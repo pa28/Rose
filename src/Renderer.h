@@ -14,6 +14,10 @@
 #include "ScreenMetrics.h"
 #include "Utilities.h"
 
+/**
+ * @namespace rose::sdl
+ * @brief Class and functions that are used to access the SDL2 api.
+ */
 namespace rose::sdl {
 
     class Texture;

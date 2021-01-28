@@ -28,6 +28,10 @@
 #include <SDL.h>
 #include "Constants.h"
 
+/**
+ * @namespace rose::color
+ * @brief Color management.
+ */
 namespace rose::color {
 
     /**
