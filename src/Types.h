@@ -67,11 +67,17 @@ namespace rose {
         int mHorizontalSpacing;     ///< The horizontal spacing value, pixels.
     };
 
+    /**
+     * @struct Elastic
+     * @brief A stream manipulator to set a Widget elastic value.
+     */
     struct Elastic {
-        bool mElastic{true};
+        bool mElastic{true};    ///< The elastic value.
 
+        /// Default constructor
         Elastic() = default;
 
+        /// Constructor
         explicit Elastic(bool elastic) : mElastic(elastic) {}
     };
 
@@ -91,6 +97,10 @@ namespace rose {
         explicit RoseLogicError(const char *what) : std::logic_error(std::string(what)) {}
     };
 
+    /**
+     * @class RoseRuntimeError
+     * @brief Thrown when a runtime error has occurred.
+     */
     class RoseRuntimeError : public std::runtime_error {
     public:
         /// Constructor

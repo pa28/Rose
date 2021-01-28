@@ -16,6 +16,10 @@
 #include "Signals.h"
 
 namespace rose {
+    /**
+     * @struct MenuButtonData
+     * @brief Information to specify a Menu Button
+     */
     struct MenuButtonData {
         std::string_view mLabelText;    ///< The MenuButton Label value
         SignalToken mSignalToken;       ///< A SignalToken to identify the MenuButton.
@@ -25,6 +29,7 @@ namespace rose {
 
     /**
      * @class PopupMenu
+     * @brief A Menu that can be popped up by a CascadeButton
      */
     class PopupMenu : public Popup {
     protected:
@@ -71,12 +76,16 @@ namespace rose {
 
     };
 
+    /**
+     * @class CascadeButton
+     * @brief A Button Widget that will popup a cascade menu.
+     */
     class CascadeButton : public Button {
     protected:
-        CascadeButtonType mCascadeButtonType;
+        CascadeButtonType mCascadeButtonType;       ///< The type of cascade button.
 
-        std::shared_ptr<Slot<Button::SignalType>> mCascadeButtonRx{};
-        std::shared_ptr<Slot<Button::SignalType>> mAppButtonSlot{};
+        std::shared_ptr<Slot<Button::SignalType>> mCascadeButtonRx{};   ///< Slot to receive CascadeButton signals.
+        std::shared_ptr<Slot<Button::SignalType>> mAppButtonSlot{};     ///< Slot to receive menu Button signals.
 
         MenuDataList mMenuData{};      ///< List of buttons to create in the menu.
 

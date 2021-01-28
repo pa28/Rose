@@ -119,7 +119,8 @@ namespace rose {
     };
 
     /**
-     * @enum The Modality of a transient Window, a Popup or derivative.
+     * @enum Modality
+     * @brief The Modality of a transient Window, a Popup or derivative.
      */
     enum Modality {
         NotModal,       ///< Not modal, interactions with elements outside the container are allowed.

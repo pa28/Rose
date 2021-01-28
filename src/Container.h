@@ -15,14 +15,20 @@
 
 namespace rose {
 
-class ContainerOversizeException : public std::runtime_error {
-public:
-    ContainerOversizeException() = delete;
+    /**
+     * @class ContainerOversizeException
+     * @brief Thrown when a Container lays out to be over sized.
+     */
+    class ContainerOversizeException : public std::runtime_error {
+    public:
+        ContainerOversizeException() = delete;
 
-    explicit ContainerOversizeException(const std::string& what) : std::runtime_error(what) {}
+        /// Constructor
+        explicit ContainerOversizeException(const std::string &what) : std::runtime_error(what) {}
 
-    explicit ContainerOversizeException(const char *what) : std::runtime_error(what) {}
-};
+        /// Constructor
+        explicit ContainerOversizeException(const char *what) : std::runtime_error(what) {}
+    };
 
     /**
      * @struct ContainerLayoutHints
@@ -55,11 +61,16 @@ public:
 
     public:
         Container();
+
         ~Container() override = default;
+
         Container(Container &&) = delete;
+
         Container(const Container &) = delete;
-        Container& operator=(Container &&) = delete;
-        Container& operator=(const Container &) = delete;
+
+        Container &operator=(Container &&) = delete;
+
+        Container &operator=(const Container &) = delete;
 
         /**
          * @brief Add a child widget to this container
@@ -67,7 +78,7 @@ public:
          * and the widgets initializeComposite method is called.
          * @param widget The child widget to add
          */
-        virtual void addChild(const std::shared_ptr<Widget>& widget) {
+        virtual void addChild(const std::shared_ptr<Widget> &widget) {
             auto wParent = widget->weak_from_this();
             widget->mParent = as<Container>();
             widget->mHasParent = true;
@@ -147,7 +158,7 @@ public:
          * @brief Access to ContainerLayoutHints.
          * @return ContainerLayoutHints&
          */
-        ContainerLayoutHints& containerLayoutHints() noexcept { return mContainerHints; }
+        ContainerLayoutHints &containerLayoutHints() noexcept { return mContainerHints; }
 
         /**
          * @brief See Widget::draw
@@ -267,17 +278,22 @@ public:
 
     public:
         ~Window() override = default;
+
         Window() = default;
+
         Window(Window &&) = delete;
+
         Window(const Window &) = delete;
-        Window& operator=(Window &&) = delete;
-        Window& operator=(const Window &) = delete;
+
+        Window &operator=(Window &&) = delete;
+
+        Window &operator=(const Window &) = delete;
 
         /**
          * @brief Construct a Window which covers the entire screen.
          * @param parent the Rose application object.
          */
-        explicit Window(const std::shared_ptr<Rose>& parent);
+        explicit Window(const std::shared_ptr<Rose> &parent);
 
         /**
          * @brief Construct a Window of specified size. Default position attempts to centre the Window on the Screen.
@@ -322,10 +338,14 @@ public:
 
     public:
         ~Column() override = default;
+
         Column(Column &&) = delete;
+
         Column(const Column &) = delete;
-        Column& operator=(Column &&) = delete;
-        Column& operator=(const Column &) = delete;
+
+        Column &operator=(Column &&) = delete;
+
+        Column &operator=(const Column &) = delete;
 
         /**
          * @brief Constructor see: Widget constructor.
@@ -359,10 +379,14 @@ public:
     class Row : public Container {
     public:
         ~Row() override = default;
+
         Row(Row &&) = delete;
+
         Row(const Row &) = delete;
-        Row& operator=(Row &&) = delete;
-        Row& operator=(const Row &) = delete;
+
+        Row &operator=(Row &&) = delete;
+
+        Row &operator=(const Row &) = delete;
 
         /**
          * @brief Constructor see: Widget constructor.
@@ -382,6 +406,7 @@ public:
          */
         Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
     };
+
 #if 0
 
     /**
@@ -449,7 +474,8 @@ public:
  * @param verticalSpacing The VerticalSpacing.
  * @return The Container.
  */
-inline std::shared_ptr<rose::Container> operator << (std::shared_ptr<rose::Container> container, rose::VerticalSpacing verticalSpacing ) {
+inline std::shared_ptr<rose::Container>
+operator<<(std::shared_ptr<rose::Container> container, rose::VerticalSpacing verticalSpacing) {
     container->containerLayoutHints().verticalSpacing = verticalSpacing.mVerticalSpacing;
     return container;
 }
@@ -460,7 +486,8 @@ inline std::shared_ptr<rose::Container> operator << (std::shared_ptr<rose::Conta
  * @param horizontalSpacing The HorizontalSpacing.
  * @return The Container.
  */
-inline std::shared_ptr<rose::Container> operator << (std::shared_ptr<rose::Container> container, rose::HorizontalSpacing horizontalSpacing ) {
+inline std::shared_ptr<rose::Container>
+operator<<(std::shared_ptr<rose::Container> container, rose::HorizontalSpacing horizontalSpacing) {
     container->containerLayoutHints().horizontalSpacing = horizontalSpacing.mHorizontalSpacing;
     return container;
 }

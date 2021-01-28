@@ -430,32 +430,63 @@ namespace rose {
         int& bottom() noexcept { return (*this)[3]; }        ///< Access the bottom padding.
     };
 
+    /**
+     * @class Line
+     * @brief An abstraction of a line defined by two end points.
+     */
     class Line {
     protected:
         Position    mPoint0;            ///< One endpoint of the line.
         Position    mPoint1;            ///< The other endpoint of the line.
 
     public:
+        /**
+         * @brief Construct line of zero length.
+         */
         constexpr Line() noexcept : mPoint0(), mPoint1() {}
 
+        /**
+         * @brief Construct a line from p0 to p1.
+         * @param p0 An end point.
+         * @param p1 An end point.
+         */
         constexpr Line(const Position &p0, const Position &p1) : mPoint0(p0), mPoint1(p1) {}
 
+        /// Copy constructor.
         constexpr Line(const Line &) = default;
 
+        /// Move Constructor.
         constexpr Line(Line &&) = default;
 
+        /// Copy assignment.
         constexpr Line& operator=(const Line &) = default;
 
+        /// Move assignment.
         constexpr Line &operator=(Line &&) = default;
 
     };
 }
 
+/**
+ * @brief An output stream inserter to print ScreenMetrics.
+ * @tparam T The underlying type.
+ * @tparam N The size
+ * @param strm The output stream.
+ * @param array The ScreenMetric
+ * @return The output stream.
+ */
 template<typename T, size_t N>
 inline std::ostream &operator<<(std::ostream &strm, const std::array<T, N> &array) {
     return rose::util::printScreenMetric<T, N>(strm, array);
 }
 
+/**
+ * @brief An output stream inserter to print a std::optional Rectangle, Position or Size.
+ * @tparam T The type to print.
+ * @param strm The output stream.
+ * @param opt The std::optional
+ * @return The output stream.
+ */
 template<typename T>
 inline std::ostream &operator<<(std::ostream &strm, const std::optional<T> &opt) {
     if (opt) {

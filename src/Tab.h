@@ -18,6 +18,10 @@
 
 namespace rose {
 
+    /**
+     * @class TabPage
+     * @brief A TabPage manages a single Widget which displays the page contents.
+     */
     class TabPage : public Border {
     protected:
         std::string mTabLabel{};        ///< The identity of the TabPage, will be the TabButton Label.
@@ -46,6 +50,10 @@ namespace rose {
         const std::string& tabLabel() const noexcept { return mTabLabel; }
     };
 
+    /**
+     * @class TabBody
+     * @brief A TabBody manages a number of TabPages.
+     */
     class TabBody : public Container {
     protected:
 
@@ -131,6 +139,12 @@ namespace rose {
 
     using TabHeader = Row;      ///< The type to use as the TabHeader.
 
+    /**
+     * @class Tab
+     * @brief A Tab Widget
+     * @details Hosts a number of children TabPage objects in a TabBody, each with a TabButton in the
+     * TabHeader. Only ont TabPage is visible at a time the other being, conceptually behind the visible TabPage.
+     */
     class Tab : public Column {
     protected:
         std::size_t mActiveTab{};               ///< The currently active TabPage.

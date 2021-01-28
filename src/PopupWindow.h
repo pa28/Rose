@@ -14,11 +14,19 @@
 
 namespace rose {
 
+    /**
+     * @struct DialogActionButton
+     * @brief The data required to creat a DialogActionButton
+     */
     struct DialogActionButton {
         ActionButtonType mActionButton{};
         SignalToken mSignalToken{};
     };
 
+    /**
+     * @class Popup
+     * @brief An undecorated window that is transient by nature.
+     */
     class Popup : public Window {
     protected:
         Size mMinimumSize;               ///< The minimum size requests for the popup if supported by derived types.
@@ -108,6 +116,10 @@ namespace rose {
         }
     };
 
+    /**
+     * @class PopupWindow
+     * @brief A decorated transient Window.
+     */
     class PopupWindow : public Popup {
     protected:
         std::string mWindowTitle{};         ///< The title of the window.
@@ -224,6 +236,10 @@ namespace rose {
         void setButtonSlot(shared_ptr<Slot<ButtonSignalType>> &buttonSlot) override;
     };
 
+    /**
+     * @class ExitDialog
+     * @brief A Dialog specialized to guard the exit path.
+     */
     class ExitDialog : public Dialog {
     protected:
         static constexpr std::string_view mExitTitle = "Exit?";

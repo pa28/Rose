@@ -21,6 +21,10 @@
 
 namespace rose {
 
+    /**
+     * @struct ScaleBackgroundElement
+     * @brief An element in a blended Scale background image.
+     */
     struct ScaleBackgroundElement {
         float mLength;          ///< The position along the progress axis the segment applies to.
         float mBlend;           ///< The width of the previous segment and this segment blended.
@@ -28,8 +32,14 @@ namespace rose {
 
         ScaleBackgroundElement() = delete;
 
-        constexpr ScaleBackgroundElement(float width, float blend, color::HSVA color) : mLength(width), mBlend(blend),
-                                                                                        mColor(color) {}
+        /**
+         * @brief Constructor
+         * @param length The length of the color area.
+         * @param blend The length of the blended portion of this area.
+         * @param color The color of this area.
+         */
+        constexpr ScaleBackgroundElement(float length, float blend, color::HSVA color) : mLength(length), mBlend(blend),
+                                                                                         mColor(color) {}
     };
 
     template<size_t N>
@@ -393,22 +403,41 @@ namespace rose {
         drawGradientBackground(sdl::Renderer &renderer, Gradient gradient, Rectangle dst, Orientation orientation,
                                float boundary = 0.5f);
 
+        /**
+         * @struct LinearInterpolator
+         * @brief Provide an linear interpolated value between between two extrema values.
+         * @tparam T The type of the dependent data value, the value being interpolated.
+         * @tparam U The type of the independent data value, the index marking the distance between extrema.
+         */
         template<typename T, typename U>
-        struct LinearInterpolateor {
-            bool zeroRange;
-            T zeroData;
-            using working_type = double;
-            working_type dataMin, dataRange;
-            working_type indexMin, indexRange;
+        struct LinearInterpolator {
+            bool zeroRange;                         ///< True of the range between extrema is zero.
+            T zeroData;                             ///< The dependent value corresponding to zero, the left extrema.
+            using working_type = double;            ///< The type used for computation.
+            working_type dataMin, dataRange;        ///< The minimum and range of the dependent values.
+            working_type indexMin, indexRange;      ///< The minimum and range of the independent values.
 
-            LinearInterpolateor() = delete;
-            LinearInterpolateor(T dataFirst, T dataLast, U indexFirst, U indexLast)
+            LinearInterpolator() = delete;
+
+            /**
+             * @brief Constructor
+             * @param dataFirst The first (left hand) dependent value.
+             * @param dataLast The last (right hand) dependent value.
+             * @param indexFirst The index of dataFirst.
+             * @param indexLast The index of dataLast.
+             */
+            LinearInterpolator(T dataFirst, T dataLast, U indexFirst, U indexLast)
                 : dataMin(dataFirst), dataRange(dataLast-dataFirst),
                   indexMin(indexFirst), indexRange(indexLast-indexFirst) {
                 zeroRange = dataFirst == dataLast;
                 zeroData = dataFirst;
             }
 
+            /**
+             * @brief Calculate the interpolation of the dependent value at index.
+             * @param index The independent value to compute the interpolation at.
+             * @return The interpolated dependent value.
+             */
             T operator()(U index) {
                 if (zeroRange)
                     return zeroData;
@@ -423,17 +452,27 @@ namespace rose {
             }
         };
 
+        /**
+         * @brief Compute a Hue, Saturation, Value, Alpha gradiant.
+         * @details At each pixel index of the Rectangle dst, a line of the color generated from an interpolation of
+         * each component between start and end colors is drawn perpendicular to the orientation axis.
+         * @param renderer The Renderer
+         * @param dst The rectangle to fill with the gradiant.
+         * @param startColor The start Color
+         * @param endColor The end Color
+         * @param orientation Whether the gradiant is horizontal (along the x axis) or vertical (along the y axis).
+         */
         static void
-        renderHSVGradiant(sdl::Renderer &renderer, Rectangle dst, color::HSVA startColor, color::HSVA endColor,
-                          Orientation orientation) {
+        renderHSVAGradiant(sdl::Renderer &renderer, Rectangle dst, color::HSVA startColor, color::HSVA endColor,
+                           Orientation orientation) {
             sdl::DrawColorGuard colorGuard{renderer, color::RGBA(startColor)};
             switch (orientation) {
                 case Orientation::Unset:
                 case Orientation::Horizontal: {
-                    LinearInterpolateor liH{startColor.hue(), endColor.hue(), 0, dst.width()};
-                    LinearInterpolateor liS{startColor.saturation(), endColor.saturation(), 0, dst.width()};
-                    LinearInterpolateor liV{startColor.value(), endColor.value(), 0, dst.width()};
-                    LinearInterpolateor liA{startColor.alpha(), endColor.alpha(), 0, dst.width()};
+                    LinearInterpolator liH{startColor.hue(), endColor.hue(), 0, dst.width()};
+                    LinearInterpolator liS{startColor.saturation(), endColor.saturation(), 0, dst.width()};
+                    LinearInterpolator liV{startColor.value(), endColor.value(), 0, dst.width()};
+                    LinearInterpolator liA{startColor.alpha(), endColor.alpha(), 0, dst.width()};
 
                     for (int i = 0; i < dst.width(); ++i) {
                         color::HSVA shade;
@@ -447,10 +486,10 @@ namespace rose {
                 }
                     break;
                 case Orientation::Vertical: {
-                    LinearInterpolateor liH{endColor.hue(), startColor.hue(), 0, dst.height()};
-                    LinearInterpolateor liS{endColor.saturation(), startColor.saturation(), 0, dst.height()};
-                    LinearInterpolateor liV{endColor.value(), startColor.value(), 0, dst.height()};
-                    LinearInterpolateor liA{endColor.alpha(), startColor.alpha(), 0, dst.height()};
+                    LinearInterpolator liH{endColor.hue(), startColor.hue(), 0, dst.height()};
+                    LinearInterpolator liS{endColor.saturation(), startColor.saturation(), 0, dst.height()};
+                    LinearInterpolator liV{endColor.value(), startColor.value(), 0, dst.height()};
+                    LinearInterpolator liA{endColor.alpha(), startColor.alpha(), 0, dst.height()};
 
                     for (int i = 0; i < dst.width(); ++i) {
                         color::HSVA shade;
@@ -466,6 +505,16 @@ namespace rose {
             }
         }
 
+        /**
+         * @brief Compute a Red, Green, Blue, Alpha gradiant.
+         * @details At each pixel index of the Rectangle dst, a line of the color generated from an interpolation of
+         * each component between start and end colors is drawn perpendicular to the orientation axis.
+         * @param renderer The Renderer
+         * @param dst The rectangle to fill with the gradiant.
+         * @param startColor The start Color
+         * @param endColor The end Color
+         * @param orientation Whether the gradiant is horizontal (along the x axis) or vertical (along the y axis).
+         */
         static void
         renderColorGradiant(sdl::Renderer &renderer, Rectangle dst, color::RGBA startColor, color::RGBA endColor,
                           Orientation orientation) {
@@ -473,10 +522,10 @@ namespace rose {
             switch (orientation) {
                 case Orientation::Unset:
                 case Orientation::Horizontal: {
-                    LinearInterpolateor liR{startColor.r(), endColor.r(), 0, dst.width()};
-                    LinearInterpolateor liG{startColor.g(), endColor.g(), 0, dst.width()};
-                    LinearInterpolateor liB{startColor.b(), endColor.b(), 0, dst.width()};
-                    LinearInterpolateor liA{startColor.a(), endColor.a(), 0, dst.width()};
+                    LinearInterpolator liR{startColor.r(), endColor.r(), 0, dst.width()};
+                    LinearInterpolator liG{startColor.g(), endColor.g(), 0, dst.width()};
+                    LinearInterpolator liB{startColor.b(), endColor.b(), 0, dst.width()};
+                    LinearInterpolator liA{startColor.a(), endColor.a(), 0, dst.width()};
 
                     for (int i = 0; i < dst.width(); ++i) {
                         color::RGBA shade;
@@ -490,10 +539,10 @@ namespace rose {
                 }
                     break;
                 case Orientation::Vertical: {
-                    LinearInterpolateor liR{endColor.r(), startColor.r(), 0, dst.height()};
-                    LinearInterpolateor liG{endColor.g(), startColor.g(), 0, dst.height()};
-                    LinearInterpolateor liB{endColor.b(), startColor.b(), 0, dst.height()};
-                    LinearInterpolateor liA{endColor.a(), startColor.a(), 0, dst.height()};
+                    LinearInterpolator liR{endColor.r(), startColor.r(), 0, dst.height()};
+                    LinearInterpolator liG{endColor.g(), startColor.g(), 0, dst.height()};
+                    LinearInterpolator liB{endColor.b(), startColor.b(), 0, dst.height()};
+                    LinearInterpolator liA{endColor.a(), startColor.a(), 0, dst.height()};
 
                     for (int i = 0; i < dst.width(); ++i) {
                         color::RGBA shade;
@@ -509,12 +558,24 @@ namespace rose {
             }
         }
 
+        /**
+         * @brief Draw a gradient background given a range [first ... last) of ScaleBackgroundElement objects.
+         * @tparam InputIterator The iterator type providing the range.
+         * @param renderer The Renderer.
+         * @param first The iterator of the first background element.
+         * @param last The iterator one past the last background element.
+         * @param dst The destination rectangle.
+         * @param orientation The orientation.
+         */
         template<class InputIterator>
         void drawGradientBackground(sdl::Renderer &renderer, InputIterator first, InputIterator last,
                                     Rectangle dst, Orientation orientation) {
             static_assert(std::is_same_v<typeof((*first)), ScaleBackgroundElement> &
                           std::is_same_v<typeof((*last)), ScaleBackgroundElement>,
                           "Iterator arguments not of type ScaleBackgroundElement.");
+
+            sdl::ClipRectangleGuard clipRectangleGuard{renderer, dst};
+
             if (first != last) {
                 if (last - first == 1) {
                     renderer.fillRect(dst, color::RGBA{first->mColor});
@@ -566,8 +627,8 @@ namespace rose {
                                     blendRect.y() = previousEnd + blendRect.height()/2;
                                     break;
                             }
-                            renderHSVGradiant(renderer, blendRect, (idx - 1)->mColor, idx->mColor,
-                                              orientation);
+                            renderHSVAGradiant(renderer, blendRect, (idx - 1)->mColor, idx->mColor,
+                                               orientation);
                         }
 
                         switch (orientation) {

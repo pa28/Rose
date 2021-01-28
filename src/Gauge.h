@@ -67,8 +67,16 @@ namespace rose {
     using GaugeValueLimits = std::array<float,6>;   ///< Type of Gauge values.
     using GaugeValueHues = std::array<uint32_t,5>;   ///< Type of Gauge colors.
 
+    /**
+     * @class Gauge
+     * @brief Display an analogue value as the position of an indicator on a background scale.
+     */
     class Gauge : public Frame {
     protected:
+        /**
+         * @class GaugeInterior
+         * @brief Manages the interior of the Gauge.
+         */
         class GaugeInterior : public Widget {
         protected:
             friend class Gauge;

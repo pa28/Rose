@@ -19,6 +19,11 @@
 
 namespace rose::util {
 
+    /**
+     * @struct iterator_pair
+     * @brief A pair of iterators which may be used as first and last in the sequence [first .. last)
+     * @tparam Iterator The type of iterator
+     */
     template<class Iterator>
     struct iterator_pair {
         Iterator mBegin, mEnd;
@@ -27,14 +32,33 @@ namespace rose::util {
         Iterator end() const { return mEnd; }
     };
 
+    /**
+     * @brief An iterator type definition.
+     */
     template<class C>
     using iterator_t = decltype(std::begin(std::declval<C&>()));
 
+    /**
+     * @brief Crate an iterator_pair to generate an offset sequence.
+     * @details The returned iterator pair will form a sequence over the container of [first+skip ... last)
+     * @tparam C The type of the container.
+     * @param container The container
+     * @param skip the offset
+     * @return An iterator_pair<iterator_t<C>>
+     */
     template<class C>
     iterator_pair<iterator_t<C>> offset(C& container, size_t skip) {
         return {std::next(container.begin(), skip), container.end()};
     }
 
+    /**
+     * @brief A function to print ScreenMetric values.
+     * @tparam T The underlying type of the metric.
+     * @tparam N The number of elements in the metric.
+     * @param strm The std::ostream to print on.
+     * @param metric The ScreenMetric value.
+     * @return The std::stream.
+     */
     template<typename T, size_t N>
     std::ostream & printScreenMetric(std::ostream &strm, const std::array<T,N> &metric) {
         strm << '(' << metric.front();

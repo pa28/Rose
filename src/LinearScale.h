@@ -35,6 +35,10 @@ namespace rose {
         ImageId mImageId{RoseImageInvalid};     ///< ImageId of the indicator.
         ImageId mCenterId{RoseImageInvalid};    ///< ImageId of the thumb center.
 
+        /**
+         * @class LinearScaleBorder
+         * @brief The border around a LinearScale background.
+         */
         class LinearScaleBorder : public Border {
         public:
             LinearScaleBorder() = default;
@@ -44,6 +48,10 @@ namespace rose {
             LinearScaleBorder& operator=(const LinearScaleBorder &) = delete;
             LinearScaleBorder& operator=(LinearScaleBorder &&) = delete;
 
+            /**
+             * @brief Constructor
+             * @param border The size of the border in pixes.
+             */
             explicit LinearScaleBorder(int border) : Border(border) {}
 
             /**
@@ -62,6 +70,10 @@ namespace rose {
             void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
         };
 
+        /**
+         * @class LinearScaleImage
+         * @brief The Indicator image of the LinearScale.
+         */
         class LinearScaleImage : public ImageView {
         public:
             LinearScaleImage() = default;
@@ -71,6 +83,10 @@ namespace rose {
             LinearScaleImage& operator=(const LinearScaleImage &) = delete;
             LinearScaleImage& operator=(LinearScaleImage &&) = delete;
 
+            /**
+             * @brief Constructor
+             * @param imageId The ImageId of the indicator
+             */
             explicit LinearScaleImage(ImageId imageId) : ImageView(imageId) {}
 
             /**

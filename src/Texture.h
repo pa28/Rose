@@ -349,6 +349,11 @@ namespace rose::sdl {
         void setColors(const color::RGBA &start, const color::RGBA &end, Orientation orientation = Orientation::Horizontal);
     };
 
+    /**
+     * @class GradientScale
+     * @brief A type of texture that if stretch across a destination Rectangle in rendering, will create a
+     * gradient coloring.
+     */
     class GradientScale : public Texture {
     protected:
 
@@ -362,8 +367,8 @@ namespace rose::sdl {
     };
 
     /**
- * @brief A functor to destroy an SDL_PixelFormat in a std::unique_ptr (rose::sdl::PixelFormat)
- */
+     * @brief A functor to destroy an SDL_PixelFormat in a std::unique_ptr (rose::sdl::PixelFormat)
+     */
     class PixelFormatDestroy {
     public:
         /**
@@ -376,7 +381,8 @@ namespace rose::sdl {
     };
 
     /**
-     * @class An encapsulation of an SDL_PixelFormat.
+     * @class PixelFormat
+     * @brief An encapsulation of an SDL_PixelFormat.
      */
     class PixelFormat : public std::unique_ptr<SDL_PixelFormat, PixelFormatDestroy> {
     public:

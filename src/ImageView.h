@@ -12,6 +12,11 @@
 #include "Utilities.h"
 
 namespace rose {
+
+    /**
+     * @class ImageView
+     * @brief Display an image texture.
+     */
     class ImageView : public Widget {
     protected:
         ImageId mImageId;
@@ -56,6 +61,10 @@ namespace rose {
          */
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
+        /**
+         * @brief Set the ImageId of the image texture to display.
+         * @param imageId The ImageId.
+         */
         void setImageId(ImageId imageId) override;
 
     };

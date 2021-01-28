@@ -114,7 +114,6 @@ namespace rose {
     /**
      * @class Widget
      * @brief An element in the scene graph that describes a rectangle.
-     * @section class_structure
      * The rose::Widget class is the base class of all visual elements in the library.
      */
     class Widget : public std::enable_shared_from_this<Widget> {
