@@ -16,6 +16,7 @@ namespace rose {
 
     /**
      * @class ContainerChildView
+     * @brief Provide a range view of a Container Widget's children.
      * @tparam ContainerType The type of Container Widget
      */
     template<class ContainerType>

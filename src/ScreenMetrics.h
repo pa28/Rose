@@ -394,7 +394,7 @@ namespace rose {
 
     /**
      * @class Padding
-     * @details Padding values for Border Widget objects
+     * @brief Padding values for Border Widget objects
      */
     class Padding : public std::array<int,4> {
     public:
