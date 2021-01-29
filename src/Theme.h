@@ -40,11 +40,11 @@ namespace rose {
 
         color::HSVA mBaseColorHSLA{dBaseColorHSLA};
         color::RGBA mBaseColor{dBaseColorHSLA};
-        color::RGBA mTopColor{dBaseColorHSLA.modValue(0.2)};
-        color::RGBA mBotColor{dBaseColorHSLA.modValue(-0.15)};
-        color::RGBA mLeftColor{dBaseColorHSLA.modValue(0.1)};
-        color::RGBA mRightColor{dBaseColorHSLA.modValue(-0.2)};
-        color::RGBA mInvertColor{dBaseColorHSLA.modValue(-0.1)};
+        color::RGBA mTopColor{dTopColor};
+        color::RGBA mBotColor{dBotColor};
+        color::RGBA mLeftColor{dLeftColor};
+        color::RGBA mRightColor{dRightColor};
+        color::RGBA mInvertColor{dInvertColor};
         color::RGBA mTextColour{dBaseColorHSLA.contrasting()};
         color::RGBA mWhite{dWhite};
         color::RGBA mBlack{dBlack};
@@ -78,14 +78,16 @@ namespace rose {
         int mLabelBadgeSpace{dLabelBadgeSpace};
         std::string mIconFontName{dIconFontName};
 
-        static constexpr color::HSVA dBaseColorHSLA{{200.f, .00, .20, 1.0}};
-        static constexpr std::array<float, 5> dColorSetMods{0.2, -0.15, 0.1, -0.2, -0.1};
+//        static constexpr color::HSVA dBaseColorHSLA{{200.f, .00, .20, 1.0}};
+//        static constexpr std::array<float, 5> dColorSetMods{0.2, -0.15, 0.1, -0.2, -0.1};
+        static constexpr color::HSVA dBaseColorHSLA{{200.f, .00, .15, 1.0}};
+        static constexpr std::array<float, 5> dColorSetMods{0.2, -0.15, 0.1, -0.15, -0.075};
         static constexpr color::RGBA dBaseColor{dBaseColorHSLA};
         static constexpr color::RGBA dTopColor{dBaseColorHSLA.modValue(0.2)};
         static constexpr color::RGBA dBotColor{dBaseColorHSLA.modValue(-0.15)};
         static constexpr color::RGBA dLeftColor{dBaseColorHSLA.modValue(0.1)};
-        static constexpr color::RGBA dRightColor{dBaseColorHSLA.modValue(-0.2)};
-        static constexpr color::RGBA dInvertColor{dBaseColorHSLA.modValue(-0.1)};
+        static constexpr color::RGBA dRightColor{dBaseColorHSLA.modValue(-0.15)};
+        static constexpr color::RGBA dInvertColor{dBaseColorHSLA.modValue(-0.075)};
 
         static constexpr color::HSVA dWhite{{0.0f, 0.0f, 1.0f, 1.0f }};
         static constexpr color::HSVA dBlack{{0.0f, 0.0f, 0.0f, 1.0f }};
