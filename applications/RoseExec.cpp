@@ -39,12 +39,7 @@ int main(int argc, char **argv) {
             if (command.result().empty() || command.result() == "EXIT\n") {
                 runLoop = false;
             } else if (command.result() == "upgrade\n") {
-                for (auto &upgrade : UpgradeCommands) {
-                    Command cmd{upgrade};
-                    cmd.wait();
-                    if (cmd.statusCode())
-                        break;
-                }
+                auto res = system("sudo /usr/bin/bash -c '/usr/bin/apt update && apt upgrade --assume-yes'");
             } else {
                 auto appStr = command.result() + " 2> /dev/null";
                 auto application = Command(appStr.c_str());
