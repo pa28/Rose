@@ -16,14 +16,16 @@
 enum UserSignalTokenValues : rose::SignalToken {
     RoseButton = rose::FirstUserSignalToken,        ///< Launch Rose Demo application.
     LifeButton,                                     ///< Launch Conway's Game of Life.
-    HamClockButton,
-    ExitButton,
+    HamClockButton,                                 ///< Launch Ham Clock application.
+    UpgradeButton,                                  ///< Upgrade the system software.
+    ExitButton,                                     ///< Exit RoseExec.
 };
 
-static constexpr std::array<rose::MenuButtonData,4> appMenu {
+static constexpr std::array<rose::MenuButtonData,5> appMenu {
         rose::MenuButtonData{ "Rose Demo", RoseButton },
         rose::MenuButtonData{ "Conway's Life", LifeButton},
         rose::MenuButtonData{ "Ham Clock", HamClockButton},
+        rose::MenuButtonData{ "Upgrade Software", UpgradeButton} ,
         rose::MenuButtonData{"Exit", ExitButton},
 };
 

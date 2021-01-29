@@ -14,8 +14,13 @@ using namespace rose;
 
 int main(int argc, char **argv) {
     static constexpr std::array<const char *,2> PrepCommands = {
-            "sudo chgrp video /sys/class/backlight/rpi_backlight/brightness",
-            "sudo chmod g+w /sys/class/backlight/rpi_backlight/brightness"
+            "/usr/bin/sudo /usr/bin/chgrp video /sys/class/backlight/rpi_backlight/brightness",
+            "/usr/bin/sudo /usr/bin/chmod g+w /sys/class/backlight/rpi_backlight/brightness"
+    };
+
+    static constexpr std::array<const char *,2> UpgradeCommands = {
+        "/usr/bin/sudo apt update",
+        "/usr/bin/sudo apt -y upgrade"
     };
 
     std::filesystem::path backlight{"/sys/class/backlight/rpi_backlight/brightness"};
@@ -33,8 +38,16 @@ int main(int argc, char **argv) {
         if (command.statusCode() == 0) {
             if (command.result().empty() || command.result() == "EXIT\n") {
                 runLoop = false;
+            } else if (command.result() == "upgrade\n") {
+                for (auto &upgrade : UpgradeCommands) {
+                    Command cmd{upgrade};
+                    cmd.wait();
+                    if (cmd.statusCode())
+                        break;
+                }
             } else {
-                auto application = Command(command.result().c_str());
+                auto appStr = command.result() + " 2> /dev/null";
+                auto application = Command(appStr.c_str());
                 application.wait();
             }
         } else {
