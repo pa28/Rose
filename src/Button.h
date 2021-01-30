@@ -204,11 +204,21 @@ namespace rose {
         }
 
         /**
-         * @brief Set the font name
+         * @brief Set the font name.
          * @param fontName The font name.
          */
         void setFontName(std::string &fontName);
 
+        /**
+         * @brief Set the font size.
+         * @param fontSize The point size of the font in pixels.
+         */
+        void setFontSize(int fontSize);
+
+        /**
+         * @brief Set the ImageId for the Button (Label).
+         * @param imageId an ImageId.
+         */
         void setImageId(ImageId imageId) override;
     };
 }

@@ -76,7 +76,7 @@ void Test::build() {
                                    << BorderStyle::Bevel << CornerStyle::Round
                                    << wdg<Border>(4)
                                            << wdg<ScrollArea>() << Size{300,300}
-                         << wdg<Column>() << VerticalSpacing{4}
+                         << wdg<Column>() << InternalSpace{4}
                                 << wdg<Label>("A very wide label.")  << Manip::Parent
                                 << wdg<Label>("Label left")
                                     << LabelHorizontalAlignment::Left
@@ -94,7 +94,7 @@ void Test::build() {
     mMainWindow << wdg<Frame>() << Position{ 10, 350}
                                 << BorderStyle::Bevel << CornerStyle::Round
                                 << wdg<Border>(4)
-            << wdg<Row>() << HorizontalSpacing{4}
+            << wdg<Row>() << InternalSpace{4}
                             << wdg<Label>("A very wide label.") << Manip::Parent
                             << wdg<Label>("Label top")
                                 << FontSize{20}

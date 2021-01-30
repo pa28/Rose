@@ -55,16 +55,16 @@ namespace rose {
      * @struct VerticalSpacing
      * @brief A manipulator type for VerticalSpacing.
      */
-    struct VerticalSpacing {
-        int mVerticalSpacing;       ///< The vertical spacing value, pixels.
+    struct StartOffset {
+        int mStartOffset;       ///< The start offset value, pixels.
     };
 
     /**
      * @struct HorizontalSpacing
      * @brief A manipulator type for HorizontalSpacing.
      */
-    struct HorizontalSpacing {
-        int mHorizontalSpacing;     ///< The horizontal spacing value, pixels.
+    struct InternalSpace {
+        int mInternalSpace;     ///< The internal spacing value, pixels.
     };
 
     /**

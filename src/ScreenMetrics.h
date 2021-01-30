@@ -63,13 +63,16 @@ namespace rose {
          * @details The primary access differs depending on the orientation
          */
         int &primary(Orientation orientation) {
+            int r = 0;
             switch (orientation) {
                 case Orientation::Unset:
+                    break;
                 case Orientation::Horizontal:
                     return width();
                 case Orientation::Vertical:
                     return height();
             }
+            return width();
         }
 
         /**
@@ -79,11 +82,13 @@ namespace rose {
         [[nodiscard]] constexpr int primary(Orientation orientation) const noexcept {
             switch (orientation) {
                 case Orientation::Unset:
+                    break;
                 case Orientation::Horizontal:
                     return width();
                 case Orientation::Vertical:
                     return height();
             }
+            return width();
         }
 
         /**
@@ -93,11 +98,13 @@ namespace rose {
         int &secondary(Orientation orientation) {
             switch (orientation) {
                 case Orientation::Unset:
+                    break;
                 case Orientation::Horizontal:
                     return height();
                 case Orientation::Vertical:
                     return width();
             }
+            return height();
         }
 
         /**
@@ -107,11 +114,13 @@ namespace rose {
         [[nodiscard]] constexpr int secondary(Orientation orientation) const noexcept {
             switch (orientation) {
                 case Orientation::Unset:
+                    break;
                 case Orientation::Horizontal:
                     return height();
                 case Orientation::Vertical:
                     return width();
             }
+            return height();
         }
 
         /// Addition operator
@@ -174,11 +183,13 @@ namespace rose {
         int &primary(Orientation orientation) {
             switch (orientation) {
                 case Orientation::Unset:
+                    break;
                 case Orientation::Horizontal:
                     return x();
                 case Orientation::Vertical:
                     return y();
             }
+            return x();
         }
 
         /**
@@ -202,11 +213,13 @@ namespace rose {
         int &secondary(Orientation orientation) {
             switch (orientation) {
                 case Orientation::Unset:
+                    break;
                 case Orientation::Horizontal:
                     return y();
                 case Orientation::Vertical:
                     return x();
             }
+            return y();
         }
 
         /**
@@ -216,11 +229,13 @@ namespace rose {
         [[nodiscard]] constexpr int secondary(Orientation orientation) const noexcept {
             switch (orientation) {
                 case Orientation::Unset:
+                    break;
                 case Orientation::Horizontal:
                     return y();
                 case Orientation::Vertical:
                     return x();
             }
+            return y();
         }
 
         /// Addition operator

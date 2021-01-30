@@ -6,6 +6,7 @@
 #include "Container.h"
 #include "Math.h"
 #include "Rose.h"
+#include "ScreenMetrics.h"
 
 namespace rose {
     using namespace rose::util;
@@ -184,7 +185,7 @@ namespace rose {
             }
             columnAvailable.height() -= childHints.mAssignedRect->height();
             if (!first)
-                columnAvailable.height() -= mContainerHints.verticalSpacing;
+                columnAvailable.height() -= mContainerHints.internalSpace;
             else
                 first = false;
         }
@@ -197,7 +198,7 @@ namespace rose {
             childHints.mAssignedRect = child->initialLayout(renderer, columnAvailable);
             columnAvailable.height() -= childHints.mAssignedRect->height();
             if (!first)
-                columnAvailable.height() -= mContainerHints.verticalSpacing;
+                columnAvailable.height() -= mContainerHints.internalSpace;
             else
                 first = false;
         }
@@ -213,12 +214,12 @@ namespace rose {
             totalHeight += childHints.mAssignedRect->height();
         }
 
-        int posY = 0;
+        int posY = mContainerHints.startOffset;
         first = true;
         for (auto &child : mChildren) {
             LayoutHints &childHints{child->layoutHints()};
             if (!first)
-                posY += mContainerHints.verticalSpacing;
+                posY += mContainerHints.internalSpace;
             else
                 first = false;
             childHints.mAssignedRect->y() = posY;
@@ -240,6 +241,7 @@ namespace rose {
                 }
             }
         }
+        posY += mContainerHints.startOffset;
 
         auto layout = Rectangle{mPos, mSize};
         layout.width() = maxWidth;
@@ -274,7 +276,7 @@ namespace rose {
             }
             rowAvailable.width() -= childHints.mAssignedRect->width();
             if (!first)
-                rowAvailable.width() -= mContainerHints.horizontalSpacing;
+                rowAvailable.width() -= mContainerHints.internalSpace;
             else
                 first = false;
         }
@@ -287,7 +289,7 @@ namespace rose {
             childHints.mAssignedRect = child->initialLayout(renderer, rowAvailable);
             rowAvailable.width() -= childHints.mAssignedRect->width();
             if (!first)
-                rowAvailable.width() -= mContainerHints.horizontalSpacing;
+                rowAvailable.width() -= mContainerHints.internalSpace;
             else
                 first = false;
         }
@@ -303,12 +305,12 @@ namespace rose {
             totalWidth += childHints.mAssignedRect->width();
         }
 
-        int posX = 0;
+        int posX = mContainerHints.startOffset;
         first = true;
         for (auto &child : mChildren) {
             LayoutHints &childHints{child->layoutHints()};
             if (!first)
-                posX += mContainerHints.horizontalSpacing;
+                posX += mContainerHints.internalSpace;
             else
                 first = false;
             childHints.mAssignedRect->x() = posX;
@@ -328,6 +330,7 @@ namespace rose {
                 }
             }
         }
+        posX += mContainerHints.startOffset;
 
         auto layout = Rectangle{mPos, mSize};
         layout.width() = posX;
@@ -336,128 +339,58 @@ namespace rose {
         return layout;
     }
 
-#if 0
-
-    Grid::Grid(size_t stride, Orientation orientation) : Container() {
+    Grid::Grid(size_t stride, const Size &size, Orientation orientation) : Container() {
         mStride = stride;
+        if (size != Size::Zero)
+            mSingleSize = size;
+        else
+            mSingleSize = std::nullopt;
         mOrientation = orientation;
-        mClassName = "Grid";
     }
 
-    void Grid::draw(sdl::Renderer &renderer, Size size, Position parentPosition) {
+    void Grid::draw(sdl::Renderer &renderer, Rectangle parentRect) {
+        assertLayout();
         if (!mVisible)
             return;
 
-        if (size)
-            mSize = size;
-        else
-            mSize = mLayoutHints.size;
+        if (mSingleSize) {
+            auto widgetRect = parentRect.moveOrigin(mLayoutHints.mAssignedRect->getPosition());
 
-        if (parentPosition)
-            mPos = parentPosition;
-        else
-            mPos = mLayoutHints.position;
-
-        if (mOrientation == Orientation::Horizontal) {
-            int positionX = 0;
-            int positionY = 0;
-
-            for (auto child = mChildren.begin(); child != mChildren.end(); ++child) {
-                auto idx = child - mChildren.begin();
-                auto row = idx / mStride;
-                auto col = idx % mStride;
-
-                if (idx > 0 && col == 0) {
-                    positionY += mRowLayout.at(row - 1).size.height();
-                    positionX = 0;
-                }
-
-                (*child)->layoutHints().size = Size{
-                        mColLayout.at(col).size.width(),
-                        mRowLayout.at(row).size.height()};
-                (*child)->layoutHints().position = Position{positionX, positionY};
-                positionX += mColLayout.at(col).size.width();
+            for (auto &child : mChildren) {
+                child->draw(renderer, widgetRect);
             }
-        } else {
-            int positionX = 0;
-            int positionY = 0;
-
-            for (auto child = mChildren.begin(); child != mChildren.end(); ++child) {
-                auto idx = child - mChildren.begin();
-                auto col = idx / mStride;
-                auto row = idx % mStride;
-
-                if (idx > 0 && row == 0) {
-                    positionX += mColLayout.at(col - 1).size.width();
-                    positionY = 0;
-                }
-
-                (*child)->layoutHints().size = Size{
-                        mColLayout.at(col).size.width(),
-                        mRowLayout.at(row).size.height()};
-                (*child)->layoutHints().position = Position{positionX, positionY};
-                positionY += mRowLayout.at(row).size.height();
-            }
-        }
-
-        for (auto &child : mChildren) {
-            child->draw(renderer, limitSize(child), child->layoutHints().position);
         }
     }
 
-    Size Grid::initialLayout(sdl::Renderer &renderer, Size available) {
-        // ToDo: handle shrinkable Widgets.
-        if (mOrientation == Orientation::Horizontal) {
-            for (auto child = mChildren.begin(); child != mChildren.end(); ++child) {
-                auto idx = child - mChildren.begin();
-                auto row = idx / mStride;
-                auto col = idx % mStride;
-
-                if (row >= mRowLayout.size())
-                    mRowLayout.emplace_back(LayoutHints{});
-
-                if (col >= mColLayout.size())
-                    mColLayout.emplace_back(LayoutHints{});
-
-                auto size = (*child)->initialLayout(renderer, rose::Size());
-                (*child)->layoutHints().size = size;
-                mRowLayout.at(row).size.height() = std::max(mRowLayout.at(row).size.height(),
-                                                            size.height());
-                mColLayout.at(col).size.width() = std::max(mColLayout.at(col).size.width(),
-                                                           size.width());
+    Rectangle Grid::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+        auto gridAvailable = clampAvailableArea(available, mPos, mSize);
+        if (mSingleSize) {
+            size_t count = 0;
+            size_t stack = 0;
+            gridAvailable = mSingleSize.value();
+            Position childPos{};
+            for (auto &child : mChildren) {
+                LayoutHints &childHints{child->layoutHints()};
+                auto layout = child->initialLayout(renderer, gridAvailable);
+                layout = childPos;
+                layout = mSingleSize.value();
+                childHints.mAssignedRect = layout;
+                if (++count >= mStride) {
+                    childPos.primary(mOrientation) = 0;
+                    childPos.secondary(mOrientation) += mSingleSize->secondary(mOrientation);
+                    count = 0;
+                    ++stack;
+                } else {
+                    childPos.primary(mOrientation) += mSingleSize->primary(mOrientation);
+                }
             }
-        } else {
-            for (auto child = mChildren.begin(); child != mChildren.end(); ++child) {
-                auto idx = child - mChildren.begin();
-                auto col = idx / mStride;
-                auto row = idx % mStride;
 
-                if (row >= mRowLayout.size())
-                    mRowLayout.emplace_back(LayoutHints{});
-
-                if (col >= mColLayout.size())
-                    mColLayout.emplace_back(LayoutHints{});
-
-                auto size = (*child)->initialLayout(renderer, rose::Size());
-                (*child)->layoutHints().size = size;
-                mRowLayout.at(row).size.height() = std::max(mRowLayout.at(row).size.height(),
-                                                            size.height());
-                mColLayout.at(col).size.width() = std::max(mColLayout.at(col).size.width(),
-                                                           size.width());
-            }
+            Size gridSize{};
+            gridSize.primary(mOrientation) = mSingleSize->primary(mOrientation) * static_cast<int>(mStride);
+            gridSize.secondary(mOrientation) = mSingleSize->secondary(mOrientation) * static_cast<int>(stack);
+            return Rectangle{0, 0, gridSize.width(), gridSize.height()};
         }
 
-        mLayoutHints.clear();
-
-        for (auto &row : mRowLayout) {
-            mLayoutHints.size.height() += row.size.height();
-        }
-
-        for (auto &col : mColLayout) {
-            mLayoutHints.size.width() += col.size.width();
-        }
-
-        return mLayoutHints.size;
+        return gridAvailable;
     }
-#endif
 }

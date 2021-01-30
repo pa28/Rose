@@ -367,7 +367,9 @@ namespace rose {
          * Widget source. The user application is responsible for enforcing what unique means in this case.
          * @param signalToken The SignalToken
          */
-        void setSignalToken(SignalToken signalToken) { mSignalToken = signalToken; }
+        void setSignalToken(SignalToken signalToken) {
+            mSignalToken = signalToken;
+        }
 
         /**
          * @brief Get the SignalToken value.
@@ -781,19 +783,6 @@ operator<<(std::shared_ptr<WidgetClass> widget, const rose::WidgetSize &widgetSi
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Orientation &orientation) {
     widget->setOrientation(orientation);
-    return widget;
-}
-
-/**
- * @brief Set the SignalToken value on a Widget
- * @tparam WidgetType The Widget type.
- * @param widget The Widget
- * @param token The SignalToken
- * @return The Widget.
- */
-template<class WidgetType>
-inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget, rose::SignalToken token) {
-    widget->setSignalToken(token);
     return widget;
 }
 

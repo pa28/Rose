@@ -246,10 +246,11 @@ namespace rose {
     }
 
     std::tuple<int, int, int, int, int> rose::Label::getGlyphMetrics(char glyph) {
-        int minx{}, maxx{}, miny{}, maxy{}, advance{};
-        fetchFont();
-        TTF_GlyphMetrics(mFont.value().get(), glyph, &minx, &maxx, &miny, &maxy, &advance);
-        return std::make_tuple(minx, maxx, miny, maxy, advance);
+//        int minx{}, maxx{}, miny{}, maxy{}, advance{};
+//        fetchFont();
+//        TTF_GlyphMetrics(mFont.value().get(), glyph, &minx, &maxx, &miny, &maxy, &advance);
+//        return std::make_tuple(minx, maxx, miny, maxy, advance);
+        return rose::getGlyphMetrics(mFont, glyph);
     }
 
     std::tuple<int, int, int, int> rose::Label::getFontMetrics() {

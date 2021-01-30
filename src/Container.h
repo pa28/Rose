@@ -36,8 +36,8 @@ namespace rose {
      */
     struct ContainerLayoutHints {
         bool labelVerAlignBaseLine{};       ///< If true, all child Labels are aligned to a common base line.
-        int verticalSpacing{};              ///< Vertical internal spacing between children.
-        int horizontalSpacing{};            ///< Horizontal internal spacing between children.
+        int internalSpace{};                ///< Space between children.
+        int startOffset{};                  ///< Space before the first child.
         float verticalElastic{};            ///< How much extra vertical space should go between children.
         float horizontalElastic{};          ///< How much extra horizontal space should go between children.
     };
@@ -407,21 +407,15 @@ namespace rose {
         Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
     };
 
-#if 0
-
     /**
      * @class Grid
      * @brief A container than manages its children in a grid arrangement.
      */
     class Grid : public Container {
     protected:
-        std::vector<LayoutHints>::size_type mRows{0},   ///< Number of rows
-        mCols{0},       ///< Number of columns
-        mStride{0};     ///< The stride
-        std::vector<LayoutHints> mRowLayout{};  ///< Row layout data.
-        std::vector<LayoutHints> mColLayout{};  ///< Column layout data.
-
-        Orientation mOrientation{};             ///< Grid orientation
+        size_t mStride;         ///< The stride (objects along the primary axis) of the grid
+        std::optional<Size> mSingleSize;       ///< The size of all objects are the same.
+        Orientation mOrientation{Orientation::Horizontal};             ///< Grid orientation
 
     public:
         using size_type = std::vector<LayoutHints>::size_type;  ///< The size type for vectors of LayoutHints.
@@ -430,24 +424,31 @@ namespace rose {
 
         ~Grid() override = default;
 
+        Grid(Grid &&) = delete;
+
+        Grid(const Grid &) = delete;
+
+        Grid &operator=(Grid &&) = delete;
+
+        Grid &operator=(const Grid &) = delete;
+
         /**
          * @brief Constructor
          * @param stride The stride in the orientation direction
          * @param orientation The orientation direction
          */
-        explicit Grid(size_t stride, Orientation orientation = Orientation::Horizontal);
+        explicit Grid(size_t stride, const Size &size, Orientation orientation = Orientation::Horizontal);
 
         /**
          * @brief See Widget::draw.
          */
-        void draw(sdl::Renderer &renderer, Size size, Position parentPosition) override;
+        void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
         /**
          * @brief See Widget::initialLayout.
          */
-        Size initialLayout(sdl::Renderer &renderer, Size available) override;
+        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
     };
-#endif
 
     /**
      * @brief Construct a WidgetType widget with the provided arguments.
@@ -471,12 +472,12 @@ namespace rose {
 /**
  * @brief Set the VerticalSpacing on a Container ContainerLayoutHints.
  * @param container The Container.
- * @param verticalSpacing The VerticalSpacing.
+ * @param startOffset The VerticalSpacing.
  * @return The Container.
  */
 inline std::shared_ptr<rose::Container>
-operator<<(std::shared_ptr<rose::Container> container, rose::VerticalSpacing verticalSpacing) {
-    container->containerLayoutHints().verticalSpacing = verticalSpacing.mVerticalSpacing;
+operator<<(std::shared_ptr<rose::Container> container, rose::StartOffset startOffset) {
+    container->containerLayoutHints().startOffset = startOffset.mStartOffset;
     return container;
 }
 
@@ -487,8 +488,8 @@ operator<<(std::shared_ptr<rose::Container> container, rose::VerticalSpacing ver
  * @return The Container.
  */
 inline std::shared_ptr<rose::Container>
-operator<<(std::shared_ptr<rose::Container> container, rose::HorizontalSpacing horizontalSpacing) {
-    container->containerLayoutHints().horizontalSpacing = horizontalSpacing.mHorizontalSpacing;
+operator<<(std::shared_ptr<rose::Container> container, rose::InternalSpace internalSpace) {
+    container->containerLayoutHints().internalSpace = internalSpace.mInternalSpace;
     return container;
 }
 

@@ -129,6 +129,14 @@ namespace rose {
 
         std::map<FontCacheKey, FontPointer> mFontCache;             ///< The font cache
     };
+
+    inline std::tuple<int, int, int, int, int> getGlyphMetrics(std::optional<FontPointer> &font, char glyph) {
+        int minx{}, maxx{}, miny{}, maxy{}, advance{};
+        if (font)
+            TTF_GlyphMetrics(font.value().get(), glyph, &minx, &maxx, &miny, &maxy, &advance);
+        return std::make_tuple(minx, maxx, miny, maxy, advance);
+    }
+
 }
 
 

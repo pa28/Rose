@@ -72,7 +72,7 @@ namespace rose {
                         break;
                 }
 
-            getWidget<Button>() << wdg<Border>(4)
+            getWidget<Button>() << wdg<Border>(sRose->theme().mButtonPadding)
                     << wdg<Label>(mLabelText, mBadge) << FontSize{mLabelFontSize};
         }
         mClassName = "Button";
@@ -176,6 +176,19 @@ namespace rose {
             if (auto border = mChildren.front()->as<Border>(); border) {
                 if (auto label = border->front()->as<Label>(); label) {
                     label->setFontName(fontName);
+                    return;
+                }
+            }
+        }
+        throw RoseLogicError(
+                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
+    }
+
+    void Button::setFontSize(int fontSize) {
+        if (!mChildren.empty()) {
+            if (auto border = mChildren.front()->as<Border>(); border) {
+                if (auto label = border->front()->as<Label>(); label) {
+                    label->setFontSize(fontSize);
                     return;
                 }
             }

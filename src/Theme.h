@@ -56,6 +56,7 @@ namespace rose {
         CornerStyle mCornerStyle{dCornerStyle};
         int mBorderWidth{dBorderWidth};
         int mPadding{dPadding};
+        int mButtonPadding{dButtonPadding};
         int mCPUNormalMax{dCPUNormalMax};
         int mCPUWarningMax{dCPUWarningMax};
         int mImageButtonSize{dImageButtonSize};
@@ -74,6 +75,7 @@ namespace rose {
         int mTimeBoxDateFontSize{dTimeBoxDateFontSize};
         int mDateBoxFontSize{dDateBoxFontSize};
         int mFontPointSize{dFontPointSize};
+        int mKeyboardFontPointSize{dFontPointSize};
         int mIconFontSize{dIconPointSize};
         int mTitleFontSize{dTitlePointSize};
         int mLabelBadgeSpace{dLabelBadgeSpace};
@@ -100,6 +102,7 @@ namespace rose {
         static constexpr CornerStyle dCornerStyle{CornerStyle::Square};
         static constexpr int dBorderWidth = 2;
         static constexpr int dPadding = 6;
+        static constexpr int dButtonPadding = 4;
         static constexpr int dImageButtonSize = 50;
         static constexpr int dCPUNormalMax = 55000;
         static constexpr int dCPUWarningMax = 60000;
