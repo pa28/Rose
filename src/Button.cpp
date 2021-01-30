@@ -170,4 +170,17 @@ namespace rose {
         throw RoseLogicError(
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
+
+    void Button::setFontName(string &fontName) {
+        if (!mChildren.empty()) {
+            if (auto border = mChildren.front()->as<Border>(); border) {
+                if (auto label = border->front()->as<Label>(); label) {
+                    label->setFontName(fontName);
+                    return;
+                }
+            }
+        }
+        throw RoseLogicError(
+                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
+    }
 }

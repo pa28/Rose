@@ -203,6 +203,12 @@ namespace rose {
             return mChildren.front()->as<Label>()->getText();
         }
 
+        /**
+         * @brief Set the font name
+         * @param fontName The font name.
+         */
+        void setFontName(std::string &fontName);
+
         void setImageId(ImageId imageId) override;
     };
 }

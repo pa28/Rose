@@ -62,7 +62,8 @@ namespace rose {
         std::string mFontRootPath{dFontRootPath};
         std::string mDefaultFontName{dDefaultFontName};
 
-        std::string mTimeBoxTimeFont{dTimeBoxTimeFont};
+        std::string mTimeBoxTimeFont{dFixePitchFont};
+        std::string mKeyboardFont{dFixePitchFont};
         std::string mTimeBoxHoursMinFmt{dTimeBoxHoursMinFmt};
         std::string mTimeBoxSecFmt{dTimeBoxSecFmt};
         std::string mTimeBoxSmallSecFmt{dTimeBoxSmallSecFmt};
@@ -106,7 +107,7 @@ namespace rose {
         static constexpr std::string_view dFontRootPath = "/usr/share/fonts/truetype/";
         static constexpr std::string_view dDefaultFontName = "FreeSans";
 
-        static constexpr std::string_view dTimeBoxTimeFont = "FreeMonoBold";    ///< Default font name
+        static constexpr std::string_view dFixePitchFont = "FreeMonoBold";    ///< Default font name
         static constexpr std::string_view dTimeBoxHoursMinFmt = "%R";           ///< Default hours minutes format
         static constexpr std::string_view dTimeBoxSecFmt = "%S %Z";             ///< Default seconds format
         static constexpr std::string_view dTimeBoxSmallSecFmt = "%Z";           ///< Small version seconds format

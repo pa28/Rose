@@ -95,9 +95,10 @@ list(APPEND TEST_SRC
         src/Button.cpp
         src/Color.cpp
         src/Container.cpp
-        src/Gauge.cpp
         src/Frame.cpp
+        src/Gauge.cpp
         src/ImageView.cpp
+        src/Keyboard.cpp
         src/Label.cpp
         src/LinearScale.cpp
         src/Menu.cpp

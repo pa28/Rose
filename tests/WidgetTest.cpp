@@ -7,6 +7,7 @@
 #include "Button.h"
 #include "Color.h"
 #include "Gauge.h"
+#include "Keyboard.h"
 #include "Manipulators.h"
 #include "Menu.h"
 #include "ScrollArea.h"
@@ -109,6 +110,8 @@ void Test::build() {
                                 << Manip::Parent;
 
     slider->valueTx.connect(scale->valueRx);
+
+    mMainWindow << wdg<Keyboard>() << Position{300,0};
 
 #else
     mHue = mTheme.mBaseColorHSLA.hue() / 360.0f;
