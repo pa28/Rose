@@ -178,28 +178,28 @@ namespace rose {
                         continue;
                     }
 
-                    if (mTranslateFingerEvents) {
-                        // Translate finger events to equivalent mouse events
-                        if (e.type == SDL_FINGERDOWN || e.type == SDL_FINGERUP) {
-                            SDL_Event mbe;
-
-                            // Translate finger events to mouse evnets.
-                            mbe.type = (e.type == SDL_FINGERDOWN) ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
-                            mbe.button.timestamp = e.tfinger.timestamp;
-                            mbe.button.windowID = SDL_GetWindowID(mSdlWindow.get());
-                            mbe.button.which = SDL_TOUCH_MOUSEID;
-                            mbe.button.button = SDL_BUTTON_LEFT;
-                            mbe.button.state = (e.type == SDL_FINGERDOWN) ? SDL_PRESSED : SDL_RELEASED;
-                            mbe.button.clicks = 1;
-                            mbe.button.x = (Sint32) (e.tfinger.x * (float) mWidth);
-                            mbe.button.y = (Sint32) (e.tfinger.y * (float) mHeight);
-                            SDL_WarpMouseGlobal(mbe.button.x, mbe.button.y);
-                            SDL_PushEvent(&mbe);
-                        } else if (e.type == SDL_FINGERMOTION) {
-                            SDL_WarpMouseGlobal((Sint32) (e.tfinger.x * (float) mWidth),
-                                                (Sint32) (e.tfinger.y * (float) mHeight));
-                        }
-                    }
+//                    if (mTranslateFingerEvents) {
+//                        // Translate finger events to equivalent mouse events
+//                        if (e.type == SDL_FINGERDOWN || e.type == SDL_FINGERUP) {
+//                            SDL_Event mbe;
+//
+//                            // Translate finger events to mouse evnets.
+//                            mbe.type = (e.type == SDL_FINGERDOWN) ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
+//                            mbe.button.timestamp = e.tfinger.timestamp;
+//                            mbe.button.windowID = SDL_GetWindowID(mSdlWindow.get());
+//                            mbe.button.which = SDL_TOUCH_MOUSEID;
+//                            mbe.button.button = SDL_BUTTON_LEFT;
+//                            mbe.button.state = (e.type == SDL_FINGERDOWN) ? SDL_PRESSED : SDL_RELEASED;
+//                            mbe.button.clicks = 1;
+//                            mbe.button.x = (Sint32) (e.tfinger.x * (float) mWidth);
+//                            mbe.button.y = (Sint32) (e.tfinger.y * (float) mHeight);
+//                            SDL_WarpMouseGlobal(mbe.button.x, mbe.button.y);
+//                            SDL_PushEvent(&mbe);
+//                        } else if (e.type == SDL_FINGERMOTION) {
+//                            SDL_WarpMouseGlobal((Sint32) (e.tfinger.x * (float) mWidth),
+//                                                (Sint32) (e.tfinger.y * (float) mHeight));
+//                        }
+//                    }
                     mEventSemantics.onEvent(e);
                 }
                 mEventSemantics.flushFifo();
@@ -387,7 +387,7 @@ namespace rose {
         for (auto &window : ReverseContainerView(mWindowList)) {
             if (window->layoutHints().mAssignedRect) {
                 if (window->layoutHints().mAssignedRect->contains(pos)) {
-                    return window->findWidget(pos - window->layoutHints().mAssignedRect->getPosition());
+                    return window->findWidget(pos); // - window->layoutHints().mAssignedRect->getPosition());
                 }
             } else if (window->getSize() && window->getPos()) {
                 if (pos >= window->getPos() && (pos - window->getPos().value()) <= window->getSize())
