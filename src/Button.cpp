@@ -74,7 +74,8 @@ namespace rose {
                 }
 
             getWidget<Button>() << wdg<Border>(sRose->theme().mButtonPadding)
-                    << wdg<Label>(mLabelText, mBadge) << FontSize{mLabelFontSize};
+                                << wdg<Label>(mLabelText, mBadge)
+                                << FontSize{mLabelFontSize};
         }
         mClassName = "Button";
     }

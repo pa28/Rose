@@ -27,7 +27,9 @@ namespace rose {
         for (const auto &item : mMenuDataList) {
             auto button = wdg<Button>(std::string{item.mLabelText});
             addChild(button);
-            button << item.mSignalToken;
+            // ToDo: Identify why a signal token is interpreted as a font size in this case
+            // button << item.mSignalToken;
+            button->setSignalToken(item.mSignalToken);
             button->txPushed.connect(mAppButtonRx);
             button->txPushed.connect(mDismissButtonRx);
             button->layoutHints().mElastic = true;
