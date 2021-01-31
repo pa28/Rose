@@ -263,7 +263,7 @@ namespace rose {
         mButtonState = 0;
         auto widget = identifyFocusWidget(position);
         if (widget)
-            widget->mouseButtonEvent(position, 0, false, SDL_GetModState());
+            widget->mouseButtonEvent(position, 1, false, SDL_GetModState());
         else
             std::cout << __FUNCTION__ << "Widget not found\n";
     }
