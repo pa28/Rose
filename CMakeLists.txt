@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(Rose VERSION 0.1.9.11)
+project(Rose VERSION 0.1.10.12)
 include(GNUInstallDirs)
 
 add_compile_definitions(VERSION=${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-${PROJECT_VERSION_TWEAK})
@@ -64,6 +64,7 @@ list(APPEND ROSE_SRC
         src/Cache.cpp
         src/Color.cpp
         src/Container.cpp
+        src/EventSemantics.cpp
         src/Frame.cpp
         src/Gauge.cpp
         src/ImageRepository.cpp

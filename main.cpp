@@ -144,7 +144,7 @@ public:
                     << CornerStyle::Round
                     << Position(2, 2)
                     << wdg<Border>(6)
-                        << wdg<Column>() << VerticalSpacing{4}
+                        << wdg<Column>() << InternalSpace{4}
                             << wdg<CascadeButton>(Id{"CALLSIGN"})
                                 << exitMenu
                                 << menuButtonRx

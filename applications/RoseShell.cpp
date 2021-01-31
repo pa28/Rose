@@ -70,7 +70,7 @@ void RoseShell::build() {
               << BorderStyle::Notch
               << CornerStyle::Round
                   << wdg<Border>(6)
-                      << wdg<Column>() << VerticalSpacing{4}
+                      << wdg<Column>() << InternalSpace{4}
                           << wdg<CascadeButton>("Select Application")
                             << appMenu
                             << mMenuButtonRx
@@ -84,7 +84,7 @@ void RoseShell::build() {
     std::shared_ptr<DateBox> gmtDateBox;
 
 
-    rowWidget << wdg<Column>() << VerticalSpacing{140}
+    rowWidget << wdg<Column>() << InternalSpace{140}
             << wdg<Frame>()
                 << DrawBackground::None
                 << BorderStyle::Notch
