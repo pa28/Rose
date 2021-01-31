@@ -67,27 +67,27 @@ namespace rose {
 
     bool MouseSemantics::fingerMotion(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
                                       float dx, float dy, float pressure) {
-        print( std::cout, __FUNCTION__, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         return false;
     }
 
     bool
     MouseSemantics::fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                                float dy, float pressure) {
-        print( std::cout, __FUNCTION__, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         return false;
     }
 
     bool
     MouseSemantics::fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                              float dy, float pressure) {
-        print( std::cout, __FUNCTION__, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         return false;
     }
 
     bool
     MouseSemantics::multiGesture(SDL_Event &event, float dTheta, float dDist, float x, float y, uint16_t nFingers) {
-        print( std::cout, __FUNCTION__, dTheta, dDist, x, y, nFingers, '\n');
+        print( std::cout, __FUNCTION__, event.tfinger.timestamp, dTheta, dDist, x, y, nFingers, '\n');
         return false;
     }
 }
