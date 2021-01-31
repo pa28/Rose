@@ -236,10 +236,14 @@ namespace rose {
     }
 
     bool Rose::onEvent(SDL_Event &e) {
+#if 1
+        return mMouseSemantics.onEvent(e);
+#else
         switch (e.type) {
             case SDL_MOUSEWHEEL: {
                 if (!mProcessEvents)
                     return false;
+                std::cout << "MOUSEWHEEL\n";
                 return scrollCallbackEvent(e.wheel.x, e.wheel.y);
             }
                 break;
@@ -247,6 +251,7 @@ namespace rose {
             case SDL_MOUSEMOTION: {
                 if (!mProcessEvents)
                     return false;
+                std::cout << "MOUSEMOTION\n";
                 return cursorPosCallbackEvent(e.motion.x, e.motion.y);
             }
                 break;
@@ -257,6 +262,7 @@ namespace rose {
                     return false;
 
                 SDL_Keymod mods = SDL_GetModState();
+                std::cout << "MOUSEBUTTON\n";
                 return mouseButtonCallbackEvent(e.button.button, e.button.type, mods);
             }
                 break;
@@ -278,6 +284,7 @@ namespace rose {
             }
                 break;
         }
+#endif
         return false;
     }
 

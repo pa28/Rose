@@ -31,7 +31,7 @@ constexpr T mod(T x, T y) {
 
 void Test::build() {
     std::cout << __PRETTY_FUNCTION__ << '\n';
-    mTranslateFingerEvents = true;
+    mTranslateFingerEvents = false;
 
     sliderRx = std::make_shared<Slot<Slider::SignalType>>();
     sliderRx->setCallback([=](uint32_t, Slider::SignalType signalType) {
