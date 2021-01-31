@@ -145,6 +145,11 @@ namespace rose {
         SignalToken mSignalToken{};     ///< The SignalToken of the Widget.
 
         LayoutHints mLayoutHints{};     ///< The layout hints for this widget. These are managed by the parent Container.
+
+        bool mSupportsDrag{};                           ///< True if the Widget supports dragging contents.
+        bool mAcceptsFocus{};                           ///< True if the Widget accepts focus.
+        bool mSupportsScrollWheel{};                    ///< True if the Widget supports mouse scroll wheel events.
+
     public:
         Widget();
         virtual ~Widget() = default;
@@ -471,6 +476,24 @@ namespace rose {
         }
 
         /**
+         * @brief Determine if the Widget supports dragging contents.
+         * @return True if dragging contents is supported.
+         */
+        bool supportsDrag() const { return mSupportsDrag; }
+
+        /**
+         * @brief Determine if the Widget accepts focus.
+         * @return True if the Widget accpets focus.
+         */
+         bool acceptsFocus() const { return mAcceptsFocus; }
+
+         /**
+          * @brief Determine if the Widget supports mouse scroll wheel events.
+          * @return
+          */
+         bool supportsScrollWheel() const { return mSupportsScrollWheel; }
+
+        /**
          * @brief Set a color on a Widget.
          * @details This is a virtual method, each widget can redefine the what to do with the color. The default
          * behavior provided by the Widget class is to set the background color.
@@ -542,6 +565,9 @@ namespace rose {
         /// Handle a mouse button event (default implementation: propagate to children)
         virtual bool mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers);
 
+        /// Handle a click transaction cancel event (default implementation: propagate to children)
+        virtual bool clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers);
+
         /// Handle a mouse motion event (default implementation: propagate to children)
         virtual bool mouseMotionEvent(const Position &cursorPosition, const Position &rel, int button, int modifiers);
 
@@ -552,7 +578,7 @@ namespace rose {
         virtual bool mouseEnterEvent(const Position &p, bool enter);
 
         /// Handle a mouse scroll event (default implementation: propagate to children)
-        virtual bool scrollEvent(const Position &p, double relX, double relY);
+        virtual bool scrollEvent(const Position &p, int32_t relX, int32_t relY);
 
         /// Handle a focus change event (default implementation: record the focus status, but do nothing)
         virtual bool focusEvent(bool focused);

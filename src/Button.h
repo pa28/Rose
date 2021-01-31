@@ -51,10 +51,8 @@ namespace rose {
          */
         bool mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers) override;
 
-        /**
-         * @brief Handle mouse enter events. See Widget::mouseEnterEvent
-         */
-        bool mouseEnterEvent(const Position &p, bool enter) override;
+        /// Handle a click transaction cancel event (default implementation: propagate to children)
+        bool clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) override;
 
     public:
         Button();

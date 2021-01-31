@@ -46,6 +46,7 @@ namespace rose {
 
     void Button::initializeComposite() {
         Frame::initializeComposite();
+        mAcceptsFocus = true;
         auto sRose = rose();
 
         if (mLabelText.empty() && !getId().empty()) {
@@ -131,8 +132,8 @@ namespace rose {
         return false;
     }
 
-    bool Button::mouseEnterEvent(const Position &p, bool enter) {
-        if (!enter && mSelectProgress) {
+    bool Button::clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) {
+        if (mSelectProgress) {
             switch (mButtonType) {
                 case NormalButton:
                 case MenuCascade:
@@ -148,10 +149,8 @@ namespace rose {
                     break;
             }
             mSelectProgress = false;
-            return true;
         }
-
-        return Container::mouseEnterEvent(p, enter);
+        return true;
     }
 
     void Button::setImageId(ImageId imageId) {

@@ -109,7 +109,7 @@ namespace rose {
         bool mouseEnterEvent(const Position &p, bool enter) override;
 
         /// Handle a mouse scroll event (default implementation: propagate to children)
-        bool scrollEvent(const Position &p, double x, double y) override;
+        bool scrollEvent(const Position &p, int32_t x, int32_t y) override;
 
         /// Handle a focus change event (default implementation: record the focus status, but do nothing)
         bool focusEvent(bool focused) override;

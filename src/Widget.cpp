@@ -40,6 +40,10 @@ namespace rose {
         return true;
     }
 
+    bool Widget::clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) {
+        return false;
+    }
+
     bool
     Widget::mouseMotionEvent(const Position &cursorPosition, const Position &rel, int button,
                              int modifiers) {
@@ -63,7 +67,7 @@ namespace rose {
         return false;
     }
 
-    bool Widget::scrollEvent(const Position &p, const double relX, double relY) {
+    bool Widget::scrollEvent(const Position &p, int32_t relX, int32_t relY) {
         return false;
     }
 

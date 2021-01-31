@@ -126,7 +126,7 @@ namespace rose {
         return true;
     }
 
-    bool ScrollArea::scrollEvent(const Position &mousePos, double x, double y) {
+    bool ScrollArea::scrollEvent(const Position &mousePos, int32_t x, int32_t y) {
         if (mChildren.empty())
             return false;
 

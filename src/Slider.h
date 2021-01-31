@@ -63,7 +63,7 @@ namespace rose {
         bool mouseDragEvent(const Position &p, const Position &rel, int button, int modifiers) override;
 
         /// Handle a mouse scroll event (default implementation: propagate to children)
-        bool scrollEvent(const Position &p, double x, double y) override;
+        bool scrollEvent(const Position &p, int32_t x, int32_t y) override;
 
         /// Handle a keyboard event (default implementation: do nothing)
         bool keyboardEvent(int key, int scancode, int action, int modifiers) override;

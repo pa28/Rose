@@ -155,7 +155,7 @@ namespace rose {
         return false;
     }
 
-    bool TabBody::scrollEvent(const Position &p, double x, double y) {
+    bool TabBody::scrollEvent(const Position &p, int32_t x, int32_t y) {
         if (auto tabPage = activeChild<Widget>(); tabPage)
             return tabPage->scrollEvent(p, x, y);
         return false;

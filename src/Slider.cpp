@@ -12,15 +12,21 @@ namespace rose {
     Slider::Slider(float value) : LinearScale() {
         setValue(value, false);
         mSupportsDrag = true;
+        mAcceptsFocus = true;
+        mSupportsScrollWheel = true;
     }
 
     Slider::Slider(ImageId imageId) : LinearScale(imageId) {
         mSupportsDrag = true;
+        mAcceptsFocus = true;
+        mSupportsScrollWheel = true;
     }
 
     Slider::Slider(float lowerBound, float upperBound, float value, ImageId imageId)
             : LinearScale(lowerBound, upperBound, value, imageId) {
         mSupportsDrag = true;
+        mAcceptsFocus = true;
+        mSupportsScrollWheel = true;
     }
 
     void Slider::initializeComposite() {
@@ -33,8 +39,6 @@ namespace rose {
     }
 
     bool Slider::mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers) {
-//        if (!down)
-//            finalValue(mValue);
         return true;
     }
 
@@ -80,7 +84,7 @@ namespace rose {
         return true;
     }
 
-    bool Slider::scrollEvent(const Position &p, double x, double y) {
+    bool Slider::scrollEvent(const Position &p, int32_t x, int32_t y) {
         if (mChildren.empty())
             return false;
 
@@ -108,11 +112,11 @@ namespace rose {
                     case Orientation::Unset:
                     case Orientation::Horizontal:
                         clampMax = sliderSize.width() - thumbSize->width();
-                        mSliderOffset = std::clamp<int>(mSliderOffset - roundToInt(y) * multiplier, 0, clampMax);
+                        mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
                         break;
                     case Orientation::Vertical:
                         clampMax = sliderSize.height() - thumbSize->height();
-                        mSliderOffset = std::clamp<int>(mSliderOffset - roundToInt(y) * multiplier, 0, clampMax);
+                        mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
                         break;
                 }
 

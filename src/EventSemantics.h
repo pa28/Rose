@@ -8,7 +8,10 @@
 #pragma once
 
 #include <SDL.h>
+#include <memory>
 #include <optional>
+#include <vector>
+#include "Widget.h"
 
 namespace rose {
 
@@ -20,8 +23,63 @@ namespace rose {
  */
     class EventSemantics {
     protected:
+        bool mClickTransaction{};
+        uint mButtonState{};
+
         Rose &mRose;
         std::optional<SDL_Event> mEventQue{};
+        std::vector<std::weak_ptr<Widget>> mFocusTrail{};       ///< The current focus trail.
+        std::shared_ptr<Widget> mTextFocus{};                   ///< Widget that has text focus.
+        std::shared_ptr<Widget> mDragFocus{};                   ///< Widget that has drag focus.
+        std::shared_ptr<Widget> mScrollFocus{};                 ///< Widget that has scroll wheel focus.
+
+        Position mMousePosition{};                              ///< The last noted position of the mouse.
+
+        /**
+         * @brief Find the Widget at a Position and set it as the focus widget.
+         * @param focusPos The focus Position.
+         */
+        std::shared_ptr<Widget> identifyFocusWidget(Position focusPos);
+
+        /**
+         * @brief Set a Widget as the focus Widget and build the focus trail.
+         * @param widget The new Focus Widget.
+         */
+        void setFocusWidget(const std::shared_ptr<Widget>& widget);
+
+        /**
+         * @brief Identify the Drag focus Widget.
+         * @details If a Drag focus Widget is already identified it will be used. If not, and a focus trail has
+         * been identified it will be searched for a Widget that supports drag events. If all fails, the focus
+         * Position will be used to build a new focus trail and search it for a Widget that supports drag.
+         * @param focusPos The focus Position.
+         * @return A std::shared_ptr<Widget> to drag focus Widget if found, otherwise empty.
+         */
+        std::shared_ptr<Widget> identifyDragFocusWidget(Position focusPos);
+
+        /**
+         * @brief Identify the Text focus Widget.
+         * @details If a Text focus Widget is already identified it will be used. If not, and a focus trail has
+         * been identified it will be search for a Widget that supports drag events. If all fails the events will
+         * be sent to the stray event recipient which is usually the font window.
+         * @return A std::shared_ptr<Widget> to text focus Widget if found, otherwise the stray event Widget.
+         */
+        std::shared_ptr<Widget> identifyTextFocusWidget();
+
+        /**
+         * @brief Identify the scroll focus Widget.
+         * @param focusPos The position of the event to determining where focus should go.
+         * @return A std::shared_ptr<Widget> to the scroll focus Widget or empty if none.
+         */
+        std::shared_ptr<Widget> identifyScrollFocusWidget(Position focusPos);
+
+        /**
+         * @brief Convert floating point finger coordinates to a position.
+         * @param x the X coordinate
+         * @param y the Y coordinate
+         * @return A Position.
+         */
+        Position convertFingerCoordinates(float x, float y);
 
     public:
         EventSemantics() = delete;

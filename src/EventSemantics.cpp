@@ -8,6 +8,7 @@
 #include "EventSemantics.h"
 
 #include <iostream>
+#include "Math.h"
 #include "Rose.h"
 
 namespace rose {
@@ -30,6 +31,8 @@ namespace rose {
                 processEvent(event);
                 break;
             case SDL_MOUSEMOTION:
+                mMousePosition.x() = event.motion.x;
+                mMousePosition.y() = event.motion.y;
                 if (event.motion.state) {
                     // Drag event
                     if (mEventQue) {
@@ -152,34 +155,108 @@ namespace rose {
     void EventSemantics::mouseWheel(uint32_t timestamp, uint32_t windowId, uint32_t which, int32_t x, int32_t y,
                                     uint32_t direction) {
         print(std::cout, __FUNCTION__, timestamp, windowId, which, x, y, direction, '\n');
+        auto widget = identifyScrollFocusWidget(mMousePosition);
+        if (direction == SDL_MOUSEWHEEL_FLIPPED) {
+            x *= -1;
+            y *= -1;
+        }
+
+        if (widget)
+            widget->scrollEvent(mMousePosition, x, y);
     }
 
     void
     EventSemantics::mouseMotion(SDL_Event &event, uint32_t state, int32_t x, int32_t y, int32_t relX, int32_t relY) {
+        print(std::cout, __FUNCTION__, (state ? "Drag" : "Move"), state, x, y, relX, relY, '\n');
+        Position position{x,y};
+        Position positionRel{relX, relY};
+        auto modifiers = SDL_GetModState();
+        if (state) {
+            // Gesture is now a drag, cancel any click transactin in progress.
+            if (mClickTransaction) {
+                if (!mFocusTrail.empty()) {
+                    auto weakPtr = mFocusTrail.front();
+                    if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {
+                        widget->clickTransactionCancel(position, state, false, modifiers);
+                        mClickTransaction = false;
+                    }
+                }
+            }
 
-        print(std::cout, __FUNCTION__, (event.motion.state ? "Drag" : "Move"), x, y, relX, relY, '\n');
+            auto widget = identifyDragFocusWidget(position);
+            if (widget) {
+                widget->mouseDragEvent(position, positionRel, state, modifiers);
+            }
+        }
     }
 
     void
     EventSemantics::mouseButton(SDL_Event &event, uint button, uint state, uint clicks, int32_t x, int32_t y) {
         print( std::cout, __FUNCTION__, button, state, clicks, x, y, '\n');
+        Position position{x,y};
+        if (state == SDL_PRESSED) {
+            mClickTransaction = true;
+            mButtonState |= button;
+            auto widget = identifyFocusWidget(position);
+            if (widget)
+                widget->mouseButtonEvent(position, button, true, SDL_GetModState());
+        } else if (state == SDL_RELEASED) {
+            mButtonState &= ~button;
+            if (!mFocusTrail.empty()) {
+                auto weakPtr = mFocusTrail.front();
+                if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {
+                    widget->mouseButtonEvent(position, button, false, SDL_GetModState());
+                    mClickTransaction = false;
+                }
+            }
+        }
     }
 
     void EventSemantics::fingerMotion(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
                                       float dx, float dy, float pressure) {
         print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        auto position = convertFingerCoordinates(x, y);
+        auto positionRel = convertFingerCoordinates(x, y);
+        auto modifiers = SDL_GetModState();
+        // Gesture is now a drag, cancel any click transactin in progress.
+        if (mClickTransaction) {
+            if (!mFocusTrail.empty()) {
+                auto weakPtr = mFocusTrail.front();
+                if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {
+                    widget->clickTransactionCancel(position, 1, false, modifiers);
+                    mClickTransaction = false;
+                }
+            }
+        }
+
+        auto widget = identifyDragFocusWidget(position);
+        if (widget) {
+            widget->mouseDragEvent(position, positionRel, 1, modifiers);
+        }
     }
 
     void
     EventSemantics::fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                                float dy, float pressure) {
         print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        auto position = convertFingerCoordinates(x, y);
+        mClickTransaction = true;
+        mButtonState = 1;
+        auto widget = identifyFocusWidget(position);
+        if (widget)
+            widget->mouseButtonEvent(position, 1, true, SDL_GetModState());
     }
 
     void
     EventSemantics::fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                              float dy, float pressure) {
         print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        auto position = convertFingerCoordinates(x, y);
+        mClickTransaction = false;
+        mButtonState = 0;
+        auto widget = identifyFocusWidget(position);
+        if (widget)
+            widget->mouseButtonEvent(position, 0, false, SDL_GetModState());
     }
 
     void
@@ -194,5 +271,107 @@ namespace rose {
 
     void EventSemantics::textInputEvent(SDL_Event &event, const string &text) {
         print(std::cout, __FUNCTION__, text, '\n');
+    }
+
+    std::shared_ptr<Widget> EventSemantics::identifyFocusWidget(Position focusPos) {
+        auto focusWidget = mRose.findWidget(focusPos);
+        if (focusWidget) {
+            if (!mFocusTrail.empty()) {
+                if (!mFocusTrail.front().expired()) {
+                    auto currentFocus = mFocusTrail.front().lock();
+                    if (currentFocus == focusWidget)
+                        return currentFocus;
+                }
+            }
+            while (focusWidget && !focusWidget->acceptsFocus())
+                focusWidget = focusWidget->parent();
+            setFocusWidget(focusWidget);
+        }
+        return focusWidget;
+    }
+
+    void EventSemantics::setFocusWidget(const std::shared_ptr<Widget>& widget) {
+        if (widget) {
+            mFocusTrail.clear();
+
+            mFocusTrail.push_back(widget->weak_from_this());
+            auto parent = widget->parent();
+            while (parent) {
+                mFocusTrail.push_back(parent->weak_from_this());
+                parent = parent->parent();
+            }
+
+            mDragFocus.reset();
+            mTextFocus.reset();
+            mScrollFocus.reset();
+        }
+    }
+
+    std::shared_ptr<Widget> EventSemantics::identifyDragFocusWidget(Position focusPos) {
+        if (mDragFocus) {
+            return mDragFocus;
+        }
+
+        static auto findDragFocus = [&]() -> std::shared_ptr<Widget> {
+            if (!mFocusTrail.empty()) {
+                for (const auto& weakPtr : mFocusTrail) {
+                    if (!weakPtr.expired()) {
+                        auto widget = weakPtr.lock();
+                        if (widget->supportsDrag()) {
+                            mDragFocus = widget;
+                            return mDragFocus;
+                        }
+                    }
+                }
+            }
+            return nullptr;
+        };
+
+        auto widget = findDragFocus();
+        if (!widget) {
+            identifyFocusWidget(focusPos);
+            widget = findDragFocus();
+        }
+
+        return widget;
+    }
+
+    std::shared_ptr<Widget> EventSemantics::identifyTextFocusWidget() {
+        if (mTextFocus)
+            return mTextFocus;
+
+        if (!mFocusTrail.empty()) {
+            for (const auto& weakPtr : mFocusTrail) {
+                if (!weakPtr.expired()) {
+                    auto widget = weakPtr.lock();
+                    if (widget->supportsDrag()) {
+                        mTextFocus = widget;
+                        return mTextFocus;
+                    }
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    std::shared_ptr<Widget> EventSemantics::identifyScrollFocusWidget(Position focusPos) {
+        if (mScrollFocus && mScrollFocus->contains(focusPos))
+            return mScrollFocus;
+
+        auto widget = mRose.findWidget(focusPos);
+        while (widget && !widget->supportsScrollWheel()) {
+            widget = widget->parent();
+        }
+
+        mScrollFocus = widget;
+        return widget;
+    }
+
+    Position EventSemantics::convertFingerCoordinates(float x, float y) {
+        Position position{};
+        position.x() = util::roundToInt((float)mRose.width() * x);
+        position.y() = util::roundToInt((float)mRose.height() * y);
+        return position;
     }
 }

@@ -50,7 +50,6 @@ namespace rose {
      */
     class Container : public Widget {
     protected:
-        bool mSupportsDrag{};                           ///< True if the container supports dragging contents.
         bool mLayoutReverse{};                          ///< True if the layout should be done in reverse order.
 
         ContainerLayoutHints mContainerHints{};         ///< Hints to use in management of children.
@@ -147,12 +146,6 @@ namespace rose {
          * @return
          */
         auto size() const { return mChildren.size(); }
-
-        /**
-         * @brief Determine if the container supports dragging contents.
-         * @return True if dragging contents is supported.
-         */
-        bool supportsDrag() const { return mSupportsDrag; }
 
         /**
          * @brief Access to ContainerLayoutHints.
@@ -253,7 +246,7 @@ namespace rose {
         bool mouseDragEvent(const Position &p, const Position &rel, int button, int modifiers) override;
 
         /// Handle a mouse scroll event (default implementation: propagate to children)
-        bool scrollEvent(const Position &p, double relX, double relY) override;
+        bool scrollEvent(const Position &p, int32_t relX, int32_t relY) override;
 
         /// Handle a keyboard event (default implementation: do nothing)
         bool keyboardEvent(int key, int scancode, int action, int modifiers) override;

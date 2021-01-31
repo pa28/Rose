@@ -85,7 +85,7 @@ namespace rose {
         return false;
     }
 
-    bool Container::scrollEvent(const Position &p, double relX, double relY) {
+    bool Container::scrollEvent(const Position &p, int32_t relX, int32_t relY) {
         auto relMousePos = p - mLayoutHints.mAssignedRect->getPosition();
         for (auto &child : ReverseContainerView(mChildren)) {
             if (!child->getVisible())
