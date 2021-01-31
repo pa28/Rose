@@ -39,7 +39,7 @@
 #include "Settings.h"
 #include "Surface.h"
 #include "Texture.h"
-#include "MouseSemantics.h"
+#include "EventSemantics.h"
 
 /**
  * @namespace rose
@@ -173,7 +173,7 @@ namespace rose {
         FontMetrics mIconFontMetrics{};             ///< Font metrics for the icons in the Image Repository
         InputParser mCmdLineParser;                 ///< The results of command line parsing
         std::unique_ptr<Settings> mSettings{};      ///< The application settings database, set by derived app class
-        MouseSemantics mMouseSemantics{};           ///< Mouse semantics processor.
+        EventSemantics mEventSemantics;             ///< Mouse semantics processor.
 
         /**
          * @brief Copy texture to textureData in a way the preserves the transparency encoded into texture and

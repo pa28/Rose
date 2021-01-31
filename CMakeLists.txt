@@ -102,7 +102,7 @@ list(APPEND TEST_SRC
         src/Label.cpp
         src/LinearScale.cpp
         src/Menu.cpp
-        src/MouseSemantics.cpp
+        src/EventSemantics.cpp
         src/PopupWindow.cpp
         src/Renderer.cpp
         src/Rose.cpp

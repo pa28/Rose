@@ -47,7 +47,8 @@ namespace rose {
     Rose::~Rose() {
     }
 
-    Rose::Rose(Size screenSize, int argc, char **argv, const std::string_view title) : mCmdLineParser(argc, argv) {
+    Rose::Rose(Size screenSize, int argc, char **argv, const std::string_view title) : mCmdLineParser(argc, argv),
+            mEventSemantics(*this) {
         mWidth = screenSize.width();
         mHeight = screenSize.height();
 
@@ -199,9 +200,9 @@ namespace rose {
                                                 (Sint32) (e.tfinger.y * (float) mHeight));
                         }
                     }
-                    mMouseSemantics.onEvent(e);
+                    mEventSemantics.onEvent(e);
                 }
-                mMouseSemantics.flushFifo();
+                mEventSemantics.flushFifo();
 
                 SDL_SetRenderDrawColor(mRenderer.get(), 0x0, 0x0, 0x0, 0xff);
                 SDL_RenderClear(mRenderer.get());
