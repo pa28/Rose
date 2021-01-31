@@ -241,13 +241,16 @@ namespace rose {
     void
     EventSemantics::fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                                float dy, float pressure) {
-        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        print(std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
+        print(std::cout, __FUNCTION__, position, 'n');
         mClickTransaction = true;
         mButtonState = 1;
         auto widget = identifyFocusWidget(position);
         if (widget)
             widget->mouseButtonEvent(position, 1, true, SDL_GetModState());
+        else
+            std::cout << __FUNCTION__ << "Widget not found\n";
     }
 
     void
@@ -255,11 +258,14 @@ namespace rose {
                              float dy, float pressure) {
         print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
+        print(std::cout, __FUNCTION__, position, 'n');
         mClickTransaction = false;
         mButtonState = 0;
         auto widget = identifyFocusWidget(position);
         if (widget)
             widget->mouseButtonEvent(position, 0, false, SDL_GetModState());
+        else
+            std::cout << __FUNCTION__ << "Widget not found\n";
     }
 
     void
