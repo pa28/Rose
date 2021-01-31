@@ -55,6 +55,8 @@ namespace rose {
             mSupportsDrag = true;
             mLastScrollTick = 0;
             mClassName = "ScrollArea";
+            mAcceptsFocus = true;
+            mSupportsDrag = true;
             mSupportsScrollWheel = true;
         }
 
