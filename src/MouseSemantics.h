@@ -8,6 +8,7 @@
 #pragma once
 
 #include <SDL.h>
+#include <optional>
 
 namespace rose {
 
@@ -17,6 +18,7 @@ namespace rose {
  */
     class MouseSemantics {
     protected:
+        std::optional<SDL_Event> mEventQue{};
 
     public:
         MouseSemantics() = default;
@@ -26,7 +28,11 @@ namespace rose {
         MouseSemantics& operator=(MouseSemantics &&) = delete;
         MouseSemantics& operator=(const MouseSemantics &) = delete;
 
-        bool onEvent(SDL_Event &event);
+        void onEvent(SDL_Event &event);
+
+        void processEvent(SDL_Event &event);
+
+        void flushFifo();
 
         /**
          * @brief Mouse Wheel event
@@ -38,22 +44,23 @@ namespace rose {
          * @param direction SDL_MOUSEWHEEL_NORMAL or SDL_MOUSEWHEEL_FLIPPED
          * @return true if event processed.
          */
-        bool mouseWheel(uint32_t timestamp, uint32_t windowId, uint32_t which, int32_t x, int32_t y, uint32_t direction);
+        void mouseWheel(uint32_t timestamp, uint32_t windowId, uint32_t which, int32_t x, int32_t y, uint32_t direction);
 
-        bool mouseMotion(SDL_Event &event, int32_t x, int32_t y, int32_t relX, int32_t relY);
+        void mouseMotion(SDL_Event &event, int32_t x, int32_t y, int32_t relX, int32_t relY);
 
-        bool mouseButton(SDL_Event &event, uint button, uint state, uint clicks, int32_t x, int32_t y);
+        void mouseButton(SDL_Event &event, uint button, uint state, uint clicks, int32_t x, int32_t y);
 
-        bool fingerMotion(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
+        void fingerMotion(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
                           float dx, float dy, float pressure);
 
-        bool fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
-                          float dx, float dy, float pressure);
+        void fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
+                        float dx, float dy, float pressure);
 
-        bool fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
-                          float dx, float dy, float pressure);
+        void fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
+                      float dx, float dy, float pressure);
 
-        bool multiGesture(SDL_Event &event, float dTheta, float dDist, float x, float y, uint16_t nFingers);
+        void multiGesture(SDL_Event &event, float dTheta, float dDist, float x, float y, uint16_t nFingers);
+
     };
 }
 

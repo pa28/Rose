@@ -199,8 +199,9 @@ namespace rose {
                                                 (Sint32) (e.tfinger.y * (float) mHeight));
                         }
                     }
-                    onEvent(e);
+                    mMouseSemantics.onEvent(e);
                 }
+                mMouseSemantics.flushFifo();
 
                 SDL_SetRenderDrawColor(mRenderer.get(), 0x0, 0x0, 0x0, 0xff);
                 SDL_RenderClear(mRenderer.get());
@@ -236,9 +237,6 @@ namespace rose {
     }
 
     bool Rose::onEvent(SDL_Event &e) {
-#if 1
-        return mMouseSemantics.onEvent(e);
-#else
         switch (e.type) {
             case SDL_MOUSEWHEEL: {
                 if (!mProcessEvents)
@@ -284,7 +282,6 @@ namespace rose {
             }
                 break;
         }
-#endif
         return false;
     }
 
