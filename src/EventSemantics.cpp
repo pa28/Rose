@@ -217,6 +217,7 @@ namespace rose {
         print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
         auto positionRel = convertFingerCoordinates(x, y);
+        print(std::cout, __FUNCTION__, position, positionRel, 'n');
         auto modifiers = SDL_GetModState();
         // Gesture is now a drag, cancel any click transactin in progress.
         if (mClickTransaction) {
@@ -232,6 +233,8 @@ namespace rose {
         auto widget = identifyDragFocusWidget(position);
         if (widget) {
             widget->mouseDragEvent(position, positionRel, 1, modifiers);
+        } else {
+            std::cout << __FUNCTION__ << "Widget not found\n";
         }
     }
 
