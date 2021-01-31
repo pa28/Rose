@@ -243,7 +243,7 @@ namespace rose {
                                float dy, float pressure) {
         print(std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
-        print(std::cout, __FUNCTION__, position, 'n');
+        print(std::cout, __FUNCTION__, position, '\n');
         mClickTransaction = true;
         mButtonState = 1;
         auto widget = identifyFocusWidget(position);
@@ -258,7 +258,7 @@ namespace rose {
                              float dy, float pressure) {
         print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
-        print(std::cout, __FUNCTION__, position, 'n');
+        print(std::cout, __FUNCTION__, position, '\n');
         mClickTransaction = false;
         mButtonState = 0;
         auto widget = identifyFocusWidget(position);
