@@ -52,6 +52,8 @@ namespace rose {
 
         bool fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
                           float dx, float dy, float pressure);
+
+        bool multiGesture(SDL_Event &event, float dTheta, float dDist, float x, float y, uint16_t nFingers);
     };
 }
 

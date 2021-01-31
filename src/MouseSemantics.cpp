@@ -40,7 +40,9 @@ namespace rose {
             case SDL_FINGERUP:
                 return fingerUp(event, event.tfinger.touchId, event.tfinger.fingerId, event.tfinger.x, event.tfinger.y,
                                     event.tfinger.dx, event.tfinger.dy, event.tfinger.pressure);
-//            case SDL_MULTIGESTURE:
+            case SDL_MULTIGESTURE:
+                return multiGesture(event, event.mgesture.dTheta, event.mgesture.dDist, event.mgesture.x, event.mgesture.y,
+                                    event.mgesture.numFingers);
         }
         return false;
     }
@@ -80,6 +82,12 @@ namespace rose {
     MouseSemantics::fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                              float dy, float pressure) {
         print( std::cout, __FUNCTION__, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        return false;
+    }
+
+    bool
+    MouseSemantics::multiGesture(SDL_Event &event, float dTheta, float dDist, float x, float y, uint16_t nFingers) {
+        print( std::cout, __FUNCTION__, dTheta, dDist, x, y, nFingers, '\n');
         return false;
     }
 }
