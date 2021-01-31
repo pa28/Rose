@@ -216,7 +216,7 @@ namespace rose {
                                       float dx, float dy, float pressure) {
         print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
-        auto positionRel = convertFingerCoordinates(x, y);
+        auto positionRel = convertFingerCoordinates(dx, dy);
         print(std::cout, __FUNCTION__, position, positionRel, 'n');
         auto modifiers = SDL_GetModState();
         // Gesture is now a drag, cancel any click transactin in progress.
