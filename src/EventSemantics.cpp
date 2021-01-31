@@ -154,7 +154,7 @@ namespace rose {
 
     void EventSemantics::mouseWheel(uint32_t timestamp, uint32_t windowId, uint32_t which, int32_t x, int32_t y,
                                     uint32_t direction) {
-        print(std::cout, __FUNCTION__, timestamp, windowId, which, x, y, direction, '\n');
+//        print(std::cout, __FUNCTION__, timestamp, windowId, which, x, y, direction, '\n');
         auto widget = identifyScrollFocusWidget(mMousePosition);
         if (direction == SDL_MOUSEWHEEL_FLIPPED) {
             x *= -1;
@@ -167,7 +167,7 @@ namespace rose {
 
     void
     EventSemantics::mouseMotion(SDL_Event &event, uint32_t state, int32_t x, int32_t y, int32_t relX, int32_t relY) {
-        print(std::cout, __FUNCTION__, (state ? "Drag" : "Move"), state, x, y, relX, relY, '\n');
+//        print(std::cout, __FUNCTION__, (state ? "Drag" : "Move"), state, x, y, relX, relY, '\n');
         Position position{x,y};
         Position positionRel{relX, relY};
         auto modifiers = SDL_GetModState();
@@ -192,7 +192,7 @@ namespace rose {
 
     void
     EventSemantics::mouseButton(SDL_Event &event, uint button, uint state, uint clicks, int32_t x, int32_t y) {
-        print( std::cout, __FUNCTION__, button, state, clicks, x, y, '\n');
+//        print( std::cout, __FUNCTION__, button, state, clicks, x, y, '\n');
         Position position{x,y};
         if (state == SDL_PRESSED) {
             mClickTransaction = true;
@@ -214,10 +214,10 @@ namespace rose {
 
     void EventSemantics::fingerMotion(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
                                       float dx, float dy, float pressure) {
-        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+//        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
         auto positionRel = convertFingerCoordinates(dx, dy);
-        print(std::cout, __FUNCTION__, position, positionRel, 'n');
+//        print(std::cout, __FUNCTION__, position, positionRel, 'n');
         auto modifiers = SDL_GetModState();
         // Gesture is now a drag, cancel any click transactin in progress.
         if (mClickTransaction) {
@@ -233,39 +233,33 @@ namespace rose {
         auto widget = identifyDragFocusWidget(position);
         if (widget) {
             widget->mouseDragEvent(position, positionRel, 1, modifiers);
-        } else {
-            std::cout << __FUNCTION__ << "Widget not found\n";
         }
     }
 
     void
     EventSemantics::fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                                float dy, float pressure) {
-        print(std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+//        print(std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
-        print(std::cout, __FUNCTION__, position, '\n');
+//        print(std::cout, __FUNCTION__, position, '\n');
         mClickTransaction = true;
         mButtonState = 1;
         auto widget = identifyFocusWidget(position);
         if (widget)
             widget->mouseButtonEvent(position, 1, true, SDL_GetModState());
-        else
-            std::cout << __FUNCTION__ << "Widget not found\n";
     }
 
     void
     EventSemantics::fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
                              float dy, float pressure) {
-        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+//        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
         auto position = convertFingerCoordinates(x, y);
-        print(std::cout, __FUNCTION__, position, '\n');
+//        print(std::cout, __FUNCTION__, position, '\n');
         mClickTransaction = false;
         mButtonState = 0;
         auto widget = identifyFocusWidget(position);
         if (widget)
             widget->mouseButtonEvent(position, 1, false, SDL_GetModState());
-        else
-            std::cout << __FUNCTION__ << "Widget not found\n";
     }
 
     void
