@@ -87,6 +87,7 @@ namespace rose {
                     Size useKeySize = keySize;
                     auto buttonType = ButtonType::NormalButton;
                     bool elastic = false;
+                    sdl::RenderFlip renderFlip{};
                     switch (keyData[keyIdx]) {
                         case SDLK_SPACE:
                             useKeySize.width() = keySize.width();
@@ -102,6 +103,7 @@ namespace rose {
                         case SDLK_RETURN:
                             imageId = RoseImageId::IconLevelDown;
                             elastic = true;
+                            renderFlip = sdl::RenderFlip{SDL_FLIP_HORIZONTAL};
                             break;
                         case SDLK_ESCAPE:
                             break;
@@ -131,6 +133,7 @@ namespace rose {
                     }
 
                     auto key = row << wdg<Button>(imageId, buttonType)
+                            << renderFlip
                             << CornerStyle::Round;
                     if (!elastic)
                         key << Elastic{Orientation::Vertical};

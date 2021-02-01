@@ -164,40 +164,39 @@ namespace rose {
         mChildren.front()->as<Label>()->setBadge(imageId);
     }
 
-    void Button::setText(const string &text) {
+    std::shared_ptr<Label> Button::getLabel() {
         if (!mChildren.empty()) {
             if (auto border = mChildren.front()->as<Border>(); border) {
                 if (auto label = border->front()->as<Label>(); label) {
-                    label->setText(text);
-                    return;
+                    return label;
                 }
             }
+        }
+        return std::shared_ptr<Label>();
+    }
+
+    void Button::setText(const string &text) {
+        if (auto label = getLabel(); label) {
+            label->setText(text);
+            return;
         }
         throw RoseLogicError(
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
     void Button::setFontName(string &fontName) {
-        if (!mChildren.empty()) {
-            if (auto border = mChildren.front()->as<Border>(); border) {
-                if (auto label = border->front()->as<Label>(); label) {
-                    label->setFontName(fontName);
-                    return;
-                }
-            }
+        if (auto label = getLabel(); label) {
+            label->setFontName(fontName);
+            return;
         }
         throw RoseLogicError(
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
     void Button::setFontSize(int fontSize) {
-        if (!mChildren.empty()) {
-            if (auto border = mChildren.front()->as<Border>(); border) {
-                if (auto label = border->front()->as<Label>(); label) {
-                    label->setFontSize(fontSize);
-                    return;
-                }
-            }
+        if (auto label = getLabel(); label) {
+            label->setFontSize(fontSize);
+            return;
         }
         throw RoseLogicError(
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
@@ -213,5 +212,14 @@ namespace rose {
                 label->setSize(labelSize);
             }
         };
+    }
+
+    void Button::setRenderFlip(sdl::RenderFlip renderFlip) {
+        if (auto label = getLabel(); label) {
+            label->setRenderFlip(renderFlip);
+            return;
+        }
+        throw RoseLogicError(
+                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 }

@@ -78,11 +78,28 @@ namespace rose {
         /// Default constructor
         Elastic() = default;
 
-        Elastic(Orientation orientation) : mElastic(orientation) {}
+        /// Construct an elastic value from an Orientation
+        explicit Elastic(Orientation orientation) : mElastic(orientation) {}
 
+        /// Test for elasticity along the Horizontal axis
         bool horizontal() { return mElastic == Orientation::Horizontal || mElastic == Orientation::Both; }
 
+        /// Test for elasticity along the Vertical axis
         bool vertical() { return mElastic == Orientation::Vertical || mElastic == Orientation::Both; }
+
+        /// Test for elasticity along the Primary axis
+        bool primary(Orientation orientation) { return mElastic == Orientation::Both || mElastic == orientation; }
+
+        /// Test for elasticity along the Secondary axis
+        bool secondary(Orientation orientation) {
+            if (mElastic == Orientation::Both)
+                return true;
+            if (orientation == Orientation::Horizontal && mElastic == Orientation::Vertical)
+                return true;
+            if (orientation == Orientation::Vertical && mElastic == Orientation::Horizontal)
+                return true;
+            return false;
+        }
     };
 
     /**

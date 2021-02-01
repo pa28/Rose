@@ -25,6 +25,14 @@ namespace rose::sdl {
 
     class GradientTexture;
 
+    struct RenderFlip {
+        SDL_RendererFlip mFlip;
+
+        constexpr RenderFlip() noexcept : mFlip(SDL_FLIP_NONE) {}
+
+        constexpr explicit RenderFlip(SDL_RendererFlip flip) noexcept : mFlip(flip) {}
+    };
+
     /**
      * @brief A functor to destroy an SDL_Window in a std::unique_ptr (rose::sdl::Window).
      */
@@ -206,6 +214,18 @@ namespace rose::sdl {
          * @return The return status of SDL_RenderCopy.
          */
         int renderCopy(GradientTexture &texture, Rectangle dst);
+
+        /**
+         * @brief Render with extras
+         * @param src Source Rectangle
+         * @param dst Destination Rectangle
+         * @param angle Rotation Angle
+         * @param renderFlip Flip
+         * @param point Rotation Position if specified.
+         * @return Stastus code returned by SDL_RenderCopyEx()
+         */
+        int renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
+                         std::optional<Position> point = std::nullopt);
 
         /**
          * @brief Calls SDL_RenderFillRect after setting the RenderDrawColor to color.

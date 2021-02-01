@@ -115,7 +115,7 @@ namespace rose {
                             badgeRect.width() <= mRenderSize.width() ? badgeRect.width() : mRenderSize.width(),
                             badgeRect.height() <= mRenderSize.height() ? badgeRect.height() : mRenderSize.height()
                     };
-                    sRose->imageRepository().renderCopy(renderer, mBadge, src, dst);
+                    renderer.renderCopyEx(sRose->imageRepository().image(mBadge), src, dst, 0., mRenderFlip);
                     mTexture = std::move(composite);
                 } else {
                     auto fg = mTextColor.toSdlColor();

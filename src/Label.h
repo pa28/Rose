@@ -58,6 +58,8 @@ namespace rose {
 
         int mLabelBadgeSpace{};                 ///< Space between the badge and text in pixels.
 
+        sdl::RenderFlip mRenderFlip{};          ///< Flip the badge.
+
         /**
          * @brief Fetch the font when needed.
          */
@@ -256,6 +258,8 @@ namespace rose {
          * @brief See Widget::initializeComposite
          */
         void initializeComposite() override;
+
+        void setRenderFlip(sdl::RenderFlip &renderFlip) { mRenderFlip = renderFlip; }
     };
 
     /**
@@ -369,6 +373,11 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::FontName fontName) {
     widget->setFontName(fontName.fontName);
+    return widget;
+}
+
+inline std::shared_ptr<rose::Label> operator<<(std::shared_ptr<rose::Label> &widget, rose::sdl::RenderFlip &renderFlip) {
+    widget->setRenderFlip(renderFlip);
     return widget;
 }
 

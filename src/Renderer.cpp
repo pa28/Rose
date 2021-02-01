@@ -52,6 +52,20 @@ namespace rose::sdl {
         destination.setBlendMOde(SDL_BLENDMODE_BLEND);
     }
 
+    int Renderer::renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
+                               std::optional<Position> point) {
+        auto srcRect = src.toSdlRect();
+        auto dstRect = dst.toSdlRect();
+        if (point) {
+            SDL_Point sdlPoint;
+            sdlPoint.x = point->x();
+            sdlPoint.y = point->y();
+            return SDL_RenderCopyEx(get(), texture.get(), &srcRect, &dstRect, angle, &sdlPoint, renderFlip.mFlip);
+        } else {
+            return SDL_RenderCopyEx(get(), texture.get(), &srcRect, &dstRect, angle, nullptr, renderFlip.mFlip);
+        }
+    }
+
     DrawColorGuard::DrawColorGuard(Renderer &renderer, SDL_Color color) : mRenderer(renderer) {
         mStatus = 0;
         if (int status = SDL_GetRenderDrawColor( mRenderer.get(), &mOldColor.r, &mOldColor.g,

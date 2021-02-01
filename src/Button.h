@@ -54,13 +54,21 @@ namespace rose {
         /// Handle a click transaction cancel event (default implementation: propagate to children)
         bool clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) override;
 
+        /// Get the underlying Label Widget.
+        std::shared_ptr<Label> getLabel();
+
     public:
         Button();
+
         ~Button() override = default;
+
         Button(Button &&) = delete;
+
         Button(const Button &) = delete;
-        Button& operator=(Button &&) = delete;
-        Button& operator=(const Button &) = delete;
+
+        Button &operator=(Button &&) = delete;
+
+        Button &operator=(const Button &) = delete;
 
         /**
          * @brief Constructor
@@ -72,7 +80,7 @@ namespace rose {
          * @brief Constructor
          * @param id Widget id string.
          */
-        explicit Button(const Id& id);
+        explicit Button(const Id &id);
 
         /**
          * @brief Constructor
@@ -107,7 +115,7 @@ namespace rose {
          * @param type the button type
          * @param fontSize the font size to use with the label
          */
-        Button(const Id& id, ButtonType type, int fontSize = 0);
+        Button(const Id &id, ButtonType type, int fontSize = 0);
 
         /**
          * @brief Constructor
@@ -227,8 +235,26 @@ namespace rose {
          * @param imageId an ImageId.
          */
         void setImageId(ImageId imageId) override;
+
+        /**
+         * @brief Set RenderFlip for the Button (Label).
+         * @param renderFlip
+         */
+        void setRenderFlip(sdl::RenderFlip renderFlip);
     };
 }
 
+/**
+ * @addtogroup WidgetManip
+ * @{
+ */
+
+inline std::shared_ptr<rose::Button>
+operator<<(std::shared_ptr<rose::Button> widget, rose::sdl::RenderFlip &renderFlip) {
+    widget->setRenderFlip(renderFlip);
+    return widget;
+}
+
+/** @} */
 
 
