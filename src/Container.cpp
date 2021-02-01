@@ -241,7 +241,7 @@ namespace rose {
                 }
             }
         }
-        posY += mContainerHints.startOffset;
+        posY += mContainerHints.endOffset;
 
         auto layout = Rectangle{mPos, mSize};
         layout.width() = maxWidth;
@@ -330,7 +330,7 @@ namespace rose {
                 }
             }
         }
-        posX += mContainerHints.startOffset;
+        posX += mContainerHints.endOffset;
 
         auto layout = Rectangle{mPos, mSize};
         layout.width() = posX;

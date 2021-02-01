@@ -34,7 +34,7 @@ namespace rose {
             mSize = Size::Zero;
         } else if (rose()->imageRepository().isValidImage(renderer, mImageId)) {
             mPos = Position::Zero;
-            mSize = rose()->imageRepository().image(mImageId).getSize();
+            mSize = rose()->imageRepository().image(static_cast<RoseImageId>(mImageId)).getSize();
         } else {
             mPos = Position::Zero;
             mSize = Size::Zero;

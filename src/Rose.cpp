@@ -582,10 +582,14 @@ namespace rose {
     }
 
     void Rose::createStandardIcons() {
-        static constexpr std::array<RoseImageId, 7> iconList{IconCancel, IconHelp,
+        static constexpr std::array<RoseImageId, 16> iconList{IconCancel, IconHelp,
                                                              IconInfo, IconCheck,
-                                                             IconAlert, IconDown,
-                                                             IconRight};
+                                                             IconAlert, IconDownCascade,
+                                                             IconRightCascade, IconLock,
+                                                             IconUpBold, IconLeft,
+                                                             IconRight, IconToEnd,
+                                                             IconBack, IconLevelDown,
+                                                             Icon2Dots, Icon3Dots};
 
         for (auto &iconId : iconList) {
             int iconCode;
@@ -605,11 +609,38 @@ namespace rose {
                 case IconAlert:
                     iconCode = ENTYPO_ICON_ALERT;
                     break;
-                case IconDown:
+                case IconDownCascade:
                     iconCode = ENTYPO_ICON_DOWN_DIR;
                     break;
-                case IconRight:
+                case IconRightCascade:
                     iconCode = ENTYPO_ICON_RIGHT_DIR;
+                    break;
+                case IconLock:
+                    iconCode = ENTYPO_ICON_LOCK;
+                    break;
+                case IconUpBold:
+                    iconCode = ENTYPO_ICON_UP_BOLD;
+                    break;
+                case IconLeft:
+                    iconCode = ENTYPO_ICON_LEFT;
+                    break;
+                case IconRight:
+                    iconCode = ENTYPO_ICON_RIGHT;
+                    break;
+                case IconToEnd:
+                    iconCode = ENTYPO_ICON_TO_END;
+                    break;
+                case IconBack:
+                    iconCode = ENTYPO_ICON_BACK;
+                    break;
+                case IconLevelDown:
+                    iconCode = ENTYPO_ICON_LEVEL_DOWN;
+                    break;
+                case Icon2Dots:
+                    iconCode = ENTYPO_ICON_TWO_DOTS;
+                    break;
+                case Icon3Dots:
+                    iconCode = ENTYPO_ICON_THREE_DOTS;
                     break;
                 default:
                     throw std::runtime_error("Unhandled icon id.");

@@ -150,15 +150,24 @@ namespace rose {
      * @enum RoseImageId
      * @brief Identifiers for Textures created by the Rose object and available from the Rose ImageRepository.
      */
-    enum RoseImageId : std::size_t {
+    enum RoseImageId : size_t {
         RoseImageInvalid = 0,   ///< Invalid image ID
         IconCancel,             ///< Cancel the action, close a window, answer no, etc.
         IconHelp,               ///< Provide help.
         IconInfo,               ///< Provide information.
         IconCheck,              ///< Approve the action, answer yes, etc.
         IconAlert,              ///< Alert the user to an error, unusual or unexpected occurrence.
-        IconDown,               ///< Down facing triangle, CascadeButton
-        IconRight,              ///< Right facing triangle, CascadeButton
+        IconDownCascade,        ///< Down facing triangle, CascadeButton
+        IconRightCascade,       ///< Right facing triangle, CascadeButton
+        IconLock,               ///< Closed Lock Icon
+        IconUpBold,             ///< Bold Up Arrow
+        IconLeft,               ///< Left Arrow
+        IconRight,              ///< Right Arrow
+        IconToEnd,              ///< Forward to end
+        IconBack,               ///< Back
+        IconLevelDown,          ///< Carriage Return
+        Icon2Dots,              ///< Two Dots
+        Icon3Dots,              ///< Three Dots
         BevelOutRoundCorners,   ///< Sheet of round corners beveled out
         BevelInRoundCorners,    ///< Sheet of round corners beveled in
         NotchOutRoundCorners,   ///< Sheet of round corners notched out

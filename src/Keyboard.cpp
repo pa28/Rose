@@ -61,8 +61,83 @@ namespace rose {
             }
     };
 
-    void QUERTY::build(shared_ptr <Keyboard> frame, Size keySize, shared_ptr <Slot<Button::SignalType>> &slot) const {
+    void QUERTY::build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName,
+                       shared_ptr <Slot<Button::SignalType>> &charSlot) const {
+        size_t rowIdx = 0;
+        size_t keyIdx = 1;
+        auto column = keyboard << wdg<Column>();
+        column->containerLayoutHints().startOffset = 4;
+        column->containerLayoutHints().endOffset = 4;
+        column->containerLayoutHints().internalSpace = 4;
+        for (const auto &keyRow : QWERTYData) {
+            auto row = column << wdg<Row>();
+            row->containerLayoutHints().startOffset = 4;
+            row->containerLayoutHints().endOffset = 4;
+            row->containerLayoutHints().internalSpace = 4;
+            if (rowIdx == 1)
+                row->containerLayoutHints().startOffset += keySize.width()/2 + 4;
+            for (const auto &keyData : keyRow) {
+                if (keyData[keyIdx] == SDLK_UNKNOWN)
+                    break;
+                if (keyData[keyIdx] <= SDLK_SPACE || keyData[keyIdx] >= SDLK_CAPSLOCK) {
+                    // Control key.
+                    RoseImageId imageId = RoseImageId::RoseImageInvalid;
+                    Size useKeySize = keySize;
+                    auto buttonType = ButtonType::NormalButton;
+                    switch (keyData[keyIdx]) {
+                        case SDLK_SPACE:
+                            useKeySize.width() = keySize.width() * 57 / 10;
+                            break;
+                        case SDLK_BACKSPACE:
+                            imageId = RoseImageId::IconBack;
+                            useKeySize.width() = keySize.width() * 3 / 2 + 4;
+                            break;
+                        case SDLK_TAB:
+                            imageId = RoseImageId::IconToEnd;
+                            break;
+                        case SDLK_RETURN:
+                            imageId = RoseImageId::IconLevelDown;
+                            useKeySize.width() = keySize.width() * 2 + 4;
+                            break;
+                        case SDLK_ESCAPE:
+                            break;
+                        case SDLK_CAPSLOCK:
+                            imageId = RoseImageId::IconLock;
+                            buttonType = ButtonType::ToggleButton;
+                            break;
+                        case SDLK_RSHIFT:
+                        case SDLK_LSHIFT:
+                            imageId = RoseImageId::IconUpBold;
+                            break;
+                        case SDLK_LALT:
+                        case SDLK_RALT:
+                            if (keyIdx < 3)
+                                imageId = RoseImageId::Icon2Dots;
+                            else
+                                imageId = RoseImageId::Icon3Dots;
+                            break;
+                        case SDLK_LEFT:
+                            imageId = RoseImageId::IconLeft;
+                            break;
+                        case SDLK_RIGHT:
+                            imageId = RoseImageId::IconRight;
+                            break;
+                        default:
+                            break;
+                    }
 
+                    auto key = row << wdg<Button>(imageId, buttonType)
+                            << CornerStyle::Round
+                            << useKeySize;
+                } else {
+                    // Character key.
+                    auto key = row << wdg<Button>(std::string{(char)keyData[keyIdx]}, ButtonType::NormalButton, fontSize)
+                            << CornerStyle::Round << FontName{fontName} << keySize;
+                    key->txPushed.connect(charSlot);
+                }
+            }
+            ++rowIdx;
+        }
     }
 
     Rectangle Keyboard::initialLayout(sdl::Renderer &renderer, Rectangle available) {
@@ -91,10 +166,10 @@ namespace rose {
         });
 
         mBorder = BorderStyle::Notch;
-        mKeysGrid = getWidget<Keyboard>() << wdg<Column>();
-        mKeysGrid->containerLayoutHints().internalSpace = 4;
-        mKeysGrid->containerLayoutHints().startOffset = 4;
+//        mKeysGrid = getWidget<Keyboard>() << wdg<Column>();
+//        mKeysGrid->containerLayoutHints().internalSpace = 4;
+//        mKeysGrid->containerLayoutHints().startOffset = 4;
 
-        mKeyboardPlugin.build(getWidget<Keyboard>(), mKeySize, mKeyPressRx);
+        mKeyboardPlugin.build(getWidget<Keyboard>(), mKeySize, mFontSize, mFontName, mKeyPressRx);
     }
 }

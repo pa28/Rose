@@ -95,6 +95,13 @@ namespace rose {
         Button(const std::string &labelString, ButtonType type, int fontSize = 0);
 
         /**
+         * @brief Construct an Icon Button
+         * @param imageId The icon to use
+         * @param type The Button type
+         */
+        Button(RoseImageId imageId, ButtonType type);
+
+        /**
          * Constructor
          * @param id Widget id string.
          * @param type the button type
@@ -212,6 +219,8 @@ namespace rose {
          * @param fontSize The point size of the font in pixels.
          */
         void setFontSize(int fontSize);
+
+        void setSize(Size size) override;
 
         /**
          * @brief Set the ImageId for the Button (Label).

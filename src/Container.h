@@ -38,6 +38,7 @@ namespace rose {
         bool labelVerAlignBaseLine{};       ///< If true, all child Labels are aligned to a common base line.
         int internalSpace{};                ///< Space between children.
         int startOffset{};                  ///< Space before the first child.
+        int endOffset{};                    ///< Space after the last child.
         float verticalElastic{};            ///< How much extra vertical space should go between children.
         float horizontalElastic{};          ///< How much extra horizontal space should go between children.
     };

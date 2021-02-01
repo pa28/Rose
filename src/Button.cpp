@@ -44,6 +44,12 @@ namespace rose {
         mButtonType = type;
     }
 
+    Button::Button(RoseImageId imageId, ButtonType type) : Button() {
+        mLabelFontSize = 0;
+        mButtonType = type;
+        mBadge = imageId;
+    }
+
     void Button::initializeComposite() {
         Frame::initializeComposite();
         mAcceptsFocus = true;
@@ -195,5 +201,17 @@ namespace rose {
         }
         throw RoseLogicError(
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
+    }
+
+    void Button::setSize(Size size) {
+        mSize = size;
+        if (auto border = mChildren.front()->as<Border>(); border) {
+            if (auto label = border->front()->as<Label>(); label) {
+                auto labelSize = size;
+                labelSize.width() -= mFrameWidth*2 + border->getPadding()->width();
+                labelSize.height() -= mFrameWidth*2 + border->getPadding()->height();
+                label->setSize(labelSize);
+            }
+        };
     }
 }

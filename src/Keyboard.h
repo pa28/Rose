@@ -79,7 +79,8 @@ namespace rose {
         virtual ~KeyboardPlugin() = default;
 
         virtual void
-        build(shared_ptr <Keyboard> keyboard, Size keySize, shared_ptr <Slot<Button::SignalType>> &slot) const = 0;
+        build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName,
+              shared_ptr <Slot<Button::SignalType>> &charSlot) const = 0;
     };
 
     /**
@@ -93,7 +94,7 @@ namespace rose {
         KeyboardMode mKeyboardMode{KeyboardMode::LowerCase};    ///< The mode the keyboard is in.
 
         char mEm{'M'};                          ///< The 'largest' glyph in the Font.
-        std::shared_ptr<Column> mKeysGrid;      ///< The Column of key rows.
+//        std::shared_ptr<Column> mKeysGrid;      ///< The Column of key rows.
         Size mKeySize{};                        ///< The size of regular keys, determined by mEm.
 
         std::string mFontName{};                ///< Key face font name
@@ -146,10 +147,11 @@ namespace rose {
 
         /**
          * @brief Build the keyboard from the KeyboardSpec and apply any special layout rules.
-         * @param frame The Keyboard Widget to build the keyboard in.
-         * @param slot The slot to receive key press signals on.
+         * @param keyboard The Keyboard Widget to build the keyboard in.
+         * @param charSlot The slot to receive key press signals on.
          */
-        void build(shared_ptr <Keyboard> frame, Size keySize, shared_ptr <Slot<Button::SignalType>> &slot) const override;
+        void build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName,
+                   shared_ptr <Slot<Button::SignalType>> &charSlot) const override;
     };
 }
 

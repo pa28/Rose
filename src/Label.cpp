@@ -54,9 +54,16 @@ namespace rose {
             mTextSize = Size{w + badgeRect.w + mLabelBadgeSpace, h};
         }
 
+        mRenderSize = Size{mTextSize.width(), mFontMetrics.fontHeight};
+
         if (!mPos)
             mPos = Position::Zero;
-        mSize = Size{mTextSize.width(), mFontMetrics.fontHeight};
+
+        if (mSize) {
+            mSize->width() = std::max(mSize->width(), mTextSize.width());
+            mSize->height() = std::max(mSize->height(), mFontMetrics.fontHeight);
+        } else
+            mSize = Size{mTextSize.width(), mFontMetrics.fontHeight};
         return Rectangle{mPos, mSize};
     }
 
@@ -89,7 +96,7 @@ namespace rose {
                     auto badgeRect = sRose->imageRepository(mBadge).getRectangle();
 
                     sdl::TextureData composite{renderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_TARGET,
-                                                                 mSize->width(), mSize->height()};
+                                                                 mRenderSize.width(), mRenderSize.height()};
 
                     composite.setBlendMOde(SDL_BLENDMODE_BLEND);
                     sdl::RenderTargetGuard renderTargetGuard(renderer, composite);
@@ -97,16 +104,16 @@ namespace rose {
                     renderer.renderClear();
 
                     Rectangle src{
-                            badgeRect.width() <= mSize->width() ? 0 : (badgeRect.width() - mSize->width()) / 2,
-                            badgeRect.height() <= mSize->height() ? 0 : (badgeRect.height() - mSize->height()) / 2,
-                            badgeRect.width() <= mSize->width() ? badgeRect.width() : mSize->width(),
-                            badgeRect.height() <= mSize->height() ? badgeRect.height() : mSize->height()
+                            badgeRect.width() <= mRenderSize.width() ? 0 : (badgeRect.width() - mRenderSize.width()) / 2,
+                            badgeRect.height() <= mRenderSize.height() ? 0 : (badgeRect.height() - mRenderSize.height()) / 2,
+                            badgeRect.width() <= mRenderSize.width() ? badgeRect.width() : mRenderSize.width(),
+                            badgeRect.height() <= mRenderSize.height() ? badgeRect.height() : mRenderSize.height()
                     };
                     Rectangle dst{
-                            badgeRect.width() <= mSize->width() ? (mSize->width() - badgeRect.width()) / 2 : 0,
-                            badgeRect.height() <= mSize->height() ? (mSize->height() - badgeRect.height()) / 2 : 0,
-                            badgeRect.width() <= mSize->width() ? badgeRect.width() : mSize->width(),
-                            badgeRect.height() <= mSize->height() ? badgeRect.height() : mSize->height()
+                            badgeRect.width() <= mRenderSize.width() ? (mRenderSize.width() - badgeRect.width()) / 2 : 0,
+                            badgeRect.height() <= mRenderSize.height() ? (mRenderSize.height() - badgeRect.height()) / 2 : 0,
+                            badgeRect.width() <= mRenderSize.width() ? badgeRect.width() : mRenderSize.width(),
+                            badgeRect.height() <= mRenderSize.height() ? badgeRect.height() : mRenderSize.height()
                     };
                     sRose->imageRepository().renderCopy(renderer, mBadge, src, dst);
                     mTexture = std::move(composite);
@@ -120,7 +127,7 @@ namespace rose {
 
                     sdl::TextureData composite{SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_RGBA8888,
                                                                  SDL_TEXTUREACCESS_TARGET,
-                                                                 mSize->width(), mSize->height())};
+                                                                 mRenderSize.width(), mRenderSize.height())};
 
                     composite.setBlendMOde(SDL_BLENDMODE_BLEND);
                     sdl::RenderTargetGuard renderTargetGuard(renderer, composite);
@@ -129,13 +136,13 @@ namespace rose {
 
                     Rectangle src{
                             0,
-                            badgeRect.height() <= mSize->height() ? 0 : (badgeRect.height() - mSize->height()) / 2,
-                            badgeRect.width() <= mSize->width() ? badgeRect.width() : mSize->width(),
-                            badgeRect.height() <= mSize->height() ? badgeRect.height() : mSize->height()
+                            badgeRect.height() <= mRenderSize.height() ? 0 : (badgeRect.height() - mRenderSize.height()) / 2,
+                            badgeRect.width() <= mRenderSize.width() ? badgeRect.width() : mRenderSize.width(),
+                            badgeRect.height() <= mRenderSize.height() ? badgeRect.height() : mRenderSize.height()
                     };
                     Rectangle dst{
-                            mBadgeRight ? mSize->width() - badgeRect.width() : 0,
-                            badgeRect.height() <= mSize->height() ? (mSize->height() - badgeRect.height()) / 2 : 0,
+                            mBadgeRight ? mRenderSize.width() - badgeRect.width() : 0,
+                            badgeRect.height() <= mRenderSize.height() ? (mRenderSize.height() - badgeRect.height()) / 2 : 0,
                             badgeRect.width(), mTextSize.height()
                     };
                     sRose->imageRepository().renderCopy(renderer, mBadge, src, dst);
@@ -148,7 +155,7 @@ namespace rose {
                 }
             }
 
-            Rectangle dst{widgetRect.getPosition(), mSize.value()};
+            Rectangle dst{widgetRect.getPosition(), mRenderSize};
 
             switch (mLayoutHints.mLabelHorAlign) {
                 case LabelHorizontalAlignment::Unset:

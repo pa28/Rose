@@ -46,7 +46,8 @@ namespace rose {
         int mFontSize{};                        ///< The text font point size
         std::string mFontName{};                ///< The text font name
         color::RGBA mTextColor{};               ///< The text colour
-        Size mTextSize{};                    ///< The rendered size of the text
+        Size mTextSize{};                       ///< The rendered size of the text
+        Size mRenderSize{};                     ///< The size to render the label texture at.
         FontMetrics mFontMetrics{};             ///< The metrics of the text font
         FontMetrics mIconFontMetrics{};         ///< The metrics of the icon font
         std::optional<FontPointer> mFont{};     ///< The text font
