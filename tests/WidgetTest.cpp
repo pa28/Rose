@@ -111,7 +111,7 @@ void Test::build() {
 
     slider->valueTx.connect(scale->valueRx);
 
-    mMainWindow << wdg<Keyboard>() << Position{300,0};
+    mMainWindow << wdg<Keyboard>(QUERTY{}) << Position{300,0};
 
 #else
     mHue = mTheme.mBaseColorHSLA.hue() / 360.0f;

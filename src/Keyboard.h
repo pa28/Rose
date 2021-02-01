@@ -13,75 +13,98 @@
 
 namespace rose {
 
+    /**
+     * @enum KeyboardMode
+     * @brief Keyboard modes (cases)
+     */
     enum class KeyboardMode {
-        LowerCase,
-        UpperCase,
-        Symbols,
+        LowerCase,          ///< Lower case letters.
+        UpperCase,          ///< Upper case letters.
+        Numbers,            ///< Numbers and symbols.
+        Symbols,            ///< Numbers and more symbols.
     };
 
-    enum class Keys {
-        A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-        N0, N1, N2, N3, N4, N5, N6, N7, N8, N9,
-        P0, P1, P2, P3,
-        C0, C1, C2, C3,
+    /**
+     * @class KeySpec
+     * @brief The specification of the cases, or special function of a key.
+     */
+    class KeySpec : public std::array<uint32_t,4> {
+    public:
+        KeySpec() = default;
+
+        /**
+         * @brief Constructor
+         * @details Construct a KeySpec from four independent values that may be cast to uint32_t.
+         * @tparam A
+         * @tparam B
+         * @tparam C
+         * @tparam D
+         * @param a
+         * @param b
+         * @param c
+         * @param d
+         */
+        template<typename A, typename B, typename C, typename D>
+        constexpr KeySpec(A a, B b, C c, D d) noexcept
+            : std::array<uint32_t,4>( {static_cast<uint32_t>(a),
+                                     static_cast<uint32_t>(b),
+                                     static_cast<uint32_t>(c),
+                                     static_cast<uint32_t>(d)}
+                                     ) {}
+        /// Construct a KeySpec from a array of char.
+        constexpr explicit KeySpec(const std::array<char,5> &c) noexcept
+            : KeySpec(c[0], c[1], c[2], c[3]) {}
     };
 
-    template<std::size_t N>
-    using KeyRow = std::array<Keys, N>;
+    /// A row of KeySpec specifications.
+    template<size_t N>
+    using KeySpecRow = std::array<KeySpec,N>;
 
-    template<std::size_t R, std::size_t N>
-    using KeyboardDef = std::array<KeyRow<N>,R>;
+    /// Type to help construct a KeySpec from a string.
+    using KSS = std::array<char,5>;
 
-    using KeyboardFace = std::array<std::string_view, 3>;
+    /// Type for a full Keyboard specification.
+    template<size_t R, std::size_t N>
+    using KeyboardSpec = std::array<std::array<KeySpec,N>,R>;
 
-/**
- * @class Keyboard
- * @brief Implement a touchscreen keyboard
- */
+    class Keyboard;
+
+    /**
+     * @class KeyboardPlugin
+     * @brief Encapsulate the KeyboardSpec specification and build function.
+     */
+    class KeyboardPlugin {
+    public:
+        KeyboardPlugin() = default;
+        virtual ~KeyboardPlugin() = default;
+
+        virtual void
+        build(shared_ptr <Keyboard> keyboard, Size keySize, shared_ptr <Slot<Button::SignalType>> &slot) const = 0;
+    };
+
+    /**
+     * @class Keyboard
+     * @brief Implement a touchscreen keyboard
+     */
     class Keyboard : public Frame {
     protected:
+        const KeyboardPlugin &mKeyboardPlugin;  ///< The KeyboardPlugin to use
+
         KeyboardMode mKeyboardMode{KeyboardMode::LowerCase};    ///< The mode the keyboard is in.
 
         char mEm{'M'};                          ///< The 'largest' glyph in the Font.
         std::shared_ptr<Column> mKeysGrid;      ///< The Column of key rows.
         Size mKeySize{};                        ///< The size of regular keys, determined by mEm.
 
-        std::string mFontName{};
-        int mFontSize{};
+        std::string mFontName{};                ///< Key face font name
+        int mFontSize{};                        ///< Key face font size
 
-        static constexpr KeyRow<10> KeyRow1 = {Keys::N1, Keys::N2, Keys::N3,
-                                               Keys::N4, Keys::N5, Keys::N6,
-                                               Keys::N7, Keys::N8, Keys::N9,
-                                               Keys::N0};
-
-        static constexpr KeyRow<10> KeyRow2 = { Keys::Q, Keys::W,Keys::E,
-                                                Keys::R, Keys::T, Keys::Y,
-                                                Keys::U, Keys::I, Keys::O,
-                                                Keys::P};
-
-        static constexpr KeyRow<10> KeyRow3 = {Keys::A, Keys::S, Keys::D,
-                                               Keys::F, Keys::G, Keys::H,
-                                               Keys::J, Keys::K, Keys::L,
-                                               Keys::P0};
-
-        static constexpr KeyRow<10> KeyRow4 = {Keys::Z, Keys::X, Keys::C,
-                                               Keys::V, Keys::B, Keys::N,
-                                               Keys::M, Keys::P1, Keys::P2,
-                                               Keys::P3};
-
-        template<std::size_t R, std::size_t N>
-        void buildKeyboard(std::shared_ptr<Column> &grid, KeyboardDef<R,N> keyboardDef);
-
-        static constexpr KeyboardDef<4,10> mKeyboardDef = {
-                KeyRow1, KeyRow2, KeyRow3, KeyRow4,
-        };
-
-        static std::string keyFace(KeyboardMode keyboardMode, Keys keys, KeyboardFace face);
-
+        /// Slot to receive key press signals on.
         std::shared_ptr<Slot<Button::SignalType>> mKeyPressRx{};
 
     public:
-        Keyboard() = default;
+
+        Keyboard() = delete;
 
         ~Keyboard() override = default;
 
@@ -93,6 +116,12 @@ namespace rose {
 
         Keyboard &operator=(const Keyboard &) = delete;
 
+        /**
+         * @brief Constructor
+         * @param keyboardPlugin The KeyboardPlugin to use.
+         */
+        explicit Keyboard(const KeyboardPlugin &keyboardPlugin) : mKeyboardPlugin(keyboardPlugin) {}
+
         /// See Widget::initialLayout()
         Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
 
@@ -101,7 +130,26 @@ namespace rose {
 
         /// See Widget::initializeComposite()
         void initializeComposite() override;
+    };
 
+    /**
+     * @class QUERTY
+     * @brief A KeyboardPlugin for a QWERTY keyboard.
+     */
+    class QUERTY : public KeyboardPlugin {
+    protected:
+        static const KeyboardSpec<4,11> QWERTYData;     ///< The KeyboardSpec.
+
+    public:
+        QUERTY() = default;
+        ~QUERTY() override = default;
+
+        /**
+         * @brief Build the keyboard from the KeyboardSpec and apply any special layout rules.
+         * @param frame The Keyboard Widget to build the keyboard in.
+         * @param slot The slot to receive key press signals on.
+         */
+        void build(shared_ptr <Keyboard> frame, Size keySize, shared_ptr <Slot<Button::SignalType>> &slot) const override;
     };
 }
 

@@ -10,11 +10,60 @@
 
 namespace rose {
 
-    static constexpr KeyboardFace keyboardFace = {
-            "abcdefghijklmnopqrstuvwxyz0123456789;,./;,./",
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*():<>?:<>?",
-            "1234567890!@#$%^&*()-=[]\\,./_+:\"<>?       ",
+    constexpr KeyboardSpec<4, 11> QUERTY::QWERTYData = {
+            KeySpecRow<11>{
+                    KeySpec{KSS{"qQ11"}},
+                    KeySpec{KSS{"wW22"}},
+                    KeySpec{KSS{"eE33"}},
+                    KeySpec{KSS{"rR44"}},
+                    KeySpec{KSS{"tT55"}},
+                    KeySpec{KSS{"yY66"}},
+                    KeySpec{KSS{"uU77"}},
+                    KeySpec{KSS{"iI88"}},
+                    KeySpec{KSS{"oO99"}},
+                    KeySpec{KSS{"pP00"}},
+                    KeySpec{KSS{"\b\b\b\b"}},
+            },
+            KeySpecRow<11>{
+                    KeySpec{KSS{"aA@!"}},
+                    KeySpec{KSS{"sS#~"}},
+                    KeySpec{KSS{"dD$\\"}},
+                    KeySpec{KSS{"fF%_"}},
+                    KeySpec{KSS{"gG^["}},
+                    KeySpec{KSS{"hH&]"}},
+                    KeySpec{KSS{"jJ*{"}},
+                    KeySpec{KSS{"kK(}"}},
+                    KeySpec{KSS{"lL)|"}},
+                    KeySpec{KSS{"\r\r\r\r"}},
+                    KeySpec{KSS{"\0\0\0\0"}}
+            },
+            KeySpecRow<11>{
+                    KeySpec{SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK},
+                    KeySpec{KSS{"zZ+1"}},
+                    KeySpec{KSS{"xX-2"}},
+                    KeySpec{KSS{"cC'3"}},
+                    KeySpec{KSS{"vV\"4"}},
+                    KeySpec{KSS{"bB55"}},
+                    KeySpec{KSS{"nN66"}},
+                    KeySpec{KSS{"mM77"}},
+                    KeySpec{KSS{",?88"}},
+                    KeySpec{KSS{"./99"}},
+                    KeySpec{SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT},
+            },
+            KeySpecRow<11>{
+                    KeySpec{SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT},
+                    KeySpec{SDLK_LALT,SDLK_LALT,SDLK_LALT,SDLK_LALT},
+                    KeySpec{KSS{"    "}},
+                    KeySpec{SDLK_LEFT,SDLK_LEFT,SDLK_LEFT,SDLK_LEFT},
+                    KeySpec{SDLK_RIGHT,SDLK_RIGHT,SDLK_RIGHT,SDLK_RIGHT},
+                    KeySpec{SDLK_RALT,SDLK_RALT,SDLK_RALT,SDLK_RALT},
+                    KeySpec{KSS{"\0\0\0\0"}},
+            }
     };
+
+    void QUERTY::build(shared_ptr <Keyboard> frame, Size keySize, shared_ptr <Slot<Button::SignalType>> &slot) const {
+
+    }
 
     Rectangle Keyboard::initialLayout(sdl::Renderer &renderer, Rectangle available) {
         return Frame::initialLayout(renderer, available);
@@ -35,13 +84,10 @@ namespace rose {
         auto[hminx, hmaxx, hminy, hmaxy, hadvance] = getGlyphMetrics(fontPtr, mEm);
         auto lineSkip = TTF_FontLineSkip(fontPtr.value().get());
 
-        // 32 x 42   28 x 38
         mKeySize = Size{hmaxx - hminx + borderWidth * 2, lineSkip + borderWidth * 2};
 
         mKeyPressRx = std::make_shared<Slot<Button::SignalType>>();
         mKeyPressRx->setCallback([=](uint32_t, Button::SignalType signalType) {
-            auto face = keyFace(mKeyboardMode, static_cast<Keys>(signalType.second), keyboardFace);
-            std::cout << face << '\n';
         });
 
         mBorder = BorderStyle::Notch;
@@ -49,57 +95,6 @@ namespace rose {
         mKeysGrid->containerLayoutHints().internalSpace = 4;
         mKeysGrid->containerLayoutHints().startOffset = 4;
 
-        buildKeyboard(mKeysGrid, mKeyboardDef);
-    }
-
-    template<size_t R, size_t N>
-    void Keyboard::buildKeyboard(shared_ptr<Column> &column, KeyboardDef<R, N> keyboardDef) {
-        int nRow = 0;
-        for (auto &row : keyboardDef) {
-            auto keyRow = column << wdg<Row>();
-            keyRow->containerLayoutHints().internalSpace = 4;
-
-            if (nRow == 1)
-                keyRow->containerLayoutHints().startOffset = 4 + nRow * mKeySize.height() / 2;
-            else
-                keyRow->containerLayoutHints().startOffset = 4;
-
-            if (nRow == 2) {
-                auto btn = keyRow << wdg<Button>("L", ButtonType::ToggleButton, mFontSize)
-                                  << mKeySize
-                                  << FontName{mFontName};
-            } else if (nRow == 3) {
-                auto btn = keyRow << wdg<Button>("Sh", ButtonType::NormalButton, mFontSize)
-                                  << Size{(mKeySize.width() * 3) / 2, mKeySize.height()}
-                                  << FontName{mFontName};
-            }
-
-            for (auto &key : row) {
-                auto face = keyFace(mKeyboardMode, key, keyboardFace);
-                auto btn = keyRow << wdg<Button>(face, ButtonType::NormalButton, mFontSize)
-                                  << static_cast<SignalToken>(key)
-                                  << mKeySize << CornerStyle::Round
-                                  << FontName{mFontName};
-                btn->txPushed.connect(mKeyPressRx);
-            }
-            ++nRow;
-        }
-    }
-
-    std::string Keyboard::keyFace(KeyboardMode keyboardMode, Keys keys, KeyboardFace face) {
-        auto mode = static_cast<std::size_t>(keyboardMode);
-        auto idx = static_cast<std::size_t>(keys);
-        switch (keys) {
-            case Keys::C0:
-                return "C0";
-            case Keys::C1:
-                return "C1";
-            case Keys::C2:
-                return "C2";
-            case Keys::C3:
-                return "C3";
-            default:
-                return std::string{face[mode][idx]};
-        }
+        mKeyboardPlugin.build(getWidget<Keyboard>(), mKeySize, mKeyPressRx);
     }
 }
