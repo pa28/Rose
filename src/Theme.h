@@ -75,7 +75,7 @@ namespace rose {
         int mTimeBoxDateFontSize{dTimeBoxDateFontSize};
         int mDateBoxFontSize{dDateBoxFontSize};
         int mFontPointSize{dFontPointSize};
-        int mKeyboardFontPointSize{dFontPointSize};
+        int mKeyboardFontPointSize{dKeyboardPointSize};
         int mIconFontSize{dIconPointSize};
         int mTitleFontSize{dTitlePointSize};
         int mLabelBadgeSpace{dLabelBadgeSpace};
@@ -123,6 +123,7 @@ namespace rose {
         static constexpr int dDateBoxFontSize = 20;
 
         static constexpr int dFontPointSize = 30;
+        static constexpr int dKeyboardPointSize = 40;
         static constexpr int dIconPointSize = 50;
         static constexpr int dTitlePointSize = 20;
 
