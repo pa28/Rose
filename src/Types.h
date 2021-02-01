@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <uuid/uuid.h>
 #include <SDL2/SDL.h>
+#include "Constants.h"
 
 namespace rose {
 #ifdef DISPLAY800X480
@@ -45,9 +46,6 @@ namespace rose {
      */
     using SignalToken = uint32_t;
 
-    /// Type definition for the Button Signal type.
-    using ButtonSignalType = std::pair<bool, SignalToken>;
-
     /// Type definition for the LinearScale Signal type.
     using LinearScaleSignalType = std::pair<float, SignalToken>;
 
@@ -71,14 +69,20 @@ namespace rose {
      * @struct Elastic
      * @brief A stream manipulator to set a Widget elastic value.
      */
-    struct Elastic {
-        bool mElastic{true};    ///< The elastic value.
+    class Elastic {
+    protected:
+        Orientation mElastic{Orientation::Unset};   ///< The elastic value.
+
+    public:
 
         /// Default constructor
         Elastic() = default;
 
-        /// Constructor
-        explicit Elastic(bool elastic) : mElastic(elastic) {}
+        Elastic(Orientation orientation) : mElastic(orientation) {}
+
+        bool horizontal() { return mElastic == Orientation::Horizontal || mElastic == Orientation::Both; }
+
+        bool vertical() { return mElastic == Orientation::Vertical || mElastic == Orientation::Both; }
     };
 
     /**

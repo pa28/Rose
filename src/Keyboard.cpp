@@ -7,6 +7,7 @@
 
 #include "Keyboard.h"
 #include "Manipulators.h"
+#include "Types.h"
 
 namespace rose {
 
@@ -70,10 +71,11 @@ namespace rose {
         column->containerLayoutHints().endOffset = 4;
         column->containerLayoutHints().internalSpace = 4;
         for (const auto &keyRow : QWERTYData) {
-            auto row = column << wdg<Row>();
+            auto row = column << wdg<Row>() << Elastic{Orientation::Horizontal};
             row->containerLayoutHints().startOffset = 4;
             row->containerLayoutHints().endOffset = 4;
             row->containerLayoutHints().internalSpace = 4;
+            row->containerLayoutHints().fillToEnd = true;
             if (rowIdx == 1)
                 row->containerLayoutHints().startOffset += keySize.width()/2 + 4;
             for (const auto &keyData : keyRow) {
@@ -84,20 +86,22 @@ namespace rose {
                     RoseImageId imageId = RoseImageId::RoseImageInvalid;
                     Size useKeySize = keySize;
                     auto buttonType = ButtonType::NormalButton;
+                    bool elastic = false;
                     switch (keyData[keyIdx]) {
                         case SDLK_SPACE:
-                            useKeySize.width() = keySize.width() * 57 / 10;
+                            useKeySize.width() = keySize.width();
+                            elastic = true;
                             break;
                         case SDLK_BACKSPACE:
                             imageId = RoseImageId::IconBack;
-                            useKeySize.width() = keySize.width() * 3 / 2 + 4;
+                            elastic = true;
                             break;
                         case SDLK_TAB:
                             imageId = RoseImageId::IconToEnd;
                             break;
                         case SDLK_RETURN:
                             imageId = RoseImageId::IconLevelDown;
-                            useKeySize.width() = keySize.width() * 2 + 4;
+                            elastic = true;
                             break;
                         case SDLK_ESCAPE:
                             break;
@@ -127,8 +131,11 @@ namespace rose {
                     }
 
                     auto key = row << wdg<Button>(imageId, buttonType)
-                            << CornerStyle::Round
-                            << useKeySize;
+                            << CornerStyle::Round;
+                    if (!elastic)
+                        key << Elastic{Orientation::Vertical};
+                    else
+                        key << Elastic{Orientation::Both};
                 } else {
                     // Character key.
                     auto key = row << wdg<Button>(std::string{(char)keyData[keyIdx]}, ButtonType::NormalButton, fontSize)
@@ -140,8 +147,8 @@ namespace rose {
         }
     }
 
-    Rectangle Keyboard::initialLayout(sdl::Renderer &renderer, Rectangle available) {
-        return Frame::initialLayout(renderer, available);
+    Rectangle Keyboard::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+        return Frame::widgetLayout(renderer, available, 0);
     }
 
     void Keyboard::draw(sdl::Renderer &renderer, Rectangle parentRect) {

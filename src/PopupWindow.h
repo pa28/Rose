@@ -72,9 +72,9 @@ namespace rose {
         void initializeComposite() override;
 
         /**
-         * @brief See Widget::initialLayout()
+         * @brief See Widget::widgetLayout()
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief See Widget::draw()
@@ -111,7 +111,7 @@ namespace rose {
          * to buttonSlot.
          * @param buttonSlot
          */
-        void setButtonSlot(shared_ptr<Slot<ButtonSignalType>> &buttonSlot) override {
+        virtual void setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) {
             mActionButtonRx = buttonSlot;
         }
     };
@@ -160,7 +160,7 @@ namespace rose {
          */
         void initializeComposite() override;
 
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief Set the value of the Window Title.
@@ -233,7 +233,7 @@ namespace rose {
          * to buttonSlot.
          * @param buttonSlot
          */
-        void setButtonSlot(shared_ptr<Slot<ButtonSignalType>> &buttonSlot) override;
+        void setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) override;
     };
 
     /**
@@ -304,7 +304,7 @@ template<class WidgetType, size_t N>
 inline std::shared_ptr<WidgetType> operator << (std::shared_ptr<WidgetType> &widget,
         std::array<rose::DialogActionButton,N> &container) {
     static_assert(std::is_base_of_v<rose::Popup, WidgetType>,
-            "Dialog action buttons are only created on classes derrived from rose::Popup." );
+            "Dialog action buttons are only created on classes derived from rose::Popup." );
     widget->setActionbuttons(container);
     return widget;
 }
@@ -321,7 +321,7 @@ template<class WidgetType>
 inline std::shared_ptr<WidgetType> operator << (std::shared_ptr<WidgetType> &widget,
                                                 std::vector<rose::DialogActionButton> &container) {
     static_assert(std::is_base_of_v<rose::Popup, WidgetType>,
-                  "Dialog action buttons are only created on classes derrived from rose::Popup." );
+                  "Dialog action buttons are only created on classes derived from rose::Popup." );
     widget->setActionbuttons(container);
     return widget;
 }

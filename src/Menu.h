@@ -171,7 +171,7 @@ namespace rose {
         }
 
         /// See Widget::setButtonSlot()
-        void setButtonSlot(shared_ptr<Slot<ButtonSignalType>> &buttonSlot) override { mAppButtonSlot = buttonSlot; }
+        void setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) { mAppButtonSlot = buttonSlot; }
     };
 }
 
@@ -203,6 +203,22 @@ inline std::shared_ptr<rose::CascadeButton> operator << (std::shared_ptr<rose::C
 inline std::shared_ptr<rose::CascadeButton> operator << (std::shared_ptr<rose::CascadeButton> widget,
                                                 std::vector<rose::MenuButtonData> &container) {
     widget->addMenuData(container);
+    return widget;
+}
+
+/**
+ * @brief Set the Widget Slot to receive Signals from child Button Widgets, if implemented.
+ * @tparam WidgetType The Widget type.
+ * @param widget The Widget.
+ * @param buttonRxSlot The Slot<rose::ButtonSignalType>.
+ * @return The Widget.
+ */
+template<class WidgetType>
+inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget,
+                                              std::shared_ptr<rose::Slot<rose::Button::SignalType>> buttonRxSlot) {
+    static_assert(std::is_base_of_v<rose::Popup, WidgetType> || std::is_base_of_v<rose::CascadeButton, WidgetType>,
+                  "Button signals can only be set on Popup or CascadeButton objects." );
+    widget->setButtonSlot(buttonRxSlot);
     return widget;
 }
 

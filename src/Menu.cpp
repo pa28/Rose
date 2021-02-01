@@ -32,7 +32,7 @@ namespace rose {
             button->setSignalToken(item.mSignalToken);
             button->txPushed.connect(mAppButtonRx);
             button->txPushed.connect(mDismissButtonRx);
-            button->layoutHints().mElastic = true;
+            button->layoutHints().mElastic = Elastic{Orientation::Both};
         }
         requestFocus();
     }
@@ -69,7 +69,7 @@ namespace rose {
 
     void CascadeButton::initializeComposite() {
         Button::initializeComposite();
-        mLayoutHints.mElastic = true;
+        mLayoutHints.mElastic = Elastic{Orientation::Both};
         if (auto border = mChildren.front()->as<Border>(); border) {
             if (auto label = border->front()->as<Label>(); label) {
                 label->setBadgeRight(true);

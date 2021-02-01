@@ -301,7 +301,7 @@ namespace rose {
         void initialLayout(sdl::Renderer &renderer) {
             for (auto &window : mWindowList) {
                 Rectangle screenAvailable{Position::Zero, size()};
-                auto layout = window->initialLayout(renderer, screenAvailable);
+                auto layout = window->widgetLayout(renderer, screenAvailable, 0);
                 window->layoutHints().mAssignedRect = layout;
             }
         }

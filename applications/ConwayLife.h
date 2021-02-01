@@ -127,7 +127,7 @@ public:
 
     void initializeComposite() override;
 
-    rose::Rectangle initialLayout(rose::sdl::Renderer &renderer, rose::Rectangle available) override {
+    rose::Rectangle widgetLayout(rose::sdl::Renderer &renderer, rose::Rectangle available, uint layoutStage) override {
         return rose::Rectangle{0, 0, (int)(mBoardWidth * mCellPixels), (int)(mBoardHeight * mCellPixels)};
     }
 

@@ -93,13 +93,13 @@ namespace rose {
 
         /**
          * @brief Determine the desired size of the child widgets.
-         * @details If not overridden the default is to call initialLayout() for each child and return
+         * @details If not overridden the default is to call widgetLayout() for each child and return
          * the current value of mSize of the Container.
          * @param renderer The Renderer to use
          * @param available The Rectangle available to layout in.
          * @return
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief Set the scroll offset of the ScrollArea

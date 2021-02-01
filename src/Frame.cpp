@@ -45,14 +45,14 @@ namespace rose {
         });
     }
 
-    Rectangle Frame::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Frame::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto frameAvailable = clampAvailableArea(available, mPos, mSize);
         frameAvailable.width() -= mFrameWidth * 2;
         frameAvailable.height() -= mFrameWidth * 2;
         Rectangle layout{};
         for (auto &child : mChildren) {
             LayoutHints& childHints{child->layoutHints()};
-            layout = child->initialLayout(renderer, frameAvailable);
+            layout = child->widgetLayout(renderer, frameAvailable, 0);
             childHints.mAssignedRect = layout;
             childHints.mAssignedRect->x() += mFrameWidth;
             childHints.mAssignedRect->y() += mFrameWidth;

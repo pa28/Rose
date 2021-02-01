@@ -37,7 +37,9 @@ namespace rose {
 
     void LinearScale::initializeComposite() {
         Frame::initializeComposite();
-        mLayoutHints.mElastic = true;
+        if (mOrientation == Orientation::Unset)
+            mOrientation = Orientation::Horizontal;
+        mLayoutHints.mElastic = Elastic{mOrientation};
         mLayoutHints.mShrinkable = false;
 
         mBorder = getWidget<Frame>() << BorderStyle::Notch << CornerStyle::Round
@@ -64,8 +66,8 @@ namespace rose {
         }
     }
 
-    Rectangle LinearScale::initialLayout(sdl::Renderer &renderer, Rectangle available) {
-        return Frame::initialLayout(renderer, available);
+    Rectangle LinearScale::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+        return Frame::widgetLayout(renderer, available, 0);
     }
 
     void LinearScale::draw(sdl::Renderer &renderer, Rectangle parentRect) {
@@ -176,8 +178,9 @@ namespace rose {
         parent<LinearScale>()->initializeBorderComposite();
     }
 
-    Rectangle LinearScale::LinearScaleBorder::initialLayout(sdl::Renderer &renderer, Rectangle available) {
-        auto layout = Border::initialLayout(renderer, available);
+    Rectangle
+    LinearScale::LinearScaleBorder::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+        auto layout = Border::widgetLayout(renderer, available, 0);
         return parent<LinearScale>()->initialBorderLayout(renderer, available, layout);
     }
 
@@ -195,12 +198,13 @@ namespace rose {
         parent()->parent<LinearScale>()->initializeImageComposite();
     }
 
-    Rectangle LinearScale::LinearScaleImage::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle
+    LinearScale::LinearScaleImage::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto linearScale = parent()->parent<LinearScale>();
         auto imageRect = clampAvailableArea(available, mPos, mSize);
 
         if (mImageId) {
-            imageRect = ImageView::initialLayout(renderer, available);
+            imageRect = ImageView::widgetLayout(renderer, available, 0);
         }
 
         return parent()->parent<LinearScale>()->initialImageLayout(renderer, available, imageRect);

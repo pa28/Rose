@@ -60,9 +60,9 @@ namespace rose {
             void initializeComposite() override;
 
             /**
-             * @brief See Widget initialLayout()
+             * @brief See Widget widgetLayout()
              */
-            Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+            Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
             /**
              * @brief See Widget::draw()
@@ -95,9 +95,9 @@ namespace rose {
             void initializeComposite() override;
 
             /**
-             * @brief See Widget initialLayout()
+             * @brief See Widget widgetLayout()
              */
-            Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+            Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
             /**
              * @brief See Widget::draw()
@@ -136,9 +136,9 @@ namespace rose {
         void initializeComposite() override;
 
         /**
-         * @brief See Widget initialLayout()
+         * @brief See Widget widgetLayout()
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief See Widget::draw()
@@ -151,11 +151,11 @@ namespace rose {
         virtual void initializeBorderComposite();
 
         /**
-         * @brief Called by LinearScaleBorder::initialLayout() after it calls Border::initialLayout().
-         * @details The return value of this method is returned by LinearScaleBorder::initialLayout().
+         * @brief Called by LinearScaleBorder::initialLayout() after it calls Border::widgetLayout().
+         * @details The return value of this method is returned by LinearScaleBorder::widgetLayout().
          * @param renderer The Renderer used.
          * @param available The available screen rectangle.
-         * @param borderLayout The layout Rectangle returned by Border::initialLayout().
+         * @param borderLayout The layout Rectangle returned by Border::widgetLayout().
          * @return The final layout rectangle.
          */
         virtual Rectangle initialBorderLayout(sdl::Renderer &renderer, Rectangle available, Rectangle borderLayout);
@@ -173,11 +173,11 @@ namespace rose {
         virtual void initializeImageComposite();
 
         /**
-         * @brief Called by LinearScaleImage::initialLayout() after it calls ImageView::initialLayout().
-         * @details The return value of this method is returned by LinearScaleImage::initialLayout().
+         * @brief Called by LinearScaleImage::initialLayout() after it calls ImageView::widgetLayout().
+         * @details The return value of this method is returned by LinearScaleImage::widgetLayout().
          * @param renderer The Renderer used.
          * @param available The available screen rectangle.
-         * @param imageLayout The layout Rectangle returned by ImageView::initialLayout().
+         * @param imageLayout The layout Rectangle returned by ImageView::widgetLayout().
          * @return The final layout rectangle.
          */
         virtual Rectangle initialImageLayout(sdl::Renderer &renderer, Rectangle available, Rectangle imageLayout);

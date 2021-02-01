@@ -73,11 +73,11 @@ namespace rose {
         mSeconds->draw(renderer, widgetRect);
     }
 
-    Rectangle TimeBox::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle TimeBox::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         int posX = 0;
         int posY = 0;
         for (auto &child : mChildren) {
-            auto size = child->initialLayout(renderer, available);
+            auto size = child->widgetLayout(renderer, available, 0);
             child->layoutHints().mAssignedRect = size;
             posX += size.width();
         }

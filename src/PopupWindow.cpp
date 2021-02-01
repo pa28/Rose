@@ -49,9 +49,9 @@ namespace rose {
         sRose->needsLayout();
     }
 
-    Rectangle Popup::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Popup::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto windowRect = clampAvailableArea(available, mPos, mSize);
-        auto layout = mFrame->initialLayout(renderer, windowRect);
+        auto layout = mFrame->widgetLayout(renderer, windowRect, 0);
         mFrame->layoutHints().mAssignedRect = layout;
         layout = windowRect.getPosition();
         return layout;
@@ -118,8 +118,8 @@ namespace rose {
         return true;
     }
 
-    Rectangle PopupWindow::initialLayout(sdl::Renderer &renderer, Rectangle available) {
-        auto layout = Popup::initialLayout(renderer, available);
+    Rectangle PopupWindow::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+        auto layout = Popup::widgetLayout(renderer, available, 0);
         layout = Position{(available.width()-layout.width())/2, (available.height()-layout.height())/2};
         return layout;
     }
@@ -174,7 +174,7 @@ namespace rose {
 //            button->txPushed.connect(mDismissButtonRx);
     }
 
-    void Dialog::setButtonSlot(shared_ptr<Slot<ButtonSignalType>> &buttonSlot) {
+    void Dialog::setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) {
         mActionButtonRx = buttonSlot;
         std::for_each(mButtonRow->begin(), mButtonRow->end(),
                       [this](auto widget){

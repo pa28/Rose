@@ -36,6 +36,7 @@ namespace rose {
      */
     struct ContainerLayoutHints {
         bool labelVerAlignBaseLine{};       ///< If true, all child Labels are aligned to a common base line.
+        bool fillToEnd{};                   ///< If true, expand elastic children to fill to end of available space.
         int internalSpace{};                ///< Space between children.
         int startOffset{};                  ///< Space before the first child.
         int endOffset{};                    ///< Space after the last child.
@@ -161,15 +162,15 @@ namespace rose {
 
         /**
          * @brief Determine the desired size of the child widgets.
-         * @details If not overridden the default is to call initialLayout() for each child and return
+         * @details If not overridden the default is to call widgetLayout() for each child and return
          * the current space available to the Container.
          * @param renderer
          * @return SizeInt
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override {
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override {
             auto containerAvailable = clampAvailableArea(available, mPos, mSize);
             for (auto &child : mChildren) {
-                auto layout = child->initialLayout(renderer, containerAvailable);
+                auto layout = child->widgetLayout(renderer, containerAvailable, 0);
                 if (auto position = child->getPos(); position)
                     layout = position.value();
                 child->mLayoutHints.mAssignedRect = layout;
@@ -355,9 +356,9 @@ namespace rose {
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
         /**
-         * @brief See Widget::initialLayout.
+         * @brief See Widget::widgetLayout.
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief Set the minimum width of the Column
@@ -396,9 +397,9 @@ namespace rose {
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
         /**
-         * @brief See Widget::initialLayout.
+         * @brief See Widget::widgetLayout.
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
     };
 
     /**
@@ -439,9 +440,9 @@ namespace rose {
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
         /**
-         * @brief See Widget::initialLayout.
+         * @brief See Widget::widgetLayout.
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
     };
 
     /**

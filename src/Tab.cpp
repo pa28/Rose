@@ -12,8 +12,8 @@
 
 namespace rose {
 
-    Rectangle Tab::initialLayout(sdl::Renderer &renderer, Rectangle available) {
-        auto layout = Column::initialLayout(renderer, available);
+    Rectangle Tab::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+        auto layout = Column::widgetLayout(renderer, available, 0);
         return layout;
     }
 
@@ -29,8 +29,8 @@ namespace rose {
         mFrame = tab->add<Frame>() << BorderStyle::Notch;
         mBody = mFrame->add<TabBody>();
 
-        rxState = std::make_shared<Slot<ButtonSignalType>>();
-        rxState->setCallback([=](uint32_t, ButtonSignalType buttonSignalType) {
+        rxState = std::make_shared<Slot<Button::SignalType>>();
+        rxState->setCallback([=](uint32_t, Button::SignalType buttonSignalType) {
             if (buttonSignalType.first) {
                 for (auto child = mHdr->begin(); child != mHdr->end(); ++child) {
                     auto tabButton = (*child)->as<Button>();
@@ -40,8 +40,8 @@ namespace rose {
             }
         });
 
-        rxPushed = std::make_shared<Slot<ButtonSignalType>>();
-        rxPushed->setCallback([=](uint32_t, ButtonSignalType buttonSignalType) {
+        rxPushed = std::make_shared<Slot<Button::SignalType>>();
+        rxPushed->setCallback([=](uint32_t, Button::SignalType buttonSignalType) {
             for (auto &child : *mHdr) {
                 auto tabButton = child->as<Button>();
                 if (tabButton)
@@ -94,7 +94,7 @@ namespace rose {
         }
     }
 
-    Rectangle TabBody::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle TabBody::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto frame = parent<Frame>();
         auto frameWidth = frame->frameWidth();
         auto frameAvailable = clampAvailableArea(available, mPos, mSize);
@@ -107,7 +107,7 @@ namespace rose {
         Rectangle layout{};
         for (auto &child : mChildren) {
             LayoutHints& childHints{child->layoutHints()};
-            layout = child->initialLayout(renderer, frameAvailable);
+            layout = child->widgetLayout(renderer, frameAvailable, 0);
 //            if (!layout.getPosition())
 //                layout = Position::Zero;
             childHints.mAssignedRect = layout;

@@ -17,7 +17,7 @@ namespace rose {
     void Label::initializeComposite() {
         Widget::initializeComposite();
         auto theme = Widget::rose()->theme();
-        mLayoutHints.mElastic = true;
+        mLayoutHints.mElastic = Elastic{Orientation::Both};
         mFontSize = theme.mFontPointSize;
         mFontName = theme.mDefaultFontName;
         mTextColor = theme.mTextColour;
@@ -30,7 +30,7 @@ namespace rose {
         mClassName = "Label";
     }
 
-    Rectangle Label::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Label::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto labelAvailable = clampAvailableArea(available, mPos, mSize);
 
         if (!mFont) {
@@ -73,7 +73,7 @@ namespace rose {
             auto widgetRect = clampAvailableArea(parentRect, mLayoutHints.mAssignedRect);
 
             if (mTextureDirty || mBadgeDirty) {
-                initialLayout(renderer, parentRect);
+                widgetLayout(renderer, parentRect, 0);
                 mTextureDirty = mBadgeDirty = false;
 
                 if (mText.empty() && mBadge == RoseImageInvalid) {

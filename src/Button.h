@@ -123,7 +123,7 @@ namespace rose {
          */
         void initializeComposite() override;
 
-        using SignalType = ButtonSignalType ;   ///< The content type of Button signals and slots
+        using SignalType = std::pair<bool, SignalToken>;   ///< The content type of Button signals and slots
 
         /**
          * @brief A Slot to receive Pushed signals on.

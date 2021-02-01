@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include <array>
 
 namespace rose {
 
@@ -42,7 +42,7 @@ namespace rose {
      * @enum SignalTokenValues
      * @brief These are the signal tokens used by built-in Widgets that transmit Signals with SignalTokens.
      */
-    enum SignalTokenValues : rose::SignalToken {
+    enum SignalTokenValues : uint32_t {
         ExitDialogOk,                   ///< ExitDialog Ok ActionButton
         ExitDialogCancel,               ///< ExitDialog Cancel ActionButton
         FirstUserSignalToken            ///< The value that can be used for the first SignalToken of a user application.
@@ -144,6 +144,7 @@ namespace rose {
         Unset,          ///< Not set to a valid value.
         Horizontal,     ///< Horizontal orientation.
         Vertical,       ///< Vertical orientation.
+        Both,           ///< Both axis -- for Elastic.
     };
 
     /**

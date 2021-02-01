@@ -29,12 +29,12 @@ namespace rose {
 
     void Gauge::initializeComposite() {
         Frame::initializeComposite();
-        mLayoutHints.mElastic = true;
+        mLayoutHints.mElastic = Elastic(mOrientation);
         mLayoutHints.mShrinkable = true;
 
         auto interior = getWidget<Frame>() << BorderStyle::Notch << CornerStyle::Round
-                                           << wdg<Border>(4) << Elastic(true)
-                                           << wdg<GaugeInterior>() << mOrientation << Elastic(true);
+                                           << wdg<Border>(4) << Elastic{mOrientation}
+                                           << wdg<GaugeInterior>() << mOrientation << Elastic{mOrientation};
 
         valueRx = std::make_shared<Slot<float>>();
         valueRx->setCallback([=](uint32_t, float value) {
@@ -42,8 +42,8 @@ namespace rose {
         });
     }
 
-    Rectangle Gauge::initialLayout(sdl::Renderer &renderer, Rectangle available) {
-        return Frame::initialLayout(renderer, available);
+    Rectangle Gauge::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+        return Frame::widgetLayout(renderer, available, 0);
     }
 
     void Gauge::draw(sdl::Renderer &renderer, Rectangle parentRect) {
@@ -58,7 +58,7 @@ namespace rose {
         Widget::setOrientation(orientation);
     }
 
-    Rectangle Gauge::GaugeInterior::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Gauge::GaugeInterior::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto gageRect = clampAvailableArea(available, mPos, mSize);
         auto layout = gageRect;
         switch (mOrientation) {

@@ -72,8 +72,8 @@ namespace rose {
         /// See Widget::draw()
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
-        /// See Widget::initialLayout()
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        /// See Widget::widgetLayout()
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief Set the TimeBox to display local or GMT time
@@ -157,12 +157,12 @@ namespace rose {
          * @param renderer
          * @return the Widget LayoutPack
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override {
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override {
             timeCallback();
             Rectangle widgetRect{available};
             if (mPos)
                 widgetRect = widgetRect.moveOrigin(mPos.value());
-            return Label::initialLayout(renderer, widgetRect);
+            return Label::widgetLayout(renderer, widgetRect, 0);
         }
 
         std::shared_ptr<Slot<int>> rxHour;      ///< Receive the hour timing on this Slot.

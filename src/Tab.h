@@ -92,9 +92,9 @@ namespace rose {
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
         /**
-         * @brief See Widget::initialLayout()
+         * @brief See Widget::widgetLayout()
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /// Handle a mouse button event (default implementation: propagate to children)
         bool mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers) override;
@@ -152,8 +152,8 @@ namespace rose {
         std::shared_ptr<Frame> mFrame{};        ///< Convenience pointer to the Frame surrounding the TabBody.
         std::shared_ptr<Container> mBody{};     ///< Convenience pointer to the TabBody.
 
-        std::shared_ptr<Slot<ButtonSignalType>> rxState{};      ///< Slot to receive TabButton state signals.
-        std::shared_ptr<Slot<ButtonSignalType>> rxPushed{};     ///< Slot to receive TabButton pushed signals.
+        std::shared_ptr<Slot<Button::SignalType>> rxState{};      ///< Slot to receive TabButton state signals.
+        std::shared_ptr<Slot<Button::SignalType>> rxPushed{};     ///< Slot to receive TabButton pushed signals.
 
     public:
         Tab() = default;
@@ -170,9 +170,9 @@ namespace rose {
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
         /**
-         * @brief See Widget::initialLayout()
+         * @brief See Widget::widgetLayout()
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief Add a TabPage to the Tab widget

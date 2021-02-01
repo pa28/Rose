@@ -51,7 +51,7 @@ namespace rose {
          * @param available The Rectangle available for layout.
          * @return Rectangle The layout Rectangle.
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief Draw the Label

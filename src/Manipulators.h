@@ -9,7 +9,7 @@
 
 #include "Container.h"
 #include "Rose.h"
-//#include "ScrollArea.h"
+#include "Types.h"
 #include "Utilities.h"
 
 /**
@@ -77,7 +77,7 @@ inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget
  */
 template<class WidgetType>
 inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget, rose::Elastic elastic) {
-    widget->layoutHints().mElastic = elastic.mElastic;
+    widget->layoutHints().mElastic = elastic;
     return widget;
 }
 

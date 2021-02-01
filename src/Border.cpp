@@ -13,7 +13,7 @@ namespace rose {
         mClassName = "Border";
     }
 
-    Rectangle Border::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Border::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto borderAvailable = clampAvailableArea(available, mPos, mSize);
         if (mPadding) {
             borderAvailable.width() -= mPadding->width();
@@ -22,7 +22,7 @@ namespace rose {
         Rectangle layout{borderAvailable};
         for (auto &child : mChildren) {
             LayoutHints& childHints{child->layoutHints()};
-            layout = child->initialLayout(renderer, borderAvailable);
+            layout = child->widgetLayout(renderer, borderAvailable, 0);
 //            if (!layout.getPosition())
 //                layout = Position::Zero;
             childHints.mAssignedRect = layout;

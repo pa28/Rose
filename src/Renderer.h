@@ -13,6 +13,7 @@
 #include "Color.h"
 #include "ScreenMetrics.h"
 #include "Utilities.h"
+#include "Types.h"
 
 /**
  * @namespace rose::sdl

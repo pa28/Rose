@@ -172,14 +172,14 @@ namespace rose {
         }
     }
 
-    Rectangle Column::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Column::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto columnAvailable = clampAvailableArea(available, mPos, mSize);
         auto maxWidth = mMinWidth;
 
         bool first = true;
         for (auto &child : mChildren) {
             LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->initialLayout(renderer, columnAvailable);
+            childHints.mAssignedRect = child->widgetLayout(renderer, columnAvailable, 0);
             if (!childHints.mShrinkable) {
                 maxWidth = std::max(maxWidth, childHints.mAssignedRect->width());
             }
@@ -195,7 +195,7 @@ namespace rose {
         columnAvailable.width() = maxWidth;
         for (auto &child : mChildren) {
             LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->initialLayout(renderer, columnAvailable);
+            childHints.mAssignedRect = child->widgetLayout(renderer, columnAvailable, 1);
             columnAvailable.height() -= childHints.mAssignedRect->height();
             if (!first)
                 columnAvailable.height() -= mContainerHints.internalSpace;
@@ -208,7 +208,7 @@ namespace rose {
             LayoutHints &childHints{child->layoutHints()};
             if (childHints.mShrinkable) {
                 childHints.mAssignedRect.value() = wdigetRatioWidth(childHints.mAssignedRect->getSize(), maxWidth);
-            } else if (childHints.mElastic) {
+            } else if (childHints.mElastic.horizontal()) {
                 childHints.mAssignedRect->width() = maxWidth;
             }
             totalHeight += childHints.mAssignedRect->height();
@@ -224,7 +224,7 @@ namespace rose {
                 first = false;
             childHints.mAssignedRect->y() = posY;
             posY += childHints.mAssignedRect->height();
-            if (childHints.mElastic) {
+            if (childHints.mElastic.horizontal()) {
                 childHints.mAssignedRect->width() = maxWidth;
             } else {
                 switch (childHints.mHorAlign) {
@@ -247,6 +247,37 @@ namespace rose {
         layout.width() = maxWidth;
         layout.height() = posY;
 
+        if (mContainerHints.fillToEnd && layoutStage > 0 && layout.height() < available.height()) {
+            auto extraSpace = available.height() - layout.height();
+            size_t elasticChildren = 0;
+            for (auto &child : mChildren) {
+                if (child->layoutHints().mElastic.vertical())
+                    ++elasticChildren;
+            }
+
+            if (elasticChildren) {
+                auto perChildSpace = extraSpace / elasticChildren;
+                int positionShift = 0;
+                for (auto &child : mChildren) {
+                    child->layoutHints().mAssignedRect->x() += positionShift;
+                    if (child->layoutHints().mElastic.vertical()) {
+                        if (elasticChildren == 1) {
+                            child->layoutHints().mAssignedRect->height() += extraSpace;
+                            layout.height() += extraSpace;
+                            positionShift += extraSpace;
+                            extraSpace = 0;
+                        } else {
+                            child->layoutHints().mAssignedRect->height() += perChildSpace;
+                            layout.height() += perChildSpace;
+                            positionShift += perChildSpace;
+                            extraSpace -= perChildSpace;
+                        }
+                        --elasticChildren;
+                    }
+                }
+            }
+        }
+
         return layout;
     }
 
@@ -262,14 +293,14 @@ namespace rose {
         }
     }
 
-    Rectangle Row::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Row::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto rowAvailable = clampAvailableArea(available, mPos, mSize);
         int maxHeight{0};
 
         bool first = true;
         for (auto &child : mChildren) {
             LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->initialLayout(renderer, rowAvailable);
+            childHints.mAssignedRect = child->widgetLayout(renderer, rowAvailable, 0);
             rowAvailable.width() -= childHints.mAssignedRect->width();
             if (!childHints.mShrinkable) {
                 maxHeight = std::max(maxHeight, childHints.mAssignedRect->height());
@@ -286,7 +317,7 @@ namespace rose {
         rowAvailable.height() = maxHeight;
         for (auto &child : mChildren) {
             LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->initialLayout(renderer, rowAvailable);
+            childHints.mAssignedRect = child->widgetLayout(renderer, rowAvailable, 1);
             rowAvailable.width() -= childHints.mAssignedRect->width();
             if (!first)
                 rowAvailable.width() -= mContainerHints.internalSpace;
@@ -299,7 +330,7 @@ namespace rose {
             LayoutHints &childHints{child->layoutHints()};
             if (childHints.mShrinkable) {
                 childHints.mAssignedRect.value() = widgetRatioHeight(childHints.mAssignedRect->getSize(), maxHeight);
-            } else if (childHints.mElastic) {
+            } else if (childHints.mElastic.vertical()) {
                 childHints.mAssignedRect->height() = maxHeight;
             }
             totalWidth += childHints.mAssignedRect->width();
@@ -315,7 +346,7 @@ namespace rose {
                 first = false;
             childHints.mAssignedRect->x() = posX;
             posX += childHints.mAssignedRect->width();
-            if (!childHints.mElastic) {
+            if (!childHints.mElastic.vertical()) {
                 switch (childHints.mVerAlign) {
                     case VerticalAlignment::Unset:
                     case VerticalAlignment::Top:
@@ -335,6 +366,37 @@ namespace rose {
         auto layout = Rectangle{mPos, mSize};
         layout.width() = posX;
         layout.height() = maxHeight;
+
+        if (mContainerHints.fillToEnd && layoutStage > 0 && layout.width() < available.width()) {
+            auto extraSpace = available.width() - layout.width();
+            size_t elasticChildren = 0;
+            for (auto &child : mChildren) {
+                if (child->layoutHints().mElastic.horizontal())
+                    ++elasticChildren;
+            }
+
+            if (elasticChildren) {
+                auto perChildSpace = extraSpace / elasticChildren;
+                auto positionShift = 0;
+                for (auto &child : mChildren) {
+                    child->layoutHints().mAssignedRect->x() += positionShift;
+                    if (child->layoutHints().mElastic.horizontal()) {
+                        if (elasticChildren == 1) {
+                            child->layoutHints().mAssignedRect->width() += extraSpace;
+                            layout.width() += extraSpace;
+                            positionShift += extraSpace;
+                            extraSpace = 0;
+                        } else {
+                            child->layoutHints().mAssignedRect->width() += perChildSpace;
+                            layout.width() += perChildSpace;
+                            positionShift += perChildSpace;
+                            extraSpace -= perChildSpace;
+                        }
+                        --elasticChildren;
+                    }
+                }
+            }
+        }
 
         return layout;
     }
@@ -362,7 +424,7 @@ namespace rose {
         }
     }
 
-    Rectangle Grid::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle Grid::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto gridAvailable = clampAvailableArea(available, mPos, mSize);
         if (mSingleSize) {
             size_t count = 0;
@@ -371,7 +433,7 @@ namespace rose {
             Position childPos{};
             for (auto &child : mChildren) {
                 LayoutHints &childHints{child->layoutHints()};
-                auto layout = child->initialLayout(renderer, gridAvailable);
+                auto layout = child->widgetLayout(renderer, gridAvailable, 0);
                 layout = childPos;
                 layout = mSingleSize.value();
                 childHints.mAssignedRect = layout;

@@ -123,8 +123,8 @@ namespace rose {
          */
         explicit Keyboard(const KeyboardPlugin &keyboardPlugin) : mKeyboardPlugin(keyboardPlugin) {}
 
-        /// See Widget::initialLayout()
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        /// See Widget::widgetLayout()
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /// See Widget::draw()
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;

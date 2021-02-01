@@ -172,13 +172,13 @@ namespace rose {
 
         /**
          * @brief Determine the desired size of the child widget.
-         * @details If not overridden the default is to call initialLayout() for the child and return
+         * @details If not overridden the default is to call widgetLayout() for the child and return
          * the current value of mSize of the Container.
          * @param renderer The Renderer to use.
          * @param available The Rectangle available for layout.
          * @return Rectangle The layout Rectangle.
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief Draw this Widget's contribution to the scene.

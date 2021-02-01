@@ -96,9 +96,9 @@ namespace rose {
             GaugeInterior& operator=(GaugeInterior &&) = delete;
 
             /**
-             * @brief See Widget initialLayout()
+             * @brief See Widget widgetLayout()
              */
-            Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+            Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
             /// See Widget::draw();
             void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
@@ -177,9 +177,9 @@ namespace rose {
         void initializeComposite() override;
 
         /**
-         * @brief See Widget initialLayout()
+         * @brief See Widget widgetLayout()
          */
-        Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) override;
+        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
         /**
          * @brief See Widget::draw()

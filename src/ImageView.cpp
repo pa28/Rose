@@ -28,7 +28,7 @@ namespace rose {
         mClassName = "ImageView";
     }
 
-    Rectangle ImageView::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle ImageView::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         if (mImageId == ImageRepository::InvalidImageId) {
             mPos = Position::Zero;
             mSize = Size::Zero;

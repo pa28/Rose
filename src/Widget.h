@@ -78,7 +78,7 @@ namespace rose {
      * extra space.
      */
     struct LayoutHints {
-        bool mElastic{false};                           ///< True if the Widget can expand and manage its layout withing a larger box like a Label
+        Elastic mElastic{};                             ///< Contains the elastic parameters
         bool mShrinkable{false};                        ///< True if the Widget is easily shrinkable like an ImageView
         HorizontalAlignment mHorAlign{};                ///< Horizontal alignment.
         VerticalAlignment mVerAlign{};                  ///< Vertical alignment.
@@ -278,9 +278,10 @@ namespace rose {
          * @details If not overridden the default is to return the current value of mSize.
          * @param renderer the Renderer to use if needed.
          * @param available The rectangle available for layout.
+         * @param layoutStage The stage in the layout process.
          * @return Rectangle The requested layout rectangle.
          */
-        virtual Rectangle initialLayout(sdl::Renderer &renderer, Rectangle available) = 0;
+        virtual Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) = 0;
 
         /**
          * @brief Provide access to the Widget's parent down cast to WidgetType if possible.
@@ -559,9 +560,6 @@ namespace rose {
          */
         virtual ImageId getImageId() const noexcept;
 
-        /// Provide a Slot for the widget to direct Signals transmitted from child Button Widgets.
-        virtual void setButtonSlot(std::shared_ptr<Slot<ButtonSignalType>> &buttonSlot) {}
-
         /// Handle a mouse button event (default implementation: propagate to children)
         virtual bool mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers);
 
@@ -835,20 +833,6 @@ inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget
 template<class WidgetType>
 inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget, rose::WidgetText text) {
     widget->setText(text.mText);
-    return widget;
-}
-
-/**
- * @brief Set the Widget Slot to receive Signals from child Button Widgets, if implemented.
- * @tparam WidgetType The Widget type.
- * @param widget The Widget.
- * @param buttonRxSlot The Slot<rose::ButtonSignalType>.
- * @return The Widget.
- */
-template<class WidgetType>
-inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget,
-        std::shared_ptr<rose::Slot<rose::ButtonSignalType>> buttonRxSlot) {
-    widget->setButtonSlot(buttonRxSlot);
     return widget;
 }
 

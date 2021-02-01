@@ -9,7 +9,7 @@
 namespace rose {
 
 
-    Rectangle ScrollArea::initialLayout(sdl::Renderer &renderer, Rectangle available) {
+    Rectangle ScrollArea::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto scrollAvailable = clampAvailableArea(available, mPos, mSize);
         Rectangle childAvailable{0, 0, MaximumChildSize, MaximumChildSize};
         mHorizontalInd.reset();
@@ -17,7 +17,7 @@ namespace rose {
 
         for (auto &child : mChildren) {
             LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->initialLayout(renderer, childAvailable);
+            childHints.mAssignedRect = child->widgetLayout(renderer, childAvailable, 0);
             if (childHints.mAssignedRect->width() < scrollAvailable.width())
                 scrollAvailable.width() = childHints.mAssignedRect->width();
             if (childHints.mAssignedRect->height() < scrollAvailable.height())
