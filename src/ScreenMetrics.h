@@ -247,6 +247,16 @@ namespace rose {
         constexpr Position operator-(const Position &position) const noexcept {
             return Position{x() - position.x(), y() - position.y()};
         }
+
+        /**
+         * @brief Compute the square of the scalar distance of a position from the origin.
+         * @details This can be used on the difference of two positions to get the square
+         * of the scalar distance between the two positions.
+         * @return the distance squared
+         */
+        constexpr int abs() const noexcept {
+            return x() * x() + y() * y();
+        }
     };
 
     /**
