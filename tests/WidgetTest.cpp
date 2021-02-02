@@ -111,7 +111,7 @@ void Test::build() {
 
     slider->valueTx.connect(scale->valueRx);
 
-    auto keyboard = std::make_shared<QUERTY>();
+    auto keyboard = std::make_shared<NumberPad>();
     mMainWindow << wdg<Keyboard>(keyboard) << Position{100,0};
 
 #else
