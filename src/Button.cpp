@@ -133,6 +133,7 @@ namespace rose {
                             break;
                     }
                 }
+                mSelectProgress = false;
                 return true;
             }
         }

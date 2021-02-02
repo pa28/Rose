@@ -167,7 +167,7 @@ namespace rose {
 
     void
     EventSemantics::mouseMotion(SDL_Event &event, uint32_t state, int32_t x, int32_t y, int32_t relX, int32_t relY) {
-        print(std::cout, __FUNCTION__, (state ? "Drag" : "Move"), state, x, y, relX, relY, '-', mClickTransaction, mTransactionPos,'\n');
+//        print(std::cout, __FUNCTION__, (state ? "Drag" : "Move"), state, x, y, relX, relY, '-', mClickTransaction, mTransactionPos,'\n');
         Position position{x,y};
         Position positionRel{relX, relY};
         auto modifiers = SDL_GetModState();
@@ -196,7 +196,7 @@ namespace rose {
 
     void
     EventSemantics::mouseButton(SDL_Event &event, uint button, uint state, uint clicks, int32_t x, int32_t y) {
-        print( std::cout, __FUNCTION__, button, state, clicks, x, y, '-', mClickTransaction, mTransactionPos, '\n');
+//        print( std::cout, __FUNCTION__, button, state, clicks, x, y, '-', mClickTransaction, mTransactionPos, '\n');
         Position position{x,y};
         if (state == SDL_PRESSED) {
             mClickTransaction = true;
