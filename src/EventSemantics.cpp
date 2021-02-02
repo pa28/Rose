@@ -174,12 +174,17 @@ namespace rose {
         if (state) {
             // Gesture is now a drag, cancel any click transactin in progress.
             if (mClickTransaction) {
-                if (!mFocusTrail.empty()) {
-                    auto weakPtr = mFocusTrail.front();
-                    if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {
-                        widget->clickTransactionCancel(position, state, false, modifiers);
-                        mClickTransaction = false;
+                if ((position - mTransactionPos).abs() > 25) {
+
+                    if (!mFocusTrail.empty()) {
+                        auto weakPtr = mFocusTrail.front();
+                        if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {
+                            widget->clickTransactionCancel(position, state, false, modifiers);
+                            mClickTransaction = false;
+                        }
                     }
+                } else {
+                    return;
                 }
             }
 
@@ -196,6 +201,7 @@ namespace rose {
         Position position{x,y};
         if (state == SDL_PRESSED) {
             mClickTransaction = true;
+            mTransactionPos = position;
             mButtonState |= button;
             auto widget = identifyFocusWidget(position);
             if (widget)
@@ -221,12 +227,16 @@ namespace rose {
         auto modifiers = SDL_GetModState();
         // Gesture is now a drag, cancel any click transactin in progress.
         if (mClickTransaction) {
-            if (!mFocusTrail.empty()) {
-                auto weakPtr = mFocusTrail.front();
-                if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {
-                    widget->clickTransactionCancel(position, 1, false, modifiers);
-                    mClickTransaction = false;
+            if ((position - mTransactionPos).abs() > 25) {
+                if (!mFocusTrail.empty()) {
+                    auto weakPtr = mFocusTrail.front();
+                    if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {
+                        widget->clickTransactionCancel(position, 1, false, modifiers);
+                        mClickTransaction = false;
+                    }
                 }
+            } else {
+                return;
             }
         }
 
@@ -243,6 +253,7 @@ namespace rose {
         auto position = convertFingerCoordinates(x, y);
 //        print(std::cout, __FUNCTION__, position, '\n');
         mClickTransaction = true;
+        mTransactionPos = position;
         mButtonState = 1;
         auto widget = identifyFocusWidget(position);
         if (widget)

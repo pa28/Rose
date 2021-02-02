@@ -24,6 +24,7 @@ namespace rose {
     class EventSemantics {
     protected:
         bool mClickTransaction{};
+        Position mTransactionPos{};
         uint mButtonState{};
 
         Rose &mRose;
