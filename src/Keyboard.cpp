@@ -11,58 +11,58 @@
 
 namespace rose {
 
-    constexpr KeyboardSpec<4, 11> QUERTY::QWERTYData = {
-            KeySpecRow<11>{
-                    KeySpec{KSS{"qQ11"}},
-                    KeySpec{KSS{"wW22"}},
-                    KeySpec{KSS{"eE33"}},
-                    KeySpec{KSS{"rR44"}},
-                    KeySpec{KSS{"tT55"}},
-                    KeySpec{KSS{"yY66"}},
-                    KeySpec{KSS{"uU77"}},
-                    KeySpec{KSS{"iI88"}},
-                    KeySpec{KSS{"oO99"}},
-                    KeySpec{KSS{"pP00"}},
-                    KeySpec{KSS{"\b\b\b\b"}},
+    constexpr KeyboardSpec<QUERTY::Rows, QUERTY::KeysPerRow, QUERTY::Depth> QUERTY::QWERTYData = {
+            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+                    makeKeySpec<QUERTY::Depth>("qQ11"),
+                    makeKeySpec<QUERTY::Depth>("wW22"),
+                    makeKeySpec<QUERTY::Depth>("eE33"),
+                    makeKeySpec<QUERTY::Depth>("rR44"),
+                    makeKeySpec<QUERTY::Depth>("tT55"),
+                    makeKeySpec<QUERTY::Depth>("yY66"),
+                    makeKeySpec<QUERTY::Depth>("uU77"),
+                    makeKeySpec<QUERTY::Depth>("iI88"),
+                    makeKeySpec<QUERTY::Depth>("oO99"),
+                    makeKeySpec<QUERTY::Depth>("pP00"),
+                    makeKeySpec<QUERTY::Depth>("\b\b\b\b"),
             },
-            KeySpecRow<11>{
-                    KeySpec{KSS{"aA@!"}},
-                    KeySpec{KSS{"sS#~"}},
-                    KeySpec{KSS{"dD$\\"}},
-                    KeySpec{KSS{"fF%_"}},
-                    KeySpec{KSS{"gG^["}},
-                    KeySpec{KSS{"hH&]"}},
-                    KeySpec{KSS{"jJ*{"}},
-                    KeySpec{KSS{"kK(}"}},
-                    KeySpec{KSS{"lL)|"}},
-                    KeySpec{KSS{"\r\r\r\r"}},
-                    KeySpec{KSS{"\0\0\0\0"}}
+            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+                    makeKeySpec<QUERTY::Depth>("aA@!"),
+                    makeKeySpec<QUERTY::Depth>("sS#~"),
+                    makeKeySpec<QUERTY::Depth>("dD$\\"),
+                    makeKeySpec<QUERTY::Depth>("fF%_"),
+                    makeKeySpec<QUERTY::Depth>("gG^["),
+                    makeKeySpec<QUERTY::Depth>("hH&]"),
+                    makeKeySpec<QUERTY::Depth>("jJ*{"),
+                    makeKeySpec<QUERTY::Depth>("kK()"),
+                    makeKeySpec<QUERTY::Depth>("lL)|"),
+                    makeKeySpec<QUERTY::Depth>("\r\r\r\r"),
+                    makeKeySpec<QUERTY::Depth>("\0\0\0\0"),
             },
-            KeySpecRow<11>{
-                    KeySpec{SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK},
-                    KeySpec{KSS{"zZ+1"}},
-                    KeySpec{KSS{"xX-2"}},
-                    KeySpec{KSS{"cC'3"}},
-                    KeySpec{KSS{"vV\"4"}},
-                    KeySpec{KSS{"bB_5"}},
-                    KeySpec{KSS{"nN?6"}},
-                    KeySpec{KSS{"mM/7"}},
-                    KeySpec{KSS{",?,8"}},
-                    KeySpec{KSS{"./.9"}},
-                    KeySpec{SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT},
+            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+                    makeKeySpec<QUERTY::Depth>(SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK),
+                    makeKeySpec<QUERTY::Depth>("zZ+1"),
+                    makeKeySpec<QUERTY::Depth>("xX-2"),
+                    makeKeySpec<QUERTY::Depth>("cC'3"),
+                    makeKeySpec<QUERTY::Depth>("vV\"4"),
+                    makeKeySpec<QUERTY::Depth>("bB_5"),
+                    makeKeySpec<QUERTY::Depth>("nN?6"),
+                    makeKeySpec<QUERTY::Depth>("mM/7"),
+                    makeKeySpec<QUERTY::Depth>(",?,8"),
+                    makeKeySpec<QUERTY::Depth>("./.9"),
+                    makeKeySpec<QUERTY::Depth>(SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT),
             },
-            KeySpecRow<11>{
-                    KeySpec{SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT},
-                    KeySpec{SDLK_LALT, SDLK_LALT, SDLK_LALT, SDLK_LALT},
-                    KeySpec{KSS{"    "}},
-                    KeySpec{SDLK_LEFT, SDLK_LEFT, SDLK_LEFT, SDLK_LEFT},
-                    KeySpec{SDLK_RIGHT, SDLK_RIGHT, SDLK_RIGHT, SDLK_RIGHT},
-                    KeySpec{SDLK_RALT, SDLK_RALT, SDLK_RALT, SDLK_RALT},
-                    KeySpec{KSS{"\0\0\0\0"}},
+            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+                    makeKeySpec<QUERTY::Depth>(SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT),
+                    makeKeySpec<QUERTY::Depth>(SDLK_LALT, SDLK_LALT, SDLK_LALT, SDLK_LALT),
+                    makeKeySpec<QUERTY::Depth>("    "),
+                    makeKeySpec<QUERTY::Depth>(SDLK_LEFT, SDLK_LEFT, SDLK_LEFT, SDLK_LEFT),
+                    makeKeySpec<QUERTY::Depth>(SDLK_RIGHT, SDLK_RIGHT, SDLK_RIGHT, SDLK_RIGHT),
+                    makeKeySpec<QUERTY::Depth>(SDLK_RALT, SDLK_RALT, SDLK_RALT, SDLK_RALT),
+                    makeKeySpec<QUERTY::Depth>("\0\0\0\0"),
             }
     };
 
-    auto QUERTY::controlKeyData(const KeySpec &keyData) {
+    auto QUERTY::controlKeyData(const KeySpec<Depth> &keyData) {
         RoseImageId imageId = RoseImageId::RoseImageInvalid;
         auto keyIdx = static_cast<std::size_t>(mKeyboardMode);
         auto buttonType = ButtonType::NormalButton;

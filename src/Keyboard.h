@@ -26,48 +26,55 @@ namespace rose {
         Symbols,            ///< Numbers and more symbols.
     };
 
-    /**
-     * @class KeySpec
-     * @brief The specification of the cases, or special function of a key.
-     */
-    class KeySpec : public std::array<uint32_t,4> {
-    public:
-        KeySpec() = default;
+    /// A key specification of depth N
+    template<size_t N>
+    using KeySpec = std::array<uint32_t,N>;
 
-        /**
-         * @brief Constructor
-         * @details Construct a KeySpec from four independent values that may be cast to uint32_t.
-         * @tparam A
-         * @tparam B
-         * @tparam C
-         * @tparam D
-         * @param a
-         * @param b
-         * @param c
-         * @param d
-         */
-        template<typename A, typename B, typename C, typename D>
-        constexpr KeySpec(A a, B b, C c, D d) noexcept
-            : std::array<uint32_t,4>( {static_cast<uint32_t>(a),
-                                     static_cast<uint32_t>(b),
-                                     static_cast<uint32_t>(c),
-                                     static_cast<uint32_t>(d)}
-                                     ) {}
-        /// Construct a KeySpec from a array of char.
-        constexpr explicit KeySpec(const std::array<char,5> &c) noexcept
-            : KeySpec(c[0], c[1], c[2], c[3]) {}
-    };
+    template<size_t N>
+    constexpr auto makeKeySpec(const char *values) noexcept {
+        auto a = KeySpec<N>{};
+        const char *cp = values;
+        for (auto &v : a) {
+            if (*cp != '\0') {
+                v = static_cast<uint32_t>(*cp++);
+            } else {
+                v = 0;
+            }
+        }
+        return a;
+    }
+
+    template<class I, typename Arg, typename ... Args>
+    constexpr I makeKeySpecInit(I first, I last, Arg arg, Args ... args) noexcept {
+        if (first != last) {
+            *first = static_cast<uint32_t>(arg);
+            ++first;
+            if constexpr (sizeof...(args) > 0) {
+                first = makeKeySpecInit(first, last, args...);
+            }
+        }
+        return first;
+    }
+
+    template<size_t N, typename ... Args>
+    constexpr auto makeKeySpec(Args ... args) noexcept {
+        auto a = KeySpec<N>{};
+        auto first = a.begin();
+        auto last = a.end();
+        last = makeKeySpecInit(first, last, args...);
+        return a;
+    }
 
     /// A row of KeySpec specifications.
-    template<size_t N>
-    using KeySpecRow = std::array<KeySpec,N>;
+    template<size_t M, size_t N>
+    using KeySpecRow = std::array<KeySpec<N>,M>;
 
     /// Type to help construct a KeySpec from a string.
     using KSS = std::array<char,5>;
 
     /// Type for a full Keyboard specification.
-    template<size_t R, std::size_t N>
-    using KeyboardSpec = std::array<std::array<KeySpec,N>,R>;
+    template<size_t R, size_t M, size_t N>
+    using KeyboardSpec = std::array<std::array<KeySpec<N>,M>,R>;
 
     class Keyboard;
 
@@ -137,9 +144,14 @@ namespace rose {
      */
     class QUERTY : public KeyboardPlugin {
     protected:
-        static const KeyboardSpec<4,11> QWERTYData;     ///< The KeyboardSpec.
+        static constexpr size_t Rows = 4;
+        static constexpr size_t KeysPerRow = 11;
+        static constexpr size_t Depth = 4;
+        static const KeyboardSpec<Rows, KeysPerRow, Depth> QWERTYData;     ///< The KeyboardSpec.
 
         std::weak_ptr<Keyboard> mKeyboard{};            ///< The parent Keyboard Widget.
+
+        using KeySpecType = KeySpec<Depth>;
 
         /**
          * @enum KeyboardMode
@@ -173,7 +185,7 @@ namespace rose {
          * @param keyIdx The index into the key.
          * @return A std::tuple with the construction information.
          */
-        auto controlKeyData(const KeySpec &keyData);
+        auto controlKeyData(const KeySpec<Depth> &keyData);
 
         /**
          * @brief Encode data gathered from user interaction into a current KeyboardMode.
@@ -196,6 +208,18 @@ namespace rose {
          * @param charSlot The slot to receive key press signals on.
          */
         void build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName) override;
+    };
+
+    class NumberPad : public KeyboardPlugin {
+    protected:
+        static constexpr size_t Rows = 5;
+        static constexpr size_t KeysPerRow = 3;
+        static const KeyboardSpec<Rows, KeysPerRow, 1> NumberData;     ///< The main number pad KeyboardSpec.
+
+        static constexpr size_t SideRows = 5;
+        static constexpr size_t SideKeysPerRow = 1;
+        static const KeyboardSpec<SideRows,SideKeysPerRow, 1> SideNumberData;  ///< The side key data.
+    public:
     };
 }
 
