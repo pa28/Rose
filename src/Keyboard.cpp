@@ -98,7 +98,15 @@ namespace rose {
                 break;
             case SDLK_RSHIFT:
             case SDLK_LSHIFT:
-                imageId = RoseImageId::IconUpBold;
+                switch (mSymbolState) {
+                    case SymbolState::None:
+                        imageId = IconUpBold;
+                        break;
+                    case SymbolState::Symbols1:
+                    case SymbolState::Symbols2:
+                        imageId = IconKeyboard;
+                        break;
+                }
                 break;
             case SDLK_LALT:
             case SDLK_RALT:
