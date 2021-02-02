@@ -11,8 +11,107 @@
 
 namespace rose {
 
+    constexpr KeyboardSpec<NumberPad::Rows, NumberPad::KeysPerRow, 1> NumberPad::NumberData = {
+            KeySpecRow<NumberPad::KeysPerRow, 1>{
+                    makeKeySpec<1>(","),
+                    makeKeySpec<1>("/"),
+                    makeKeySpec<1>("*"),
+            },
+            KeySpecRow<NumberPad::KeysPerRow, 1>{
+                    makeKeySpec<1>("7"),
+                    makeKeySpec<1>("8"),
+                    makeKeySpec<1>("9"),
+            },
+            KeySpecRow<NumberPad::KeysPerRow, 1>{
+                    makeKeySpec<1>("4"),
+                    makeKeySpec<1>("5"),
+                    makeKeySpec<1>("6"),
+            },
+            KeySpecRow<NumberPad::KeysPerRow, 1>{
+                    makeKeySpec<1>("1"),
+                    makeKeySpec<1>("2"),
+                    makeKeySpec<1>("3"),
+            },
+            KeySpecRow<NumberPad::KeysPerRow, 1>{
+                    makeKeySpec<1>("0"),
+                    makeKeySpec<1>("."),
+                    makeKeySpec<1>(0),
+            },
+    };
+
+    constexpr KeyboardSpec<NumberPad::SideCols, NumberPad::SideKeysPerCol, 1> NumberPad::SideNumberData = {
+            KeySpecRow<NumberPad::SideKeysPerCol, 1>{
+                    makeKeySpec<1>("-"),
+                    makeKeySpec<1>("+"),
+                    makeKeySpec<1>("_"),
+                    makeKeySpec<1>("\r"),
+                    makeKeySpec<1>(0)
+            }
+    };
+
+    void NumberPad::build(std::shared_ptr<Keyboard> keyboard, Size keySize, int fontSize, const string &fontName) {
+        auto row0 = keyboard << wdg<Row>();
+        row0->containerLayoutHints().endOffset = 4;
+
+        auto column = row0 << wdg<Column>();
+        column->containerLayoutHints().startOffset = 4;
+        column->containerLayoutHints().endOffset = 4;
+        column->containerLayoutHints().internalSpace = 4;
+
+        for (auto &keyRow : NumberData) {
+            auto row = column << wdg<Row>() << Elastic{Orientation::Horizontal};
+            row->containerLayoutHints().startOffset = 4;
+            row->containerLayoutHints().endOffset = 4;
+            row->containerLayoutHints().internalSpace = 4;
+            row->containerLayoutHints().fillToEnd = true;
+            for (auto keyData : keyRow) {
+                if (keyData[0] == 0)
+                    break;
+                // Character key.
+                auto key = row << wdg<Button>(std::string{(char) keyData[0]},
+                                              ButtonType::NormalButton, fontSize)
+                               << CornerStyle::Round
+                               << FontName{fontName}
+                               << keySize;
+                key->setSignalToken(keyData[0]);
+                if (keyData[0] == '0')
+                    key << Elastic(Orientation::Both);
+                else
+                    key << Elastic(Orientation::Vertical);
+            }
+        }
+
+        auto col = row0 << wdg<Column>();
+        col->containerLayoutHints().startOffset = 4;
+        col->containerLayoutHints().endOffset = 4;
+        col->containerLayoutHints().internalSpace = 4;
+        col->containerLayoutHints().fillToEnd = true;
+        for (auto &keyRow : SideNumberData) {
+            for (auto &keyData : keyRow) {
+                if (keyData[0] == 0)
+                    break;
+                if (keyData[0] == '\r') {
+                    auto renderFlip = sdl::RenderFlip{SDL_FLIP_HORIZONTAL};
+                    auto key = col << wdg<Button>(RoseImageId::IconLevelDown, ButtonType::NormalButton)
+                                   << renderFlip
+                                   << Elastic(Orientation::Both)
+                                   << CornerStyle::Round;
+                    key->setSignalToken(keyData[0]);
+                } else {
+                    auto key = col << wdg<Button>(std::string{(char) keyData[0]},
+                                                  ButtonType::NormalButton, fontSize)
+                                   << CornerStyle::Round
+                                   << Elastic(Orientation::Horizontal)
+                                   << FontName{fontName}
+                                   << keySize;
+                    key->setSignalToken(keyData[0]);
+                }
+            }
+        }
+    }
+
     constexpr KeyboardSpec<QUERTY::Rows, QUERTY::KeysPerRow, QUERTY::Depth> QUERTY::QWERTYData = {
-            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+            KeySpecRow<QUERTY::KeysPerRow, QUERTY::Depth>{
                     makeKeySpec<QUERTY::Depth>("qQ11"),
                     makeKeySpec<QUERTY::Depth>("wW22"),
                     makeKeySpec<QUERTY::Depth>("eE33"),
@@ -25,7 +124,7 @@ namespace rose {
                     makeKeySpec<QUERTY::Depth>("pP00"),
                     makeKeySpec<QUERTY::Depth>("\b\b\b\b"),
             },
-            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+            KeySpecRow<QUERTY::KeysPerRow, QUERTY::Depth>{
                     makeKeySpec<QUERTY::Depth>("aA@!"),
                     makeKeySpec<QUERTY::Depth>("sS#~"),
                     makeKeySpec<QUERTY::Depth>("dD$\\"),
@@ -36,9 +135,9 @@ namespace rose {
                     makeKeySpec<QUERTY::Depth>("kK()"),
                     makeKeySpec<QUERTY::Depth>("lL)|"),
                     makeKeySpec<QUERTY::Depth>("\r\r\r\r"),
-                    makeKeySpec<QUERTY::Depth>("\0\0\0\0"),
+                    makeKeySpec<QUERTY::Depth>(0),
             },
-            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+            KeySpecRow<QUERTY::KeysPerRow, QUERTY::Depth>{
                     makeKeySpec<QUERTY::Depth>(SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK),
                     makeKeySpec<QUERTY::Depth>("zZ+1"),
                     makeKeySpec<QUERTY::Depth>("xX-2"),
@@ -51,14 +150,14 @@ namespace rose {
                     makeKeySpec<QUERTY::Depth>("./.9"),
                     makeKeySpec<QUERTY::Depth>(SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT),
             },
-            KeySpecRow<QUERTY::KeysPerRow,QUERTY::Depth>{
+            KeySpecRow<QUERTY::KeysPerRow, QUERTY::Depth>{
                     makeKeySpec<QUERTY::Depth>(SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT),
                     makeKeySpec<QUERTY::Depth>(SDLK_LALT, SDLK_LALT, SDLK_LALT, SDLK_LALT),
                     makeKeySpec<QUERTY::Depth>("    "),
                     makeKeySpec<QUERTY::Depth>(SDLK_LEFT, SDLK_LEFT, SDLK_LEFT, SDLK_LEFT),
                     makeKeySpec<QUERTY::Depth>(SDLK_RIGHT, SDLK_RIGHT, SDLK_RIGHT, SDLK_RIGHT),
                     makeKeySpec<QUERTY::Depth>(SDLK_RALT, SDLK_RALT, SDLK_RALT, SDLK_RALT),
-                    makeKeySpec<QUERTY::Depth>("\0\0\0\0"),
+                    makeKeySpec<QUERTY::Depth>(0),
             }
     };
 
@@ -211,7 +310,7 @@ namespace rose {
             row->containerLayoutHints().internalSpace = 4;
             row->containerLayoutHints().fillToEnd = true;
             if (rowIdx == 1)
-                row->containerLayoutHints().startOffset += keySize.width()/2 + 4;
+                row->containerLayoutHints().startOffset += keySize.width() / 2 + 4;
             for (const auto &keyData : keyRow) {
                 if (keyData[keyIdx] == SDLK_UNKNOWN)
                     break;
@@ -220,7 +319,8 @@ namespace rose {
                     auto[isChar, imageId, buttonType, elastic, renderFlip] = controlKeyData(keyData);
                     auto key = row << wdg<Button>(imageId, buttonType)
                                    << renderFlip
-                                   << CornerStyle::Round;
+                                   << CornerStyle::Round
+                                   << keySize;
                     if (!elastic)
                         key << Elastic{Orientation::Vertical};
                     else
@@ -324,6 +424,8 @@ namespace rose {
         auto lineSkip = TTF_FontLineSkip(fontPtr.value().get());
 
         mKeySize = Size{hmaxx - hminx + borderWidth * 2, lineSkip + borderWidth * 2};
+        mKeySize.width() = std::max(mKeySize.width(), mKeySize.height());
+        mKeySize.height() = mKeySize.width();
 
         mBorder = BorderStyle::Notch;
 

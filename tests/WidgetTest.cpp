@@ -112,7 +112,7 @@ void Test::build() {
     slider->valueTx.connect(scale->valueRx);
 
     auto keyboard = std::make_shared<QUERTY>();
-    mMainWindow << wdg<Keyboard>(keyboard) << Position{300,0};
+    mMainWindow << wdg<Keyboard>(keyboard) << Position{100,0};
 
 #else
     mHue = mTheme.mBaseColorHSLA.hue() / 360.0f;

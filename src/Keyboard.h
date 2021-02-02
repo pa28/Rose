@@ -216,10 +216,14 @@ namespace rose {
         static constexpr size_t KeysPerRow = 3;
         static const KeyboardSpec<Rows, KeysPerRow, 1> NumberData;     ///< The main number pad KeyboardSpec.
 
-        static constexpr size_t SideRows = 5;
-        static constexpr size_t SideKeysPerRow = 1;
-        static const KeyboardSpec<SideRows,SideKeysPerRow, 1> SideNumberData;  ///< The side key data.
+        static constexpr size_t SideCols = 1;
+        static constexpr size_t SideKeysPerCol = 5;
+        static const KeyboardSpec<SideCols,SideKeysPerCol, 1> SideNumberData;  ///< The side key data.
     public:
+        NumberPad() = default;
+        ~NumberPad() override = default;
+
+        void build(std::shared_ptr<Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName) override;
     };
 }
 
