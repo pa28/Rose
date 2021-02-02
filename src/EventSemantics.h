@@ -43,6 +43,11 @@ namespace rose {
         std::shared_ptr<Widget> identifyFocusWidget(Position focusPos);
 
         /**
+         * @brief Clear all mouse/finger focus data.
+         */
+        void clearFocusWidget();
+
+        /**
          * @brief Set a Widget as the focus Widget and build the focus trail.
          * @param widget The new Focus Widget.
          */
