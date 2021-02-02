@@ -164,6 +164,16 @@ namespace rose {
             setNeedsDrawing();
         }
 
+        /**
+         * @brief Set the Label badge to an ImageId
+         * @param imageId The ImageId.
+         */
+        void setImageId(const ImageId imageId) override {
+            mBadge = imageId;
+            mTextureDirty = true;
+            setNeedsDrawing();
+        }
+
         std::shared_ptr<Slot<std::string>> mTextRx{};   ///< A slot to receive Label text updates.
 
         /**

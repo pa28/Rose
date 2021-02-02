@@ -139,8 +139,52 @@ namespace rose {
     protected:
         static const KeyboardSpec<4,11> QWERTYData;     ///< The KeyboardSpec.
 
+        std::weak_ptr<Keyboard> mKeyboard{};            ///< The parent Keyboard Widget.
+
+        /**
+         * @enum KeyboardMode
+         * @brief Set the state of the keyboard.
+         */
+        enum class KeyboardMode : size_t  {
+            LowerCase, UpperCase, Numeric, Symbols,
+        };
+
+        /**
+         * @enum SymbolState
+         * @brief The state of symbol selection.
+         */
+        enum class SymbolState : size_t {
+            None, Symbols1, Symbols2,
+        };
+
+        uint32_t mTempShiftKey{0};    ///< The temporary shift status
+        bool mCapsLock{false};        ///< The state of the caps lock key
+
+        SymbolState mSymbolState{SymbolState::None};            ///< The state of symbol selection
+        KeyboardMode mKeyboardMode{KeyboardMode::LowerCase};    ///< Current KeyboardMode
+
         std::shared_ptr<Slot<Button::SignalType>> rxKey{};
         std::shared_ptr<Slot<Button::SignalType>> rxCtl{};
+        std::shared_ptr<Slot<Button::SignalType>> rxToggle{};
+
+        /**
+         * @brief Decode a KeySpec and Key index into key Button construction information.
+         * @param keyData The KeySpec.
+         * @param keyIdx The index into the key.
+         * @return A std::tuple with the construction information.
+         */
+        auto controlKeyData(const KeySpec &keyData);
+
+        /**
+         * @brief Encode data gathered from user interaction into a current KeyboardMode.
+         * @details If the KeyboardMode changes changeKeyboardFace() is called.
+         */
+        void setKeyboardMode();
+
+        /**
+         * @brief Change the Key faces to match the current KeyboardMode.
+         */
+        void changeKeyboardFace();
 
     public:
         QUERTY() = default;

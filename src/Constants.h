@@ -167,6 +167,7 @@ namespace rose {
         IconToEnd,              ///< Forward to end
         IconBack,               ///< Back
         IconLevelDown,          ///< Carriage Return
+        Icon1Dot,               ///< One Dot
         Icon2Dots,              ///< Two Dots
         Icon3Dots,              ///< Three Dots
         BevelOutRoundCorners,   ///< Sheet of round corners beveled out

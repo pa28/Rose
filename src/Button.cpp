@@ -161,7 +161,12 @@ namespace rose {
     }
 
     void Button::setImageId(ImageId imageId) {
-        mChildren.front()->as<Label>()->setBadge(imageId);
+        if (auto label = getLabel(); label) {
+            label->setImageId(imageId);
+            return;
+        }
+        throw RoseLogicError(
+                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
     std::shared_ptr<Label> Button::getLabel() {
