@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "Frame.h"
 #include "Button.h"
 #include "Container.h"
@@ -79,8 +81,7 @@ namespace rose {
         virtual ~KeyboardPlugin() = default;
 
         virtual void
-        build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName,
-              shared_ptr <Slot<Button::SignalType>> &charSlot) const = 0;
+        build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName) = 0;
     };
 
     /**
@@ -89,7 +90,7 @@ namespace rose {
      */
     class Keyboard : public Frame {
     protected:
-        const KeyboardPlugin &mKeyboardPlugin;  ///< The KeyboardPlugin to use
+        std::shared_ptr<KeyboardPlugin> mKeyboardPlugin{};  ///< The KeyboardPlugin to use
 
         KeyboardMode mKeyboardMode{KeyboardMode::LowerCase};    ///< The mode the keyboard is in.
 
@@ -99,9 +100,6 @@ namespace rose {
 
         std::string mFontName{};                ///< Key face font name
         int mFontSize{};                        ///< Key face font size
-
-        /// Slot to receive key press signals on.
-        std::shared_ptr<Slot<Button::SignalType>> mKeyPressRx{};
 
     public:
 
@@ -121,7 +119,7 @@ namespace rose {
          * @brief Constructor
          * @param keyboardPlugin The KeyboardPlugin to use.
          */
-        explicit Keyboard(const KeyboardPlugin &keyboardPlugin) : mKeyboardPlugin(keyboardPlugin) {}
+        explicit Keyboard(std::shared_ptr<KeyboardPlugin> keyboardPlugin) : mKeyboardPlugin(std::move(keyboardPlugin)) {}
 
         /// See Widget::widgetLayout()
         Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
@@ -141,6 +139,9 @@ namespace rose {
     protected:
         static const KeyboardSpec<4,11> QWERTYData;     ///< The KeyboardSpec.
 
+        std::shared_ptr<Slot<Button::SignalType>> rxKey{};
+        std::shared_ptr<Slot<Button::SignalType>> rxCtl{};
+
     public:
         QUERTY() = default;
         ~QUERTY() override = default;
@@ -150,8 +151,7 @@ namespace rose {
          * @param keyboard The Keyboard Widget to build the keyboard in.
          * @param charSlot The slot to receive key press signals on.
          */
-        void build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName,
-                   shared_ptr <Slot<Button::SignalType>> &charSlot) const override;
+        void build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName) override;
     };
 }
 

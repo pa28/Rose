@@ -62,8 +62,13 @@ namespace rose {
             }
     };
 
-    void QUERTY::build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName,
-                       shared_ptr <Slot<Button::SignalType>> &charSlot) const {
+    void QUERTY::build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName) {
+
+        rxKey = std::make_shared<Slot<Button::SignalType>>();
+        rxKey->setCallback([=](uint32_t, Button::SignalType signal){
+            std::cout << "rxKey " << static_cast<char>(signal.second & 0xFFu) << '\n';
+        });
+
         size_t rowIdx = 0;
         size_t keyIdx = 1;
         auto column = keyboard << wdg<Column>();
@@ -143,7 +148,8 @@ namespace rose {
                     // Character key.
                     auto key = row << wdg<Button>(std::string{(char)keyData[keyIdx]}, ButtonType::NormalButton, fontSize)
                             << CornerStyle::Round << FontName{fontName} << keySize;
-                    key->txPushed.connect(charSlot);
+                    key->txPushed.connect(rxKey);
+                    key->setSignalToken(keyData[keyIdx]);
                 }
             }
             ++rowIdx;
@@ -171,15 +177,11 @@ namespace rose {
 
         mKeySize = Size{hmaxx - hminx + borderWidth * 2, lineSkip + borderWidth * 2};
 
-        mKeyPressRx = std::make_shared<Slot<Button::SignalType>>();
-        mKeyPressRx->setCallback([=](uint32_t, Button::SignalType signalType) {
-        });
-
         mBorder = BorderStyle::Notch;
 //        mKeysGrid = getWidget<Keyboard>() << wdg<Column>();
 //        mKeysGrid->containerLayoutHints().internalSpace = 4;
 //        mKeysGrid->containerLayoutHints().startOffset = 4;
 
-        mKeyboardPlugin.build(getWidget<Keyboard>(), mKeySize, mFontSize, mFontName, mKeyPressRx);
+        mKeyboardPlugin->build(getWidget<Keyboard>(), mKeySize, mFontSize, mFontName);
     }
 }
