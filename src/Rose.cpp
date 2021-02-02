@@ -582,7 +582,7 @@ namespace rose {
     }
 
     void Rose::createStandardIcons() {
-        static constexpr std::array<RoseImageId, 17> iconList{IconCancel, IconHelp,
+        static constexpr std::array<RoseImageId, 18> iconList{IconCancel, IconHelp,
                                                              IconInfo, IconCheck,
                                                              IconAlert, IconDownCascade,
                                                              IconRightCascade, IconLock,
@@ -590,7 +590,7 @@ namespace rose {
                                                              IconRight, IconToEnd,
                                                              IconBack, IconLevelDown,
                                                              Icon1Dot, Icon2Dots,
-                                                             Icon3Dots};
+                                                             Icon3Dots, IconKeyboard};
 
         for (auto &iconId : iconList) {
             int iconCode;
@@ -645,6 +645,9 @@ namespace rose {
                     break;
                 case Icon3Dots:
                     iconCode = ENTYPO_ICON_THREE_DOTS;
+                    break;
+                case IconKeyboard:
+                    iconCode = ENTYPO_ICON_KEYBOARD;
                     break;
                 default:
                     throw std::runtime_error("Unhandled icon id.");

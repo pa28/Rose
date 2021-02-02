@@ -44,11 +44,11 @@ namespace rose {
                     KeySpec{KSS{"xX-2"}},
                     KeySpec{KSS{"cC'3"}},
                     KeySpec{KSS{"vV\"4"}},
-                    KeySpec{KSS{"bB55"}},
-                    KeySpec{KSS{"nN66"}},
-                    KeySpec{KSS{"mM77"}},
-                    KeySpec{KSS{",?88"}},
-                    KeySpec{KSS{"./99"}},
+                    KeySpec{KSS{"bB_5"}},
+                    KeySpec{KSS{"nN?6"}},
+                    KeySpec{KSS{"mM/7"}},
+                    KeySpec{KSS{",?,8"}},
+                    KeySpec{KSS{"./.9"}},
                     KeySpec{SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT},
             },
             KeySpecRow<11>{
@@ -104,7 +104,7 @@ namespace rose {
             case SDLK_RALT:
                 switch (mSymbolState) {
                     case SymbolState::None:
-                        imageId = Icon1Dot;
+                        imageId = IconKeyboard;
                         break;
                     case SymbolState::Symbols1:
                         imageId = Icon2Dots;

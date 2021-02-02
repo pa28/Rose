@@ -170,6 +170,7 @@ namespace rose {
         Icon1Dot,               ///< One Dot
         Icon2Dots,              ///< Two Dots
         Icon3Dots,              ///< Three Dots
+        IconKeyboard,           ///< Keyboard
         BevelOutRoundCorners,   ///< Sheet of round corners beveled out
         BevelInRoundCorners,    ///< Sheet of round corners beveled in
         NotchOutRoundCorners,   ///< Sheet of round corners notched out
