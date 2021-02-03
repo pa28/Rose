@@ -24,7 +24,7 @@ void ConwayLife::build() {
         if (status.first) {
             switch (status.second) {
                 case ExitButton:
-                    createPopup<ExitDialog>() << mButtonRx;
+                    createPopup<ExitDialog>()->setButtonSlot(mButtonRx);
                     needsLayout();
                     break;
                 case ExitDialogOk:
@@ -72,12 +72,12 @@ void ConwayLife::build() {
     auto row = mainWindow << wdg<Row>();
 
     auto column = row << wdg<Column>();
-    mExit = column << wdg<Button>("Exit") << ExitButton << Elastic(true);
-    mGun = column << wdg<Button>("Gun") << GunButton << Elastic(true);
-    mAcorn = column << wdg<Button>("Acorn") << AcornButton << Elastic(true);
-    mSwitch1 = column << wdg<Button>("Switch1") << Switch1Button << Elastic(true);
-    mSwitch2 = column << wdg<Button>("Switch2") << Switch2Button << Elastic(true);
-    mTribute = column << wdg<Button>("Tribute") << TributeButton << Elastic(true);
+    mExit = column << wdg<Button>("Exit") << ExitButton << Elastic(Orientation::Horizontal);
+    mGun = column << wdg<Button>("Gun") << GunButton << Elastic(Orientation::Horizontal);
+    mAcorn = column << wdg<Button>("Acorn") << AcornButton << Elastic(Orientation::Horizontal);
+    mSwitch1 = column << wdg<Button>("Switch1") << Switch1Button << Elastic(Orientation::Horizontal);
+    mSwitch2 = column << wdg<Button>("Switch2") << Switch2Button << Elastic(Orientation::Horizontal);
+    mTribute = column << wdg<Button>("Tribute") << TributeButton << Elastic(Orientation::Horizontal);
     mGeneration = column << wdg<Label>("") << FontSize{20} << FontName{theme().mTimeBoxTimeFont};
     mSlider = column << wdg<Slider>() << Orientation{rose::Orientation::Horizontal} << BorderStyle::Notch;
 

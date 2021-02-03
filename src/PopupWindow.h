@@ -326,4 +326,13 @@ inline std::shared_ptr<WidgetType> operator << (std::shared_ptr<WidgetType> &wid
     return widget;
 }
 
+template<class WidgetType>
+inline std::shared_ptr<WidgetType> operator << (std::shared_ptr<WidgetType> &widget,
+        std::shared_ptr<rose::Slot<rose::Button::SignalType>> &rxSlot) {
+    static_assert(std::is_base_of_v<rose::Popup, WidgetType>,
+            "Button Slot can only be set on objects derived from rose::Popup." );
+    widget->setButtonSlot(rxSlot);
+    return widget;
+}
+
 /** @} */
