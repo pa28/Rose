@@ -215,7 +215,7 @@ namespace rose {
             case SDLK_LSHIFT:
                 switch (mSymbolState) {
                     case SymbolState::None:
-                        imageId = IconUpBold;
+                        imageId = IconUpOpenBig;
                         break;
                     case SymbolState::Symbols1:
                     case SymbolState::Symbols2:
@@ -430,6 +430,7 @@ namespace rose {
 
     void Keyboard::initializeComposite() {
         Frame::initializeComposite();
+        setCornerStyle(CornerStyle::Round);
 
         mFontName = rose()->theme().mKeyboardFont;
         mFontSize = rose()->theme().mKeyboardFontPointSize;

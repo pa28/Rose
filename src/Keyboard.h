@@ -210,6 +210,10 @@ namespace rose {
         void build(shared_ptr <Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName) override;
     };
 
+    /**
+     * @class NumberPad
+     * @brief A numeric keypad KeyboardPlugin.
+     */
     class NumberPad : public KeyboardPlugin {
     protected:
         static constexpr size_t Rows = 5;
@@ -226,6 +230,11 @@ namespace rose {
         NumberPad() = default;
         ~NumberPad() override = default;
 
+        /**
+         * @brief Build the keyboard from the KeyboardSpec and apply any special layout rules.
+         * @param keyboard The Keyboard Widget to build the keyboard in.
+         * @param charSlot The slot to receive key press signals on.
+         */
         void build(std::shared_ptr<Keyboard> keyboard, Size keySize, int fontSize, const std::string &fontName) override;
     };
 }

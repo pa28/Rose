@@ -582,15 +582,16 @@ namespace rose {
     }
 
     void Rose::createStandardIcons() {
-        static constexpr std::array<RoseImageId, 18> iconList{IconCancel, IconHelp,
+        static constexpr std::array<RoseImageId, 19> iconList{IconCancel, IconHelp,
                                                              IconInfo, IconCheck,
                                                              IconAlert, IconDownCascade,
                                                              IconRightCascade, IconLock,
-                                                             IconUpBold, IconLeft,
-                                                             IconRight, IconToEnd,
-                                                             IconBack, IconLevelDown,
-                                                             Icon1Dot, Icon2Dots,
-                                                             Icon3Dots, IconKeyboard};
+                                                             IconUpBold, IconUpOpenBig,
+                                                             IconLeft, IconRight,
+                                                             IconToEnd, IconBack,
+                                                             IconLevelDown, Icon1Dot,
+                                                             Icon2Dots, Icon3Dots,
+                                                             IconKeyboard};
 
         for (auto &iconId : iconList) {
             int iconCode;
@@ -618,6 +619,9 @@ namespace rose {
                     break;
                 case IconLock:
                     iconCode = ENTYPO_ICON_LOCK;
+                    break;
+                case IconUpOpenBig:
+                    iconCode = ENTYPO_ICON_UP_OPEN_BIG;
                     break;
                 case IconUpBold:
                     iconCode = ENTYPO_ICON_UP_BOLD;

@@ -162,6 +162,7 @@ namespace rose {
         IconRightCascade,       ///< Right facing triangle, CascadeButton
         IconLock,               ///< Closed Lock Icon
         IconUpBold,             ///< Bold Up Arrow
+        IconUpOpenBig,          ///< Up Chevron Big
         IconLeft,               ///< Left Arrow
         IconRight,              ///< Right Arrow
         IconToEnd,              ///< Forward to end
