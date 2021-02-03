@@ -65,6 +65,10 @@ namespace rose {
         SingleChild(SingleChild &&) = delete;
         SingleChild& operator=(SingleChild &&) = delete;
 
+        std::shared_ptr<Widget> getChild() {
+            return mChildren.front()->getWidget();
+        }
+
         /**
          * @brief Create a Container view of the child.
          * @tparam ContainerType The type of Container Widget.
