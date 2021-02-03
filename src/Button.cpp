@@ -79,9 +79,10 @@ namespace rose {
                         break;
                 }
 
-            getWidget<Button>() << wdg<Border>(sRose->theme().mButtonPadding)
-                                << wdg<Label>(mLabelText, mBadge)
-                                << FontSize{mLabelFontSize};
+            mPadding = sRose->theme().mButtonPadding;
+
+            getWidget<Button>() << wdg<Label>(mLabelText, mBadge)
+                    << FontSize(mLabelFontSize);
         }
         mClassName = "Button";
     }
@@ -172,13 +173,11 @@ namespace rose {
 
     std::shared_ptr<Label> Button::getLabel() {
         if (!mChildren.empty()) {
-            if (auto border = mChildren.front()->as<Border>(); border) {
-                if (auto label = border->front()->as<Label>(); label) {
-                    return label;
-                }
+            if (auto label = front()->as<Label>(); label) {
+                return label;
             }
         }
-        return std::shared_ptr<Label>();
+        return nullptr;
     }
 
     void Button::setText(const string &text) {
@@ -209,15 +208,14 @@ namespace rose {
     }
 
     void Button::setSize(Size size) {
-        mSize = size;
-        if (auto border = mChildren.front()->as<Border>(); border) {
-            if (auto label = border->front()->as<Label>(); label) {
-                auto labelSize = size;
-                labelSize.width() -= mFrameWidth*2 + border->getPadding()->width();
-                labelSize.height() -= mFrameWidth*2 + border->getPadding()->height();
-                label->setSize(labelSize);
-            }
-        };
+        if (auto label = getLabel(); label) {
+            mSize = size;
+            auto labelSize = size;
+            auto padding = getPadding();
+            labelSize.width() -= mFrameWidth * 2 + (padding ? padding->width() : 0);
+            labelSize.height() -= mFrameWidth * 2 + (padding ? padding->height() : 0);
+            label->setSize(labelSize);
+        }
     }
 
     void Button::setRenderFlip(sdl::RenderFlip renderFlip) {

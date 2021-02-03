@@ -69,18 +69,14 @@ namespace rose {
 
     void CascadeButton::initializeComposite() {
         Button::initializeComposite();
-        mLayoutHints.mElastic = Elastic{Orientation::Both};
-        if (auto border = mChildren.front()->as<Border>(); border) {
-            if (auto label = border->front()->as<Label>(); label) {
-                label->setBadgeRight(true);
-                if (mCascadeButtonType == CascadeButtonType::CascadeDown)
-                    label->setBadge(RoseImageId::IconDownCascade);
-                else
-                    label->setBadge(RoseImageId::IconRightCascade);
-            } else
-                throw std::logic_error("First grandchild of CascadeButton is not a Label");
+        if (auto label = getLabel(); label) {
+            label->setBadgeRight(true);
+            if (mCascadeButtonType == CascadeButtonType::CascadeDown)
+                label->setBadge(RoseImageId::IconDownCascade);
+            else
+                label->setBadge(RoseImageId::IconRightCascade);
         } else
-            throw std::logic_error("First child of CascadeButton is not a Border");
+            throw std::logic_error("First child of CascadeButton is not a Label");
 
         mCascadeButtonRx = std::make_shared<Slot<Button::SignalType>>();
         mCascadeButtonRx->setCallback([=](uint32_t, Button::SignalType signalType){

@@ -72,9 +72,8 @@ void Test::build() {
     std::shared_ptr<Slider> slider{};
     std::shared_ptr<LinearScale> scale{};
 
-    mMainWindow << wdg<Frame>() << Position{50, 50}
+    mMainWindow << wdg<Frame>(5) << Position{50, 50}
                                    << BorderStyle::Bevel << CornerStyle::Round
-                                   << wdg<Border>(4)
                                            << wdg<ScrollArea>() << Size{300,300}
                          << wdg<Column>() << InternalSpace{4}
                                 << wdg<Label>("A very wide label.")  << Manip::Parent
