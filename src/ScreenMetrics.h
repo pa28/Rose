@@ -453,6 +453,18 @@ namespace rose {
         int& right() noexcept { return (*this)[1]; }         ///< Access the right padding.
         int& top() noexcept { return (*this)[2]; }           ///< Access the top padding.
         int& bottom() noexcept { return (*this)[3]; }        ///< Access the bottom padding.
+
+        Padding& operator=(const Padding& other) noexcept {
+            std::copy(other.cbegin(), other.cend(), this->begin());
+            return *this;
+        }
+
+        constexpr Padding& operator=(int value) noexcept {
+            for (auto &v : *this) {
+                v = value;
+            }
+            return *this;
+        }
     };
 
     /**
