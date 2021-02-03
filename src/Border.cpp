@@ -48,6 +48,8 @@ namespace rose {
     }
 
     void Border::initializeComposite() {
+        if (mParent.lock()->getClassName() == "Frame")
+            std::cout << __PRETTY_FUNCTION__ << ' ' << mParent.lock()->getClassName() << '\n';
         if (!mPadding)
             mPadding = Padding::Zero;
     }
