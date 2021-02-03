@@ -69,6 +69,7 @@ list(APPEND ROSE_SRC
         src/Gauge.cpp
         src/ImageRepository.cpp
         src/ImageView.cpp
+        src/Keyboard.cpp
         src/Label.cpp
         src/LinearScale.cpp
         src/Menu.cpp
@@ -82,40 +83,13 @@ list(APPEND ROSE_SRC
         src/Surface.cpp
         src/Tab.cpp
         src/Texture.cpp
+        src/TextField.cpp
         src/Theme.cpp
         src/TimeBox.cpp
         src/Timer.cpp
         src/Utilities.cpp
         src/Slider.cpp
         src/SystemMonitor.cpp
-        src/Widget.cpp
-        )
-
-list(APPEND TEST_SRC
-        src/Border.cpp
-        src/Button.cpp
-        src/Color.cpp
-        src/Container.cpp
-        src/Frame.cpp
-        src/Gauge.cpp
-        src/ImageView.cpp
-        src/Keyboard.cpp
-        src/Label.cpp
-        src/LinearScale.cpp
-        src/Menu.cpp
-        src/EventSemantics.cpp
-        src/PopupWindow.cpp
-        src/Renderer.cpp
-        src/Rose.cpp
-        src/ScreenMetrics.cpp
-        src/ScrollArea.cpp
-        src/SingleChild.cpp
-        src/Slider.cpp
-        src/Surface.cpp
-        src/Texture.cpp
-        src/Timer.cpp
-        src/Theme.cpp
-        src/Utilities.cpp
         src/Widget.cpp
         )
 
@@ -141,7 +115,7 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
 else()
     add_executable(Rose main.cpp ${ROSE_SRC})
     add_executable(Life applications/ConwayLife.cpp ${ROSE_SRC})
-    add_executable(Test tests/WidgetTest.cpp ${TEST_SRC})
+    add_executable(Test tests/WidgetTest.cpp ${ROSE_SRC})
     add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
     add_executable(RoseShell applications/RoseShell.cpp ${ROSE_SRC})
 
