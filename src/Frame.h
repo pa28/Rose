@@ -15,7 +15,7 @@
 #include "Math.h"
 #include "Rose.h"
 #include "Signals.h"
-#include "SingleChild.h"
+#include "Border.h"
 #include "Texture.h"
 #include "Surface.h"
 
@@ -55,7 +55,7 @@ namespace rose {
      * @class Frame
      * @brief A Container Widget that takes one child and places a frame around it.
      */
-    class Frame : public SingleChild {
+    class Frame : public Border {
     protected:
         /**
          * @brief Draw the background for the Frame.
@@ -171,6 +171,18 @@ namespace rose {
         Frame();
 
         /**
+         * @brief Constructor
+         * @param padding Padding value to use on all sides.
+         */
+        explicit Frame(int padding);
+
+        /**
+         * @brief Constructor
+         * @param padding Padding object to set padding.
+         */
+        explicit Frame(Padding padding);
+
+        /**
          * @brief Determine the desired size of the child widget.
          * @details If not overridden the default is to call widgetLayout() for the child and return
          * the current value of mSize of the Container.
@@ -268,7 +280,7 @@ namespace rose {
          * @brief Get the padding around the contentts of the Frame.
          * @return The padding in pixels.
          */
-        int getPadding() const noexcept { return 0; } //return mPadding; }
+        auto getPadding() const noexcept { return mPadding; } //return mPadding; }
 
         /**
          * @brief Set the BorderStyle and return a std::shared_ptr to this.

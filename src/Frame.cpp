@@ -14,16 +14,24 @@
 #include "Surface.h"
 
 namespace rose {
-    Frame::Frame() :
+    Frame::Frame() : Border(),
             mTextureValid(false),
             mDrawBackground(DrawBackground::None),
             mInvert(false),
             mCornerStyle(CornerStyle::Unset) {
     }
 
+    Frame::Frame(int padding) : Frame() {
+        mPadding = Padding{padding};
+    }
+
+    Frame::Frame(Padding padding) : Frame() {
+        mPadding = padding;
+    }
+
     void Frame::initializeComposite() {
         mClassName = "Frame";
-        Container::initializeComposite();
+        Border::initializeComposite();
 
         auto theme = Widget::rose()->theme();
         mBaseColor = theme.mBaseColor;
@@ -46,6 +54,7 @@ namespace rose {
     }
 
     Rectangle Frame::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+#if 0
         auto frameAvailable = clampAvailableArea(available, mPos, mSize);
         frameAvailable.width() -= mFrameWidth * 2;
         frameAvailable.height() -= mFrameWidth * 2;
@@ -62,6 +71,24 @@ namespace rose {
         }
 
         return layout;
+#else
+        auto frameAvailable = clampAvailableArea(available, mPos, mSize);
+        frameAvailable.width() -= mFrameWidth * 2 - (mPadding ? mPadding->width() : 0);
+        frameAvailable.height() -= mFrameWidth * 2 - (mPadding ? mPadding->height() : 0);
+        Rectangle layout{};
+//        auto layout = Border::widgetLayout(renderer, frameAvailable, layoutStage);
+        if (auto child = getChild(); child) {
+            LayoutHints& childHints{child->layoutHints()};
+            layout = child->widgetLayout(renderer, frameAvailable, layoutStage);
+            childHints.mAssignedRect = layout;
+            childHints.mAssignedRect->x() += mFrameWidth + (mPadding ? mPadding->left() : 0);
+            childHints.mAssignedRect->y() += mFrameWidth + (mPadding ? mPadding->top() : 0);
+        }
+        layout.width() += mFrameWidth*2 + (mPadding ? mPadding->width() : 0);
+        layout.height() += mFrameWidth*2 + (mPadding ? mPadding->height() : 0);
+
+        return layout;
+#endif
     }
 
     void Frame::drawFrameOnly(sdl::Renderer &renderer, Rectangle widgetRect) {
@@ -306,7 +333,7 @@ namespace rose {
 
         sdl::Surface surface{dst.width(), dst.height(), 32, SDL_PIXELFORMAT_RGBA8888};
         if (!surface)
-            std::cout << __PRETTY_FUNCTION__ << ' ' << SDL_GetError() << '\n';
+            throw RoseRuntimeError(StringCompositor(__PRETTY_FUNCTION__ , ' ', dst.width(), ',', dst.height(), ' ', SDL_GetError()));
 
         color::RGBA color;
         if (mBorder == BorderStyle::Notch)
