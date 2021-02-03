@@ -252,8 +252,10 @@ namespace rose {
             else
                 res = Position::Zero;
 
-            if (size && res.getSize() > size.value())
-                res = size.value();
+            if (size) {
+                res.width() = std::min(res.width(), size->width());
+                res.height() = std::min(res.height(), size->height());
+            }
 
             return res;
         }
