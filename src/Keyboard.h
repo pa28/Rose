@@ -219,6 +219,9 @@ namespace rose {
         static constexpr size_t SideCols = 1;
         static constexpr size_t SideKeysPerCol = 5;
         static const KeyboardSpec<SideCols,SideKeysPerCol, 1> SideNumberData;  ///< The side key data.
+
+        std::shared_ptr<Slot<Button::SignalType>> rxKey{};      ///< Slot to process keys
+
     public:
         NumberPad() = default;
         ~NumberPad() override = default;

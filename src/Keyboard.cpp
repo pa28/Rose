@@ -50,6 +50,19 @@ namespace rose {
     };
 
     void NumberPad::build(std::shared_ptr<Keyboard> keyboard, Size keySize, int fontSize, const string &fontName) {
+        rxKey = std::make_shared<Slot<Button::SignalType>>();
+        rxKey->setCallback([=](uint32_t, Button::SignalType signal){
+            SDL_Event event;
+            event.type = SDL_TEXTINPUT;
+            event.text.timestamp = SDL_GetTicks();
+            event.text.windowID = 0;
+            event.text.text[0] = static_cast<char>(signal.second & 0xFFu);
+            event.text.text[1] = '\0';
+            SDL_ClearError();
+            if (auto status = SDL_PushEvent(&event); !status)
+                std::cout << __PRETTY_FUNCTION__ << ' ' << status << SDL_GetError() << '\n';
+        });
+
         auto row0 = keyboard << wdg<Row>();
         row0->containerLayoutHints().endOffset = 4;
 
@@ -74,6 +87,7 @@ namespace rose {
                                << FontName{fontName}
                                << keySize;
                 key->setSignalToken(keyData[0]);
+                key->txPushed.connect(rxKey);
                 if (keyData[0] == '0')
                     key << Elastic(Orientation::Both);
                 else
@@ -97,6 +111,7 @@ namespace rose {
                                    << Elastic(Orientation::Both)
                                    << CornerStyle::Round;
                     key->setSignalToken(keyData[0]);
+                    key->txPushed.connect(rxKey);
                 } else {
                     auto key = col << wdg<Button>(std::string{(char) keyData[0]},
                                                   ButtonType::NormalButton, fontSize)
@@ -105,6 +120,7 @@ namespace rose {
                                    << FontName{fontName}
                                    << keySize;
                     key->setSignalToken(keyData[0]);
+                    key->txPushed.connect(rxKey);
                 }
             }
         }
