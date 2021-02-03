@@ -93,17 +93,20 @@ namespace rose {
     void Frame::trimCorners(sdl::Surface &surface, color::RGBA color, Frame::SelectedCorners selectedCorners,
                             Size cornerSize,
                             Size frameSize) {
-        auto trimCorner = [&surface, &color](int x0, int y0, int xw, int yh, int R2) {
+        auto trimColor = color;
+        trimColor.a() = 0.f;
+        auto trimCorner = [&surface, &trimColor](int x0, int y0, int xw, int yh, int R2) {
             for (int x = x0; x0 < xw ? x < xw : x > xw; x0 < xw ? ++x : --x)
                 for (int y = y0; y0 < yh ? y < yh : y > yh; y0 < yh ? ++y : --y) {
                     int xr = xw - x;
                     int yr = yh - y;
                     int r2 = xr * xr + yr * yr;
                     if (r2 > R2) {
-                        surface.pixel(x, y) = sdl::mapRGBA(surface.get()->format, color);
+                        surface.pixel(x, y) = sdl::mapRGBA(surface.get()->format, trimColor);
                     }
                 }
         };
+
         cornerSize.width() /= 2;
         cornerSize.height() /= 2;
         int R2 = cornerSize.width() * cornerSize.width();
