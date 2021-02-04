@@ -90,30 +90,48 @@ namespace rose {
         Padding mPadding{};                             ///< Padding on each side of the Widget, if any, in pixels.
 
         /**
+         * @brief Get the size of the frame and padding.
+         * @return A Size object with the total size of the frame and padding.
+         */
+        [[nodiscard]] constexpr Size totalBorderSize() const noexcept {
+            return Size{mFrameWidth * 2 + mPadding.width(), mFrameWidth * 2 + mPadding.height()};
+        }
+
+        /**
          * @brief Begin layout of a Widget by removing the frame width and padding hints from available screen area.
          * @param available The screen area available, from the Widget parent.
          * @return A new, smaller Rectangle which reserves space for the frame and padding.
          */
         [[nodiscard]] constexpr Rectangle layoutBegin(const Rectangle &available) const noexcept {
             Rectangle interior{available};
-            interior.width() -= mFrameWidth * 2 + mPadding.width();
-            interior.height() -= mFrameWidth * 2 + mPadding.height();
+            auto borderSize = totalBorderSize();
+            interior.width() -= borderSize.width();
+            interior.height() -= borderSize.height();
             return interior;
         }
 
         /**
-         * @brief End layout of a Widget by reclaiming the frame width and padding hings.
-         * @details The relative layout position is shifted and the full screen size of the Widget is calculated.
+         * @brief End layout of a Widget by reclaiming the frame width and padding.
          * @param interior The screen area required/requested by the widget without frame or padding.
          * @return The screen area required/requested by the widget with frame and padding, if any.
          */
         [[nodiscard]] constexpr Rectangle layoutEnd(const Rectangle &interior) const noexcept {
             Rectangle available{interior};
+            auto borderSize = totalBorderSize();
+            available.width() += borderSize.width();
+            available.height() += borderSize.height();
+            return available;
+        }
+
+        /**
+         * @brief Shift the relative position by frame width and padding.
+         * @param interior The interior layout rectangle.
+         * @return The shifted interior rectangle.
+         */
+        [[nodiscard]] constexpr Rectangle relativePositionShift(const Rectangle &interior) const noexcept {
+            Rectangle available{interior};
             available.x() += mFrameWidth + mPadding.left();
             available.y() += mFrameWidth + mPadding.top();
-
-            available.width() += mFrameWidth*2 + mPadding.width();
-            available.height() += mFrameWidth*2 + mPadding.height();
             return available;
         }
     };
