@@ -52,9 +52,9 @@ namespace rose {
         color::RGBA mYellow{dYellow};
         color::RGBA mGreen{dGreen};
 
-        BorderStyle mBorder{dBorder};
+        BorderStyle mBorderStyle{dBorderStyle};
         CornerStyle mCornerStyle{dCornerStyle};
-        int mBorderWidth{dBorderWidth};
+        int mFrameWidth{dFrameWidth};
         int mPadding{dPadding};
         int mButtonPadding{dButtonPadding};
         int mCPUNormalMax{dCPUNormalMax};
@@ -98,9 +98,9 @@ namespace rose {
         static constexpr color::HSVA dYellow{{60.f, 0.7f, 0.8f, 1.0f }};
         static constexpr color::HSVA dGreen{{120.f, 0.7f, 0.8f, 1.0f }};
 
-        static constexpr BorderStyle dBorder{BorderStyle::Unset};
+        static constexpr BorderStyle dBorderStyle{BorderStyle::Unset};
         static constexpr CornerStyle dCornerStyle{CornerStyle::Square};
-        static constexpr int dBorderWidth = 2;
+        static constexpr int dFrameWidth = 2;
         static constexpr int dPadding = 6;
         static constexpr int dButtonPadding = 4;
         static constexpr int dImageButtonSize = 50;
