@@ -203,7 +203,6 @@ namespace rose {
         virtual ~Widget() = default;
         Widget(Widget &&) = delete;
         Widget(const Widget &) = delete;
-        Widget& operator=(Widget &&) = delete;
         Widget& operator=(const Widget &) = delete;
 
         /**
