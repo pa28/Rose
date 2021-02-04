@@ -53,10 +53,10 @@ namespace rose {
             return false;
 
         auto relMousePos = mousePos - mLayoutHints.mAssignedRect->getPosition();
-        auto sliderSize = interiorRectangle().getSize() - getPadding()->padSize();
+        auto sliderSize = interiorArea().getSize() - getPadding().padSize();
         relMousePos = relMousePos - layoutHints().mAssignedRect->getPosition();
 
-        if (auto thumb = getChild<ImageView>(); thumb) {
+        if (auto thumb = getSingleChild<ImageView>(); thumb) {
             auto thumbSize = thumb->getSize();
             relMousePos = relMousePos - thumb->layoutHints().mAssignedRect->getPosition();
             thumb->mouseEnterEvent(relMousePos, false);
@@ -89,8 +89,8 @@ namespace rose {
         if (mChildren.empty())
             return false;
 
-        auto sliderSize = interiorRectangle().getSize() - getPadding()->padSize();
-        if (auto thumb = getChild<ImageView>(); thumb) {
+        auto sliderSize = interiorArea().getSize() - getPadding().padSize();
+        if (auto thumb = getSingleChild<ImageView>(); thumb) {
             auto thumbSize = thumb->getSize();
 
             auto ticks = SDL_GetTicks();
