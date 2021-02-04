@@ -592,6 +592,18 @@ namespace rose {
         }
 
         /**
+         * @brief Set the padding around the contents of the Frame.
+         * @param padding The padding in pixels.
+         */
+        void setPadding(int padding) noexcept { mLayoutHints.mPadding = Padding{padding}; }
+
+        /**
+         * @brief Get the padding around the contentts of the Frame.
+         * @return The padding in pixels.
+         */
+        auto getPadding() const noexcept { return mLayoutHints.mPadding; }
+
+        /**
          * @brief Get the position, on the screen, where the top left corner of the widget is located.
          * @return a Position
          */
