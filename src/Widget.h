@@ -324,6 +324,17 @@ namespace rose {
         }
 
         /**
+         * @brief Get the interior area of a Widget
+         * @return A Rectangle with the interior area.
+         */
+        [[nodiscard]] constexpr Rectangle interiorArea() const noexcept {
+            if (mLayoutHints.mAssignedRect)
+                return mLayoutHints.mAssignedRect.value();
+            else
+                return Rectangle{mPos, mSize};
+        }
+
+        /**
          * @brief Determine the desired size of the widget.
          * @details If not overridden the default is to return the current value of mSize.
          * @param renderer the Renderer to use if needed.
