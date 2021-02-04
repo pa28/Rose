@@ -15,7 +15,7 @@
 #include "Math.h"
 #include "Rose.h"
 #include "Signals.h"
-#include "Border.h"
+#include "SingleChild.h"
 #include "Texture.h"
 #include "Surface.h"
 
@@ -55,7 +55,7 @@ namespace rose {
      * @class Frame
      * @brief A Container Widget that takes one child and places a frame around it.
      */
-    class Frame : public Border {
+    class Frame : public SingleChild {
     protected:
         /**
          * @brief Draw the background for the Frame.

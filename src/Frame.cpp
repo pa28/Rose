@@ -14,7 +14,7 @@
 #include "Surface.h"
 
 namespace rose {
-    Frame::Frame() : Border(),
+    Frame::Frame() : SingleChild(),
             mTextureValid(false),
             mDrawBackground(DrawBackground::None),
             mInvert(false),
@@ -87,7 +87,7 @@ namespace rose {
 
             drawFrameOnly(renderer, widgetRect);
 
-            for (auto &child : mChildren) {
+            if (auto child = getSingleChild(); child) {
                 child->draw(renderer, widgetRect);
             }
         }
