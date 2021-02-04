@@ -73,10 +73,9 @@ namespace rose {
         return layout;
 #else
         auto frameAvailable = clampAvailableArea(available, mPos, mSize);
-        frameAvailable.width() -= mFrameWidth * 2 - (mPadding ? mPadding->width() : 0);
-        frameAvailable.height() -= mFrameWidth * 2 - (mPadding ? mPadding->height() : 0);
+        frameAvailable.width() -= mFrameWidth * 2 + (mPadding ? mPadding->width() : 0);
+        frameAvailable.height() -= mFrameWidth * 2 + (mPadding ? mPadding->height() : 0);
         Rectangle layout{};
-//        auto layout = Border::widgetLayout(renderer, frameAvailable, layoutStage);
         if (auto child = getChild(); child) {
             LayoutHints& childHints{child->layoutHints()};
             layout = child->widgetLayout(renderer, frameAvailable, layoutStage);
