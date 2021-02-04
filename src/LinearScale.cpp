@@ -81,7 +81,7 @@ namespace rose {
             drawFrameOnly(renderer, widgetRect);
             drawBorder(renderer, widgetRect);
 
-            for (auto &child : mChildren) {
+            if (auto child = getSingleChild(); child) {
                 child->draw(renderer, widgetRect);
             }
         }

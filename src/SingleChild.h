@@ -65,7 +65,7 @@ namespace rose {
         SingleChild(SingleChild &&) = delete;
         SingleChild& operator=(SingleChild &&) = delete;
 
-        std::shared_ptr<Widget> getChild() {
+        std::shared_ptr<Widget> getSingleChild() {
             return mChildren.front()->getWidget();
         }
 
@@ -107,7 +107,7 @@ namespace rose {
          * @return std::shared_prt<WidgetType> if child is sent and derived from WidgetType, empty otherwise.
          */
         template<class WidgetType>
-        std::shared_ptr<WidgetType> getChild() {
+        std::shared_ptr<WidgetType> getSingleChild() {
             if (!mChildren.empty())
                 return mChildren.front()->as<WidgetType>();
             return nullptr;
