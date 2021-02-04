@@ -96,10 +96,8 @@ namespace rose {
 
     Rectangle TabBody::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto frame = parent<Frame>();
-        auto frameWidth = frame->frameWidth();
         auto frameAvailable = clampAvailableArea(available, mPos, mSize);
-        frameAvailable.width() -= frameWidth * 2;
-        frameAvailable.height() -= frameWidth * 2;
+        frameAvailable = mLayoutHints.layoutBegin(frameAvailable);
 
         int maxWidth = 0;
         int maxHeight = 0;
@@ -110,12 +108,8 @@ namespace rose {
             layout = child->widgetLayout(renderer, frameAvailable, 0);
 //            if (!layout.getPosition())
 //                layout = Position::Zero;
-            childHints.mAssignedRect = layout;
-
-            childHints.mAssignedRect->x() = frameWidth;
-            childHints.mAssignedRect->y() = frameWidth;
-            layout.width() += frameWidth * 2;
-            layout.height() += frameWidth * 2;
+            childHints.mAssignedRect = childHints.relativePositionShift(layout);
+            layout = mLayoutHints.layoutEnd(layout);
 
             maxWidth = std::max(maxWidth, layout.width());
             maxHeight = std::max(maxHeight, layout.height());

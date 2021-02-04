@@ -79,7 +79,7 @@ namespace rose {
                         break;
                 }
 
-            mPadding = sRose->theme().mButtonPadding;
+            setPadding(sRose->theme().mButtonPadding);
 
             getWidget<Button>() << wdg<Label>(mLabelText, mBadge)
                     << FontSize(mLabelFontSize);
@@ -211,9 +211,9 @@ namespace rose {
         if (auto label = getLabel(); label) {
             mSize = size;
             auto labelSize = size;
-            auto padding = getPadding();
-            labelSize.width() -= mFrameWidth * 2 + (padding ? padding->width() : 0);
-            labelSize.height() -= mFrameWidth * 2 + (padding ? padding->height() : 0);
+            auto borderSize = mLayoutHints.totalBorderSize();
+            labelSize.width() -= borderSize.width();
+            labelSize.height() -= borderSize.height();
             label->setSize(labelSize);
         }
     }

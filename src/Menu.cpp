@@ -82,8 +82,8 @@ namespace rose {
         mCascadeButtonRx->setCallback([=](uint32_t, Button::SignalType signalType){
             if (!mMenuData.empty()) {
                 auto menuPosition = getScreenPosition();
-                menuPosition.y() += mLayoutHints.mAssignedRect->height() - mFrameWidth;
-                menuPosition.x() -= mFrameWidth;
+                menuPosition.y() += mLayoutHints.mAssignedRect->height() - mLayoutHints.mFrameWidth;
+                menuPosition.x() -= mLayoutHints.mFrameWidth;
                 auto minimumSize = mLayoutHints.mAssignedRect->getSize();
                 minimumSize.height() = 0;
                 mPopupMenu = rose()->createPopup<PopupMenu>(menuPosition, minimumSize,

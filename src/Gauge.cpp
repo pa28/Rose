@@ -31,7 +31,7 @@ namespace rose {
         Frame::initializeComposite();
         mLayoutHints.mElastic = Elastic(mOrientation);
         mLayoutHints.mShrinkable = true;
-        mPadding = Padding{4};
+        setPadding(4);
 
         auto interior = getWidget<Frame>() << BorderStyle::Notch << CornerStyle::Round
                                            << Elastic{mOrientation}

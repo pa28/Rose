@@ -32,6 +32,7 @@ namespace rose {
 
     Rectangle Label::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto labelAvailable = clampAvailableArea(available, mPos, mSize);
+        labelAvailable = mLayoutHints.layoutBegin(labelAvailable);
 
         if (!mFont) {
             fetchFont();
@@ -71,6 +72,7 @@ namespace rose {
         if (mVisible) {
             auto sRose = rose();
             auto widgetRect = clampAvailableArea(parentRect, mLayoutHints.mAssignedRect);
+            widgetRect = mLayoutHints.layoutBegin(widgetRect);
 
             if (mTextureDirty || mBadgeDirty) {
                 widgetLayout(renderer, parentRect, 0);

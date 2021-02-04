@@ -42,7 +42,7 @@ namespace rose {
 
         setBorder(BorderStyle::Notch);
         setCornerStyle(CornerStyle::Round);
-        mPadding = 4;
+        setPadding(4);
         if (mOrientation == Orientation::Unset)
             mOrientation = Orientation::Horizontal;
         mLayoutHints.mElastic = Elastic{mOrientation};
@@ -115,14 +115,17 @@ namespace rose {
                     interior.y() += size.height() / 2;
                     interior.height() -= size.height();
                     break;
+                case Orientation::Both:
+                    break;
             }
         }
-        auto scaleSize = interiorRectangle().getSize() - (padding ? padding->padSize() : Size::Zero);
+
+        auto scaleSize = interiorArea().getSize() - mLayoutHints.mPadding.padSize();
         if (mGradient != Gradient::None) {
             drawGradientBackground(renderer, mGradient, interior, mOrientation);
         }
-        auto imageView = front()->as<ImageView>();
-        if (imageView) {
+
+        if (auto imageView = getSingleChild<ImageView>()) {
             if (mImageId) {
                 auto thumbSize = imageView->getSize();
                 auto length = mOrientation == Orientation::Vertical ?
@@ -133,10 +136,12 @@ namespace rose {
                 switch (mOrientation) {
                     case Orientation::Unset:
                     case Orientation::Horizontal:
-                        imageView->layoutHints().mAssignedRect->x() = padding->left() + intOffset;
+                        imageView->layoutHints().mAssignedRect->x() = mLayoutHints.mPadding.left() + intOffset;
                         break;
                     case Orientation::Vertical:
-                        imageView->layoutHints().mAssignedRect->y() = padding->top() + length - intOffset;
+                        imageView->layoutHints().mAssignedRect->y() = mLayoutHints.mPadding.top() + length - intOffset;
+                        break;
+                    case Orientation::Both:
                         break;
                 }
             }
@@ -156,7 +161,7 @@ namespace rose {
     }
 
     void LinearScale::drawImage(sdl::Renderer &renderer, Rectangle available) {
-        auto scaleSize = interiorRectangle().getSize() - getPadding()->padSize();
+        auto scaleSize = interiorArea().getSize() - mLayoutHints.mPadding.padSize();
         auto padding = getPadding();
         auto imageView = front()->as<ImageView>();
         if (imageView) {

@@ -74,7 +74,6 @@ namespace rose {
         mLeftColor{},                          ///< the left shadow colour
         mRightColor{},                         ///< the right shodow colour
         mInvertColor{};                        ///< the invert colour
-        int mFrameWidth{-1};                   ///< The width of the border
         bool mTextureValid{};                  ///< True if the texture is valid, false if the texture must be recreated.
         BorderStyle mBorder{};                 ///< The type of border.
         CornerStyle mCornerStyle;              ///< The style used in border colours
@@ -202,12 +201,6 @@ namespace rose {
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
 
         /**
-         * @brief Get the frame width.
-         * @return The frame width if set, 0 otherwise.
-         */
-        int frameWidth() const noexcept { return mFrameWidth > 0 ? mFrameWidth : 0; }
-
-        /**
          * @brief Get the colour set used by the Frame.
          * @return An array of 6 colours: Base, Top, Bottom, Left, Right and Invert.
          */
@@ -269,18 +262,6 @@ namespace rose {
             mBorder = border;
             mTextureValid = false;
         }
-
-        /**
-         * @brief Set the padding around the contents of the Frame.
-         * @param padding The padding in pixels.
-         */
-        void setPadding(int padding) noexcept { } //mPadding = padding; }
-
-        /**
-         * @brief Get the padding around the contentts of the Frame.
-         * @return The padding in pixels.
-         */
-        auto getPadding() const noexcept { return mPadding; } //return mPadding; }
 
         /**
          * @brief Set the BorderStyle and return a std::shared_ptr to this.
