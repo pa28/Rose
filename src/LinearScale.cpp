@@ -100,14 +100,9 @@ namespace rose {
     }
 
     void LinearScale::drawBorder(sdl::Renderer &renderer, Rectangle available) {
-        auto interior = Rectangle{available.getPosition(), interiorRectangle().getSize()};
-        auto padding = getPadding();
-        if (padding) {
-            interior.x() += mFrameWidth + padding->left();
-            interior.y() += mFrameWidth + padding->top();
-            interior.width() -= padding->width();
-            interior.height() -= padding->height();
-        }
+        auto interior = interiorArea();
+        interior = mLayoutHints.relativePositionShift(mLayoutHints.layoutBegin(available));
+
         if (mImageId) {
             auto size = rose()->imageRepository(mImageId).getSize();
             switch (mOrientation) {

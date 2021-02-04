@@ -296,17 +296,17 @@ namespace rose {
          * @brief Get the interior (managed) size of a Container
          * @return
          */
-        Rectangle interiorRectangle() override {
-            if (mLayoutHints.mAssignedRect) {
-                auto rect = mLayoutHints.mAssignedRect.value();
-                rect.x() += mFrameWidth;
-                rect.y() += mFrameWidth;
-                rect.width() -= mFrameWidth * 2;
-                rect.height() -= mFrameWidth * 2;
-                return rect;
-            }
-            return Rectangle{mPos, mSize};
-        }
+//        Rectangle interiorRectangle() override {
+//            if (mLayoutHints.mAssignedRect) {
+//                auto rect = mLayoutHints.mAssignedRect.value();
+//                rect.x() += mFrameWidth;
+//                rect.y() += mFrameWidth;
+//                rect.width() -= mFrameWidth * 2;
+//                rect.height() -= mFrameWidth * 2;
+//                return rect;
+//            }
+//            return Rectangle{mPos, mSize};
+//        }
 
         /**
          * @brief Get the border CornerStyle

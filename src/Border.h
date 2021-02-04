@@ -60,22 +60,22 @@ namespace rose {
          * @brief Get the interior (managed) size of a Container
          * @return
          */
-        Rectangle interiorRectangle() override {
-            Rectangle rect{};
-            if (mLayoutHints.mAssignedRect) {
-                rect = mLayoutHints.mAssignedRect.value();
-            } else if (mSize) {
-                rect = mSize.value();
-                if (mPos)
-                    rect = mPos.value();
-            }
-
-            rect.x() += mPadding->left();
-            rect.y() += mPadding->top();
-            rect.width() -= mPadding->size();
-            rect.height() -= mPadding->height();
-            return rect;
-        }
+//        Rectangle interiorRectangle() override {
+//            Rectangle rect{};
+//            if (mLayoutHints.mAssignedRect) {
+//                rect = mLayoutHints.mAssignedRect.value();
+//            } else if (mSize) {
+//                rect = mSize.value();
+//                if (mPos)
+//                    rect = mPos.value();
+//            }
+//
+//            rect.x() += mPadding->left();
+//            rect.y() += mPadding->top();
+//            rect.width() -= mPadding->size();
+//            rect.height() -= mPadding->height();
+//            return rect;
+//        }
     };
 }
 
