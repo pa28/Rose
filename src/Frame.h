@@ -74,7 +74,6 @@ namespace rose {
         mLeftColor{},                          ///< the left shadow colour
         mRightColor{},                         ///< the right shodow colour
         mInvertColor{};                        ///< the invert colour
-        int mFrameWidth{-1};                   ///< The width of the border
         bool mTextureValid{};                  ///< True if the texture is valid, false if the texture must be recreated.
         BorderStyle mBorder{};                 ///< The type of border.
         CornerStyle mCornerStyle;              ///< The style used in border colours
@@ -171,6 +170,18 @@ namespace rose {
         Frame();
 
         /**
+         * @brief Constructor
+         * @param padding Padding value to use on all sides.
+         */
+        explicit Frame(int padding);
+
+        /**
+         * @brief Constructor
+         * @param padding Padding object to set padding.
+         */
+        explicit Frame(Padding padding);
+
+        /**
          * @brief Determine the desired size of the child widget.
          * @details If not overridden the default is to call widgetLayout() for the child and return
          * the current value of mSize of the Container.
@@ -188,12 +199,6 @@ namespace rose {
          * @param parentPosition The layout position computed for this widget.
          */
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
-
-        /**
-         * @brief Get the frame width.
-         * @return The frame width if set, 0 otherwise.
-         */
-        int frameWidth() const noexcept { return mFrameWidth > 0 ? mFrameWidth : 0; }
 
         /**
          * @brief Get the colour set used by the Frame.
@@ -259,18 +264,6 @@ namespace rose {
         }
 
         /**
-         * @brief Set the padding around the contents of the Frame.
-         * @param padding The padding in pixels.
-         */
-        void setPadding(int padding) noexcept { } //mPadding = padding; }
-
-        /**
-         * @brief Get the padding around the contentts of the Frame.
-         * @return The padding in pixels.
-         */
-        int getPadding() const noexcept { return 0; } //return mPadding; }
-
-        /**
          * @brief Set the BorderStyle and return a std::shared_ptr to this.
          * @param border
          * @return std::shared_ptr<Frame>
@@ -284,17 +277,17 @@ namespace rose {
          * @brief Get the interior (managed) size of a Container
          * @return
          */
-        Rectangle interiorRectangle() override {
-            if (mLayoutHints.mAssignedRect) {
-                auto rect = mLayoutHints.mAssignedRect.value();
-                rect.x() += mFrameWidth;
-                rect.y() += mFrameWidth;
-                rect.width() -= mFrameWidth * 2;
-                rect.height() -= mFrameWidth * 2;
-                return rect;
-            }
-            return Rectangle{mPos, mSize};
-        }
+//        Rectangle interiorRectangle() override {
+//            if (mLayoutHints.mAssignedRect) {
+//                auto rect = mLayoutHints.mAssignedRect.value();
+//                rect.x() += mFrameWidth;
+//                rect.y() += mFrameWidth;
+//                rect.width() -= mFrameWidth * 2;
+//                rect.height() -= mFrameWidth * 2;
+//                return rect;
+//            }
+//            return Rectangle{mPos, mSize};
+//        }
 
         /**
          * @brief Get the border CornerStyle

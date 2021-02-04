@@ -86,6 +86,54 @@ namespace rose {
         LabelVerticalAlignment mLabelVerAlign{};        ///< Vertical text alignment within a Label.
         std::optional<Rectangle> mAssignedRect{};       ///< If valid the assigned render location relative to parent.
         int mBaseLine{};                                ///< Pixels from the top of the texture to an alignment baseline, for example in a Label.
+        int mFrameWidth{};                              ///< Width of the frame around the Widget, if any, in pixels.
+        Padding mPadding{};                             ///< Padding on each side of the Widget, if any, in pixels.
+
+        /**
+         * @brief Get the size of the frame and padding.
+         * @return A Size object with the total size of the frame and padding.
+         */
+        [[nodiscard]] constexpr Size totalBorderSize() const noexcept {
+            return Size{mFrameWidth * 2 + mPadding.width(), mFrameWidth * 2 + mPadding.height()};
+        }
+
+        /**
+         * @brief Begin layout of a Widget by removing the frame width and padding hints from available screen area.
+         * @param available The screen area available, from the Widget parent.
+         * @return A new, smaller Rectangle which reserves space for the frame and padding.
+         */
+        [[nodiscard]] constexpr Rectangle layoutBegin(const Rectangle &available) const noexcept {
+            Rectangle interior{available};
+            auto borderSize = totalBorderSize();
+            interior.width() -= borderSize.width();
+            interior.height() -= borderSize.height();
+            return interior;
+        }
+
+        /**
+         * @brief End layout of a Widget by reclaiming the frame width and padding.
+         * @param interior The screen area required/requested by the widget without frame or padding.
+         * @return The screen area required/requested by the widget with frame and padding, if any.
+         */
+        [[nodiscard]] constexpr Rectangle layoutEnd(const Rectangle &interior) const noexcept {
+            Rectangle available{interior};
+            auto borderSize = totalBorderSize();
+            available.width() += borderSize.width();
+            available.height() += borderSize.height();
+            return available;
+        }
+
+        /**
+         * @brief Shift the relative position by frame width and padding.
+         * @param interior The interior layout rectangle.
+         * @return The shifted interior rectangle.
+         */
+        [[nodiscard]] constexpr Rectangle relativePositionShift(const Rectangle &interior) const noexcept {
+            Rectangle available{interior};
+            available.x() += mFrameWidth + mPadding.left();
+            available.y() += mFrameWidth + mPadding.top();
+            return available;
+        }
     };
 
     /**
@@ -155,7 +203,6 @@ namespace rose {
         virtual ~Widget() = default;
         Widget(Widget &&) = delete;
         Widget(const Widget &) = delete;
-        Widget& operator=(Widget &&) = delete;
         Widget& operator=(const Widget &) = delete;
 
         /**
@@ -252,8 +299,10 @@ namespace rose {
             else
                 res = Position::Zero;
 
-            if (size && res.getSize() > size.value())
-                res = size.value();
+            if (size) {
+                res.width() = std::min(res.width(), size->width());
+                res.height() = std::min(res.height(), size->height());
+            }
 
             return res;
         }
@@ -271,6 +320,17 @@ namespace rose {
                                           std::optional<Size>{rectangle->getSize()});
             else
                 return clampAvailableArea(available, std::nullopt, std::nullopt);
+        }
+
+        /**
+         * @brief Get the interior area of a Widget
+         * @return A Rectangle with the interior area.
+         */
+        [[nodiscard]] constexpr Rectangle interiorArea() const noexcept {
+            if (mLayoutHints.mAssignedRect)
+                return mLayoutHints.mAssignedRect.value();
+            else
+                return Rectangle{mPos, mSize};
         }
 
         /**
@@ -540,6 +600,18 @@ namespace rose {
                 return true;
             return false;
         }
+
+        /**
+         * @brief Set the padding around the contents of the Frame.
+         * @param padding The padding in pixels.
+         */
+        void setPadding(int padding) noexcept { mLayoutHints.mPadding = Padding{padding}; }
+
+        /**
+         * @brief Get the padding around the contentts of the Frame.
+         * @return The padding in pixels.
+         */
+        auto getPadding() const noexcept { return mLayoutHints.mPadding; }
 
         /**
          * @brief Get the position, on the screen, where the top left corner of the widget is located.

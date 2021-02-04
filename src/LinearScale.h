@@ -35,6 +35,7 @@ namespace rose {
         ImageId mImageId{RoseImageInvalid};     ///< ImageId of the indicator.
         ImageId mCenterId{RoseImageInvalid};    ///< ImageId of the thumb center.
 
+#if 0
         /**
          * @class LinearScaleBorder
          * @brief The border around a LinearScale background.
@@ -69,6 +70,7 @@ namespace rose {
              */
             void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
         };
+#endif
 
         /**
          * @class LinearScaleImage
@@ -105,7 +107,7 @@ namespace rose {
             void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
         };
 
-        shared_ptr<LinearScaleBorder> mBorder{};       ///< The Border inside the Frame.
+//        shared_ptr<LinearScaleBorder> mBorder{};       ///< The Border inside the Frame.
         shared_ptr<LinearScaleImage> mIndicator{}; ///< The optional indicator.
 
     public:

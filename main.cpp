@@ -138,12 +138,11 @@ public:
 
         auto mainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
         auto rowWidget = mainWindow << wdg<Row>();
-        rowWidget << wdg<Frame>()
+        rowWidget << wdg<Frame>(6)
                     << DrawBackground::None
                     << BorderStyle::Notch
                     << CornerStyle::Round
                     << Position(2, 2)
-                    << wdg<Border>(6)
                         << wdg<Column>() << InternalSpace{4}
                             << wdg<CascadeButton>(Id{"CALLSIGN"})
                                 << exitMenu

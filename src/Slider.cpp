@@ -31,6 +31,7 @@ namespace rose {
 
     void Slider::initializeComposite() {
         LinearScale::initializeComposite();
+        mSupportsDrag = true;
         mGradient = Gradient::GreenYellowRed;
     }
 
@@ -51,34 +52,34 @@ namespace rose {
         if (mChildren.empty())
             return false;
 
-        if (auto border = getChild<Border>(); border) {
-            auto relMousePos = mousePos - mLayoutHints.mAssignedRect->getPosition();
-            auto sliderSize = interiorRectangle().getSize() - border->getPadding()->padSize();
-            relMousePos = relMousePos - border->layoutHints().mAssignedRect->getPosition();
+        auto relMousePos = mousePos - mLayoutHints.mAssignedRect->getPosition();
+        auto sliderSize = interiorArea().getSize() - getPadding().padSize();
+        relMousePos = relMousePos - layoutHints().mAssignedRect->getPosition();
 
-            if (auto thumb = border->getChild<ImageView>(); thumb) {
-                auto thumbSize = thumb->getSize();
-                relMousePos = relMousePos - thumb->layoutHints().mAssignedRect->getPosition();
-                thumb->mouseEnterEvent(relMousePos, false);
+        if (auto thumb = getSingleChild<ImageView>(); thumb) {
+            auto thumbSize = thumb->getSize();
+            relMousePos = relMousePos - thumb->layoutHints().mAssignedRect->getPosition();
+            thumb->mouseEnterEvent(relMousePos, false);
 
-                int clampMax;
-                float value = 0.f;
-                switch (mOrientation) {
-                    case Orientation::Unset:
-                    case Orientation::Horizontal:
-                        clampMax = sliderSize.width() - thumbSize->width();
-                        mSliderOffset = std::clamp<int>(mSliderOffset + rel.x(), 0, clampMax);
-                        break;
-                    case Orientation::Vertical:
-                        clampMax = sliderSize.height() - thumbSize->height();
-                        mSliderOffset = std::clamp<int>(mSliderOffset + rel.y(), 0, clampMax);
-                        break;
-                }
-
-                value = (float)mSliderOffset / (float)clampMax;
-                setValue(value, true);
-                setNeedsDrawing();
+            int clampMax;
+            float value = 0.f;
+            switch (mOrientation) {
+                case Orientation::Unset:
+                case Orientation::Horizontal:
+                    clampMax = sliderSize.width() - thumbSize->width();
+                    mSliderOffset = std::clamp<int>(mSliderOffset + rel.x(), 0, clampMax);
+                    break;
+                case Orientation::Vertical:
+                    clampMax = sliderSize.height() - thumbSize->height();
+                    mSliderOffset = std::clamp<int>(mSliderOffset + rel.y(), 0, clampMax);
+                    break;
+                case Orientation::Both:
+                    break;
             }
+
+            value = (float)mSliderOffset / (float)clampMax;
+            setValue(value, true);
+            setNeedsDrawing();
         }
 
         return true;
@@ -88,43 +89,43 @@ namespace rose {
         if (mChildren.empty())
             return false;
 
-        if (auto border = getChild<Border>(); border) {
-            auto sliderSize = interiorRectangle().getSize() - border->getPadding()->padSize();
-            if (auto thumb = border->getChild<ImageView>(); thumb) {
-                auto thumbSize = thumb->getSize();
+        auto sliderSize = interiorArea().getSize() - getPadding().padSize();
+        if (auto thumb = getSingleChild<ImageView>(); thumb) {
+            auto thumbSize = thumb->getSize();
 
-                auto ticks = SDL_GetTicks();
-                int multiplier = 1;
-                auto dTicks = ticks - mLastScrollTick;
-                mLastScrollTick = ticks;
+            auto ticks = SDL_GetTicks();
+            int multiplier = 1;
+            auto dTicks = ticks - mLastScrollTick;
+            mLastScrollTick = ticks;
 
-                if (dTicks > 250)
-                    multiplier = 1;
-                else if (dTicks > 50)
-                    multiplier = 4;
-                else if (dTicks > 10)
-                    multiplier = 8;
-                else
-                    multiplier = 16;
+            if (dTicks > 250)
+                multiplier = 1;
+            else if (dTicks > 50)
+                multiplier = 4;
+            else if (dTicks > 10)
+                multiplier = 8;
+            else
+                multiplier = 16;
 
-                int clampMax = 0;
-                switch (mOrientation) {
-                    case Orientation::Unset:
-                    case Orientation::Horizontal:
-                        clampMax = sliderSize.width() - thumbSize->width();
-                        mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
-                        break;
-                    case Orientation::Vertical:
-                        clampMax = sliderSize.height() - thumbSize->height();
-                        mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
-                        break;
-                }
-
-                auto value = (float)mSliderOffset / (float)clampMax;
-
-                setValue(value, true);
-                setNeedsDrawing();
+            int clampMax = 0;
+            switch (mOrientation) {
+                case Orientation::Unset:
+                case Orientation::Horizontal:
+                    clampMax = sliderSize.width() - thumbSize->width();
+                    mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
+                    break;
+                case Orientation::Vertical:
+                    clampMax = sliderSize.height() - thumbSize->height();
+                    mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
+                    break;
+                case Orientation::Both:
+                    break;
             }
+
+            auto value = (float)mSliderOffset / (float)clampMax;
+
+            setValue(value, true);
+            setNeedsDrawing();
         }
 
         return true;

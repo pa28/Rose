@@ -221,19 +221,19 @@ namespace rose {
          * @brief Get the interior (managed) Rectangle of a Container
          * @return
          */
-        virtual Rectangle interiorRectangle() {
-            if (mLayoutHints.mAssignedRect)
-                return mLayoutHints.mAssignedRect.value();
-            else if (mSize) {
-                if (mPos)
-                    return Rectangle{mPos.value(), mSize.value()};
-                else
-                    return Rectangle{0, 0, mSize.value().width(), mSize.value().height()};
-            }
-
-            throw RoseRuntimeError(
-                    util::StringCompositor(__PRETTY_FUNCTION__, ": ", mClassName, " Id:(", mId, ") has no size."));
-        }
+//        virtual Rectangle interiorRectangle() {
+//            if (mLayoutHints.mAssignedRect)
+//                return mLayoutHints.mAssignedRect.value();
+//            else if (mSize) {
+//                if (mPos)
+//                    return Rectangle{mPos.value(), mSize.value()};
+//                else
+//                    return Rectangle{0, 0, mSize.value().width(), mSize.value().height()};
+//            }
+//
+//            throw RoseRuntimeError(
+//                    util::StringCompositor(__PRETTY_FUNCTION__, ": ", mClassName, " Id:(", mId, ") has no size."));
+//        }
 
         /// Handle a mouse enter event.
         bool mouseEnterEvent(const Position &p, bool enter) override;

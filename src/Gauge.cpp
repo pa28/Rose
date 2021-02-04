@@ -31,9 +31,10 @@ namespace rose {
         Frame::initializeComposite();
         mLayoutHints.mElastic = Elastic(mOrientation);
         mLayoutHints.mShrinkable = true;
+        setPadding(4);
 
         auto interior = getWidget<Frame>() << BorderStyle::Notch << CornerStyle::Round
-                                           << wdg<Border>(4) << Elastic{mOrientation}
+                                           << Elastic{mOrientation}
                                            << wdg<GaugeInterior>() << mOrientation << Elastic{mOrientation};
 
         valueRx = std::make_shared<Slot<float>>();
@@ -71,6 +72,8 @@ namespace rose {
                 layout.width() = 15;
                 layout.height() = gageRect.height();
                 break;
+            case Orientation::Both:
+                break;
         }
         layout = Position::Zero;
         return layout;
@@ -78,7 +81,7 @@ namespace rose {
 
     void Gauge::GaugeInterior::draw(sdl::Renderer &renderer, Rectangle parentRect) {
         auto gaugeRect = clampAvailableArea(parentRect, mLayoutHints.mAssignedRect);
-        auto gauge = parent()->parent<Gauge>();
+        auto gauge = parent<Gauge>();
         if (!mTextureValid || !mTexture) {
             auto valueBands = computeValueBands(gauge->mValueLimits, gaugeRect, mOrientation);
             sdl::Surface surface{gaugeRect.width(), gaugeRect.height()};
@@ -106,6 +109,8 @@ namespace rose {
                             fill.x() = 0;
                             fill.width() = gaugeRect.width();
                             break;
+                        case Orientation::Both:
+                            break;
                     }
                     surface.fillRectangle(fill, color);
                 }
@@ -132,6 +137,8 @@ namespace rose {
                 break;
             case Orientation::Vertical:
                 size = (float) rect.height();
+                break;
+            case Orientation::Both:
                 break;
         }
 

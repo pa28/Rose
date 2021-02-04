@@ -72,9 +72,8 @@ void Test::build() {
     std::shared_ptr<Slider> slider{};
     std::shared_ptr<LinearScale> scale{};
 
-    mMainWindow << wdg<Frame>() << Position{50, 50}
+    mMainWindow << wdg<Frame>(5) << Position{50, 50}
                                    << BorderStyle::Bevel << CornerStyle::Round
-                                   << wdg<Border>(4)
                                            << wdg<ScrollArea>() << Size{300,300}
                          << wdg<Column>() << InternalSpace{4}
                                 << wdg<Label>("A very wide label.")  << Manip::Parent
@@ -91,9 +90,8 @@ void Test::build() {
                                 << wdg<Gauge>() << Manip::Parent
                                 << wdg<LinearScale>(BevelOutRoundCorners) >> scale << Manip::Parent;
 
-    mMainWindow << wdg<Frame>() << Position{ 10, 350}
+    mMainWindow << wdg<Frame>(4) << Position{ 10, 350}
                                 << BorderStyle::Bevel << CornerStyle::Round
-                                << wdg<Border>(4)
             << wdg<Row>() << InternalSpace{4}
                             << wdg<Label>("A very wide label.") << Manip::Parent
                             << wdg<Label>("Label top")
@@ -111,8 +109,8 @@ void Test::build() {
 
     slider->valueTx.connect(scale->valueRx);
 
-    auto keyboard = std::make_shared<QUERTY>();
-    mMainWindow << wdg<Keyboard>(keyboard) << Position{100,0};
+    auto keyboard = std::make_shared<NumberPad>();
+    mMainWindow << wdg<Keyboard>(keyboard) << Position{400,0};
 
 #else
     mHue = mTheme.mBaseColorHSLA.hue() / 360.0f;

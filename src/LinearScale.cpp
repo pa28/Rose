@@ -37,19 +37,23 @@ namespace rose {
 
     void LinearScale::initializeComposite() {
         Frame::initializeComposite();
+
+        mGradient = Gradient::GreenYellowRed;
+
+        setBorder(BorderStyle::Notch);
+        setCornerStyle(CornerStyle::Round);
+        setPadding(4);
         if (mOrientation == Orientation::Unset)
             mOrientation = Orientation::Horizontal;
         mLayoutHints.mElastic = Elastic{mOrientation};
         mLayoutHints.mShrinkable = false;
 
-        mBorder = getWidget<Frame>() << BorderStyle::Notch << CornerStyle::Round
-                                     << wdg<LinearScaleBorder>(2);
-        mIndicator = mBorder << wdg<LinearScaleImage>(mImageId);
+        mIndicator = getWidget<Frame>() << wdg<LinearScaleImage>(mImageId);
         if (!mImageId)
-            mIndicator << Size{20,20};
+            mIndicator << Size{20, 20};
 
         valueRx = std::make_shared<Slot<SignalType>>();
-        valueRx->setCallback([=](uint32_t signalSN, SignalType signalType){
+        valueRx->setCallback([=](uint32_t signalSN, SignalType signalType) {
             setValue(signalType.first, false);
             if (signalSN != mSignalSerialNumber) {
                 valueTx.transmit(signalSN, signalType);
@@ -71,7 +75,16 @@ namespace rose {
     }
 
     void LinearScale::draw(sdl::Renderer &renderer, Rectangle parentRect) {
-        Frame::draw(renderer, parentRect);
+        if (mVisible) {
+            auto widgetRect = clampAvailableArea(parentRect, mLayoutHints.mAssignedRect);
+
+            drawFrameOnly(renderer, widgetRect);
+            drawBorder(renderer, widgetRect);
+
+            if (auto child = getSingleChild(); child) {
+                child->draw(renderer, widgetRect);
+            }
+        }
     }
 
     /*
@@ -87,52 +100,49 @@ namespace rose {
     }
 
     void LinearScale::drawBorder(sdl::Renderer &renderer, Rectangle available) {
-        auto border = front()->as<Border>();
-        if (border) {
-            auto interior = Rectangle{available.getPosition(), interiorRectangle().getSize()};
-            auto padding = border->getPadding();
-            if (padding) {
-                interior.x() += mFrameWidth + padding->left();
-                interior.y() += mFrameWidth + padding->top();
-                interior.width() -= padding->width();
-                interior.height() -= padding->height();
+        auto interior = interiorArea();
+        interior = mLayoutHints.relativePositionShift(mLayoutHints.layoutBegin(available));
+
+        if (mImageId) {
+            auto size = rose()->imageRepository(mImageId).getSize();
+            switch (mOrientation) {
+                case Orientation::Unset:
+                case Orientation::Horizontal:
+                    interior.x() += size.width() / 2;
+                    interior.width() -= size.width();
+                    break;
+                case Orientation::Vertical:
+                    interior.y() += size.height() / 2;
+                    interior.height() -= size.height();
+                    break;
+                case Orientation::Both:
+                    break;
             }
+        }
+
+        auto scaleSize = interiorArea().getSize() - mLayoutHints.mPadding.padSize();
+        if (mGradient != Gradient::None) {
+            drawGradientBackground(renderer, mGradient, interior, mOrientation);
+        }
+
+        if (auto imageView = getSingleChild<ImageView>()) {
             if (mImageId) {
-                auto size = rose()->imageRepository(mImageId).getSize();
+                auto thumbSize = imageView->getSize();
+                auto length = mOrientation == Orientation::Vertical ?
+                              scaleSize.height() - thumbSize->height() :
+                              scaleSize.width() - thumbSize->width();
+                auto offset = (float) length * (mValue - mLowerBound) / (mUpperBound - mLowerBound);
+                auto intOffset = roundToInt(offset);
                 switch (mOrientation) {
                     case Orientation::Unset:
                     case Orientation::Horizontal:
-                        interior.x() += size.width()/2;
-                        interior.width() -= size.width();
+                        imageView->layoutHints().mAssignedRect->x() = mLayoutHints.mPadding.left() + intOffset;
                         break;
                     case Orientation::Vertical:
-                        interior.y() += size.height()/2;
-                        interior.height() -= size.height();
+                        imageView->layoutHints().mAssignedRect->y() = mLayoutHints.mPadding.top() + length - intOffset;
                         break;
-                }
-            }
-            auto scaleSize = interiorRectangle().getSize() - (padding ? padding->padSize() : Size::Zero);
-            if (mGradient != Gradient::None) {
-                drawGradientBackground(renderer, mGradient, interior, mOrientation);
-            }
-            auto imageView = border->front()->as<ImageView>();
-            if (imageView) {
-                if (mImageId) {
-                    auto thumbSize = imageView->getSize();
-                    auto length = mOrientation == Orientation::Vertical ?
-                            scaleSize.height() - thumbSize->height() :
-                            scaleSize.width() - thumbSize->width();
-                    auto offset = (float)length * (mValue - mLowerBound) / (mUpperBound - mLowerBound);
-                    auto intOffset = roundToInt(offset);
-                    switch (mOrientation) {
-                        case Orientation::Unset:
-                        case Orientation::Horizontal:
-                            imageView->layoutHints().mAssignedRect->x() = padding->left() + intOffset;
-                            break;
-                        case Orientation::Vertical:
-                            imageView->layoutHints().mAssignedRect->y() = padding->top() + length - intOffset;
-                            break;
-                    }
+                    case Orientation::Both:
+                        break;
                 }
             }
         }
@@ -151,24 +161,22 @@ namespace rose {
     }
 
     void LinearScale::drawImage(sdl::Renderer &renderer, Rectangle available) {
-        auto border = front()->as<Border>();
-        if (border) {
-            auto scaleSize = interiorRectangle().getSize() - border->getPadding()->padSize();
-            auto padding = border->getPadding();
-            auto imageView = border->front()->as<ImageView>();
-            if (imageView) {
-                auto imageRect = imageView->layoutHints().mAssignedRect;
-                if (mImageId) {
-                    Rectangle dst{available.x()+imageRect->x(), available.y()+imageRect->y(),
-                                     imageRect->width(), imageRect->height()};
-                    if (mCenterId)
-                        rose()->imageRepository().renderCopy(renderer, mCenterId, dst);
-                    rose()->imageRepository().renderCopy(renderer, mImageId, dst);
-                }
+        auto scaleSize = interiorArea().getSize() - mLayoutHints.mPadding.padSize();
+        auto padding = getPadding();
+        auto imageView = front()->as<ImageView>();
+        if (imageView) {
+            auto imageRect = imageView->layoutHints().mAssignedRect;
+            if (mImageId) {
+                Rectangle dst{available.x() + imageRect->x(), available.y() + imageRect->y(),
+                              imageRect->width(), imageRect->height()};
+                if (mCenterId)
+                    rose()->imageRepository().renderCopy(renderer, mCenterId, dst);
+                rose()->imageRepository().renderCopy(renderer, mImageId, dst);
             }
         }
     }
 
+#if 0
     /*
      * LinearScaleBorder
      */
@@ -188,6 +196,7 @@ namespace rose {
         parent<LinearScale>()->drawBorder(renderer, parentRect);
         Border::draw(renderer, parentRect);
     }
+#endif
 
     /*
      * LinearScaleImage
@@ -195,7 +204,7 @@ namespace rose {
 
     void LinearScale::LinearScaleImage::initializeComposite() {
         ImageView::initializeComposite();
-        parent()->parent<LinearScale>()->initializeImageComposite();
+        parent<LinearScale>()->initializeImageComposite();
     }
 
     Rectangle
@@ -207,10 +216,10 @@ namespace rose {
             imageRect = ImageView::widgetLayout(renderer, available, 0);
         }
 
-        return parent()->parent<LinearScale>()->initialImageLayout(renderer, available, imageRect);
+        return parent<LinearScale>()->initialImageLayout(renderer, available, imageRect);
     }
 
     void LinearScale::LinearScaleImage::draw(sdl::Renderer &renderer, Rectangle parentRect) {
-        parent()->parent<LinearScale>()->drawImage(renderer,parentRect);
+        parent<LinearScale>()->drawImage(renderer, parentRect);
     }
 }

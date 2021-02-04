@@ -65,11 +65,10 @@ void RoseShell::build() {
     auto mainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
     auto rowWidget = mainWindow << wdg<Row>();
 
-    rowWidget << wdg<Frame>()
+    rowWidget << wdg<Frame>(6)
               << DrawBackground::None
               << BorderStyle::Notch
               << CornerStyle::Round
-                  << wdg<Border>(6)
                       << wdg<Column>() << InternalSpace{4}
                           << wdg<CascadeButton>("Select Application")
                             << appMenu
@@ -84,21 +83,19 @@ void RoseShell::build() {
     std::shared_ptr<DateBox> gmtDateBox;
 
 
-    rowWidget << wdg<Column>() << InternalSpace{140}
-            << wdg<Frame>()
+    auto colWidget = rowWidget << wdg<Column>();
+    colWidget  << wdg<Frame>(6)
                 << DrawBackground::None
                 << BorderStyle::Notch
                 << CornerStyle::Round
-                    << wdg<Border>(6)
                         << wdg<Column>()
                             << wdg<TimeBox>(mSecondTick) >> timeBox << Manip::Parent
-                            << wdg<DateBox>(mSecondTick) >> dateBox << Manip::Parent
-                            << Parent<Column>()
-            << wdg<Frame>()
+                            << wdg<DateBox>(mSecondTick) >> dateBox << Manip::Parent;
+
+    colWidget   << wdg<Frame>(6)
                 << DrawBackground::None
                 << BorderStyle::Notch
                 << CornerStyle::Round
-                    << wdg<Border>(6)
                         << wdg<Column>()
                             << wdg<TimeBox>(mSecondTick) >> gmtTimeBox << Manip::Parent
                             << wdg<DateBox>(mSecondTick) >> gmtDateBox << Manip::Parent;

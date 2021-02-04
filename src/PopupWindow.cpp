@@ -142,9 +142,8 @@ namespace rose {
 
         mFrame << BorderStyle::BevelIn;
         mFrame->setInvert(true);
-        auto frame = mColumn << wdg<Frame>() << BorderStyle::BevelIn;
-        auto border = frame << wdg<Border>(4);
-        auto column = border << wdg<Column>() << InternalSpace{4};
+        auto frame = mColumn << wdg<Frame>(4) << BorderStyle::BevelIn;
+        auto column = frame << wdg<Column>() << InternalSpace{4};
         mMessageRow = column << wdg<Row>();
         mButtonRow = column << wdg<Row>();
         mButtonRow << InternalSpace{10};

@@ -434,7 +434,7 @@ namespace rose {
 
         mFontName = rose()->theme().mKeyboardFont;
         mFontSize = rose()->theme().mKeyboardFontPointSize;
-        auto borderWidth = rose()->theme().mBorderWidth + rose()->theme().mButtonPadding;
+        auto borderWidth = rose()->theme().mFrameWidth + rose()->theme().mButtonPadding;
 
         auto fontPtr = rose()->fontCache().getFont(mFontName, mFontSize);
         auto[hminx, hmaxx, hminy, hmaxy, hadvance] = getGlyphMetrics(fontPtr, mEm);

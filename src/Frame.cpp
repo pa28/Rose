@@ -14,16 +14,24 @@
 #include "Surface.h"
 
 namespace rose {
-    Frame::Frame() :
+    Frame::Frame() : SingleChild(),
             mTextureValid(false),
             mDrawBackground(DrawBackground::None),
             mInvert(false),
             mCornerStyle(CornerStyle::Unset) {
     }
 
+    Frame::Frame(int padding) : Frame() {
+        mLayoutHints.mPadding = Padding{padding};
+    }
+
+    Frame::Frame(Padding padding) : Frame() {
+        mLayoutHints.mPadding = padding;
+    }
+
     void Frame::initializeComposite() {
         mClassName = "Frame";
-        Container::initializeComposite();
+        SingleChild::initializeComposite();
 
         auto theme = Widget::rose()->theme();
         mBaseColor = theme.mBaseColor;
@@ -32,8 +40,8 @@ namespace rose {
         mLeftColor = theme.mLeftColor;
         mRightColor = theme.mRightColor;
         mInvertColor = theme.mInvertColor;
-        if (mFrameWidth < 0) mFrameWidth = theme.mBorderWidth;
-        if (unset(mBorder)) mBorder = theme.mBorder;
+        mLayoutHints.mFrameWidth = theme.mFrameWidth;
+        if (unset(mBorder)) mBorder = theme.mBorderStyle;
         if (unset(mCornerStyle)) mCornerStyle = theme.mCornerStyle;
 
         // Create the Invert receive slot.
@@ -47,19 +55,14 @@ namespace rose {
 
     Rectangle Frame::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto frameAvailable = clampAvailableArea(available, mPos, mSize);
-        frameAvailable.width() -= mFrameWidth * 2;
-        frameAvailable.height() -= mFrameWidth * 2;
+        frameAvailable = mLayoutHints.layoutBegin(frameAvailable);
         Rectangle layout{};
-        for (auto &child : mChildren) {
+        if (auto child = getSingleChild(); child) {
             LayoutHints& childHints{child->layoutHints()};
-            layout = child->widgetLayout(renderer, frameAvailable, 0);
-            childHints.mAssignedRect = layout;
-            childHints.mAssignedRect->x() += mFrameWidth;
-            childHints.mAssignedRect->y() += mFrameWidth;
-
-            layout.width() += mFrameWidth * 2;
-            layout.height() += mFrameWidth * 2;
+            layout = child->widgetLayout(renderer, frameAvailable, layoutStage);
+            childHints.mAssignedRect = mLayoutHints.relativePositionShift(layout);
         }
+        layout = mLayoutHints.layoutEnd(layout);
 
         return layout;
     }
@@ -84,7 +87,7 @@ namespace rose {
 
             drawFrameOnly(renderer, widgetRect);
 
-            for (auto &child : mChildren) {
+            if (auto child = getSingleChild(); child) {
                 child->draw(renderer, widgetRect);
             }
         }
@@ -167,9 +170,9 @@ namespace rose {
             if ((s & selectedSides) & SelectedSides::TopSide) {
                 fill0.x() = fill1.x() = (extend < 0 ? 0 : cornerSize.width() / 2);
                 fill0.y() = 0;
-                fill1.y() = mFrameWidth / 2;
+                fill1.y() = mLayoutHints.mFrameWidth / 2;
                 fill0.width() = fill1.width() = size.width() - cornerSize.width() / (extend ? 2 : 1);
-                fill0.height() = fill1.height() = mFrameWidth / 2;
+                fill0.height() = fill1.height() = mLayoutHints.mFrameWidth / 2;
                 switch (useBorder) {
                     case UseBorder::BevelOut:
                         color0 = color1 = mTopColor;
@@ -190,10 +193,10 @@ namespace rose {
                 }
             } else if ((s & selectedSides) & SelectedSides::BotSide) {
                 fill0.x() = fill1.x() = (extend < 0 ? 0 : cornerSize.width() / 2);
-                fill0.y() = size.height() - mFrameWidth;
-                fill1.y() = fill0.y() + mFrameWidth / 2;
+                fill0.y() = size.height() - mLayoutHints.mFrameWidth;
+                fill1.y() = fill0.y() + mLayoutHints.mFrameWidth / 2;
                 fill0.width() = fill1.width() = size.width() - cornerSize.width() / (extend ? 2 : 1);
-                fill0.height() = fill1.height() = mFrameWidth / 2;
+                fill0.height() = fill1.height() = mLayoutHints.mFrameWidth / 2;
                 switch (useBorder) {
                     case UseBorder::BevelOut:
                         color0 = color1 = mBotColor;
@@ -214,9 +217,9 @@ namespace rose {
                 }
             } else if ((s & selectedSides) & SelectedSides::LeftSide) {
                 fill0.x() = 0;
-                fill1.x() = mFrameWidth / 2;
+                fill1.x() = mLayoutHints.mFrameWidth / 2;
                 fill0.y() = fill1.y() = (extend < 0 ? 0 : cornerSize.width() / 2);
-                fill0.width() = fill1.width() = mFrameWidth / 2;
+                fill0.width() = fill1.width() = mLayoutHints.mFrameWidth / 2;
                 fill0.height() = fill1.height() = size.height() - cornerSize.height() / (extend ? 2 : 1);
                 switch (useBorder) {
                     case UseBorder::BevelOut:
@@ -237,10 +240,10 @@ namespace rose {
                         break;
                 }
             } else if ((s & selectedSides) & SelectedSides::RightSide) {
-                fill0.x() = size.width() - mFrameWidth;
-                fill1.x() = size.width() - mFrameWidth / 2;
+                fill0.x() = size.width() - mLayoutHints.mFrameWidth;
+                fill1.x() = size.width() - mLayoutHints.mFrameWidth / 2;
                 fill0.y() = fill1.y() = (extend < 0 ? 0 : cornerSize.width() / 2);
-                fill0.width() = fill1.width() = mFrameWidth / 2;
+                fill0.width() = fill1.width() = mLayoutHints.mFrameWidth / 2;
                 fill0.height() = fill1.height() = size.height() - cornerSize.height() / (extend ? 2 : 1);
                 switch (useBorder) {
                     case UseBorder::BevelOut:
@@ -306,7 +309,7 @@ namespace rose {
 
         sdl::Surface surface{dst.width(), dst.height(), 32, SDL_PIXELFORMAT_RGBA8888};
         if (!surface)
-            std::cout << __PRETTY_FUNCTION__ << ' ' << SDL_GetError() << '\n';
+            throw RoseRuntimeError(StringCompositor(__PRETTY_FUNCTION__ , ' ', dst.width(), ',', dst.height(), ' ', SDL_GetError()));
 
         color::RGBA color;
         if (mBorder == BorderStyle::Notch)
