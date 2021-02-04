@@ -86,6 +86,36 @@ namespace rose {
         LabelVerticalAlignment mLabelVerAlign{};        ///< Vertical text alignment within a Label.
         std::optional<Rectangle> mAssignedRect{};       ///< If valid the assigned render location relative to parent.
         int mBaseLine{};                                ///< Pixels from the top of the texture to an alignment baseline, for example in a Label.
+        int mFrameWidth{};                              ///< Width of the frame around the Widget, if any, in pixels.
+        Padding mPadding{};                             ///< Padding on each side of the Widget, if any, in pixels.
+
+        /**
+         * @brief Begin layout of a Widget by removing the frame width and padding hints from available screen area.
+         * @param available The screen area available, from the Widget parent.
+         * @return A new, smaller Rectangle which reserves space for the frame and padding.
+         */
+        [[nodiscard]] constexpr Rectangle layoutBegin(const Rectangle &available) const noexcept {
+            Rectangle interior{available};
+            interior.width() -= mFrameWidth * 2 + mPadding.width();
+            interior.height() -= mFrameWidth * 2 + mPadding.height();
+            return interior;
+        }
+
+        /**
+         * @brief End layout of a Widget by reclaiming the frame width and padding hings.
+         * @details The relative layout position is shifted and the full screen size of the Widget is calculated.
+         * @param interior The screen area required/requested by the widget without frame or padding.
+         * @return The screen area required/requested by the widget with frame and padding, if any.
+         */
+        [[nodiscard]] constexpr Rectangle layoutEnd(const Rectangle &interior) const noexcept {
+            Rectangle available{interior};
+            available.x() += mFrameWidth + mPadding.left();
+            available.y() += mFrameWidth + mPadding.top();
+
+            available.width() += mFrameWidth*2 + mPadding.width();
+            available.height() += mFrameWidth*2 + mPadding.height();
+            return available;
+        }
     };
 
     /**
