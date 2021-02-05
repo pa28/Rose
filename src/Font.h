@@ -53,6 +53,12 @@ namespace rose {
     using FontCacheKey = std::pair<std::string, int>;               ///< Type for TTF cache key
     using FontCacheStore = std::map<FontCacheKey, FontPointer>;     ///< Type for TTF cache store
 
+    auto textSizeUTF8(FontPointer &fontPointer, const std::string &text) {
+        int w, h;
+        TTF_SizeUTF8(fontPointer.get(), text.c_str(), &w, &h);
+        return std::make_tuple(w, h);
+    }
+
     /**
      * @class FontCache
      * @brief Cache storage for requested fonts.

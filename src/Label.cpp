@@ -38,8 +38,7 @@ namespace rose {
             fetchFont();
         }
 
-        int w = 0, h = 0;
-        TTF_SizeUTF8(mFont->get(), mText.c_str(), &w, &h);
+        auto [w, h] = textSizeUTF8(mFont.value(), mText);
 
         if (mText.empty() && mBadge == RoseImageInvalid) {
             mTextSize = Size{max(w, h), max(w, h)};
