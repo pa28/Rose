@@ -17,6 +17,32 @@
  * @{
  */
 
+/**
+ * @brief A Widget manipulator to set the FontSize.
+ * @tparam WidgetClass The type of Widget to manipulate.
+ * @param widget The Widget to manipulate.
+ * @param fontSize The font size in points (pixels).
+ * @return The manipulated Widget.
+ */
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::FontSize fontSize) {
+    widget->setFontSize(fontSize);
+    return widget;
+}
+
+/**
+ * @brief A Widget manipulator to set the FontName
+ * @tparam WidgetClass The type of Widget to manipulate.
+ * @param widget The Widget to manipulate.
+ * @param fontName Then name of the True Type font to use.
+ * @return The manipulated Widget.
+ */
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::FontName fontName) {
+    widget->setFontName(fontName.fontName);
+    return widget;
+}
+
 template<class WidgetType, class WidgetStore>
 inline std::shared_ptr<WidgetType> operator>>(std::shared_ptr<WidgetType> widget, std::shared_ptr<WidgetStore> &variable) {
     static_assert(std::is_base_of_v<WidgetStore,WidgetType>, "WidgetStore must be a base class of WidgetType" );

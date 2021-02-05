@@ -273,11 +273,6 @@ namespace rose {
     };
 
     /**
-     * @brief Type specifier to pass a Font size to a Widget through a manipulator.
-     */
-    using FontSize = int;
-
-    /**
      * @struct FontName
      * @brief A structure to pass a Font name to a Widget through a manipulator.
      */
@@ -334,10 +329,10 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
 }
 
 /**
- * @brief A widget manipulator to set horizontal alignment.
+ * @brief A Widget manipulator to set horizontal alignment.
  * @tparam WidgetClass The type of the widget
  * @param widget The widget
- * @param alignment The kind of alingment
+ * @param alignment The kind of alignment
  * @return The widget
  */
 template<class WidgetClass>
@@ -348,7 +343,7 @@ operator<<(std::shared_ptr<WidgetClass> widget, rose::LabelHorizontalAlignment a
 }
 
 /**
- * @brief A Widget manipulator to set horizontal alignment.
+ * @brief A Widget manipulator to set vertical alignment.
  * @tparam WidgetClass The type of the widget
  * @param widget The widget
  * @param alignment The kind of alingment
@@ -357,32 +352,6 @@ operator<<(std::shared_ptr<WidgetClass> widget, rose::LabelHorizontalAlignment a
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::LabelVerticalAlignment alignment) {
     widget->setLabelVerticalAlignment(alignment);
-    return widget;
-}
-
-/**
- * @brief A Label manipulator to set the FontSize.
- * @tparam WidgetClass The type of Widget to manipulate.
- * @param widget The Widget to manipulate.
- * @param fontSize The font size in points (pixels).
- * @return The manipulated Widget.
- */
-template<class WidgetClass>
-inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::FontSize fontSize) {
-    widget->setFontSize(fontSize);
-    return widget;
-}
-
-/**
- * @brief A Label manipulator to set the FontName
- * @tparam WidgetClass The type of Widget to manipulate.
- * @param widget The Widget to manipulate.
- * @param fontName Then name of the True Type font to use.
- * @return The manipulated Widget.
- */
-template<class WidgetClass>
-inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::FontName fontName) {
-    widget->setFontName(fontName.fontName);
     return widget;
 }
 

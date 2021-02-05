@@ -37,6 +37,11 @@ namespace rose {
 #endif
 
     /**
+     * @brief Type specifier to pass a Font size to a Widget through a manipulator.
+     */
+    using FontSize = int;
+
+    /**
      * @brief An opaque type used to refer to a TextureData object in the cache.
      */
     using ImageId = uint32_t;
