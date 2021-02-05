@@ -108,6 +108,18 @@ namespace rose {
     };
 
     /**
+     * @struct FontName
+     * @brief A structure to pass a Font name to a Widget through a manipulator.
+     */
+    struct FontName {
+        std::string fontName{};
+        FontName() : fontName() {}
+        explicit FontName(const char *string) : fontName(string) {}
+        explicit FontName(const std::string_view stringView) : fontName(stringView) {}
+        explicit FontName(std::string string) : fontName(std::move(string)) {}
+    };
+
+    /**
      * @class RoseLogicError
      * @brief Thrown when a structural logic error is detected at runtime.
      */

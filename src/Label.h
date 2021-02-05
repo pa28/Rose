@@ -254,7 +254,9 @@ namespace rose {
          * @param glyph the glyph to examin.
          * @return a std::tuple with minx, maxx, miny, maxy, and advance
          */
-        std::tuple<int, int, int, int, int> getGlyphMetrics(char glyph);
+        auto getGlyphMetrics(char glyph) {
+            return rose::getGlyphMetrics(mFont.value(), glyph);
+        }
 
         /**
          * @brief Get the font metrics of the current font.
@@ -262,7 +264,9 @@ namespace rose {
          * et al.
          * @return a std::tuple with font height, font ascent, font descent, and font line skip.
          */
-        std::tuple<int, int, int, int> getFontMetrics();
+        auto getFontMetrics() {
+            return rose::getFontMetrics(mFont.value());
+        }
 
         /**
          * @brief See Widget::initializeComposite
@@ -270,18 +274,6 @@ namespace rose {
         void initializeComposite() override;
 
         void setRenderFlip(sdl::RenderFlip &renderFlip) { mRenderFlip = renderFlip; }
-    };
-
-    /**
-     * @struct FontName
-     * @brief A structure to pass a Font name to a Widget through a manipulator.
-     */
-    struct FontName {
-        std::string fontName{};
-        FontName() : fontName() {}
-        explicit FontName(const char *string) : fontName(string) {}
-        explicit FontName(const std::string_view stringView) : fontName(stringView) {}
-        explicit FontName(std::string string) : fontName(std::move(string)) {}
     };
 }
 

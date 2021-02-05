@@ -35,7 +35,8 @@ namespace rose {
         labelAvailable = mLayoutHints.layoutBegin(labelAvailable);
 
         if (!mFont) {
-            fetchFont();
+            mFont = rose::fetchFont(rose()->fontCache(), mFontName, mFontSize);
+            mFontMetrics = rose::getFontMetrics(mFont.value());
         }
 
         auto [w, h] = textSizeUTF8(mFont.value(), mText);
@@ -194,20 +195,8 @@ namespace rose {
     }
 
     void Label::fetchFont() {
-        auto sRose = rose();
-        if (!mFont) {
-            mFont = sRose->fontCache().getFont(mFontName, mFontSize);
-            if (!mFont) {
-                mFont = sRose->fontCache().getFont(sRose->theme().mDefaultFontName, mFontSize);
-                if (!mFont)
-                    throw std::runtime_error(StringCompositor("Neither font", mFontName, " nor default font found: ",
-                                                              FILE_LOC));
-            }
-        }
-        mFontMetrics.fontAscent = TTF_FontAscent(mFont.value().get());
-        mFontMetrics.fontDescent = TTF_FontDescent(mFont.value().get());
-        mFontMetrics.fontHeight = TTF_FontHeight(mFont.value().get());
-        mFontMetrics.fontLineSkip = TTF_FontLineSkip(mFont.value().get());
+        mFont = rose::fetchFont(rose()->fontCache(), mFontName, mFontSize);
+        mFontMetrics = rose::getFontMetrics(mFont.value());
     }
 
     void Label::createTexture(sdl::Renderer &renderer) {
@@ -251,23 +240,5 @@ namespace rose {
 
         mTextSize.width() = mTextSize.width() + badgeSrc.w + mLabelBadgeSpace;
         mTexture = std::move(composite);
-    }
-
-    std::tuple<int, int, int, int, int> rose::Label::getGlyphMetrics(char glyph) {
-//        int minx{}, maxx{}, miny{}, maxy{}, advance{};
-//        fetchFont();
-//        TTF_GlyphMetrics(mFont.value().get(), glyph, &minx, &maxx, &miny, &maxy, &advance);
-//        return std::make_tuple(minx, maxx, miny, maxy, advance);
-        return rose::getGlyphMetrics(mFont, glyph);
-    }
-
-    std::tuple<int, int, int, int> rose::Label::getFontMetrics() {
-        int fontHeight{}, fontAscent{}, fontDescent{}, fontLineSkip{};
-        fetchFont();
-        fontHeight = TTF_FontHeight(mFont.value().get());
-        fontAscent = TTF_FontAscent(mFont.value().get());
-        fontDescent = TTF_FontDescent(mFont.value().get());
-        fontLineSkip = TTF_FontLineSkip(mFont.value().get());
-        return std::make_tuple(fontHeight, fontAscent, fontDescent, fontLineSkip);
     }
 }

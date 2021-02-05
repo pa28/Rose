@@ -94,6 +94,11 @@ namespace rose::util {
         fontDescent,        ///< The length of descenders below the baseline a negative number.
         fontHeight,         ///< The total height of the font (ascent - descent
         fontLineSkip;       ///< The size of a line advance for the font.
+
+        constexpr FontMetrics(const FontMetrics &) noexcept = default;
+        constexpr FontMetrics(FontMetrics &&) noexcept = default;
+        constexpr FontMetrics& operator=(const FontMetrics &) noexcept = default;
+        constexpr FontMetrics& operator=(FontMetrics &&) noexcept = default;
     };
 
     /**
