@@ -429,5 +429,62 @@ namespace rose::sdl {
      */
     uint32_t mapRGBA(SDL_PixelFormat *format, const color::RGBA &color);
 
+    /**
+     * @brief Render text to a Texture.
+     * @tparam Color The type of the color argument.
+     * @param renderer The renderer to use.
+     * @param font The font to use.
+     * @param text The text to render
+     * @param color The foreground Color.
+     * @return The Texture.
+     */
+    template<typename Color>
+    inline sdl::Texture
+    renderTextureBlended(sdl::Renderer &renderer, FontPointer &font, const std::string &text, const Color &color) {
+        static_assert(std::is_same_v<Color, ::rose::color::RGBA> ||
+                      std::is_same_v<Color, ::rose::color::HSVA> ||
+                      std::is_same_v<Color, SDL_Color>,
+                      "Color type is not supported.");
+        if constexpr (std::is_same_v<Color, ::rose::color::RGBA>) {
+            auto fg = color.toSdlColor();
+            return renderTextureBlended(renderer, font, text, fg);
+        } else if constexpr (std::is_same_v<Color, ::rose::color::HSVA>) {
+            auto fg = color::RGBA{color}.toSdlColor();
+            return renderTextureBlended(renderer, font, text, fg);
+        } else if constexpr (std::is_same_v<Color, SDL_Color>) {
+            sdl::Surface surface{TTF_RenderText_Blended(font.get(), text.c_str(), color)};
+            return sdl::Texture{SDL_CreateTextureFromSurface(renderer.get(), surface.get())};
+        }
+    }
+
+    /**
+     * @brief Render text to a Texture.
+     * @tparam Color The type of the color argument.
+     * @param renderer The renderer to use.
+     * @param font The font to use.
+     * @param text The text to render
+     * @param color The foreground Color.
+     * @return The Texture.
+     */
+    template<typename Color>
+    sdl::Texture
+    inline renderTextureBlendedUTF8(sdl::Renderer &renderer, FontPointer &font, const std::string &text,
+                                    const Color &color) {
+        static_assert(std::is_same_v<Color, ::rose::color::RGBA> ||
+                      std::is_same_v<Color, ::rose::color::HSVA> ||
+                      std::is_same_v<Color, SDL_Color>,
+                      "Color type is not supported.");
+        if constexpr (std::is_same_v<Color, ::rose::color::RGBA>) {
+            auto fg = color.toSdlColor();
+            return renderTextureBlendedUTF8(renderer, font, text, fg);
+        } else if constexpr (std::is_same_v<Color, ::rose::color::HSVA>) {
+            auto fg = color::RGBA{color}.toSdlColor();
+            return renderTextureBlendedUTF8(renderer, font, text, fg);
+        } else if constexpr (std::is_same_v<Color, SDL_Color>) {
+            sdl::Surface surface{TTF_RenderUTF8_Blended(font.get(), text.c_str(), color)};
+            return sdl::Texture{SDL_CreateTextureFromSurface(renderer.get(), surface.get())};
+        }
+    }
+
 }
 
