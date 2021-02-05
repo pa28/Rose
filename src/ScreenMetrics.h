@@ -10,6 +10,7 @@
 #include <array>
 #include <iostream>
 #include <iomanip>
+#include <tuple>
 #include <SDL.h>
 #include "Constants.h"
 #include "Utilities.h"
@@ -45,6 +46,13 @@ namespace rose {
 
         /// Move assignment
         constexpr Size& operator=(Size &&) = default;
+
+        /// Assign tuple
+        constexpr Size& operator=(const std::tuple<int,int> t) noexcept {
+            width() = std::get<0>(t);
+            height() = std::get<1>(t);
+            return *this;
+        }
 
         /// Reference accessor for width
         constexpr int &width() { return operator[](0); }
