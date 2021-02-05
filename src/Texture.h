@@ -10,7 +10,9 @@
 #include <filesystem>
 #include <memory>
 #include <SDL.h>
+#include "Font.h"
 #include "ScreenMetrics.h"
+#include "Surface.h"
 
 
 namespace rose::sdl {
@@ -63,6 +65,12 @@ namespace rose::sdl {
 
         int setBlendMOde(SDL_BlendMode blendMode) {
             return SDL_SetTextureBlendMode(get(), blendMode);
+        }
+
+        [[nodiscard]] std::tuple<int, int> getSize() const noexcept {
+            int w, h;
+            SDL_QueryTexture(get(), nullptr, nullptr, &w, &h);
+            return std::make_tuple(w, h);
         }
     };
 
@@ -323,6 +331,7 @@ namespace rose::sdl {
     }
 
     class GradientTexture;
+
     /**
      * @class GradientTexture
      * @brief A gradient rendering kernel.
@@ -333,20 +342,28 @@ namespace rose::sdl {
     class GradientTexture : public Texture {
     public:
         GradientTexture() = default;
+
         ~GradientTexture() = default;
+
         GradientTexture(const GradientTexture &) = delete;
+
         GradientTexture(GradientTexture &&) = default;
-        GradientTexture& operator=(const GradientTexture &) = delete;
-        GradientTexture& operator=(GradientTexture &&) = delete;
+
+        GradientTexture &operator=(const GradientTexture &) = delete;
+
+        GradientTexture &operator=(GradientTexture &&) = delete;
 
         GradientTexture(Renderer &renderer, const color::RGBA &topLeft, const color::RGBA &topRight,
                         const color::RGBA &bottomLeft, const color::RGBA &bottomRight);
 
-        GradientTexture(Renderer &renderer, const color::RGBA &start, const color::RGBA &end, Orientation orientation = Orientation::Horizontal);
+        GradientTexture(Renderer &renderer, const color::RGBA &start, const color::RGBA &end,
+                        Orientation orientation = Orientation::Horizontal);
 
-        void setColors(const color::RGBA &topLeft, const color::RGBA &topRight, const color::RGBA &bottomLeft, const color::RGBA &bottomRight);
+        void setColors(const color::RGBA &topLeft, const color::RGBA &topRight, const color::RGBA &bottomLeft,
+                       const color::RGBA &bottomRight);
 
-        void setColors(const color::RGBA &start, const color::RGBA &end, Orientation orientation = Orientation::Horizontal);
+        void setColors(const color::RGBA &start, const color::RGBA &end,
+                       Orientation orientation = Orientation::Horizontal);
     };
 
     /**
@@ -359,11 +376,16 @@ namespace rose::sdl {
 
     public:
         GradientScale() = default;
+
         ~GradientScale() = default;
+
         GradientScale(const GradientScale &) = delete;
+
         GradientScale(GradientScale &&) = default;
-        GradientScale& operator=(const GradientScale &) = delete;
-        GradientScale& operator=(GradientScale &&) = delete;
+
+        GradientScale &operator=(const GradientScale &) = delete;
+
+        GradientScale &operator=(GradientScale &&) = delete;
     };
 
     /**
@@ -395,7 +417,7 @@ namespace rose::sdl {
          * when the PixelFormat goes out of scop.
          */
         explicit PixelFormat(SDL_PixelFormat *sdlPixelFormat)
-                : std::unique_ptr<SDL_PixelFormat, PixelFormatDestroy>(sdlPixelFormat) { }
+                : std::unique_ptr<SDL_PixelFormat, PixelFormatDestroy>(sdlPixelFormat) {}
 
         /**
          * @brief Constructor

@@ -194,9 +194,10 @@ namespace rose {
 
         LayoutHints mLayoutHints{};     ///< The layout hints for this widget. These are managed by the parent Container.
 
-        bool mSupportsDrag{};                           ///< True if the Widget supports dragging contents.
-        bool mAcceptsFocus{};                           ///< True if the Widget accepts focus.
-        bool mSupportsScrollWheel{};                    ///< True if the Widget supports mouse scroll wheel events.
+        bool mSupportsDrag{};           ///< True if the Widget supports dragging contents.
+        bool mAcceptsFocus{};           ///< True if the Widget accepts focus.
+        bool mSupportsScrollWheel{};    ///< True if the Widget supports mouse scroll wheel events.
+        bool mSupportsKeyboard{};       ///< True if the Widget accepts keyboard input.
 
     public:
         Widget();
