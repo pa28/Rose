@@ -567,7 +567,8 @@ namespace rose {
                           std::is_same_v<typeof((*last)), ScaleBackgroundElement>,
                           "Iterator arguments not of type ScaleBackgroundElement.");
 
-            sdl::ClipRectangleGuard clipRectangleGuard{renderer, dst};
+            sdl::ClipRectangleGuard clipRectangleGuard{renderer };
+            clipRectangleGuard.intersection(dst);
 
             if (first != last) {
                 if (last - first == 1) {

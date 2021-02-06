@@ -423,6 +423,25 @@ namespace rose {
             return !noOverlap(o);
         }
 
+        Rectangle intersection(const Rectangle &o) const {
+            // gives bottom-left point
+            // of intersection rectangle
+
+            auto x5 = std::max(x(), o.x());
+            auto y5 = std::max(y(), o.y());
+
+            // gives top-right point
+            // of intersection rectangle
+            auto x6 = std::min(x()+width(), o.x()+o.width());
+            auto y6 = std::min(y()+height(), o.y()+o.height());
+
+            // no intersection
+            if (x5 > x6 || y5 > y6) {
+                return Rectangle{0,0,0,0};
+            }
+
+            return Rectangle{x5, y5, x6 - x5, y6 - y5};
+        }
     };
 
     /**

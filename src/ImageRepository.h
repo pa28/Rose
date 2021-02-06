@@ -161,8 +161,7 @@ namespace rose {
          */
         void renderCopy(sdl::Renderer &renderer, ImageId imageId, SDL_Rect &imgPaintRect) {
             getSurface(renderer, imageId);
-            auto tex = mImageStore.at(imageId).get();
-            SDL_RenderCopy(renderer.get(), tex, nullptr, &imgPaintRect);
+            SDL_RenderCopy(renderer.get(), mImageStore.at(imageId).get(), nullptr, &imgPaintRect);
         }
 
         /**
@@ -188,6 +187,9 @@ namespace rose {
          */
         void renderCopy(sdl::Renderer &renderer, ImageId imageId, Rectangle &imgDstRect) {
             auto dst = imgDstRect.toSdlRect();
+            sdl::ClipRectangleGuard clipRectangleGuard(renderer);
+            Rectangle clip{imgDstRect};
+            clipRectangleGuard.intersection(clip);
             renderCopy( renderer, imageId, dst);
         }
 

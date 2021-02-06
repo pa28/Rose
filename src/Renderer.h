@@ -487,5 +487,19 @@ namespace rose::sdl {
             SDL_RenderSetClipRect(mRenderer.get(), &rect);
             return *this;
         }
+
+        ClipRectangleGuard &intersection(Rectangle &clip) {
+            SDL_Rect current;
+            SDL_RenderGetClipRect(mRenderer.get(), &current);
+            if (SDL_RectEmpty(&current)) {
+                operator=(clip);
+            } else {
+                mOldClip = current;
+                Rectangle r{current.x, current.y, current.w, current.h};
+                current = r.intersection(clip).toSdlRect();
+                SDL_RenderSetClipRect(mRenderer.get(), &current);
+            }
+            return *this;
+        }
     };
 }
