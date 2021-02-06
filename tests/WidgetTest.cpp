@@ -12,6 +12,7 @@
 #include "Menu.h"
 #include "ScrollArea.h"
 #include "Slider.h"
+#include "TextField.h"
 #include "Theme.h"
 #include "WidgetTest.h"
 
@@ -76,19 +77,21 @@ void Test::build() {
                                    << BorderStyle::Bevel << CornerStyle::Round
                                            << wdg<ScrollArea>() << Size{300,300}
                          << wdg<Column>() << InternalSpace{4}
-                                << wdg<Label>("A very wide label.")  << Manip::Parent
-                                << wdg<Label>("Label left")
-                                    << LabelHorizontalAlignment::Left
-                                    << Manip::Parent
-                                << wdg<Label>("Label right")
-                                    << LabelHorizontalAlignment::Right
-                                    << Manip::Parent
-                                << wdg<Label>("Label centre")
-                                    << LabelHorizontalAlignment::Center
-                                    << Manip::Parent
+//                                << wdg<Label>("A very wide label.")  << Manip::Parent
+//                                << wdg<Label>("Label left")
+//                                    << LabelHorizontalAlignment::Left
+//                                    << Manip::Parent
+//                                << wdg<Label>("Label right")
+//                                    << LabelHorizontalAlignment::Right
+//                                    << Manip::Parent
+//                                << wdg<Label>("Label centre")
+//                                    << LabelHorizontalAlignment::Center
+//                                    << Manip::Parent
+                                << wdg<TextField>(10, "", "suffix", "Call", 6)
+                                        << BorderStyle::Notch << CornerStyle::Round << FontSize{20} << Manip::Parent
                                 << wdg<Slider>() >> slider << Id{"Slider"} << Manip::Parent
                                 << wdg<Gauge>() << Manip::Parent
-                                << wdg<LinearScale>(BevelOutRoundCorners) >> scale << Manip::Parent;
+                                << wdg<LinearScale>(RoseImageId::BevelOutRoundCorners) >> scale << Manip::Parent;
 
     mMainWindow << wdg<Frame>(4) << Position{ 10, 350}
                                 << BorderStyle::Bevel << CornerStyle::Round

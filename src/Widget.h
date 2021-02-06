@@ -557,9 +557,15 @@ namespace rose {
 
          /**
           * @brief Determine if the Widget supports mouse scroll wheel events.
-          * @return
+          * @return True if mouse scroll wheel is supported.
           */
          bool supportsScrollWheel() const { return mSupportsScrollWheel; }
+
+         /**
+          * @brief Determine if the Widget supports keyboard events.
+          * @return True if keyboard is supported.
+          */
+         bool supportsKeyboard() const { return mSupportsKeyboard; }
 
         /**
          * @brief Set a color on a Widget.
@@ -665,6 +671,12 @@ namespace rose {
 
         /// Handle text input (UTF-32 format) (default implementation: do nothing)
         virtual bool keyboardCharacterEvent(unsigned int codepoint);
+
+        /// Handle keyboard focus event.
+        virtual bool keyboardFocusEvent(bool focused) { return false; }
+
+        /// Handle text input
+        virtual bool textInputEvent(const std::string &text) { return false; }
     };
 
     /**
