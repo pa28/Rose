@@ -130,7 +130,10 @@ namespace rose {
         for (auto c:text) {
             switch (c) {
                 case '\r':
+                    break;
                 case '\b':
+                    if (!mText.empty())
+                        mText.erase(mText.end()-1);
                     break;
                 default:
                     mText.push_back(c);
