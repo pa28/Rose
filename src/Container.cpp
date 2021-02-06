@@ -160,247 +160,6 @@ namespace rose {
         mPos = pos;
     }
 
-    void Column::draw(sdl::Renderer &renderer, Rectangle parentRect) {
-        assertLayout();
-        if (!mVisible)
-            return;
-
-        auto widgetRect = parentRect.moveOrigin(mLayoutHints.mAssignedRect->getPosition());
-
-        for (auto &child : mChildren) {
-            child->draw(renderer, widgetRect);
-        }
-    }
-
-    Rectangle Column::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
-        auto columnAvailable = clampAvailableArea(available, mPos, mSize);
-        auto maxWidth = mMinWidth;
-
-        bool first = true;
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->widgetLayout(renderer, columnAvailable, 0);
-            if (!childHints.mShrinkable) {
-                maxWidth = std::max(maxWidth, childHints.mAssignedRect->width());
-            }
-            columnAvailable.height() -= childHints.mAssignedRect->height();
-            if (!first)
-                columnAvailable.height() -= mContainerHints.internalSpace;
-            else
-                first = false;
-        }
-
-        first = true;
-        columnAvailable = clampAvailableArea(available, mPos, mSize);
-        columnAvailable.width() = maxWidth;
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->widgetLayout(renderer, columnAvailable, 1);
-            columnAvailable.height() -= childHints.mAssignedRect->height();
-            if (!first)
-                columnAvailable.height() -= mContainerHints.internalSpace;
-            else
-                first = false;
-        }
-
-        int totalHeight{0};
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            if (childHints.mShrinkable) {
-                childHints.mAssignedRect.value() = wdigetRatioWidth(childHints.mAssignedRect->getSize(), maxWidth);
-            } else if (childHints.mElastic.horizontal()) {
-                childHints.mAssignedRect->width() = maxWidth;
-            }
-            totalHeight += childHints.mAssignedRect->height();
-        }
-
-        int posY = mContainerHints.startOffset;
-        first = true;
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            if (!first)
-                posY += mContainerHints.internalSpace;
-            else
-                first = false;
-            childHints.mAssignedRect->y() = posY;
-            posY += childHints.mAssignedRect->height();
-            if (childHints.mElastic.horizontal()) {
-                childHints.mAssignedRect->width() = maxWidth;
-            } else {
-                switch (childHints.mHorAlign) {
-                    case HorizontalAlignment::Unset:
-                    case HorizontalAlignment::Left:
-                        childHints.mAssignedRect->x() = 0;
-                        break;
-                    case HorizontalAlignment::Center:
-                        childHints.mAssignedRect->x() = (maxWidth - childHints.mAssignedRect->width()) / 2;
-                        break;
-                    case HorizontalAlignment::Right:
-                        childHints.mAssignedRect->x() = maxWidth - childHints.mAssignedRect->width();
-                        break;
-                }
-            }
-        }
-        posY += mContainerHints.endOffset;
-
-        auto layout = Rectangle{mPos, mSize};
-        layout.width() = maxWidth;
-        layout.height() = posY;
-
-        if (mContainerHints.fillToEnd && layoutStage > 0 && layout.height() < available.height()) {
-            auto extraSpace = available.height() - layout.height();
-            size_t elasticChildren = 0;
-            for (auto &child : mChildren) {
-                if (child->layoutHints().mElastic.vertical())
-                    ++elasticChildren;
-            }
-
-            if (elasticChildren) {
-                auto perChildSpace = extraSpace / elasticChildren;
-                int positionShift = 0;
-                for (auto &child : mChildren) {
-                    child->layoutHints().mAssignedRect->x() += positionShift;
-                    if (child->layoutHints().mElastic.vertical()) {
-                        if (elasticChildren == 1) {
-                            child->layoutHints().mAssignedRect->height() += extraSpace;
-                            layout.height() += extraSpace;
-                            positionShift += extraSpace;
-                            extraSpace = 0;
-                        } else {
-                            child->layoutHints().mAssignedRect->height() += perChildSpace;
-                            layout.height() += perChildSpace;
-                            positionShift += perChildSpace;
-                            extraSpace -= perChildSpace;
-                        }
-                        --elasticChildren;
-                    }
-                }
-            }
-        }
-
-        return layout;
-    }
-
-    void Row::draw(sdl::Renderer &renderer, Rectangle parentRect) {
-        assertLayout();
-        if (!mVisible)
-            return;
-
-        auto widgetRect = parentRect.moveOrigin(mLayoutHints.mAssignedRect->getPosition());
-
-        for (auto &child : mChildren) {
-            child->draw(renderer, widgetRect);
-        }
-    }
-
-    Rectangle Row::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
-        auto rowAvailable = clampAvailableArea(available, mPos, mSize);
-        int maxHeight{0};
-
-        bool first = true;
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->widgetLayout(renderer, rowAvailable, 0);
-            rowAvailable.width() -= childHints.mAssignedRect->width();
-            if (!childHints.mShrinkable) {
-                maxHeight = std::max(maxHeight, childHints.mAssignedRect->height());
-            }
-            rowAvailable.width() -= childHints.mAssignedRect->width();
-            if (!first)
-                rowAvailable.width() -= mContainerHints.internalSpace;
-            else
-                first = false;
-        }
-
-        first = true;
-        rowAvailable = clampAvailableArea(available, mPos, mSize);
-        rowAvailable.height() = maxHeight;
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            childHints.mAssignedRect = child->widgetLayout(renderer, rowAvailable, 1);
-            rowAvailable.width() -= childHints.mAssignedRect->width();
-            if (!first)
-                rowAvailable.width() -= mContainerHints.internalSpace;
-            else
-                first = false;
-        }
-
-        int totalWidth{0};
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            if (childHints.mShrinkable) {
-                childHints.mAssignedRect.value() = widgetRatioHeight(childHints.mAssignedRect->getSize(), maxHeight);
-            } else if (childHints.mElastic.vertical()) {
-                childHints.mAssignedRect->height() = maxHeight;
-            }
-            totalWidth += childHints.mAssignedRect->width();
-        }
-
-        int posX = mContainerHints.startOffset;
-        first = true;
-        for (auto &child : mChildren) {
-            LayoutHints &childHints{child->layoutHints()};
-            if (!first)
-                posX += mContainerHints.internalSpace;
-            else
-                first = false;
-            childHints.mAssignedRect->x() = posX;
-            posX += childHints.mAssignedRect->width();
-            if (!childHints.mElastic.vertical()) {
-                switch (childHints.mVerAlign) {
-                    case VerticalAlignment::Unset:
-                    case VerticalAlignment::Top:
-                        childHints.mAssignedRect->y() = 0;
-                        break;
-                    case VerticalAlignment::Center:
-                        childHints.mAssignedRect->y() = (maxHeight - childHints.mAssignedRect->height()) / 2;
-                        break;
-                    case VerticalAlignment::Bottom:
-                        childHints.mAssignedRect->y() = maxHeight - childHints.mAssignedRect->height();
-                        break;
-                }
-            }
-        }
-        posX += mContainerHints.endOffset;
-
-        auto layout = Rectangle{mPos, mSize};
-        layout.width() = posX;
-        layout.height() = maxHeight;
-
-        if (mContainerHints.fillToEnd && layoutStage > 0 && layout.width() < available.width()) {
-            auto extraSpace = available.width() - layout.width();
-            size_t elasticChildren = 0;
-            for (auto &child : mChildren) {
-                if (child->layoutHints().mElastic.horizontal())
-                    ++elasticChildren;
-            }
-
-            if (elasticChildren) {
-                auto perChildSpace = extraSpace / elasticChildren;
-                auto positionShift = 0;
-                for (auto &child : mChildren) {
-                    child->layoutHints().mAssignedRect->x() += positionShift;
-                    if (child->layoutHints().mElastic.horizontal()) {
-                        if (elasticChildren == 1) {
-                            child->layoutHints().mAssignedRect->width() += extraSpace;
-                            layout.width() += extraSpace;
-                            positionShift += extraSpace;
-                            extraSpace = 0;
-                        } else {
-                            child->layoutHints().mAssignedRect->width() += perChildSpace;
-                            layout.width() += perChildSpace;
-                            positionShift += perChildSpace;
-                            extraSpace -= perChildSpace;
-                        }
-                        --elasticChildren;
-                    }
-                }
-            }
-        }
-
-        return layout;
-    }
-
     Grid::Grid(size_t stride, const Size &size, Orientation orientation) : Container() {
         mStride = stride;
         if (size != Size::Zero)
@@ -454,5 +213,153 @@ namespace rose {
         }
 
         return gridAvailable;
+    }
+
+    void Box::draw(sdl::Renderer &renderer, Rectangle parentRect) {
+        if (!mVisible)
+            return;
+
+        auto widgetRect = parentRect.moveOrigin(mLayoutHints.mAssignedRect->getPosition());
+
+        for (auto &child : mChildren) {
+            child->draw(renderer, widgetRect);
+        }
+    }
+
+    Rectangle Box::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
+        auto boxAvailable = clampAvailableArea(available, mPos, mSize);
+        auto maxSecondary = mMinOrthogonal;
+
+        bool first = true;
+        for (auto &child : mChildren) {
+            LayoutHints &childHints{child->layoutHints()};
+            childHints.mAssignedRect = child->widgetLayout(renderer, boxAvailable, 0);
+            if (!childHints.mShrinkable) {
+                maxSecondary = std::max(maxSecondary, childHints.mAssignedRect->sizeSecondary(mOrientation));
+            }
+            boxAvailable.sizePrimary(mOrientation) -= childHints.mAssignedRect->sizePrimary(mOrientation);
+            if (!first)
+                boxAvailable.sizePrimary(mOrientation) -= mContainerHints.internalSpace;
+            else
+                first = false;
+        }
+
+        first = true;
+        boxAvailable = clampAvailableArea(available, mPos, mSize);
+        boxAvailable.sizeSecondary(mOrientation) = maxSecondary;
+        for (auto &child : mChildren) {
+            LayoutHints &childHints{child->layoutHints()};
+            childHints.mAssignedRect = child->widgetLayout(renderer, boxAvailable, 1);
+            boxAvailable.sizePrimary(mOrientation) -= childHints.mAssignedRect->sizePrimary(mOrientation);
+            if (!first)
+                boxAvailable.sizePrimary(mOrientation) -= mContainerHints.internalSpace;
+            else
+                first = false;
+        }
+
+        int totalPrimary{0};
+        for (auto &child : mChildren) {
+            LayoutHints &childHints{child->layoutHints()};
+            if (childHints.mShrinkable) {
+                if (mOrientation == Orientation::Vertical)
+                    childHints.mAssignedRect.value() = wdigetRatioWidth(childHints.mAssignedRect->getSize(),
+                                                                        maxSecondary);
+                else
+                    childHints.mAssignedRect.value() = widgetRatioHeight(childHints.mAssignedRect->getSize(),
+                                                                         maxSecondary);
+            } else if (childHints.mElastic.secondary(mOrientation)) {
+                childHints.mAssignedRect->sizeSecondary(mOrientation) = maxSecondary;
+            }
+            totalPrimary += childHints.mAssignedRect->sizePrimary(mOrientation);
+        }
+
+        int posPrimary = mContainerHints.startOffset;
+        first = true;
+        for (auto &child : mChildren) {
+            LayoutHints &childHints{child->layoutHints()};
+            if (!first)
+                posPrimary += mContainerHints.internalSpace;
+            else
+                first = false;
+            childHints.mAssignedRect->positionPrimary(mOrientation) = posPrimary;
+            posPrimary += childHints.mAssignedRect->sizePrimary(mOrientation);
+            if (mOrientation == Orientation::Vertical) {
+                // Column implementation.
+                if (childHints.mElastic.horizontal()) {
+                    childHints.mAssignedRect->width() = maxSecondary;
+                } else {
+                    switch (childHints.mHorAlign) {
+                        case HorizontalAlignment::Unset:
+                        case HorizontalAlignment::Left:
+                            childHints.mAssignedRect->x() = 0;
+                            break;
+                        case HorizontalAlignment::Center:
+                            childHints.mAssignedRect->x() = (maxSecondary - childHints.mAssignedRect->width()) / 2;
+                            break;
+                        case HorizontalAlignment::Right:
+                            childHints.mAssignedRect->x() = maxSecondary - childHints.mAssignedRect->width();
+                            break;
+                    }
+                }
+            } else {
+                // Row implementation.
+                if (childHints.mElastic.vertical()) {
+                    childHints.mAssignedRect->height() = maxSecondary;
+                } else {
+                    switch (childHints.mVerAlign) {
+                        case VerticalAlignment::Unset:
+                        case VerticalAlignment::Top:
+                            childHints.mAssignedRect->y() = 0;
+                            break;
+                        case VerticalAlignment::Center:
+                            childHints.mAssignedRect->y() = (maxSecondary - childHints.mAssignedRect->height()) / 2;
+                            break;
+                        case VerticalAlignment::Bottom:
+                            childHints.mAssignedRect->y() = maxSecondary - childHints.mAssignedRect->height();
+                            break;
+                    }
+                }
+            }
+
+        }
+        posPrimary += mContainerHints.endOffset;
+
+        auto layout = Rectangle{mPos, mSize};
+        layout.sizeSecondary(mOrientation) = maxSecondary;
+        layout.sizePrimary(mOrientation) = posPrimary;
+
+        if (mContainerHints.fillToEnd && layoutStage > 0 &&
+            layout.sizePrimary(mOrientation) < available.sizePrimary(mOrientation)) {
+            auto extraSpace = available.sizePrimary(mOrientation) - layout.sizePrimary(mOrientation);
+            size_t elasticChildren = 0;
+            for (auto &child : mChildren) {
+                if (child->layoutHints().mElastic.primary(mOrientation))
+                    ++elasticChildren;
+            }
+
+            if (elasticChildren) {
+                auto perChildSpace = extraSpace / elasticChildren;
+                int positionShift = 0;
+                for (auto &child : mChildren) {
+                    child->layoutHints().mAssignedRect->positionPrimary(mOrientation) += positionShift;
+                    if (child->layoutHints().mElastic.primary(mOrientation)) {
+                        if (elasticChildren == 1) {
+                            child->layoutHints().mAssignedRect->sizePrimary(mOrientation) += extraSpace;
+                            layout.sizePrimary(mOrientation) += extraSpace;
+                            positionShift += extraSpace;
+                            extraSpace = 0;
+                        } else {
+                            child->layoutHints().mAssignedRect->sizePrimary(mOrientation) += perChildSpace;
+                            layout.sizePrimary(mOrientation) += perChildSpace;
+                            positionShift += perChildSpace;
+                            extraSpace -= perChildSpace;
+                        }
+                        --elasticChildren;
+                    }
+                }
+            }
+        }
+
+        return layout;
     }
 }

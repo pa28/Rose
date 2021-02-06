@@ -217,24 +217,6 @@ namespace rose {
          */
         static Size widgetRatioHeight(Size size, int height);
 
-        /**
-         * @brief Get the interior (managed) Rectangle of a Container
-         * @return
-         */
-//        virtual Rectangle interiorRectangle() {
-//            if (mLayoutHints.mAssignedRect)
-//                return mLayoutHints.mAssignedRect.value();
-//            else if (mSize) {
-//                if (mPos)
-//                    return Rectangle{mPos.value(), mSize.value()};
-//                else
-//                    return Rectangle{0, 0, mSize.value().width(), mSize.value().height()};
-//            }
-//
-//            throw RoseRuntimeError(
-//                    util::StringCompositor(__PRETTY_FUNCTION__, ": ", mClassName, " Id:(", mId, ") has no size."));
-//        }
-
         /// Handle a mouse enter event.
         bool mouseEnterEvent(const Position &p, bool enter) override;
 
@@ -323,31 +305,28 @@ namespace rose {
         Modality getModal() const { return mModal; }
     };
 
-    /**
-     * @class Column
-     * @brief A container that manages children in a vertical arrangement.
-     */
-    class Column : public Container {
+    class Box : public Container {
     protected:
-        int mMinWidth{0};           ///< The minimum requested width for the Column.
+        int mMinOrthogonal{};                    ///< The minimum size along the secondary axis.
+        Orientation mOrientation{};              ///< The box Orientation.
 
     public:
-        ~Column() override = default;
+        ~Box() override = default;
 
-        Column(Column &&) = delete;
+        Box(Box &&) = delete;
 
-        Column(const Column &) = delete;
+        Box(const Box &) = delete;
 
-        Column &operator=(Column &&) = delete;
+        Box &operator=(Box &&) = delete;
 
-        Column &operator=(const Column &) = delete;
+        Box &operator=(const Box &) = delete;
 
         /**
          * @brief Constructor see: Widget constructor.
          * @param parent
          */
-        Column() : Container() {
-            mClassName = "Column";
+        Box() : Container() {
+            mClassName = "Box";
         }
 
         /**
@@ -364,14 +343,43 @@ namespace rose {
          * @brief Set the minimum width of the Column
          * @param minimumWidth The minimum width.
          */
-        void setMinimumWidth(int minimumWidth) { mMinWidth = minimumWidth; }
+        void setMinimumOrthogonal(int minimumOrthogonal) { mMinOrthogonal = minimumOrthogonal; }
+
+        /// Set the orientation of the Box
+        void setOrientation(Orientation orientation) override { mOrientation = orientation; }
+    };
+
+    /**
+     * @class Column
+     * @brief A container that manages children in a vertical arrangement.
+     */
+    class Column : public Box {
+    public:
+        ~Column() override = default;
+
+        Column(Column &&) = delete;
+
+        Column(const Column &) = delete;
+
+        Column &operator=(Column &&) = delete;
+
+        Column &operator=(const Column &) = delete;
+
+        /**
+         * @brief Constructor see: Widget constructor.
+         * @param parent
+         */
+        Column() : Box() {
+            mClassName = "Column";
+            mOrientation = Orientation::Vertical;
+        }
     };
 
     /**
      * @class Row
      * @brief A container that manages children in a horizontal arragement.
      */
-    class Row : public Container {
+    class Row : public Box {
     public:
         ~Row() override = default;
 
@@ -387,19 +395,10 @@ namespace rose {
          * @brief Constructor see: Widget constructor.
          * @param parent
          */
-        Row() : Container() {
+        Row() : Box() {
             mClassName = "Row";
+            mOrientation = Orientation::Horizontal;
         }
-
-        /**
-         * @brief See Widget::draw.
-         */
-        void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
-
-        /**
-         * @brief See Widget::widgetLayout.
-         */
-        Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
     };
 
     /**
