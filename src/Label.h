@@ -65,17 +65,17 @@ namespace rose {
          */
         void fetchFont();
 
-        /**
-         * @brief Create the text texture.
-         * @param renderer the rendere to use
-         */
-        void createTexture(sdl::Renderer &renderer);
-
-        /**
-         * @brief Create a composite texture of (possibly empty) text and badge
-         * @param renderer
-         */
-        void compositeBadge(sdl::Renderer &renderer);
+//        /**
+//         * @brief Create the text texture.
+//         * @param renderer the Renderer to use
+//         */
+//        void createTexture(sdl::Renderer &renderer);
+//
+//        /**
+//         * @brief Create a composite texture of (possibly empty) text and badge
+//         * @param renderer
+//         */
+//        void compositeBadge(sdl::Renderer &renderer);
 
     public:
         Label();

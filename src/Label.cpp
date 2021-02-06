@@ -194,49 +194,51 @@ namespace rose {
 
     void Label::fetchFont() {
         mFont = rose::fetchFont(rose()->fontCache(), mFontName, mFontSize);
-        mFontMetrics = rose::getFontMetrics(mFont.value());
+        mFontMetrics = rose::getFontMetrics(mFont);
     }
 
-    void Label::createTexture(sdl::Renderer &renderer) {
-        if (!mFont)
-            fetchFont();
+//    void Label::createTexture(sdl::Renderer &renderer) {
+//        if (!mFont)
+//            fetchFont();
+//
+//        mTexture = rose::sdl::renderTextureBlended(renderer, mFont, mText, mTextColor);
+//        mTextSize = mTexture.getSize();
+//        auto fg = mTextColor.toSdlColor();
+//        sdl::Surface surface{TTF_RenderText_Blended(mFont.get(), mText.c_str(), fg)};
+//        mTextSize = Size{surface->w, surface->h};
+//        mTexture.reset(SDL_CreateTextureFromSurface(renderer.get(), surface.get()));
+//    }
 
-        auto fg = mTextColor.toSdlColor();
-        sdl::Surface surface{TTF_RenderText_Blended(mFont.value().get(), mText.c_str(), fg)};
-        mTextSize = Size{surface->w, surface->h};
-        mTexture.reset(SDL_CreateTextureFromSurface(renderer.get(), surface.get()));
-    }
-
-    void Label::compositeBadge(sdl::Renderer &renderer) {
-        auto sRose = rose();
-        SDL_Rect badgeSrc;
-        sRose->imageRepository(mBadge).getRectangle(badgeSrc);
-
-        sdl::TextureData composite{renderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_TARGET,
-                                                     mTextSize.width() + badgeSrc.w + mLabelBadgeSpace,
-                                                     mTextSize.height()};
-
-        composite.setBlendMOde(SDL_BLENDMODE_BLEND);
-        sdl::RenderTargetGuard compositeGuard{renderer, composite};
-        sdl::DrawColorGuard drawColorGuard{renderer, color::RGBA::TransparentBlack};
-        renderer.renderClear();
-
-        Rectangle dst{mBadgeRight ? 0 : badgeSrc.w + mLabelBadgeSpace, 0,
-                         mTextSize.width(), mTextSize.height()};
-        renderer.renderCopy(mTexture, dst);
-
-        dst.x() = mBadgeRight ? mTextSize.width() + mLabelBadgeSpace : 0;
-        dst.width() = badgeSrc.w;
-        if (badgeSrc.h < dst.height()) {
-            dst.y() = (dst.height() - badgeSrc.h) / 2;
-            dst.height() = badgeSrc.h;
-        } else {
-            badgeSrc.y = (badgeSrc.h - dst.height()) / 2;
-            badgeSrc.h = dst.height();
-        }
-        sRose->imageRepository().renderCopy(renderer, mBadge, dst);
-
-        mTextSize.width() = mTextSize.width() + badgeSrc.w + mLabelBadgeSpace;
-        mTexture = std::move(composite);
-    }
+//    void Label::compositeBadge(sdl::Renderer &renderer) {
+//        auto sRose = rose();
+//        SDL_Rect badgeSrc;
+//        sRose->imageRepository(mBadge).getRectangle(badgeSrc);
+//
+//        sdl::TextureData composite{renderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_TARGET,
+//                                                     mTextSize.width() + badgeSrc.w + mLabelBadgeSpace,
+//                                                     mTextSize.height()};
+//
+//        composite.setBlendMOde(SDL_BLENDMODE_BLEND);
+//        sdl::RenderTargetGuard compositeGuard{renderer, composite};
+//        sdl::DrawColorGuard drawColorGuard{renderer, color::RGBA::TransparentBlack};
+//        renderer.renderClear();
+//
+//        Rectangle dst{mBadgeRight ? 0 : badgeSrc.w + mLabelBadgeSpace, 0,
+//                         mTextSize.width(), mTextSize.height()};
+//        renderer.renderCopy(mTexture, dst);
+//
+//        dst.x() = mBadgeRight ? mTextSize.width() + mLabelBadgeSpace : 0;
+//        dst.width() = badgeSrc.w;
+//        if (badgeSrc.h < dst.height()) {
+//            dst.y() = (dst.height() - badgeSrc.h) / 2;
+//            dst.height() = badgeSrc.h;
+//        } else {
+//            badgeSrc.y = (badgeSrc.h - dst.height()) / 2;
+//            badgeSrc.h = dst.height();
+//        }
+//        sRose->imageRepository().renderCopy(renderer, mBadge, dst);
+//
+//        mTextSize.width() = mTextSize.width() + badgeSrc.w + mLabelBadgeSpace;
+//        mTexture = std::move(composite);
+//    }
 }
