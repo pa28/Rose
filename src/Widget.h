@@ -413,6 +413,12 @@ namespace rose {
         auto getSize() const { return mSize; }
 
         /**
+         * @brief Set the font size on Widgets that support FontSize.
+         * @param fontSize
+         */
+        virtual void setFontSize(FontSize fontSize) {}
+
+        /**
          * @brief Set the text value if implemented by a Widget.
          * @details The default behavior is to do nothing. Widgets that implement a text member must override or
          * be derived from a Widget that does override.

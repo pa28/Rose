@@ -94,7 +94,7 @@ namespace rose {
             return getWidget<TimeBox>();
         }
 
-        void setFontSize(int fontSize) {
+        void setFontSize(int fontSize) override {
             mHoursMinutes->setFontSize(fontSize);
             mSeconds->setFontSize(2*fontSize/3);
         }

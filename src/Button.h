@@ -226,7 +226,7 @@ namespace rose {
          * @brief Set the font size.
          * @param fontSize The point size of the font in pixels.
          */
-        void setFontSize(int fontSize);
+        void setFontSize(int fontSize) override;
 
         void setSize(Size size) override;
 

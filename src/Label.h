@@ -141,7 +141,7 @@ namespace rose {
          * @details Setting the font size invalidates the text texture and the font.
          * @param fontSize
          */
-        void setFontSize(int fontSize) {
+        void setFontSize(int fontSize) override {
             mFontSize = fontSize;
             mTextureDirty = true;
             mFont = nullopt;
@@ -158,7 +158,7 @@ namespace rose {
          * @brief Set the text of the label
          * @param text The text
          */
-        void setText(const std::string &text) {
+        void setText(const std::string &text) override {
             mText = text;
             mTextureDirty = true;
             setNeedsDrawing();
