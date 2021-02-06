@@ -200,12 +200,22 @@ namespace rose::sdl {
         int renderCopy(const Texture &texture);
 
         /**
-         * @brief Calls SDL_RenderCopy to copy the source texture to the current target at a destination Rectangel.
+         * @brief Calls SDL_RenderCopy to copy the source texture to the current target at a destination Rectangle.
          * @param texture The sdl::Texture
          * @param dst The destination RectangleInt
          * @return The return status of SDL_RenderCopy.
          */
         int renderCopy(const Texture &texture, Rectangle dst);
+
+        /**
+         * @brief Calls SDL_RenderCopy to copy the source texture from a source Rectangle
+         * to the current target at a destination Rectangle.
+         * @param texture The Texture.
+         * @param src The source Rectangle.
+         * @param dst The destination Rectangle.
+         * @return The return status of SDL_RenderCopy.
+         */
+        int renderCopy(const Texture &texture, Rectangle src, Rectangle dst);
 
         /**
          * @brief Render copy a GradientTexture kernel across the destination Rectangle.

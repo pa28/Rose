@@ -29,6 +29,12 @@ namespace rose::sdl {
         return SDL_RenderCopy(mRenderer.get(), texture.get(), nullptr, &dstRect);
     }
 
+    int Renderer::renderCopy(const Texture &texture, Rectangle src, Rectangle dst) {
+        SDL_Rect srcRect = src.toSdlRect();
+        SDL_Rect dstRect = dst.toSdlRect();
+        return SDL_RenderCopy(mRenderer.get(), texture.get(), &srcRect, &dstRect);
+    }
+
     int Renderer::renderCopy(const Texture &texture) {
         return SDL_RenderCopy(mRenderer.get(), texture.get(), nullptr, nullptr);
     }
