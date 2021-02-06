@@ -43,7 +43,7 @@ namespace rose {
             KeySpecRow<NumberPad::SideKeysPerCol, 1>{
                     makeKeySpec<1>("-"),
                     makeKeySpec<1>("+"),
-                    makeKeySpec<1>("_"),
+                    makeKeySpec<1>("\b"),
                     makeKeySpec<1>("\r"),
                     makeKeySpec<1>(0)
             }
@@ -102,26 +102,29 @@ namespace rose {
         col->containerLayoutHints().fillToEnd = true;
         for (auto &keyRow : SideNumberData) {
             for (auto &keyData : keyRow) {
+                std::shared_ptr<Button> key;
                 if (keyData[0] == 0)
                     break;
-                if (keyData[0] == '\r') {
+                if (keyData[0] == SDLK_RETURN) {
                     auto renderFlip = sdl::RenderFlip{SDL_FLIP_HORIZONTAL};
-                    auto key = col << wdg<Button>(RoseImageId::IconLevelDown, ButtonType::NormalButton)
-                                   << renderFlip
-                                   << Elastic(Orientation::Both)
-                                   << CornerStyle::Round;
-                    key->setSignalToken(keyData[0]);
-                    key->txPushed.connect(rxKey);
+                    key = col << wdg<Button>(RoseImageId::IconLevelDown, ButtonType::NormalButton)
+                              << renderFlip
+                              << Elastic(Orientation::Both)
+                              << CornerStyle::Round;
+                } else if (keyData[0] == SDLK_BACKSPACE) {
+                    key = col << wdg<Button>(RoseImageId::IconBack, ButtonType::NormalButton)
+                              << CornerStyle::Round
+                              << Elastic(Orientation::Horizontal);
                 } else {
-                    auto key = col << wdg<Button>(std::string{(char) keyData[0]},
-                                                  ButtonType::NormalButton, fontSize)
-                                   << CornerStyle::Round
-                                   << Elastic(Orientation::Horizontal)
-                                   << FontName{fontName}
-                                   << keySize;
-                    key->setSignalToken(keyData[0]);
-                    key->txPushed.connect(rxKey);
+                    key = col << wdg<Button>(std::string{(char) keyData[0]},
+                                             ButtonType::NormalButton, fontSize)
+                              << CornerStyle::Round
+                              << Elastic(Orientation::Horizontal)
+                              << FontName{fontName}
+                              << keySize;
                 }
+                key->setSignalToken(keyData[0]);
+                key->txPushed.connect(rxKey);
             }
         }
     }
