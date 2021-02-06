@@ -47,7 +47,10 @@ namespace rose {
         /// Move assignment
         constexpr Size& operator=(Size &&) = default;
 
-        /// Assign tuple
+        constexpr explicit Size(const std::tuple<int,int> &t) noexcept
+                : Size(std::get<0>(t), std::get<1>(t)) {}
+
+        /// Copy assign tuple
         constexpr Size& operator=(const std::tuple<int,int> t) noexcept {
             width() = std::get<0>(t);
             height() = std::get<1>(t);
