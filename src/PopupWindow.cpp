@@ -38,7 +38,7 @@ namespace rose {
         mFrame->setBorder(BorderStyle::None);
 
         mColumn = mFrame << wdg<Column>();
-        mColumn->setMinimumWidth(mMinimumSize.width());
+        mColumn->setMinimumOrthogonal(mMinimumSize.width());
 
         mDismissButtonRx = std::make_shared<Slot<Button::SignalType>>();
         mDismissButtonRx->setCallback([=](uint32_t, Button::SignalType signalType){

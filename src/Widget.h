@@ -424,7 +424,7 @@ namespace rose {
          * be derived from a Widget that does override.
          * @param text The text to set.
          */
-        virtual void setText(const std::string &text) {}
+        virtual void setText(const std::string &text) { mId = Id{text}; }
 
         /**
          * @brief Set the title value if implemented by a Widget.

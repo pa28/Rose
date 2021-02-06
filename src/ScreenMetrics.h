@@ -341,6 +341,34 @@ namespace rose {
         /// Value access to height
         [[nodiscard]] constexpr int height() const noexcept { return operator[](3); }
 
+        constexpr int &positionPrimary(Orientation orientation) {
+            if (orientation == Orientation::Horizontal)
+                return operator[](0);
+            else
+                return operator[](1);
+        }
+
+        constexpr int &positionSecondary(Orientation orientation) {
+            if (orientation == Orientation::Horizontal)
+                return operator[](1);
+            else
+                return operator[](0);
+        }
+
+        constexpr int &sizePrimary(Orientation orientation) {
+            if (orientation == Orientation::Horizontal)
+                return operator[](2);
+            else
+                return operator[](3);
+        }
+
+        constexpr int &sizeSecondary(Orientation orientation) {
+            if (orientation == Orientation::Horizontal)
+                return operator[](3);
+            else
+                return operator[](2);
+        }
+
         /// Get the Size of a Rectangle
         [[nodiscard]] constexpr Size getSize() const noexcept {
             return Size{width(), height()};
