@@ -661,10 +661,10 @@ namespace rose {
             mImageRepository.setImage(iconId, std::move(textureData));
 
             auto font = mFontCache.getFont(mTheme.mIconFontName, mTheme.mIconFontSize);
-            mIconFontMetrics.fontAscent = TTF_FontAscent(font.value().get());
-            mIconFontMetrics.fontDescent = TTF_FontDescent(font.value().get());
-            mIconFontMetrics.fontHeight = TTF_FontHeight(font.value().get());
-            mIconFontMetrics.fontLineSkip = TTF_FontLineSkip(font.value().get());
+            mIconFontMetrics.fontAscent = TTF_FontAscent(font.get());
+            mIconFontMetrics.fontDescent = TTF_FontDescent(font.get());
+            mIconFontMetrics.fontHeight = TTF_FontHeight(font.get());
+            mIconFontMetrics.fontLineSkip = TTF_FontLineSkip(font.get());
         }
     }
 
@@ -712,7 +712,7 @@ namespace rose {
         if (!font)
             return sdl::Surface{};
 
-        return sdl::Surface{TTF_RenderUTF8_Blended(font.value().get(), text, textColor.toSdlColor())};
+        return sdl::Surface{TTF_RenderUTF8_Blended(font.get(), text, textColor.toSdlColor())};
     }
 
     void Rose::getTexAndRectUtf8(sdl::Renderer &renderer, const char *text, const std::string &fontName, size_t ptsize,
@@ -723,7 +723,7 @@ namespace rose {
             throw (std::runtime_error(StringCompositor("Can not find font '", fontName, "'.")));
 
         sdl::Surface surface;
-        surface.reset(TTF_RenderUTF8_Blended(font.value().get(), text, textColor.toSdlColor()));
+        surface.reset(TTF_RenderUTF8_Blended(font.get(), text, textColor.toSdlColor()));
 
         if (surface) {
             textureData = surface.toTexture(renderer).release();
@@ -731,7 +731,8 @@ namespace rose {
         }
     }
 
-    void Rose::copyFullTexture(sdl::Renderer &renderer, sdl::Texture &texture, sdl::TextureData &textureData) {
+    void
+    Rose::copyFullTexture(sdl::Renderer &renderer, sdl::Texture &texture, sdl::TextureData &textureData) {
         sdl::RenderTargetGuard renderTargetGuard(renderer, textureData);
         renderer.renderCopy(texture);
         textureData.setBlendMOde(SDL_BLENDMODE_BLEND);

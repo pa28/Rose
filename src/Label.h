@@ -50,7 +50,7 @@ namespace rose {
         Size mRenderSize{};                     ///< The size to render the label texture at.
         FontMetrics mFontMetrics{};             ///< The metrics of the text font
         FontMetrics mIconFontMetrics{};         ///< The metrics of the icon font
-        std::optional<FontPointer> mFont{};     ///< The text font
+        FontPointer mFont{};                    ///< The text font
 
         sdl::Texture mTexture{};                ///< The text texture
         bool mTextureDirty{true};               ///< True when the texture does not match the text
@@ -144,7 +144,7 @@ namespace rose {
         void setFontSize(int fontSize) override {
             mFontSize = fontSize;
             mTextureDirty = true;
-            mFont = nullopt;
+            mFont = nullptr;
             setNeedsDrawing();
         }
 
@@ -210,7 +210,7 @@ namespace rose {
         void setFontName(const std::string &fontName) {
             mFontName = fontName;
             mTextureDirty = true;
-            mFont = nullopt;
+            mFont = nullptr;
             setNeedsDrawing();
         }
 
@@ -255,7 +255,7 @@ namespace rose {
          * @return a std::tuple with minx, maxx, miny, maxy, and advance
          */
         auto getGlyphMetrics(char glyph) {
-            return rose::getGlyphMetrics(mFont.value(), glyph);
+            return rose::getGlyphMetrics(mFont, glyph);
         }
 
         /**
@@ -265,7 +265,7 @@ namespace rose {
          * @return a std::tuple with font height, font ascent, font descent, and font line skip.
          */
         auto getFontMetrics() {
-            return rose::getFontMetrics(mFont.value());
+            return rose::getFontMetrics(mFont);
         }
 
         /**

@@ -437,8 +437,8 @@ namespace rose {
         auto borderWidth = rose()->theme().mFrameWidth + rose()->theme().mButtonPadding;
 
         auto fontPtr = rose()->fontCache().getFont(mFontName, mFontSize);
-        auto[hminx, hmaxx, hminy, hmaxy, hadvance] = getGlyphMetrics(fontPtr.value(), mEm);
-        auto lineSkip = TTF_FontLineSkip(fontPtr.value().get());
+        auto[hminx, hmaxx, hminy, hmaxy, hadvance] = getGlyphMetrics(fontPtr, mEm);
+        auto lineSkip = TTF_FontLineSkip(fontPtr.get());
 
         mKeySize = Size{hmaxx - hminx + borderWidth * 2, lineSkip + borderWidth * 2};
         mKeySize.width() = std::max(mKeySize.width(), mKeySize.height());

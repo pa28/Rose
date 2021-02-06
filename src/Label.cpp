@@ -36,10 +36,10 @@ namespace rose {
 
         if (!mFont) {
             mFont = rose::fetchFont(rose()->fontCache(), mFontName, mFontSize);
-            mFontMetrics = rose::getFontMetrics(mFont.value());
+            mFontMetrics = rose::getFontMetrics(mFont);
         }
 
-        auto [w, h] = textSizeUTF8(mFont.value(), mText);
+        auto [w, h] = textSizeUTF8(mFont, mText);
 
         if (mText.empty() && mBadge == RoseImageInvalid) {
             mTextSize = Size{max(w, h), max(w, h)};
@@ -82,15 +82,13 @@ namespace rose {
                     mTextureDirty = mBadgeDirty = false;
                     mTexture.reset(nullptr);
                 } else if (!mText.empty() && mBadge == RoseImageInvalid) {
-                    auto fg = mTextColor.toSdlColor();
-                    sdl::Surface surface{TTF_RenderUTF8_Blended(mFont.value().get(), mText.c_str(), fg)};
-                    mTextSize = Size{surface->w, surface->h};
-                    mTexture = surface.toTexture(renderer);
+                    mTexture = sdl::renderTextureBlendedUTF8(renderer, mFont, mText, mTextColor);
+                    mTextSize = mTexture.getSize();
 
                     int maxY = 0;
                     for (auto &c : mText) {
                         int maxy;
-                        TTF_GlyphMetrics(mFont.value().get(), c, nullptr, nullptr, nullptr, &maxy, nullptr);
+                        TTF_GlyphMetrics(mFont.get(), c, nullptr, nullptr, nullptr, &maxy, nullptr);
                         maxY = std::max(maxY, maxy);
                     }
                     mLayoutHints.mBaseLine = maxY;
@@ -121,7 +119,7 @@ namespace rose {
                     mTexture = std::move(composite);
                 } else {
                     auto fg = mTextColor.toSdlColor();
-                    sdl::Surface surface{TTF_RenderUTF8_Blended(mFont.value().get(), mText.c_str(), fg)};
+                    sdl::Surface surface{TTF_RenderUTF8_Blended(mFont.get(), mText.c_str(), fg)};
                     mTextSize = Size{surface->w, surface->h};
                     mTexture = surface.toTexture(renderer);
 

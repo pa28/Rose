@@ -121,7 +121,7 @@ namespace rose {
          * @return a std::optional<FontPointer>
          */
         template<typename StringType>
-        std::optional<FontPointer> getFont(StringType fontName, int ptSize) {
+        FontPointer getFont(StringType fontName, int ptSize) {
             if (auto found = mFontCache.find(FontCacheKey{fontName, ptSize}); found != mFontCache.end()) {
                 return found->second;
             }
@@ -134,7 +134,7 @@ namespace rose {
                 }
             }
 
-            return std::nullopt;
+            return nullptr;
         }
 
     protected:
