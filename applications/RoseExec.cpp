@@ -19,8 +19,8 @@ int main(int argc, char **argv) {
     };
 
     static constexpr std::array<const char *,2> UpgradeCommands = {
-        "/usr/bin/sudo apt update > /dev/console",
-        "/usr/bin/sudo apt -y upgrade > /dev/console"
+        "/usr/bin/sudo /usr/bin/apt update > /dev/console",
+        "/usr/bin/sudo /usr/bin/apt -y upgrade > /dev/console"
     };
 
     std::filesystem::path backlight{"/sys/class/backlight/rpi_backlight/brightness"};
