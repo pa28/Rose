@@ -154,7 +154,7 @@ namespace rose {
 
     void EventSemantics::mouseWheel(uint32_t timestamp, uint32_t windowId, uint32_t which, int32_t x, int32_t y,
                                     uint32_t direction) {
-//        print(std::cout, __FUNCTION__, timestamp, windowId, which, x, y, direction, '\n');
+//        print(std::cout, __FUNCTION__, timestamp, windowId, which, x, y, direction, mMousePosition, '\n');
         auto widget = identifyScrollFocusWidget(mMousePosition);
         if (direction == SDL_MOUSEWHEEL_FLIPPED) {
             x *= -1;
@@ -284,7 +284,9 @@ namespace rose {
     }
 
     void EventSemantics::textInputEvent(SDL_Event &event, const string &text) {
-        print(std::cout, __FUNCTION__, text, '\n');
+//        print(std::cout, __FUNCTION__, text, '\n');
+        if (mTextFocus)
+            mTextFocus->textInputEvent(text);
     }
 
     std::shared_ptr<Widget> EventSemantics::identifyFocusWidget(Position focusPos) {
@@ -297,6 +299,19 @@ namespace rose {
                         return currentFocus;
                 }
             }
+
+            auto keyboardFocus = focusWidget;
+
+            while (keyboardFocus && !keyboardFocus->supportsKeyboard())
+                keyboardFocus = keyboardFocus->parent();
+            if (keyboardFocus) {
+                if (mTextFocus && mTextFocus != keyboardFocus)
+                    mTextFocus->keyboardFocusEvent(false);
+                mTextFocus = keyboardFocus;
+                if (mTextFocus)
+                    mTextFocus->keyboardFocusEvent(true);
+            }
+
             while (focusWidget && !focusWidget->acceptsFocus())
                 focusWidget = focusWidget->parent();
             setFocusWidget(focusWidget);
@@ -308,7 +323,7 @@ namespace rose {
         mFocusTrail.clear();
 
         mDragFocus.reset();
-        mTextFocus.reset();
+//        mTextFocus.reset();
         mScrollFocus.reset();
     }
 
@@ -374,8 +389,8 @@ namespace rose {
     }
 
     std::shared_ptr<Widget> EventSemantics::identifyScrollFocusWidget(Position focusPos) {
-        if (mScrollFocus && mScrollFocus->contains(focusPos))
-            return mScrollFocus;
+//        if (mScrollFocus && mScrollFocus->contains(focusPos))
+//            return mScrollFocus;
 
         auto widget = mRose.findWidget(focusPos);
         while (widget && !widget->supportsScrollWheel()) {
