@@ -67,68 +67,22 @@ void Test::build() {
 
     mMainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
 
-#if 1
-    auto menu = mMainWindow << wdg<CascadeButton>("File");
-
-    std::shared_ptr<Slider> slider{};
-    std::shared_ptr<LinearScale> scale{};
-
-    mMainWindow << wdg<Frame>(5) << Position{50, 50}
-                                   << BorderStyle::Bevel << CornerStyle::Round
-                                           << wdg<ScrollArea>() << Size{300,300}
-                         << wdg<Box>() << Orientation::Vertical << InternalSpace{4}
-//                                << wdg<Label>("A very wide label.")  << Manip::Parent
-//                                << wdg<Label>("Label left")
-//                                    << LabelHorizontalAlignment::Left
-//                                    << Manip::Parent
-//                                << wdg<Label>("Label right")
-//                                    << LabelHorizontalAlignment::Right
-//                                    << Manip::Parent
-//                                << wdg<Label>("Label centre")
-//                                    << LabelHorizontalAlignment::Center
-//                                    << Manip::Parent
-                                << wdg<TextField>(10, "", "suffix", "Call", 6)
-                                        << BorderStyle::Notch << CornerStyle::Round << FontSize{20} << Manip::Parent
-                                << wdg<Slider>() >> slider << Id{"Slider"} << Manip::Parent
-                                << wdg<Gauge>() << Manip::Parent
-                                << wdg<LinearScale>(RoseImageId::BevelOutRoundCorners) >> scale << Manip::Parent;
-
-    mMainWindow << wdg<Frame>(4) << Position{ 10, 350}
-                                << BorderStyle::Bevel << CornerStyle::Round
-            << wdg<Box>() << Orientation::Horizontal << InternalSpace{4}
-                            << wdg<Label>("A very wide label.") << Manip::Parent
-                            << wdg<Label>("Label top")
-                                << FontSize{20}
-                                << LabelVerticalAlignment::Top
-                                << Manip::Parent
-                            << wdg<Label>("Label bottom")
-                                << FontSize{20}
-                                << LabelVerticalAlignment::Bottom
-                                << Manip::Parent
-                            << wdg<Label>("Label centre")
-                                << FontSize{20}
-                                << LabelVerticalAlignment::Center
-                                << Manip::Parent;
-
-    slider->valueTx.connect(scale->valueRx);
-
-    auto keyboard = std::make_shared<NumberPad>();
-    mMainWindow << wdg<Keyboard>(keyboard) << Position{400,0};
-
-#else
-    mHue = mTheme.mBaseColorHSLA.hue() / 360.0f;
-    mSat = mTheme.mBaseColorHSLA.saturation();
-    mVal = mTheme.mBaseColorHSLA.value();
-    auto column = mMainWindow << wdg<Column>() << Position{50, 50};
-    column << wdg<Label>("Hue Saturation Lightness");
-    auto hue = column << wdg<Slider>(mHue) << UserSignalTokenValues::Hue;
-    hue->valueTx.connect(sliderRx);
-    auto sat = column << wdg<Slider>(mSat) << UserSignalTokenValues::Saturation;
-    sat->valueTx.connect(sliderRx);
-    auto lit = column << wdg<Slider>(mVal) << UserSignalTokenValues::Lightness;
-    lit->valueTx.connect(sliderRx);
-#endif
-
+    auto keyboard = std::make_shared<QUERTY>();
+    std::shared_ptr<Column> column;
+    mMainWindow << wdg<Frame>(4) << BorderStyle::Notch << CornerStyle::Round
+                << wdg<Column>()
+                    << wdg<Column>()
+                            << wdg<TextField>(10, "", "", "Call", 6)
+                                    << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
+                                    << Manip::Parent
+                            << wdg<TextField>(7, "", "Deg", "Lat", 6)
+                                    << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
+                                    << Manip::Parent
+                            << wdg<TextField>(7, "", "Deg", "Lon", 6)
+                                    << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
+                                    << Manip::Parent
+                            << Manip::Parent
+                    << wdg<Keyboard>(keyboard);
 }
 
 int main(int argc, char **argv) {
