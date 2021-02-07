@@ -196,9 +196,10 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
         COMPONENT ROSE_RUNTIME
         )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/Rose"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
+        COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL
+        FILES_MATCHING PATTERN "*.h")
 
 # ToDo: Make changes in Font.h to support multiple font paths so this can be a relative path.
 install(FILES /usr/share/fonts/truetype/entypo/entypo.ttf DESTINATION /usr/share/fonts/truetype/entypo
