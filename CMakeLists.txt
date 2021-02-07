@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
 project(Rose VERSION 0.1.18.18)
-set(DISTRO_CODENAME "testing")
 set(PACKAGE_CONTACT "Richard Buckley <richard.buckley>@ieee.org>")
 include(GNUInstallDirs)
 
@@ -160,46 +159,70 @@ else()
     target_link_libraries(RoseExec)
     target_link_libraries(RoseShell ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
             ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
-endif()
+endif ()
+
+if (NOT APPLE)
+    set(CMAKE_INSTALL_RPATH $ORIGIN)
+endif ()
 
 add_library(rose SHARED ${ROSE_SRC})
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        RoseConfig.cmake
+        VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+        COMPATIBILITY SameMajorVersion
+)
 
 set_target_properties(
         rose
         PROPERTIES FRAMEWORK FALSE
         VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
-        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
 
-if ("${LIB64}" STREQUAL "TRUE")
-    set(INSTALL_LIB_DIR "lib64")
-else()
-    set(INSTALL_LIB_DIR "lib")
-endif()
-
 install(TARGETS
-        rose
-        Rose Life RoseExec RoseShell
+        rose Rose Life RoseExec RoseShell
+        COMPONENT ROSE_RUNTIME EXCLUDE_FROM_ALL
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION lib/${CMAKE_LIBRARY_ARCHITECTURE}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
-    DESTINATION "${CMAKE_INSTALL_DOCDIR}"
-)
+        DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+        COMPONENT ROSE_RUNTIME
+        )
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/Rose"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL)
 
 # ToDo: Make changes in Font.h to support multiple font paths so this can be a relative path.
-install(FILES /usr/share/fonts/truetype/entypo/entypo.ttf DESTINATION /usr/share/fonts/truetype/entypo)
-install(FILES resources/systemd/rose.service DESTINATION /etc/systemd/system)
+install(FILES /usr/share/fonts/truetype/entypo/entypo.ttf DESTINATION /usr/share/fonts/truetype/entypo
+        COMPONENT ROSE_RUNTIME)
+install(FILES resources/systemd/rose.service DESTINATION /etc/systemd/system
+        COMPONENT ROSE_RUNTIME)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/RoseConfig.cmake
+        DESTINATION share/cmake/Rose/
+        COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL)
 
+set(CPACK_DEB_COMPONENT_INSTALL 1)
+set(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS 1)
+set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+set(CPACK_DEBIAN_ROSE_DEVELOPMENT_PACKAGE_ARCHITECTURE "noarch")
+set(CPACK_COMPONENT_ROSE_DEVELOPMENT_DEPENDS ROSE_RUNTIME)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "fonts-freefont-ttf")
+set(CPACK_DEBIAN_ROSE_DEVELOPMENT_PACKAGE_DEPENDS)
+set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(CPACK_PACKAGE_RELEASE ${PROJECT_VERSION_TWEAK})
-set(CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_DEBIAN_ROSE_RUNTIME_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_DEBIAN_ROSE_DEVELOPMENT_PACKAGE_NAME "${PROJECT_NAME}-dev")
 set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
 set(CPACK_RPM_PACKAGE_LICENSE "GPL")
 set(CPACK_RPM_PACKAGE_URL "https://github.com/pa28/Rose")
@@ -209,9 +232,6 @@ set(CPACK_RPM_PACKAGE_VENDOR "www.hrbuckley.net")
 set(CPACK_PACKAGE_CONTACT ${PACKAGE_CONTACT})
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Productivity")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
-set(CPACK_PACKAGE_EXECUTABLES Rose Life RoseExec RoseShell)
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
         /usr/local
@@ -223,3 +243,15 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
         )
 SET(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/postinst")
 include(CPack)
+
+cpack_add_component(ROSE_RUNTIME
+        DISPLAY_NAME "Rose"
+        DESCRIPTION "A lightweight GUI library targeting the Raspberry Pi."
+        REQUIRED
+        )
+cpack_add_component(ROSE_DEVELOPMENT
+        DISPLAY_NAME "Rose-dev"
+        DESCRIPTION "A lightweight GUI library targeting the Raspberry Pi."
+        REQUIRED
+        DEPENDS ROSE_RUNTIME
+        )
