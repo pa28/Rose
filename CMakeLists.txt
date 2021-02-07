@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
-project(Rose VERSION 0.1.17.17)
+project(Rose VERSION 0.1.18.18)
+set(DISTRO_CODENAME "testing")
+set(PACKAGE_CONTACT "Richard Buckley <richard.buckley>@ieee.org>")
 include(GNUInstallDirs)
 
 add_compile_definitions(VERSION=${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-${PROJECT_VERSION_TWEAK})
@@ -47,6 +49,36 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ocuments")
         message("Doxygen needs to be installed to generate the doxygen documentation")
     endif (DOXYGEN_FOUND)
 endif ()
+
+# Generates an RFC2822 timestamp
+#
+# The following variable is set:
+#   RFC2822_TIMESTAMP
+function(rfc2822stamp)
+    execute_process(COMMAND date -R
+            OUTPUT_VARIABLE RESULT)
+    set(RFC2822_TIMESTAMP ${RESULT} PARENT_SCOPE)
+endfunction()
+rfc2822stamp()
+
+set(CPACK_DEBIAN_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+# generate a Debian compliant changelog
+set(CHANGELOG_HEADER "${PROJECT_NAME} (${CPACK_DEBIAN_PACKAGE_VERSION}) ${DISTRO_CODENAME}\; urgency=high")
+set(CHANGELOG "  * Development Release.")
+# two spaces between maintainer and timestamp is NOT a mistake
+set(CHANGELOG_FOOTER " -- ${PACKAGE_CONTACT}  ${RFC2822_TIMESTAMP}")
+
+file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/changelog ${CHANGELOG_HEADER}\n\n${CHANGELOG}\n\n${CHANGELOG_FOOTER})
+
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+    COMMAND gzip -cn9 "${CMAKE_CURRENT_SOURCE_DIR}/changelog" > "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/changelog"
+    COMMENT "Compressing changelog"
+)
+
+add_custom_target(changelog ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${SDL2TTF_INCLUDE_DIR})
@@ -154,6 +186,10 @@ install(TARGETS
         LIBRARY DESTINATION lib/${CMAKE_LIBRARY_ARCHITECTURE}
         )
 
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+)
+
 # ToDo: Make changes in Font.h to support multiple font paths so this can be a relative path.
 install(FILES /usr/share/fonts/truetype/entypo/entypo.ttf DESTINATION /usr/share/fonts/truetype/entypo)
 install(FILES resources/systemd/rose.service DESTINATION /etc/systemd/system)
@@ -163,19 +199,20 @@ set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${P
 set(CPACK_PACKAGE_RELEASE ${PROJECT_VERSION_TWEAK})
 set(CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_NAME "Rose")
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
 set(CPACK_RPM_PACKAGE_LICENSE "GPL")
 set(CPACK_RPM_PACKAGE_URL "https://github.com/pa28/Rose")
 set(CPACK_RPM_PACKAGE_SUMMARY "A lightweight GUI library targeting the Raspberry Pi.")
 set(CPACK_RPM_PACKAGE_DESCRIPTION "A lightweight GUI library targeting the Raspberry Pi.")
 set(CPACK_RPM_PACKAGE_VENDOR "www.hrbuckley.net")
-set(CPACK_PACKAGE_CONTACT "Richard Buckley")
+set(CPACK_PACKAGE_CONTACT ${PACKAGE_CONTACT})
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Productivity")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_PACKAGE_EXECUTABLES Rose Life RoseExec RoseShell)
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
         /usr/local
         /usr/local/bin
