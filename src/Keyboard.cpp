@@ -300,7 +300,25 @@ namespace rose {
                     }
                     break;
                 case SDLK_LEFT:
-                case SDLK_RIGHT:
+                case SDLK_RIGHT: {
+                    SDL_Event event;
+                    event.type = SDL_KEYDOWN;
+                    event.key.timestamp = SDL_GetTicks();
+                    event.key.windowID = 0;
+                    event.key.state = SDL_PRESSED;
+                    event.key.repeat = 0;
+                    event.key.keysym.sym = signal.second;
+                    event.key.keysym.mod = SDL_GetModState();
+                    event.key.keysym.scancode = SDL_GetScancodeFromKey(event.key.keysym.sym);
+                    SDL_ClearError();
+                    if (auto status = SDL_PushEvent(&event); !status)
+                        std::cout << __PRETTY_FUNCTION__ << ' ' << status << SDL_GetError() << '\n';
+                    event.type = SDL_KEYUP;
+                    event.key.state = SDL_RELEASED;
+                    SDL_ClearError();
+                    if (auto status = SDL_PushEvent(&event); !status)
+                        std::cout << __PRETTY_FUNCTION__ << ' ' << status << SDL_GetError() << '\n';
+                }
                 default:
                     return;
             }
