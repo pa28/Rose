@@ -5,6 +5,7 @@
  * @date 2021-02-03
  */
 
+#include <numeric>
 #include "TextField.h"
 
 namespace rose {
@@ -90,12 +91,25 @@ namespace rose {
                 dst = mTextSize;
                 renderer.renderCopy(mTextTexture, dst);
             }
+
+            if (mHasFocus) {
+                int caretX = dst.x();
+                std::for_each(mText.begin(), mCaretLoc, [&](char c) {
+                    auto[hminx, hmaxx, hminy, hmaxy, hadvance] = getGlyphMetrics(mFont, c);
+                    caretX += hadvance;
+                });
+
+                Rectangle caret{caretX, dst.y(), 2, dst.height()};
+                renderer.fillRect(caret, mTextColor);
+            }
+
             dst.x() += mGlyphAdvance/2 + mGlyphAdvance * (mMaxLength);
 
             if (mSuffixTexture) {
                 dst = mSuffixSize;
                 renderer.renderCopy(mSuffixTexture, dst);
             }
+
         }
 
     }
@@ -112,6 +126,7 @@ namespace rose {
 
         mTextColor = rose()->theme().mTextColour;
         mErrorColor = rose()->theme().mRed;
+        mCaretLoc = mText.end();
     }
 
     void TextField::setFontSize(FontSize fontSize) {
@@ -129,16 +144,60 @@ namespace rose {
     bool TextField::textInputEvent(const string &text) {
         for (auto c:text) {
             switch (c) {
+                case '\t':
                 case '\r':
+                    mCaretLoc = mText.end();
                     break;
                 case '\b':
-                    if (!mText.empty())
-                        mText.erase(mText.end()-1);
+                    if (!mText.empty()) {
+                        mCaretLoc--;
+                        mText.erase(mCaretLoc);
+                    }
                     break;
                 default:
-                    mText.push_back(c);
+                    if (mText.size() < mMaxLength && c > SDLK_ESCAPE && c < SDLK_DELETE) {
+                        if (mCaretLoc == mText.end()) {
+                            mText.push_back(c);
+                            mCaretLoc = mText.end();
+                        } else {
+                            mText.insert(mCaretLoc, c);
+                            mCaretLoc++;
+                        }
+                    } else
+                        return false;
             }
         }
+
+        mTextTexture.reset();
+        setNeedsDrawing();
+        return true;
+    }
+
+    bool TextField::keyboardEvent(uint state, uint repeat, SDL_Keysym keysym) {
+        auto keyName = SDL_GetScancodeName(keysym.scancode);
+        switch (keysym.sym) {
+            case SDLK_HOME:
+                mCaretLoc = mText.begin();
+                break;
+            case SDLK_END:
+                mCaretLoc = mText.end();
+                break;
+            case SDLK_LEFT:
+                if (state && mCaretLoc > mText.begin())
+                    mCaretLoc--;
+                else
+                    return true;
+                break;
+            case SDLK_RIGHT:
+                if (state && mCaretLoc < mText.end())
+                    mCaretLoc++;
+                else
+                    return true;
+                break;
+            default:
+                return false;
+        }
+
         mTextTexture.reset();
         setNeedsDrawing();
         return true;
@@ -146,6 +205,7 @@ namespace rose {
 
     bool TextField::keyboardFocusEvent(bool focus) {
         mHasFocus = focus;
+        setNeedsDrawing();
         return true;
     }
 }

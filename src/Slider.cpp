@@ -131,9 +131,9 @@ namespace rose {
         return true;
     }
 
-    bool Slider::keyboardEvent(int key, int scancode, int action, int modifiers) {
-        return Container::keyboardEvent(key, scancode, action, modifiers);
-    }
+//    bool Slider::keyboardEvent(int key, int scancode, int action, int modifiers) {
+//        return Container::keyboardEvent(key, scancode, action, modifiers);
+//    }
 
     bool Slider::keyboardCharacterEvent(unsigned int codepoint) {
         return Container::keyboardCharacterEvent(codepoint);

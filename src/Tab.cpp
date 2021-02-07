@@ -161,11 +161,11 @@ namespace rose {
         return false;
     }
 
-    bool TabBody::keyboardEvent(int key, int scancode, int action, int modifiers) {
-        if (auto tabPage = activeChild<Widget>(); tabPage)
-            return tabPage->keyboardEvent(key, scancode, action, modifiers);
-        return false;
-    }
+//    bool TabBody::keyboardEvent(int key, int scancode, int action, int modifiers) {
+//        if (auto tabPage = activeChild<Widget>(); tabPage)
+//            return tabPage->keyboardEvent(key, scancode, action, modifiers);
+//        return false;
+//    }
 
     bool TabBody::keyboardCharacterEvent(unsigned int codepoint) {
         if (auto tabPage = activeChild<Widget>(); tabPage)

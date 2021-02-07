@@ -667,7 +667,7 @@ namespace rose {
         virtual bool focusEvent(bool focused);
 
         /// Handle a keyboard event (default implementation: do nothing)
-        virtual bool keyboardEvent(int key, int scancode, int action, int modifiers);
+        virtual bool keyboardEvent(uint state, uint repeat, SDL_Keysym keysym);
 
         /// Handle text input (UTF-32 format) (default implementation: do nothing)
         virtual bool keyboardCharacterEvent(unsigned int codepoint);

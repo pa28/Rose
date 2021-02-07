@@ -93,9 +93,9 @@ namespace rose {
         return Container::mouseMotionEvent(cursorPosition - mLayoutHints.mAssignedRect->getPosition(), rel, button, modifiers);
     }
 
-    bool ScrollArea::keyboardEvent(int key, int scancode, int action, int modifiers) {
-        return Container::keyboardEvent(key, scancode, action, modifiers);
-    }
+//    bool ScrollArea::keyboardEvent(int key, int scancode, int action, int modifiers) {
+//        return Container::keyboardEvent(key, scancode, action, modifiers);
+//    }
 
     bool ScrollArea::keyboardCharacterEvent(unsigned int codepoint) {
         return Container::keyboardCharacterEvent(codepoint);

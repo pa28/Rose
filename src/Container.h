@@ -232,8 +232,8 @@ namespace rose {
         /// Handle a mouse scroll event (default implementation: propagate to children)
         bool scrollEvent(const Position &p, int32_t relX, int32_t relY) override;
 
-        /// Handle a keyboard event (default implementation: do nothing)
-        bool keyboardEvent(int key, int scancode, int action, int modifiers) override;
+//        /// Handle a keyboard event (default implementation: do nothing)
+//        bool keyboardEvent(int key, int scancode, int action, int modifiers) override;
 
         /// Handle text input (UTF-32 format) (default implementation: do nothing)
         bool keyboardCharacterEvent(unsigned int codepoint) override;

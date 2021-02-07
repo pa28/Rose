@@ -76,7 +76,7 @@ namespace rose {
         return false;
     }
 
-    bool Widget::keyboardEvent(int key, int scancode, int action, int modifiers) {
+    bool Widget::keyboardEvent(uint state, uint repeat, SDL_Keysym keysym) {
         return false;
     }
 

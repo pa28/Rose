@@ -31,6 +31,7 @@ namespace rose {
         std::string mPrefix{};                              ///< The prefix to the text.
         std::string mSuffix{};                              ///< The suffix to the text.
         std::string mText{};                                ///< The current text value.
+        std::string::iterator mCaretLoc;                    ///< The caret location in mText (one past).
         Size mPrefixSize{};                                 ///< The size of the rendered Prefix.
         Size mSuffixSize{};                                 ///< The size of the rendered Suffix.
         Size mTextSize{};                                   ///< The size of the rendered Text.
@@ -92,6 +93,9 @@ namespace rose {
 
         /// Handle keyboard focus events.
         bool keyboardFocusEvent(bool focus) override;
+
+        /// Handle KeyboardEvent
+        bool keyboardEvent(uint state, uint repeat, SDL_Keysym keysym) override;
     };
 }
 

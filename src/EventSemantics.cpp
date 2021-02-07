@@ -115,6 +115,9 @@ namespace rose {
 
     void EventSemantics::processEvent(SDL_Event &event) {
         switch (event.type) {
+            case SDL_TEXTEDITING:
+                std::cout << "TEXTEDITING " << event.edit.text << ' ' << event.edit.start << ' ' << event.edit.length << '\n';
+                break;
             case SDL_MOUSEWHEEL:
                 mouseWheel(event.wheel.timestamp, event.wheel.windowID, event.wheel.which,
                                   event.wheel.x, event.wheel.y, event.wheel.direction == SDL_MOUSEWHEEL_NORMAL);
@@ -280,7 +283,15 @@ namespace rose {
 
     void EventSemantics::keyEvent(SDL_Event &event, uint state, uint repeat, SDL_Keysym keysym) {
         auto keyName = SDL_GetScancodeName(keysym.scancode);
-        print(std::cout, __FUNCTION__, event.key.timestamp, state, repeat, keyName, '\n');
+        auto keyCode = SDL_GetKeyFromScancode(keysym.scancode);
+        if (mTextFocus && keyCode <= SDLK_DELETE) {
+            if (state)
+                mTextFocus->textInputEvent(std::string{static_cast<char>(static_cast<uint>(keyCode) & 0xFFu)});
+        } else {
+            if (auto used = mTextFocus->keyboardEvent(state, repeat, keysym); used)
+                return;
+        }
+//        print(std::cout, __FUNCTION__, event.key.timestamp, state, repeat, keyName, '\n');
     }
 
     void EventSemantics::textInputEvent(SDL_Event &event, const string &text) {
@@ -323,7 +334,6 @@ namespace rose {
         mFocusTrail.clear();
 
         mDragFocus.reset();
-//        mTextFocus.reset();
         mScrollFocus.reset();
     }
 

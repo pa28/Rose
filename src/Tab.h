@@ -114,8 +114,8 @@ namespace rose {
         /// Handle a focus change event (default implementation: record the focus status, but do nothing)
         bool focusEvent(bool focused) override;
 
-        /// Handle a keyboard event (default implementation: do nothing)
-        bool keyboardEvent(int key, int scancode, int action, int modifiers) override;
+//        /// Handle a keyboard event (default implementation: do nothing)
+//        bool keyboardEvent(int key, int scancode, int action, int modifiers) override;
 
         /// Handle text input (UTF-32 format) (default implementation: do nothing)
         bool keyboardCharacterEvent(unsigned int codepoint) override;

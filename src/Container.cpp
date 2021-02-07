@@ -96,9 +96,9 @@ namespace rose {
         return false;
     }
 
-    bool Container::keyboardEvent(int key, int scancode, int action, int modifiers) {
-        return Widget::keyboardEvent(key, scancode, action, modifiers);
-    }
+//    bool Container::keyboardEvent(int key, int scancode, int action, int modifiers) {
+//        return Widget::keyboardEvent(key, scancode, action, modifiers);
+//    }
 
     bool Container::keyboardCharacterEvent(unsigned int codepoint) {
         return Widget::keyboardCharacterEvent(codepoint);
