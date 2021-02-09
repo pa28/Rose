@@ -11,6 +11,7 @@
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/Infos.hpp>
+#include <exception>
 #include "Utilities.h"
 
 namespace rose {
@@ -143,7 +144,7 @@ namespace rose {
         localStore = std::make_unique<CacheFileSystem>(rootPath, cacheName);
     }
 
-    std::optional<uint32_t> WebFileCache::asyncFetch(WebFileCache *self, uint32_t id, time_t cacheTime) {
+    uint32_t WebFileCache::asyncFetch(WebFileCache *self, uint32_t id, time_t cacheTime) {
         auto &cacheObject{self->find(id)->second};
 
         auto ostrm = self->localStore->openWrite(cacheObject, true);
@@ -161,7 +162,6 @@ namespace rose {
             }
         } else {
             std::cerr << "Can not write to cache \"" << cacheObject.objectSrcName() << "\"\n";
-            return std::nullopt;
         }
 
         return id;

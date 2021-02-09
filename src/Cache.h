@@ -363,7 +363,7 @@ namespace rose {
         std::shared_ptr<Slot<int>> mCheckValidity;      ///< Slot for check validity timing signal
         std::shared_ptr<Slot<int>> mCheckFutures;       ///< Slot for check futures timeing signal
 
-        std::vector<std::future<std::optional<uint32_t>>> mFutureList;  ///< The list of outstanding futures
+        std::vector<std::future<uint32_t>> mFutureList;  ///< The list of outstanding futures
 
         void checkFutures();    ///< Check for completed futures and process.
 
@@ -374,7 +374,7 @@ namespace rose {
          * @param cacheTime The cache time of the object.
          * @return The identifier if the fetch was successful, empty if not.
          */
-        static std::optional<uint32_t> asyncFetch(WebFileCache *self, uint32_t id, time_t cacheTime);
+        static uint32_t asyncFetch(WebFileCache *self, uint32_t id, time_t cacheTime);
 
     public:
         ~WebFileCache() override = default;
