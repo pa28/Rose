@@ -185,8 +185,7 @@ namespace rose {
             }
 
             if (!found || cacheTime > 0) {
-                auto fut = std::async(std::launch::async, &WebFileCache::asyncFetch, this, object.first, cacheTime);
-                mFutureList.emplace_back(std::move(fut));
+                mFutureList.emplace_back(std::async(std::launch::async, &WebFileCache::asyncFetch, this, object.first, cacheTime));
             } else {
                 if (!object.second.getFirstProcess()) {
                     itemFetched.transmit(mSignalSerialNumber(), object.first);
