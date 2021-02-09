@@ -27,6 +27,7 @@ namespace rose {
 
     Uint32 SecondTick::timerEvent(Uint32 interval) {
         auto now = ch::system_clock::now();
+
         if (txToggle)
             txToggle.transmit(mSignalSerialNumber.serialNumber(), tickToggle);
 
