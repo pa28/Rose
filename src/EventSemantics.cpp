@@ -284,12 +284,13 @@ namespace rose {
     void EventSemantics::keyEvent(SDL_Event &event, uint state, uint repeat, SDL_Keysym keysym) {
         auto keyName = SDL_GetScancodeName(keysym.scancode);
         auto keyCode = SDL_GetKeyFromScancode(keysym.scancode);
-        if (mTextFocus && keyCode <= SDLK_DELETE) {
-            if (state)
+        if (mTextFocus && state) {
+            if (keyCode <= SDLK_DELETE) {
                 mTextFocus->textInputEvent(std::string{static_cast<char>(static_cast<uint>(keyCode) & 0xFFu)});
-        } else {
-            if (auto used = mTextFocus->keyboardEvent(state, repeat, keysym); used)
-                return;
+            } else {
+                if (auto used = mTextFocus->keyboardEvent(state, repeat, keysym); used)
+                    return;
+            }
         }
 //        print(std::cout, __FUNCTION__, event.key.timestamp, state, repeat, keyName, '\n');
     }
