@@ -202,22 +202,31 @@ namespace rose {
 
     void WebFileCache::checkFutures() {
         std::lock_guard<std::mutex> lockGuard(mMutex);
-        if (!mFutureList.empty()) {
-            for (auto &fut : mFutureList) {
+        std::chrono::milliseconds span(100);
+        for (auto &fut : mFutureList) {
+            try {
                 if (fut.valid()) {
-                    auto result = fut.get();
-                    if (result) {
-                        auto& cacheObject{find(result.value())->second};
+                    if (auto status = fut.wait_for(span); status == std::future_status::ready) {
+                        auto result = fut.get();
+                        auto &cacheObject{find(result)->second};
                         if (cacheObject.getStatusCode() == 200 ||
-                                (cacheObject.getStatusCode() == 304 && !cacheObject.getFirstProcess())) {
-                            itemFetched.transmit(mSignalSerialNumber(), result.value());
+                            (cacheObject.getStatusCode() == 304 && !cacheObject.getFirstProcess())) {
+                            itemFetched.transmit(mSignalSerialNumber(), result);
                             cacheObject.setFirstProcess();
+                        } else {
+                            std::cerr << "Future failed.\n";
                         }
-                    } else {
-                        std::cerr << "Future failed.\n";
                     }
+                } else {
+                    std::cout << __PRETTY_FUNCTION__ << " future invalid.\n";
                 }
+            } catch (const std::exception &e) {
+                std::cout << __PRETTY_FUNCTION__ << ' ' << e.what() << '\n';
             }
         }
+
+        mFutureList.erase(std::remove_if(mFutureList.begin(), mFutureList.end(),
+                                         [](std::future<uint32_t> &fut) -> bool { return !fut.valid();}),
+                          mFutureList.end());
     }
 }
