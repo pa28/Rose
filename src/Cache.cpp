@@ -93,21 +93,29 @@ namespace rose {
     void CacheWebSource::fetch(CacheObject &cacheObject, std::ostream &ostrm, time_t cacheTime) {
         std::list<std::string> headers;
 
-        if (cacheTime) {
-            std::stringstream ss;
-            ss << "If-Modified-Since: " << std::put_time(std::gmtime(&cacheTime), "%a, %d %b %Y %T %Z");
-            headers.push_back(ss.str());
-        }
+        try {
+            if (cacheTime) {
+                std::stringstream ss;
+                ss << "If-Modified-Since: " << std::put_time(std::gmtime(&cacheTime), "%a, %d %b %Y %T %Z");
+                headers.push_back(ss.str());
+            }
 
-        curlpp::options::Url url(mSourceURI + cacheObject.objectSrcName());
-        curlpp::options::WriteStream ws(&ostrm);
-        curlpp::Easy request;
-        request.setOpt(new curlpp::options::HttpHeader(headers));
-        request.setOpt(url);
-        request.setOpt(ws);
-        request.perform();
-        mResponseCode = curlpp::infos::ResponseCode::get(request);
-        cacheObject.setStatusCode(mResponseCode);
+            curlpp::options::Url url(mSourceURI + cacheObject.objectSrcName());
+            curlpp::options::WriteStream ws(&ostrm);
+            curlpp::Easy request;
+            request.setOpt(new curlpp::options::HttpHeader(headers));
+            request.setOpt(url);
+            request.setOpt(ws);
+            request.perform();
+            mResponseCode = curlpp::infos::ResponseCode::get(request);
+            cacheObject.setStatusCode(mResponseCode);
+        } catch (const cURLpp::RuntimeError &e) {
+            std::cerr << __PRETTY_FUNCTION__ << ' ' << e.what() << '\n';
+            mResponseCode = 599;
+        } catch (const cURLpp::LogicError &e) {
+            std::cerr << __PRETTY_FUNCTION__ << ' ' << e.what() << '\n';
+            mResponseCode = 599;
+        }
     }
 
     WebFileCache::WebFileCache() {
