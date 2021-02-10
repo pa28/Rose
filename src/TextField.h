@@ -13,10 +13,11 @@
 
 namespace rose {
 
-/**
- * @class TextField
- * @brief
- */
+    /**
+     * @class TextField
+     * @brief An editable, single line, text field.
+     * @details The text may have a validation regular expression.
+     */
     class TextField : public Frame {
         char mEm{'M'};                                      ///< The largest Glyph that will be in the text.
         bool mValidEntry{};                                 ///< True if the current value passes validation.
