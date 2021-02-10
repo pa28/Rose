@@ -34,6 +34,9 @@ void Test::build() {
     std::cout << __PRETTY_FUNCTION__ << '\n';
     mTranslateFingerEvents = false;
 
+    mSecondTick = std::make_shared<SecondTick>();
+    mSystemData = std::make_shared<SystemData>();
+
     sliderRx = std::make_shared<Slot<Slider::SignalType>>();
     sliderRx->setCallback([=](uint32_t, Slider::SignalType signalType) {
         switch (signalType.second) {
@@ -68,7 +71,7 @@ void Test::build() {
     mMainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
 
     auto keyboard = std::make_shared<QUERTY>();
-    std::shared_ptr<Column> column;
+    std::shared_ptr<LinearScale> systemScale;
     mMainWindow << wdg<Frame>(4) << BorderStyle::Notch << CornerStyle::Round
                 << wdg<Column>()
                     << wdg<Column>()
@@ -81,11 +84,15 @@ void Test::build() {
                             << wdg<TextField>(7, "", "Deg", "Lon", 6)
                                     << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
                                     << Manip::Parent
-                            << wdg<LinearScale>(LinearScaleIndicator::DualChannel)
+                            << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> systemScale
                                     << Orientation::Horizontal
                                     << Manip::Parent
                             << Manip::Parent
                     << wdg<Keyboard>(keyboard);
+
+    mSecondTick->txSecond.connect(mSystemData->rxTrigger);
+    mSystemData->txTemperature.connect(systemScale->rxScaledValue0);
+//    mSystemData->txProcess.connect(systemScale->rxScaledValue1);
 }
 
 int main(int argc, char **argv) {

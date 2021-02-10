@@ -36,9 +36,13 @@ namespace rose {
         SignalSerialNumber mSignalSerialNumber{};       ///< The button serial number
         Orientation mOrientation{Orientation::Unset};   ///< Scale Orientation.
 
-        float mLowerBound{0.f};                 ///< The lower bound of the scale.
-        float mUpperBound{1.f};                 ///< The upper bound of the scale.
-        float mValue{0.f};                      ///< The current value of the scale.
+        float mLowerBound0{0.f};                ///< The lower bound of the scale.
+        float mUpperBound0{1.f};                ///< The upper bound of the scale.
+        float mValue0{0.f};                     ///< The current value of the scale.
+
+        float mLowerBound1{0.f};                ///< The lower bound of the scale.
+        float mUpperBound1{1.f};                ///< The upper bound of the scale.
+        float mValue1{0.f};                     ///< The current value of the scale.
 
         ImageId mImageId0{RoseImageInvalid};    ///< ImageId of the indicator.
         ImageId mImageId1{RoseImageInvalid};    ///< ImageId of the thumb center.
@@ -159,6 +163,11 @@ namespace rose {
          * @brief See Widget::draw()
          */
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
+
+        using ScaledSignal = std::array<float,3>;
+        std::shared_ptr<Slot<ScaledSignal>> rxScaledValue0{};   /// Receive scaled signals on channel 0
+
+        std::shared_ptr<Slot<ScaledSignal>> rxScaledValue1{};   /// Receive scaled signals on channel 1
 
         void setOrientation(Orientation orientation) override {
             mOrientation = orientation;

@@ -47,7 +47,6 @@ namespace rose {
         mCPUWarning = color::RGBA(255u, 255u, 0u, 255u);
         mCPUAlert = color::RGBA(255u, 0u, 0u, 255u);
 
-
         if (mHasTemperatureDevice) {
             if (count == 0) {
                 std::ifstream ifs;
@@ -119,6 +118,113 @@ namespace rose {
     }
 
     void SystemMonitor::cpuCount() {
+        static constexpr std::string_view ProcessorLine = "processor";
+        std::ifstream ifs;
+        ifs.open(std::string(ProcCpuInfo), std::ofstream::in);
+        if (ifs) {
+            std::string line;
+            while (getline(ifs, line, '\n')) {
+                if (line.substr(0, ProcessorLine.size()) == ProcessorLine) {
+                    line = line.substr(line.find_last_of(' '));
+                    std::stringstream sstrm{line.substr(line.find_last_of(' '))};
+                    sstrm >> mCpuCount;
+                }
+            }
+        }
+
+        ++mCpuCount;
+#ifdef X86HOST
+        mCpuCount /= 2;
+#endif
+    }
+
+    SystemData::SystemData() {
+        rxTrigger = std::make_shared<Slot<int>>();
+        rxTrigger->setCallback([&](uint32_t sn, int) {
+            readCPUTemperature();
+            readProcessUsage();
+        });
+
+        cpuCount();
+        readCPUTemperature();
+        readProcessUsage();
+    }
+
+    void SystemData::readCPUTemperature() {
+        static int divisor{4};
+        static int count{0};
+
+        if (mHasTemperatureDevice) {
+            if (count == 0) {
+                std::ifstream ifs;
+                ifs.open(std::string(SystemTempDevice), std::ofstream::in);
+                if (ifs) {
+                    int temperature;
+                    std::stringstream sstrm;
+                    ifs >> temperature;
+                    ifs.close();
+                    mTemperature = (float)temperature / 1000.f;
+                    std::array signal{mTemperature, 30.f, 80.f};
+                    txTemperature.transmit(mSignalSerialNumber.serialNumber(), signal);
+                } else {
+                    // TODO: Better error reporting.
+                    mHasTemperatureDevice = false;
+                    std::cerr << "Can not open " << SystemTempDevice << std::endl;
+                }
+            }
+        }
+    }
+
+    void SystemData::readProcessUsage() {
+        static int divisor{4};
+        static int count{1};
+
+        if (count == 0) {
+            std::ifstream ifs;
+            ifs.open(std::string(ProcSelfStat), std::ofstream::in);
+            int utime, stime;
+            if (ifs) {
+                std::string not_needed;
+                for (int i = 0; i < 13; ++i) {
+                    getline(ifs, not_needed, ' ');
+                }
+                ifs >> utime >> stime;
+                ifs.close();
+                if (procTimeStart)
+                    procTimeUse = (utime + stime) - procTimeStart;
+                procTimeStart = utime + stime;
+            }
+
+            ifs.open(std::string(ProcStat), std::ofstream::in);
+            if (ifs) {
+                std::string cpu;
+                getline(ifs, cpu, '\n');
+                ifs.close();
+                std::stringstream sstrm(cpu);
+                getline(sstrm, cpu, ' ');
+                int total{0};
+                while (sstrm) {
+                    int value;
+                    sstrm >> value;
+                    total += value;
+                }
+                if (cpuTimeStart) {
+                    cpuTimeUse = total - cpuTimeStart;
+                }
+                cpuTimeStart = total;
+
+            }
+            if (cpuTimeUse) {
+                mUsage = (float)mCpuCount * ((100.f * (float) procTimeUse) / (float) cpuTimeUse);
+                std::array signal{mUsage, 0.f, 100.f};
+                txProcess.transmit(mSignalSerialNumber.serialNumber(), signal);
+            }
+        }
+
+        count = (count + 1) % divisor;
+    }
+
+    void SystemData::cpuCount() {
         static constexpr std::string_view ProcessorLine = "processor";
         std::ifstream ifs;
         ifs.open(std::string(ProcCpuInfo), std::ofstream::in);
