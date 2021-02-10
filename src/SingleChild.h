@@ -66,6 +66,8 @@ namespace rose {
         SingleChild& operator=(SingleChild &&) = delete;
 
         std::shared_ptr<Widget> getSingleChild() {
+            if (mChildren.empty())
+                return nullptr;
             return mChildren.front()->getWidget();
         }
 
