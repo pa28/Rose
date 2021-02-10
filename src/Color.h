@@ -84,6 +84,14 @@ namespace rose::color {
             operator[](3) = (float) (a & 0xffu) / 255.f;
         }
 
+        /// Construct RGBA from uint8_t components in the range [0 ... 255]
+        constexpr RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a) noexcept {
+            operator[](0) = (float) (r) / 255.f;
+            operator[](1) = (float) (g) / 255.f;
+            operator[](2) = (float) (b) / 255.f;
+            operator[](3) = (float) (a) / 255.f;
+        }
+
         /// Construct RGBA from float components in range [0.0 ... 1.0]
         constexpr RGBA(float r, float g, float b, float a) noexcept {
             operator[](0) = r;
