@@ -332,25 +332,32 @@ namespace rose {
         return ret;
     }
 
-    std::shared_ptr<Widget> Rose::findWidget(const Position &pos) {
+    std::tuple<FoundWidgetType,std::shared_ptr<Widget>> Rose::findWidget(const Position &pos) {
         std::shared_ptr<Widget> widget{};
+        FoundWidgetType widgetType = FoundWidgetType::RegularWidget;
 
         for (auto &window : ReverseContainerView(mWindowList)) {
             if (window->layoutHints().mAssignedRect) {
                 if (window->layoutHints().mAssignedRect->contains(pos)) {
-                    return window->findWidget(pos); // - window->layoutHints().mAssignedRect->getPosition());
+                    return std::make_tuple(widgetType, window->findWidget(pos)); // - window->layoutHints().mAssignedRect->getPosition());
                 }
             } else if (window->getSize() && window->getPos()) {
                 if (pos >= window->getPos() && (pos - window->getPos().value()) <= window->getSize())
-                    return window->findWidget(pos - window->getPos().value());
+                    return std::make_tuple(widgetType, window->findWidget(pos - window->getPos().value()));
             } else {
                 throw std::runtime_error("Window location not well formed.");
             }
 
-            if (window->getModal() == Modal)
-                break;
+            if (window->getModal() == Modal) {
+                widgetType = FoundWidgetType::ModalWindow;
+                return std::make_tuple(widgetType, window);
+            } else {
+                if (window->as<Popup>())
+                    return std::make_tuple(FoundWidgetType::PopupWindow, window);
+            }
+
         }
-        return nullptr;
+        return std::make_tuple(widgetType, nullptr);
     }
 
     void Rose::removeWindow(std::shared_ptr<Window> window) {

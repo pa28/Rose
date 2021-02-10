@@ -97,6 +97,16 @@ namespace rose {
         XDG_PATH_FAIL,              ///< Insufficient information to generate standard XDG Base Directories.
     };
 
+    /**
+     * @enum FoundWidgetType
+     * @brief The type of widget found.
+     */
+    enum class FoundWidgetType {
+        RegularWidget,              ///< A normal Widget
+        PopupWindow,                ///< A popup that should be dismissed if a gesture lands outside.
+        ModalWindow,                ///< A modal window, gestures outside should be ignored.
+    };
+
     template<class A, typename ... Args>
     std::shared_ptr<A> RoseFactory(Args ... args) {
         return std::make_shared<A>(args...);
@@ -420,7 +430,7 @@ namespace rose {
          * @param position The position the widget must contain.
          * @return a std::shared_ptr with the widget, or empty.
          */
-        std::shared_ptr<Widget> findWidget(const Position &position);
+        std::tuple<FoundWidgetType,std::shared_ptr<Widget>> findWidget(const Position &position);
 
         /**
          * @brief Create a texture from a UTF8 code point of a font.

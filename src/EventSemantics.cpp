@@ -302,31 +302,45 @@ namespace rose {
     }
 
     std::shared_ptr<Widget> EventSemantics::identifyFocusWidget(Position focusPos) {
-        auto focusWidget = mRose.findWidget(focusPos);
-        if (focusWidget) {
-            if (!mFocusTrail.empty()) {
-                if (!mFocusTrail.front().expired()) {
-                    auto currentFocus = mFocusTrail.front().lock();
-                    if (currentFocus == focusWidget)
-                        return currentFocus;
+        auto [widgetType,focusWidget] = mRose.findWidget(focusPos);
+        switch (widgetType) {
+            case FoundWidgetType::RegularWidget:
+                if (focusWidget) {
+                    if (!mFocusTrail.empty()) {
+                        if (!mFocusTrail.front().expired()) {
+                            auto currentFocus = mFocusTrail.front().lock();
+                            if (currentFocus == focusWidget)
+                                return currentFocus;
+                        }
+                    }
+
+                    auto keyboardFocus = focusWidget;
+
+                    while (keyboardFocus && !keyboardFocus->supportsKeyboard())
+                        keyboardFocus = keyboardFocus->parent();
+                    if (keyboardFocus) {
+                        if (mTextFocus && mTextFocus != keyboardFocus)
+                            mTextFocus->keyboardFocusEvent(false);
+                        mTextFocus = keyboardFocus;
+                        if (mTextFocus)
+                            mTextFocus->keyboardFocusEvent(true);
+                    }
+
+                    while (focusWidget && !focusWidget->acceptsFocus())
+                        focusWidget = focusWidget->parent();
+                    setFocusWidget(focusWidget);
                 }
-            }
-
-            auto keyboardFocus = focusWidget;
-
-            while (keyboardFocus && !keyboardFocus->supportsKeyboard())
-                keyboardFocus = keyboardFocus->parent();
-            if (keyboardFocus) {
-                if (mTextFocus && mTextFocus != keyboardFocus)
-                    mTextFocus->keyboardFocusEvent(false);
-                mTextFocus = keyboardFocus;
-                if (mTextFocus)
-                    mTextFocus->keyboardFocusEvent(true);
-            }
-
-            while (focusWidget && !focusWidget->acceptsFocus())
-                focusWidget = focusWidget->parent();
-            setFocusWidget(focusWidget);
+                break;
+            case FoundWidgetType::PopupWindow:
+                if (auto window = focusWidget->as<Window>(); window) {
+                    std::cout << "stop\n";
+                    mRose.removeWindow(window);
+                    return identifyFocusWidget(focusPos);
+                }
+                break;
+            case FoundWidgetType::ModalWindow:
+                return nullptr;
+                break;
         }
         return focusWidget;
     }
@@ -403,7 +417,7 @@ namespace rose {
 //        if (mScrollFocus && mScrollFocus->contains(focusPos))
 //            return mScrollFocus;
 
-        auto widget = mRose.findWidget(focusPos);
+        auto [widgetType,widget] = mRose.findWidget(focusPos);
         while (widget && !widget->supportsScrollWheel()) {
             widget = widget->parent();
         }
