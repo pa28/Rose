@@ -9,8 +9,10 @@
 #include "Cache.h"
 #include "Menu.h"
 #include "ImageView.h"
+#include "LinearScale.h"
 #include "Rose.h"
 #include "Settings.h"
+#include "SystemMonitor.h"
 #include "Tab.h"
 #include "Timer.h"
 #include "Frame.h"
@@ -32,7 +34,8 @@ public:
 
     ~App() override = default;
 
-    SecondTickPtr mSecondTick;
+    SecondTickPtr mSecondTick{};
+    SystemData mSystemData{};
 
     std::unique_ptr<WebFileCache> solarImageCache;
     std::unique_ptr<WebFileCache> celesTrackEphemeris;
@@ -40,6 +43,8 @@ public:
 
     std::shared_ptr<Slot<uint32_t>> solarImageCacheSlot;
     std::shared_ptr<Slot<Button::SignalType>> menuButtonRx;
+
+    std::shared_ptr<LinearScale> mSystemStatus;
 
     std::mutex mMutex;
 
@@ -154,6 +159,7 @@ public:
                             << wdg<TimeBox>(mSecondTick) << Manip::Parent
                             << wdg<DateBox>(mSecondTick) << Manip::Parent
                             << wdg<ImageView>(256, true) << Manip::Parent
+                            << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> mSystemStatus << Manip::Parent
                   << Parent<Row>();
 
         auto tabWidget = rowWidget
@@ -198,6 +204,9 @@ public:
         solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
         celesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
         clearSkyEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
+        mSecondTick->txSecond.connect(mSystemData.rxTrigger);
+        mSystemData.txTemperature.connect(mSystemStatus->rxScaledValue0);
+        mSystemData.txProcess.connect(mSystemStatus->rxScaledValue1);
 
         /**
          *  Fetch calls should occur after all the Signal/Slot connections are made to avoid a race between
