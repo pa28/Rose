@@ -608,11 +608,8 @@ namespace rose {
             for (auto x = 0; x < minimal->w; ++x) {
                 auto rgba = sdl::getRGBA(surface->format, surface.pixel(minX + x, minY + y));
                 minimal.pixel(x, y) = sdl::mapRGBA(minimal->format, rgba);
-                std::cout << std::hex << setw(8) << std::setfill('0') << minimal.pixel(x,y) << ' ';
             }
-            std::cout << '\n';
         }
-        std::cout << dec << '\n';
 
         return sdl::TextureData{minimal.toTexture(renderer)};
     }
