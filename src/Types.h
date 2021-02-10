@@ -55,16 +55,16 @@ namespace rose {
     using LinearScaleSignalType = std::pair<float, SignalToken>;
 
     /**
-     * @struct VerticalSpacing
-     * @brief A manipulator type for VerticalSpacing.
+     * @struct StartOffset
+     * @brief A manipulator to specify the an offset for the first child of a Container along the primary axis.
      */
     struct StartOffset {
         int mStartOffset;       ///< The start offset value, pixels.
     };
 
     /**
-     * @struct HorizontalSpacing
-     * @brief A manipulator type for HorizontalSpacing.
+     * @struct InternalSpace
+     * @brief A manipulator to specify the internal spacing between children along the primary axis.
      */
     struct InternalSpace {
         int mInternalSpace;     ///< The internal spacing value, pixels.
