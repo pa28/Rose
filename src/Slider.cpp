@@ -9,21 +9,21 @@
 
 namespace rose {
 
-    Slider::Slider(float value) : LinearScale() {
+    Slider::Slider(float value) : LinearScale(LinearScaleIndicator::RoundThumb) {
         setValue(value, false);
         mSupportsDrag = true;
         mAcceptsFocus = true;
         mSupportsScrollWheel = true;
     }
 
-    Slider::Slider(ImageId imageId) : LinearScale(imageId) {
+    Slider::Slider(ImageId imageId) : LinearScale(LinearScaleIndicator::RoundThumb) {
         mSupportsDrag = true;
         mAcceptsFocus = true;
         mSupportsScrollWheel = true;
     }
 
     Slider::Slider(float lowerBound, float upperBound, float value, ImageId imageId)
-            : LinearScale(lowerBound, upperBound, value, imageId) {
+            : LinearScale(lowerBound, upperBound, value, LinearScaleIndicator::RoundThumb) {
         mSupportsDrag = true;
         mAcceptsFocus = true;
         mSupportsScrollWheel = true;

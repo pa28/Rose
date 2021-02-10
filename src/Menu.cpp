@@ -72,9 +72,9 @@ namespace rose {
         if (auto label = getLabel(); label) {
             label->setBadgeRight(true);
             if (mCascadeButtonType == CascadeButtonType::CascadeDown)
-                label->setBadge(RoseImageId::IconDownCascade);
+                label->setBadge(RoseImageId::IconDownDir);
             else
-                label->setBadge(RoseImageId::IconRightCascade);
+                label->setBadge(RoseImageId::IconRightDir);
         } else
             throw std::logic_error("First child of CascadeButton is not a Label");
 
