@@ -16,6 +16,13 @@ namespace rose {
 
     using namespace std;
 
+    enum class LinearScaleIndicator {
+        RoundThumb,
+        SquareThumb,
+        SingleChannel,
+        DualChannel,
+    };
+
     /**
      * @class LinearScale
      * @brief A base class for Widgets that are base on a linear value input or output eg) Slider and Gauge.
@@ -25,6 +32,7 @@ namespace rose {
      */
     class LinearScale : public Frame {
     protected:
+        LinearScaleIndicator mLinearScaleInd{};         ///< Specify the scale indicators.
         SignalSerialNumber mSignalSerialNumber{};       ///< The button serial number
         Orientation mOrientation{Orientation::Unset};   ///< Scale Orientation.
 
@@ -32,8 +40,13 @@ namespace rose {
         float mUpperBound{1.f};                 ///< The upper bound of the scale.
         float mValue{0.f};                      ///< The current value of the scale.
 
-        ImageId mImageId{RoseImageInvalid};     ///< ImageId of the indicator.
-        ImageId mCenterId{RoseImageInvalid};    ///< ImageId of the thumb center.
+        ImageId mImageId0{RoseImageInvalid};    ///< ImageId of the indicator.
+        ImageId mImageId1{RoseImageInvalid};    ///< ImageId of the thumb center.
+
+        Rectangle mImageRect0{};                ///< Position and size rectangle for mImageId0.
+        Rectangle mImageRect1{};                ///< Position and size rectangle for mImageId1.
+
+        Rectangle getIndicatorRectangle(ImageId imageId);   ///< Get the rectangel for value indicators.
 
 #if 0
         /**
@@ -121,7 +134,7 @@ namespace rose {
          * @brief Constructor
          * @param imageId The ImageId for the indicator which is omitted if imageId == RoseImageInvalid.
          */
-        explicit LinearScale(ImageId imageId = RoseImageInvalid);
+        explicit LinearScale(LinearScaleIndicator linearScaleIndicator);
 
         /**
          * @brief Constructor
@@ -130,7 +143,7 @@ namespace rose {
          * @param value The initial value of the scale.
          * @param imageId The ImageId for the indicator which is omitted if imageId == RoseImageInvalid.
          */
-        LinearScale(float lowerBound, float upperBound, float value, ImageId imageId = RoseImageInvalid);
+        LinearScale(float lowerBound, float upperBound, float value, LinearScaleIndicator linearScaleIndicator);
 
         /**
          * @brief See Widget::initializeComposite()
@@ -146,6 +159,11 @@ namespace rose {
          * @brief See Widget::draw()
          */
         void draw(sdl::Renderer &renderer, Rectangle parentRect) override;
+
+        void setOrientation(Orientation orientation) override {
+            mOrientation = orientation;
+            rose()->needsLayout();
+        }
 
         /**
          * @brief Called by LinearScaleBorder after it calls Border::initializeComposite().

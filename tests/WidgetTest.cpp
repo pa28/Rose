@@ -81,6 +81,9 @@ void Test::build() {
                             << wdg<TextField>(7, "", "Deg", "Lon", 6)
                                     << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
                                     << Manip::Parent
+                            << wdg<LinearScale>(LinearScaleIndicator::DualChannel)
+                                    << Orientation::Horizontal
+                                    << Manip::Parent
                             << Manip::Parent
                     << wdg<Keyboard>(keyboard);
 }

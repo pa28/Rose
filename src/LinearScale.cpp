@@ -9,30 +9,36 @@
 #include "Manipulators.h"
 
 namespace rose {
-    LinearScale::LinearScale(rose::ImageId imageId) : Frame() {
-        mImageId = imageId;
-        switch (mImageId) {
-            case RoseImageId::RoseImageInvalid:
-                break;
-            case RoseImageId::BevelInRoundCorners:
-            case RoseImageId::BevelOutRoundCorners:
-            case RoseImageId::NotchInRoundCorners:
-            case RoseImageId::NotchOutRoundCorners:
-                mCenterId = RoseImageId::CenterRoundBaseColor;
-                break;
-            case RoseImageId::BevelInSquareCorners:
-            case RoseImageId::BevelOutSquareCorners:
-            case RoseImageId::NotchInSquareCorners:
-            case RoseImageId::NotchOutSquareCorners:
-                mCenterId = RoseImageId::CenterSquareBaseColor;
-                break;
-        }
+    LinearScale::LinearScale(LinearScaleIndicator scaleIndicator) : Frame(), mLinearScaleInd(scaleIndicator) {
     }
 
-    LinearScale::LinearScale(float lowerBound, float upperBound, float value, ImageId imageId) : LinearScale(imageId) {
+    LinearScale::LinearScale(float lowerBound, float upperBound, float value, LinearScaleIndicator scaleIndicator) : LinearScale(scaleIndicator) {
         mLowerBound = lowerBound;
         mUpperBound = upperBound;
         mValue = value;
+    }
+
+    Rectangle LinearScale::getIndicatorRectangle(ImageId imageId) {
+        Rectangle rectangle{};
+        if (imageId != RoseImageId::RoseImageInvalid) {
+            rectangle = rose()->imageRepository(imageId).getRectangle();
+            if (mOrientation == Orientation::Vertical) {
+                if (imageId == RoseImageId::IconLeftDir || imageId == RoseImageId::IconRightDir) {
+                    auto hExtra = rectangle.height() - rectangle.width();
+                    rectangle.y() = hExtra / 2;
+                    rectangle.height() = rectangle.width();
+                    std::cout << __PRETTY_FUNCTION__ << " Left/Right" << rectangle << '\n';
+                }
+            } else if (mOrientation == Orientation::Horizontal) {
+                if (imageId == RoseImageId::IconUpDir || imageId == RoseImageId::IconDownDir) {
+                    auto hExtra = rectangle.height() - rectangle.width();
+                    rectangle.y() = hExtra / 2;
+                    rectangle.height() = rectangle.width();
+                    std::cout << __PRETTY_FUNCTION__ << " Up/Down" << rectangle << '\n';
+                }
+            }
+        }
+        return rectangle;
     }
 
     void LinearScale::initializeComposite() {
@@ -43,14 +49,10 @@ namespace rose {
         setBorder(BorderStyle::Notch);
         setCornerStyle(CornerStyle::Round);
         setPadding(4);
-        if (mOrientation == Orientation::Unset)
+        if (mOrientation == Orientation::Unset || mOrientation == Orientation::Both)
             mOrientation = Orientation::Horizontal;
         mLayoutHints.mElastic = Elastic{mOrientation};
         mLayoutHints.mShrinkable = false;
-
-        mIndicator = getWidget<Frame>() << wdg<LinearScaleImage>(mImageId);
-        if (!mImageId)
-            mIndicator << Size{20, 20};
 
         valueRx = std::make_shared<Slot<SignalType>>();
         valueRx->setCallback([=](uint32_t signalSN, SignalType signalType) {
@@ -71,19 +73,82 @@ namespace rose {
     }
 
     Rectangle LinearScale::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
-        return Frame::widgetLayout(renderer, available, 0);
+        auto frameAvailable = clampAvailableArea(available, mPos, mSize);
+        frameAvailable = mLayoutHints.layoutBegin(frameAvailable);
+
+        switch (mLinearScaleInd) {
+            case LinearScaleIndicator::RoundThumb:
+                mImageId0 = RoseImageId::BevelOutRoundCorners;
+                mImageId1 = RoseImageId::CenterRoundBaseColor;
+                mImageRect0 = rose()->imageRepository(mImageId0).getRectangle();
+                mImageRect1 = rose()->imageRepository(mImageId1).getRectangle();
+                break;
+            case LinearScaleIndicator::SquareThumb:
+                mImageId0 = RoseImageId::BevelOutSquareCorners;
+                mImageId1 = RoseImageId::CenterSquareBaseColor;
+                mImageRect0 = getIndicatorRectangle(mImageId0);
+                mImageRect1 = getIndicatorRectangle(mImageId1);
+                break;
+            case LinearScaleIndicator::SingleChannel:
+                if (mOrientation == Orientation::Horizontal) {
+                    mImageId0 = RoseImageId::ScaleNeedleUp;
+                    mImageId0 = RoseImageId::RoseImageInvalid;
+                    mImageRect0 = getIndicatorRectangle(mImageId0);
+                    mImageRect1 = Rectangle{};
+                    break;
+                } else if (mOrientation == Orientation::Vertical) {
+                    mImageId0 = RoseImageId::IconRightDir;
+                    mImageId1 = RoseImageId::RoseImageInvalid;
+                    mImageRect0 = getIndicatorRectangle(mImageId0);
+                    mImageRect1 = Rectangle{};
+                    break;
+                }
+                break;
+            case LinearScaleIndicator::DualChannel:
+                if (mOrientation == Orientation::Horizontal) {
+                    mImageId0 = RoseImageId::ScaleNeedleUp;
+                    mImageId1 = RoseImageId::ScaleNeedleDown;
+                    mImageRect0 = getIndicatorRectangle(mImageId0);
+                    mImageRect1 = getIndicatorRectangle(mImageId1);
+                    break;
+                } else if (mOrientation == Orientation::Vertical) {
+                    mImageId0 = RoseImageId::IconRightDir;
+                    mImageId1 = RoseImageId::IconLeftDir;
+                    mImageRect0 = getIndicatorRectangle(mImageId0);
+                    mImageRect1 = getIndicatorRectangle(mImageId1);
+                    break;
+                }
+                break;
+        }
+
+        switch (mOrientation) {
+            case Orientation::Horizontal:
+                frameAvailable.height() = std::max(mImageRect0.height(), mImageRect1.height()) * 3 / 2;
+                frameAvailable.width() = frameAvailable.height();
+                break;
+            case Orientation::Vertical:
+                frameAvailable.width() = std::max(mImageRect0.width(), mImageRect1.width()) * 3 / 2;
+                frameAvailable.height() = frameAvailable.width();
+                break;
+        }
+
+        frameAvailable = mLayoutHints.layoutEnd(frameAvailable);
+
+        std::cout << __PRETTY_FUNCTION__ << frameAvailable << '\n';
+        return frameAvailable;
     }
 
     void LinearScale::draw(sdl::Renderer &renderer, Rectangle parentRect) {
         if (mVisible) {
             auto widgetRect = clampAvailableArea(parentRect, mLayoutHints.mAssignedRect);
+            std::cout << __PRETTY_FUNCTION__ << widgetRect << '\n';
 
             drawFrameOnly(renderer, widgetRect);
             drawBorder(renderer, widgetRect);
-
-            if (auto child = getSingleChild(); child) {
-                child->draw(renderer, widgetRect);
-            }
+//
+//            if (auto child = getSingleChild(); child) {
+//                child->draw(renderer, widgetRect);
+//            }
         }
     }
 
@@ -103,49 +168,57 @@ namespace rose {
         auto interior = interiorArea();
         interior = mLayoutHints.relativePositionShift(mLayoutHints.layoutBegin(available));
 
-        if (mImageId) {
-            auto size = rose()->imageRepository(mImageId).getSize();
+        if (mImageId0) {
             switch (mOrientation) {
                 case Orientation::Unset:
                 case Orientation::Horizontal:
-                    interior.x() += size.width() / 2;
-                    interior.width() -= size.width();
+                    interior.x() += mImageRect0.width() / 2;
+                    interior.width() -= mImageRect0.width();
                     break;
                 case Orientation::Vertical:
-                    interior.y() += size.height() / 2;
-                    interior.height() -= size.height();
+                    interior.y() += mImageRect0.height() / 2;
+                    interior.height() -= mImageRect0.height();
                     break;
                 case Orientation::Both:
                     break;
             }
         }
 
-        auto scaleSize = interiorArea().getSize() - mLayoutHints.mPadding.padSize();
+        auto scaleSize = interior.getSize() - mLayoutHints.mPadding.padSize();
         if (mGradient != Gradient::None) {
             drawGradientBackground(renderer, mGradient, interior, mOrientation);
         }
 
-        if (auto imageView = getSingleChild<ImageView>()) {
-            if (mImageId) {
-                auto thumbSize = imageView->getSize();
-                auto length = mOrientation == Orientation::Vertical ?
-                              scaleSize.height() - thumbSize->height() :
-                              scaleSize.width() - thumbSize->width();
-                auto offset = (float) length * (mValue - mLowerBound) / (mUpperBound - mLowerBound);
-                auto intOffset = roundToInt(offset);
-                switch (mOrientation) {
-                    case Orientation::Unset:
-                    case Orientation::Horizontal:
-                        imageView->layoutHints().mAssignedRect->x() = mLayoutHints.mPadding.left() + intOffset;
-                        break;
-                    case Orientation::Vertical:
-                        imageView->layoutHints().mAssignedRect->y() = mLayoutHints.mPadding.top() + length - intOffset;
-                        break;
-                    case Orientation::Both:
-                        break;
-                }
-            }
+        if (mImageId0 != RoseImageInvalid) {
+            Rectangle dst{interior};
+            dst.width() = mImageRect0.width();
+            dst.height() = mImageRect0.height();
+            dst.x() += 20;
+            std::cout << "Render: " << interior << dst << '\n';
+            rose()->imageRepository().renderCopy(renderer, mImageId0, mImageRect0, dst);
         }
+
+//        if (auto imageView = getSingleChild<ImageView>()) {
+//            if (mImageId0) {
+//                auto thumbSize = imageView->getSize();
+//                auto length = mOrientation == Orientation::Vertical ?
+//                              scaleSize.height() - thumbSize->height() :
+//                              scaleSize.width() - thumbSize->width();
+//                auto offset = (float) length * (mValue - mLowerBound) / (mUpperBound - mLowerBound);
+//                auto intOffset = roundToInt(offset);
+//                switch (mOrientation) {
+//                    case Orientation::Unset:
+//                    case Orientation::Horizontal:
+//                        imageView->layoutHints().mAssignedRect->x() = mLayoutHints.mPadding.left() + intOffset;
+//                        break;
+//                    case Orientation::Vertical:
+//                        imageView->layoutHints().mAssignedRect->y() = mLayoutHints.mPadding.top() + length - intOffset;
+//                        break;
+//                    case Orientation::Both:
+//                        break;
+//                }
+//            }
+//        }
     }
 
     /*
@@ -166,12 +239,12 @@ namespace rose {
         auto imageView = front()->as<ImageView>();
         if (imageView) {
             auto imageRect = imageView->layoutHints().mAssignedRect;
-            if (mImageId) {
+            if (mImageId0) {
                 Rectangle dst{available.x() + imageRect->x(), available.y() + imageRect->y(),
                               imageRect->width(), imageRect->height()};
-                if (mCenterId)
-                    rose()->imageRepository().renderCopy(renderer, mCenterId, dst);
-                rose()->imageRepository().renderCopy(renderer, mImageId, dst);
+                if (mImageId1)
+                    rose()->imageRepository().renderCopy(renderer, mImageId1, dst);
+                rose()->imageRepository().renderCopy(renderer, mImageId0, dst);
             }
         }
     }
