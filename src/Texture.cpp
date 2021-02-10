@@ -70,6 +70,7 @@ namespace rose::sdl {
     void GradientTexture::setColors(const color::RGBA &start, const color::RGBA &end, Orientation orientation) {
         switch (orientation) {
             case Orientation::Unset:
+            case Orientation::Both:
             case Orientation::Horizontal:
                 return setColors(start, end, start, end);
             case Orientation::Vertical:
