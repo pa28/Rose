@@ -1,7 +1,7 @@
 /** @file SystemMonitor.h
   * @author Richard Buckley <richard.buckley@ieee.org>
-  * @version 1.0
-  * @date 2020-10-26
+  * @version 2.0
+  * @date 2021-02-10
   * @brief A class to display system related information.
   */
 
@@ -13,6 +13,10 @@
 
 namespace rose {
 
+    /**
+     * @class SystemData
+     * @brief Gather system data to transmit on Signal objects.
+     */
     class SystemData {
     protected:
         SignalSerialNumber mSignalSerialNumber{};    /// Signal serial number identifying the object.
@@ -53,11 +57,11 @@ namespace rose {
 
         std::shared_ptr<Slot<int>> rxTrigger;   ///< The slot to receive interval triggers on.
 
-        using TemperatureSignal = std::array<float,3>;
-        Signal<TemperatureSignal> txTemperature{};
+        using TemperatureSignal = std::array<float,3>;  ///< The type used for system temperature signals.
+        Signal<TemperatureSignal> txTemperature{};      ///< The Signal object to transmit temperature.
 
-        using ProcessSignal = std::array<float,3>;
-        Signal<ProcessSignal > txProcess{};
+        using ProcessSignal = std::array<float,3>;      ///< The type used for process usage signals.
+        Signal<ProcessSignal > txProcess{};             ///< The Signal object to transmit process usage.
     };
 
     /**
