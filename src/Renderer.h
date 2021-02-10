@@ -25,11 +25,18 @@ namespace rose::sdl {
 
     class GradientTexture;
 
+    /**
+     * @struct RenderFlip
+     * @brief A Widget manipulator to indicate if and how rendering a texture should be flipped.
+     * @details The structure supports flipping on the Horizontal, Vertical or both axis.
+     */
     struct RenderFlip {
         SDL_RendererFlip mFlip;
 
+        /// Default constructor -- No flipping
         constexpr RenderFlip() noexcept : mFlip(SDL_FLIP_NONE) {}
 
+        /// Constructor -- user specified flipping.
         constexpr explicit RenderFlip(SDL_RendererFlip flip) noexcept : mFlip(flip) {}
     };
 

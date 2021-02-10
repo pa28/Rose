@@ -305,6 +305,10 @@ namespace rose {
         Modality getModal() const { return mModal; }
     };
 
+    /**
+     * @class Box
+     * @brief A linear layout Container that can layout children in a Row or a Column.
+     */
     class Box : public Container {
     protected:
         int mMinOrthogonal{};                    ///< The minimum size along the secondary axis.
