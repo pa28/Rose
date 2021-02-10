@@ -436,6 +436,20 @@ namespace rose {
                                color::RGBA textColor, sdl::TextureData &textureData);
 
         /**
+         * @brief Create a minimal texture from an icon character.
+         * @details A minimal texture has the extra transparent pixles on the top, bottom, left and right stripped
+         * away.
+         * @param renderer The Renderer
+         * @param text The code point
+         * @param fontName The Font name
+         * @param ptsize The Font point size
+         * @param iconColor The icon rendering color.
+         * @return The TextureData object to render to.
+         */
+        sdl::TextureData getMinimalIcon(sdl::Renderer &renderer, const char *text, std::string &fontName,
+                                        size_t ptsize, color::RGBA iconColor);
+
+        /**
          * @brief Generate a surface from a UTF8 code point of a font.
          * @param text the code point
          * @param fontName the font name
@@ -495,7 +509,9 @@ namespace rose {
          * @param imageId the identifier of the TextureData to get
          * @return a TextureData object pointing to the original copy of the image.
          */
-        sdl::TextureData &imageRepository(ImageId imageId) { return mImageRepository.image(imageId); }
+        sdl::TextureData &imageRepository(ImageId imageId) {
+            return mImageRepository.image(imageId);
+        }
 
         /**
          * @brief Get a specific TextureData object from the Rose ImageRepository.

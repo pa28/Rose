@@ -433,16 +433,18 @@ namespace rose {
     }
 
     void Rose::createStandardIcons() {
-        static constexpr std::array<RoseImageId, 19> iconList{IconCancel, IconHelp,
-                                                             IconInfo, IconCheck,
-                                                             IconAlert, IconDownCascade,
-                                                             IconRightCascade, IconLock,
-                                                             IconUpBold, IconUpOpenBig,
-                                                             IconLeft, IconRight,
-                                                             IconToEnd, IconBack,
-                                                             IconLevelDown, Icon1Dot,
-                                                             Icon2Dots, Icon3Dots,
-                                                             IconKeyboard};
+        static constexpr std::array<RoseImageId, 23> iconList{IconCancel, IconHelp,
+                                                              IconInfo, IconCheck,
+                                                              IconAlert, IconLock,
+                                                              IconUpBold, IconUpOpenBig,
+                                                              IconLeft, IconRight,
+                                                              IconToEnd, IconBack,
+                                                              IconLevelDown, Icon1Dot,
+                                                              Icon2Dots, Icon3Dots,
+                                                              IconUpDir, IconDownDir,
+                                                              IconLeftDir, IconRightDir,
+                                                             IconKeyboard, ScaleNeedleUp,
+                                                             ScaleNeedleDown};
 
         for (auto &iconId : iconList) {
             int iconCode;
@@ -462,11 +464,19 @@ namespace rose {
                 case IconAlert:
                     iconCode = ENTYPO_ICON_ALERT;
                     break;
-                case IconDownCascade:
+                case IconUpDir:
+                case ScaleNeedleUp:
+                    iconCode = ENTYPO_ICON_UP_DIR;
+                    break;
+                case IconDownDir:
+                case ScaleNeedleDown:
                     iconCode = ENTYPO_ICON_DOWN_DIR;
                     break;
-                case IconRightCascade:
+                case IconRightDir:
                     iconCode = ENTYPO_ICON_RIGHT_DIR;
+                    break;
+                case IconLeftDir:
+                    iconCode = ENTYPO_ICON_LEFT_DIR;
                     break;
                 case IconLock:
                     iconCode = ENTYPO_ICON_LOCK;
@@ -507,15 +517,17 @@ namespace rose {
                 default:
                     throw std::runtime_error("Unhandled icon id.");
             }
-            sdl::TextureData textureData;
-            createIcon(iconCode, mTheme.mIconFontSize, mTheme.mTextColour, textureData);
-            mImageRepository.setImage(iconId, std::move(textureData));
 
-            auto font = mFontCache.getFont(mTheme.mIconFontName, mTheme.mIconFontSize);
-            mIconFontMetrics.fontAscent = TTF_FontAscent(font.get());
-            mIconFontMetrics.fontDescent = TTF_FontDescent(font.get());
-            mIconFontMetrics.fontHeight = TTF_FontHeight(font.get());
-            mIconFontMetrics.fontLineSkip = TTF_FontLineSkip(font.get());
+            if (iconId == ScaleNeedleDown || iconId == ScaleNeedleUp) {
+                auto icon = utf8(iconCode);
+                auto texturData = getMinimalIcon(mRenderer, icon.data(), mTheme.mIconFontName,
+                                                 mTheme.mIconFontSize, mTheme.mBaseColor);
+                mImageRepository.setImage(iconId, std::move(texturData));
+            } else {
+                sdl::TextureData textureData;
+                createIcon(iconCode, mTheme.mIconFontSize, mTheme.mTextColour, textureData);
+                mImageRepository.setImage(iconId, std::move(textureData));
+            }
         }
     }
 
@@ -564,6 +576,45 @@ namespace rose {
             return sdl::Surface{};
 
         return sdl::Surface{TTF_RenderUTF8_Blended(font.get(), text, textColor.toSdlColor())};
+    }
+
+    sdl::TextureData Rose::getMinimalIcon(sdl::Renderer &renderer, const char *text, std::string &fontName,
+                                          size_t ptsize, color::RGBA iconColor) {
+        auto font = mFontCache.getFont(fontName, ptsize);
+
+        if (!font)
+            throw (std::runtime_error(StringCompositor("Can not find font '", fontName, "'.")));
+
+        sdl::Surface surface{TTF_RenderUTF8_Blended(font.get(), text, iconColor.toSdlColor())};
+
+        int minX = surface->w;
+        int minY = surface->h;
+        int maxX = 0, maxY = 0;
+
+        for (auto y = 0; y < surface->h; ++y) {
+            for (auto x = 0; x < surface->w; ++x) {
+                auto rgba = sdl::getRGBA(surface->format, surface.pixel(x,y));
+                if (rgba.a() > 0) {
+                    minX = std::min(minX, x);
+                    minY = std::min(minY, y);
+                    maxX = std::max(maxX, x);
+                    maxY = std::max(maxY, y);
+                }
+            }
+        }
+
+        sdl::Surface minimal{maxX - minX + 1, maxY - minY + 1};
+        for (auto y = 0; y < minimal->h; ++y) {
+            for (auto x = 0; x < minimal->w; ++x) {
+                auto rgba = sdl::getRGBA(surface->format, surface.pixel(minX + x, minY + y));
+                minimal.pixel(x, y) = sdl::mapRGBA(minimal->format, rgba);
+                std::cout << std::hex << setw(8) << std::setfill('0') << minimal.pixel(x,y) << ' ';
+            }
+            std::cout << '\n';
+        }
+        std::cout << dec << '\n';
+
+        return sdl::TextureData{minimal.toTexture(renderer)};
     }
 
     void Rose::getTexAndRectUtf8(sdl::Renderer &renderer, const char *text, const std::string &fontName, size_t ptsize,

@@ -158,20 +158,25 @@ namespace rose {
         IconInfo,               ///< Provide information.
         IconCheck,              ///< Approve the action, answer yes, etc.
         IconAlert,              ///< Alert the user to an error, unusual or unexpected occurrence.
-        IconDownCascade,        ///< Down facing triangle, CascadeButton
-        IconRightCascade,       ///< Right facing triangle, CascadeButton
         IconLock,               ///< Closed Lock Icon
         IconUpBold,             ///< Bold Up Arrow
         IconUpOpenBig,          ///< Up Chevron Big
         IconLeft,               ///< Left Arrow
         IconRight,              ///< Right Arrow
+        IconLeftDir,            ///< Left facing Triangle
+        IconRightDir,           ///< Right facing Triangle
+        IconUpDir,              ///< Up facing Triangle
+        IconDownDir,            ///< Down facing Triangle
         IconToEnd,              ///< Forward to end
         IconBack,               ///< Back
         IconLevelDown,          ///< Carriage Return
+        IconLevelUp,            ///
         Icon1Dot,               ///< One Dot
         Icon2Dots,              ///< Two Dots
         Icon3Dots,              ///< Three Dots
         IconKeyboard,           ///< Keyboard
+        ScaleNeedleUp,          ///< A horizontal linear scale needle pointing up.
+        ScaleNeedleDown,        ///< A horizontal linear scale needle pointing down.
         BevelOutRoundCorners,   ///< Sheet of round corners beveled out
         BevelInRoundCorners,    ///< Sheet of round corners beveled in
         NotchOutRoundCorners,   ///< Sheet of round corners notched out
