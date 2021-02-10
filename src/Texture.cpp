@@ -91,4 +91,14 @@ namespace rose::sdl {
         auto c = color.toSdlColor();
         return SDL_MapRGBA(format, c.r, c.g, c.b, c.a);
     }
+
+    color::RGBA getRGBA(PixelFormat &pixelFormat, uint32_t pixel) {
+        return getRGBA(pixelFormat.get(), pixel);
+    }
+
+    color::RGBA getRGBA(SDL_PixelFormat *format, uint32_t pixel) {
+        uint8_t r, g, b, a;
+        SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
+        return color::RGBA{r, g, b, a};
+    }
 }

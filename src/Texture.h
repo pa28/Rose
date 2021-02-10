@@ -451,6 +451,10 @@ namespace rose::sdl {
      */
     uint32_t mapRGBA(SDL_PixelFormat *format, const color::RGBA &color);
 
+    color::RGBA getRGBA(PixelFormat &pixelFormat, uint32_t pixel);
+
+    color::RGBA getRGBA(SDL_PixelFormat *format, uint32_t pixel);
+
     /**
      * @brief Render text to a Texture.
      * @tparam Color The type of the color argument.
