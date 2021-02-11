@@ -210,6 +210,8 @@ namespace rose {
                 widget->mouseButtonEvent(position, button, true, SDL_GetModState());
         } else if (state == SDL_RELEASED) {
             mButtonState &= ~button;
+            if (mDragFocus)
+                mDragFocus->mouseButtonEvent(position, button, false, SDL_GetModState());
             if (mClickTransaction && !mFocusTrail.empty()) {
                 auto weakPtr = mFocusTrail.front();
                 if (auto widget = mFocusTrail.front().lock(); widget && mClickTransaction) {

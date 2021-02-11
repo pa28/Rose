@@ -37,28 +37,6 @@ void Test::build() {
     mSecondTick = std::make_shared<SecondTick>();
     mSystemData = std::make_shared<SystemData>();
 
-    sliderRx = std::make_shared<Slot<Slider::SignalType>>();
-    sliderRx->setCallback([=](uint32_t, Slider::SignalType signalType) {
-        switch (signalType.second) {
-            case UserSignalTokenValues::Hue:
-                mHue = signalType.first;
-                break;
-            case UserSignalTokenValues::Saturation:
-                mSat = signalType.first;
-                break;
-            case UserSignalTokenValues::Lightness:
-                mVal = signalType.first;
-                break;
-            default:
-                break;
-        }
-        color::HSVA hsva{{mHue * 360.f, mSat, mVal, 1.0f}};
-        color::RGBA color{hsva};
-        mMainWindow << BackgroundColor(color);
-        needsDrawing(true);
-        auto sdlColor = color.toSdlColor();
-    });
-
     createRoundCorners(mRenderer, 5, 10, 2,
                        Theme::dTopColor, Theme::dBotColor, Theme::dLeftColor, Theme::dRightColor);
 

@@ -52,20 +52,11 @@ namespace rose {
         mLayoutHints.mElastic = Elastic{mOrientation};
         mLayoutHints.mShrinkable = false;
 
-        valueRx = std::make_shared<Slot<SignalType>>();
-        valueRx->setCallback([=](uint32_t signalSN, SignalType signalType) {
-            setValue(signalType.first, false);
-            if (signalSN != mSignalSerialNumber) {
-                valueTx.transmit(signalSN, signalType);
-            }
-        });
-
         rxScaledValue0 = std::make_shared<Slot<ScaledSignal>>();
         rxScaledValue0->setCallback([=](uint32_t signalSN, ScaledSignal signal){
             mLowerBound0 = signal[1];
             mUpperBound0 = signal[2];
             mValue0 = std::clamp(signal[0], mLowerBound0, mUpperBound0);
-//            std::cout << "Rx Temp: " << mValue0 << ',' << mLowerBound0 << ',' << mUpperBound0 << '\n';
             setNeedsDrawing();
         });
 
@@ -74,18 +65,8 @@ namespace rose {
             mLowerBound1 = signal[1];
             mUpperBound1 = signal[2];
             mValue1 = std::clamp(signal[0], mLowerBound1, mUpperBound1);
-//            std::cout << "Rx Proc: " << mValue1 << ',' << mLowerBound1 << ',' << mUpperBound1 << '\n';
             setNeedsDrawing();
         });
-    }
-
-    void LinearScale::setValue(float value, bool transmit) {
-        mValue0 = std::clamp(value, mLowerBound0, mUpperBound0);
-
-        if (transmit) {
-            valueTx.transmit(mSignalSerialNumber.serialNumber(),
-                             SignalType{value, mSignalToken});
-        }
     }
 
     Rectangle LinearScale::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
@@ -137,15 +118,26 @@ namespace rose {
                 break;
         }
 
-        switch (mOrientation) {
-            case Orientation::Horizontal:
-                frameAvailable.height() = std::max(mImageRect0.height(), mImageRect1.height()) * 3 / 2;
-                frameAvailable.width() = frameAvailable.height();
-                break;
-            case Orientation::Vertical:
-                frameAvailable.width() = std::max(mImageRect0.width(), mImageRect1.width()) * 3 / 2;
+        switch (mLinearScaleInd) {
+            case LinearScaleIndicator::RoundThumb:
+            case LinearScaleIndicator::SquareThumb:
+                frameAvailable.width() = std::max(mImageRect0.height(), mImageRect1.height());
                 frameAvailable.height() = frameAvailable.width();
                 break;
+            case LinearScaleIndicator::SingleChannel:
+            case LinearScaleIndicator::DualChannel:
+                switch (mOrientation) {
+                    case Orientation::Unset:
+                    case Orientation::Both:
+                    case Orientation::Horizontal:
+                        frameAvailable.height() = std::max(mImageRect0.height(), mImageRect1.height()) * 3 / 2;
+                        frameAvailable.width() = frameAvailable.height();
+                        break;
+                    case Orientation::Vertical:
+                        frameAvailable.width() = std::max(mImageRect0.width(), mImageRect1.width()) * 3 / 2;
+                        frameAvailable.height() = frameAvailable.width();
+                        break;
+                }
         }
 
         frameAvailable = mLayoutHints.layoutEnd(frameAvailable);
@@ -203,6 +195,14 @@ namespace rose {
             drawGradientBackground(renderer, mGradient, interior, mOrientation);
         }
 
+        if (mImageId1 != RoseImageInvalid) {
+            Rectangle dst{interior};
+            dst.width() = mImageRect0.width();
+            dst.height() = mImageRect0.height();
+            dst.x() += roundToInt((mValue1 - mLowerBound1) / (mUpperBound1 - mLowerBound1) * (float)interior.width()) - mImageRect0.width()/2;
+            rose()->imageRepository().renderCopy(renderer, mImageId1, mImageRect1, dst);
+        }
+
         if (mOrientation == Orientation::Horizontal) {
             if (mImageId0 != RoseImageInvalid) {
                 Rectangle dst{interior};
@@ -211,14 +211,6 @@ namespace rose {
                 dst.x() += roundToInt((mValue0 - mLowerBound0) / (mUpperBound0 - mLowerBound0) * (float)interior.width()) - mImageRect0.width()/2;
                 dst.y() = interior.y() + interior.height() - mImageRect0.height();
                 rose()->imageRepository().renderCopy(renderer, mImageId0, mImageRect0, dst);
-            }
-
-            if (mImageId1 != RoseImageInvalid) {
-                Rectangle dst{interior};
-                dst.width() = mImageRect0.width();
-                dst.height() = mImageRect0.height();
-                dst.x() += roundToInt((mValue1 - mLowerBound1) / (mUpperBound1 - mLowerBound1) * (float)interior.width()) - mImageRect0.width()/2;
-                rose()->imageRepository().renderCopy(renderer, mImageId1, mImageRect1, dst);
             }
         } else if (mOrientation == Orientation::Vertical) {
             if (mImageId0 != RoseImageInvalid) {
@@ -288,6 +280,16 @@ namespace rose {
                 rose()->imageRepository().renderCopy(renderer, mImageId0, dst);
             }
         }
+    }
+
+    void LinearScale::setThumbOffset(float offset, float maxOffset) {
+        mLowerBound0 = 0.f;
+        mUpperBound0 = maxOffset;
+        mValue0 = std::clamp(offset, mLowerBound0, mUpperBound0);
+        mLowerBound1 = mLowerBound0;
+        mUpperBound1 = mUpperBound0;
+        mValue1 = mValue0;
+        setNeedsDrawing();
     }
 
 #if 0

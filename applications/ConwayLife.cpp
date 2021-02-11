@@ -56,7 +56,8 @@ void ConwayLife::build() {
 
     mRateRx = std::make_shared<rose::Slot<Slider::SignalType>>();
     mRateRx->setCallback([=](uint32_t, Slider::SignalType rate){
-        mTimer.setInterval((Uint32)((1. - rate.first) * 900) + 100);
+        if (rate.first)
+            mTimer.setInterval((Uint32)((1. - rate.second) * 900) + 100);
     });
 
     createRoundCorners(mRenderer, 5, 10, 2,
@@ -96,7 +97,7 @@ void ConwayLife::build() {
     mSlider->valueTx.connect(mRateRx);
     mTribute->txPushed.connect(mButtonRx);
 
-    mSlider->setValue(0.f, true);
+    mSlider->setValue(0.f, true, true);
 //    mSlider->finalValue(0);
 }
 

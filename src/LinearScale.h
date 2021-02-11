@@ -52,6 +52,14 @@ namespace rose {
 
         Rectangle getIndicatorRectangle(ImageId imageId);   ///< Get the rectangel for value indicators.
 
+        /**
+         * @brief Set the thumb offset.
+         * @details Used by subclasses to directly set a thumb location.
+         * @param offset
+         * @param maxOffset
+         */
+        void setThumbOffset(float offset, float maxOffset);
+
 #if 0
         /**
          * @class LinearScaleBorder
@@ -217,22 +225,6 @@ namespace rose {
          * @param available The available screen rectangle.
          */
         virtual void drawImage(sdl::Renderer &renderer, Rectangle available);
-
-        /// Local definition of SignalType
-        using SignalType = LinearScaleSignalType;
-
-        /// Signal to transmit value changes.
-        Signal<SignalType> valueTx{};
-
-        /// Slot to receive value changes.
-        std::shared_ptr<Slot<SignalType>> valueRx{};
-
-        /**
-         * @brief Set the current value of the LinearScale.
-         * @param value The new value.
-         * @param transmit If true this value is transmitted on Signal valueTx.
-         */
-        void setValue(float value, bool transmit);
     };
 }
 

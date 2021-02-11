@@ -10,7 +10,7 @@
 namespace rose {
 
     Slider::Slider(float value) : LinearScale(LinearScaleIndicator::RoundThumb) {
-        setValue(value, false);
+        setValue(value, true, false);
         mSupportsDrag = true;
         mAcceptsFocus = true;
         mSupportsScrollWheel = true;
@@ -40,6 +40,11 @@ namespace rose {
     }
 
     bool Slider::mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers) {
+        if (!down) {
+            if (mDrag)
+                setValue(mValue, true, true);
+            mDrag = false;
+        }
         return true;
     }
 
@@ -49,84 +54,50 @@ namespace rose {
     }
 
     bool Slider::mouseDragEvent(const Position &mousePos, const Position &rel, int button, int modifiers) {
-        if (mChildren.empty())
-            return false;
-
         auto relMousePos = mousePos - mLayoutHints.mAssignedRect->getPosition();
         auto sliderSize = interiorArea().getSize() - getPadding().padSize();
         relMousePos = relMousePos - layoutHints().mAssignedRect->getPosition();
 
-        if (auto thumb = getSingleChild<ImageView>(); thumb) {
-            auto thumbSize = thumb->getSize();
-            relMousePos = relMousePos - thumb->layoutHints().mAssignedRect->getPosition();
-            thumb->mouseEnterEvent(relMousePos, false);
+        auto thumbSize = mImageRect1.getSize();
 
-            int clampMax;
-            float value = 0.f;
-            switch (mOrientation) {
-                case Orientation::Unset:
-                case Orientation::Horizontal:
-                    clampMax = sliderSize.width() - thumbSize->width();
-                    mSliderOffset = std::clamp<int>(mSliderOffset + rel.x(), 0, clampMax);
-                    break;
-                case Orientation::Vertical:
-                    clampMax = sliderSize.height() - thumbSize->height();
-                    mSliderOffset = std::clamp<int>(mSliderOffset + rel.y(), 0, clampMax);
-                    break;
-                case Orientation::Both:
-                    break;
-            }
+        int clampMax;
+        clampMax = sliderSize.width() - thumbSize.width();
+        mSliderOffset = std::clamp<int>(mSliderOffset + rel.x(), 0, clampMax);
 
-            value = (float)mSliderOffset / (float)clampMax;
-            setValue(value, true);
-            setNeedsDrawing();
-        }
+        auto value = (float) mSliderOffset / (float) clampMax;
+        setValue(value, false, true);
+        setNeedsDrawing();
+
+        mDrag = true;
 
         return true;
     }
 
     bool Slider::scrollEvent(const Position &p, int32_t x, int32_t y) {
-        if (mChildren.empty())
-            return false;
-
         auto sliderSize = interiorArea().getSize() - getPadding().padSize();
-        if (auto thumb = getSingleChild<ImageView>(); thumb) {
-            auto thumbSize = thumb->getSize();
+        auto thumbSize = mImageRect1.getSize();
 
-            auto ticks = SDL_GetTicks();
-            int multiplier = 1;
-            auto dTicks = ticks - mLastScrollTick;
-            mLastScrollTick = ticks;
+        auto ticks = SDL_GetTicks();
+        int multiplier = 1;
+        auto dTicks = ticks - mLastScrollTick;
+        mLastScrollTick = ticks;
 
-            if (dTicks > 250)
-                multiplier = 1;
-            else if (dTicks > 50)
-                multiplier = 4;
-            else if (dTicks > 10)
-                multiplier = 8;
-            else
-                multiplier = 16;
+        if (dTicks > 250)
+            multiplier = 1;
+        else if (dTicks > 50)
+            multiplier = 4;
+        else if (dTicks > 10)
+            multiplier = 8;
+        else
+            multiplier = 16;
 
-            int clampMax = 0;
-            switch (mOrientation) {
-                case Orientation::Unset:
-                case Orientation::Horizontal:
-                    clampMax = sliderSize.width() - thumbSize->width();
-                    mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
-                    break;
-                case Orientation::Vertical:
-                    clampMax = sliderSize.height() - thumbSize->height();
-                    mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
-                    break;
-                case Orientation::Both:
-                    break;
-            }
+        int clampMax = 0;
+        clampMax = sliderSize.width() - thumbSize.width();
+        mSliderOffset = std::clamp<int>(mSliderOffset + y * multiplier, 0, clampMax);
 
-            auto value = (float)mSliderOffset / (float)clampMax;
+        auto value = (float) mSliderOffset / (float) clampMax;
 
-            setValue(value, true);
-            setNeedsDrawing();
-        }
+        setValue(value, true, true);
 
         return true;
     }
@@ -137,6 +108,14 @@ namespace rose {
 
     bool Slider::keyboardCharacterEvent(unsigned int codepoint) {
         return Container::keyboardCharacterEvent(codepoint);
+    }
+
+    void Slider::setValue(float value, bool final, bool transmit) {
+        setThumbOffset(value, 1.f);
+        mValue = value;
+        if (transmit) {
+            valueTx.transmit(mSignalSerialNumber.serialNumber(), std::make_pair(final, value));
+        }
     }
 
 }
