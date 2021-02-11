@@ -42,10 +42,8 @@ namespace rose {
          */
         void cpuCount();
 
-        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mCpuTime{};
-        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mPastCpuTime{};
-        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mProcTime{};
-        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mPastProcTime{};
+        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mCpuTime{};       ///< CPU current times
+        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mPastCpuTime{};   ///< CPU past times
 
         int mCpuCount{0};        ///< The number of CPUs in the system.
         float mCpuTimeUse{};     ///< The current CPU time use
