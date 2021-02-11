@@ -92,7 +92,7 @@ void Test::build() {
 
     mSecondTick->txSecond.connect(mSystemData->rxTrigger);
     mSystemData->txTemperature.connect(systemScale->rxScaledValue0);
-//    mSystemData->txProcess.connect(systemScale->rxScaledValue1);
+    mSystemData->txSystem.connect(systemScale->rxScaledValue1);
 }
 
 int main(int argc, char **argv) {

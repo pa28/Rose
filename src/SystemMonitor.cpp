@@ -145,6 +145,8 @@ namespace rose {
             readProcessUsage();
         });
 
+        for (auto &cpuTime : mPastCpuTime) cpuTime = 0;
+
         cpuCount();
         readCPUTemperature();
         readProcessUsage();
@@ -190,11 +192,16 @@ namespace rose {
                 }
                 ifs >> utime >> stime;
                 ifs.close();
-                if (procTimeStart)
-                    procTimeUse = (utime + stime) - procTimeStart;
-                procTimeStart = utime + stime;
+                if (mProcTimeStart)
+                    mProcTimeUse = (utime + stime) - mProcTimeStart;
+                mProcTimeStart = utime + stime;
             }
 
+            //      user    nice   system  idle      iowait irq   softirq  steal  guest  guest_nice
+            // cpu  74608   2520   24433   1117073   6176   4054  0        0      0      0
+            /*
+             * https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
+             */
             ifs.open(std::string(ProcStat), std::ofstream::in);
             if (ifs) {
                 std::string cpu;
@@ -202,22 +209,43 @@ namespace rose {
                 ifs.close();
                 std::stringstream sstrm(cpu);
                 getline(sstrm, cpu, ' ');
-                int total{0};
-                while (sstrm) {
-                    int value;
-                    sstrm >> value;
-                    total += value;
+                for (auto &cpuTime : mCpuTime) {
+                    sstrm >> cpuTime;
                 }
-                if (cpuTimeStart) {
-                    cpuTimeUse = total - cpuTimeStart;
-                }
-                cpuTimeStart = total;
 
+                if (mPastCpuTime[CpuTimeIndex::IDLE]) {
+                    auto prevIdle = mPastCpuTime[CpuTimeIndex::IDLE] + mPastCpuTime[CpuTimeIndex::IOWAIT];
+                    auto idle = mCpuTime[CpuTimeIndex::IDLE] + mCpuTime[CpuTimeIndex::IOWAIT];
+
+                    auto prevNonIdle = mPastCpuTime[CpuTimeIndex::USER] + mPastCpuTime[CpuTimeIndex::NICE] +
+                                       mPastCpuTime[CpuTimeIndex::SYSTEM] + mPastCpuTime[CpuTimeIndex::IRQ] +
+                                       mPastCpuTime[CpuTimeIndex::SOFTIRQ] + mPastCpuTime[CpuTimeIndex::STEAL];
+
+                    auto nonIdle = mCpuTime[CpuTimeIndex::USER] + mCpuTime[CpuTimeIndex::NICE] +
+                                   mCpuTime[CpuTimeIndex::SYSTEM] + mCpuTime[CpuTimeIndex::IRQ] +
+                                   mCpuTime[CpuTimeIndex::SOFTIRQ] + mCpuTime[CpuTimeIndex::STEAL];
+
+                    auto prevTotal = prevIdle + prevNonIdle;
+                    auto total = idle + nonIdle;
+
+                    auto dTotal = total - prevTotal;
+                    auto dIdle = idle - prevIdle;
+                    auto dNonIdle = nonIdle - prevNonIdle;
+
+                    mCpuTimeUse = 100.0f * (float) dNonIdle / (float) dTotal;
+                    mCpuTotalTime = (float) dTotal;
+                }
+
+                std::copy(mCpuTime.begin(), mCpuTime.end(), mPastCpuTime.begin());
             }
-            if (cpuTimeUse) {
-                mUsage = (float)mCpuCount * ((100.f * (float) procTimeUse) / (float) cpuTimeUse);
-                std::array signal{mUsage, 0.f, 100.f};
-                txProcess.transmit(mSignalSerialNumber.serialNumber(), signal);
+
+            if (mCpuTimeUse > 0) {
+                std::array<float,3> system{mCpuTimeUse, 0.f, 100.f};
+                txSystem.transmit(mSignalSerialNumber.serialNumber(), system);
+
+                mUsage = (float)mCpuCount * ((100.f * (float) mProcTimeUse) / (float) mCpuTotalTime);
+                std::array process{mUsage, 0.f, 100.f};
+                txProcess.transmit(mSignalSerialNumber.serialNumber(), process);
             }
         }
 

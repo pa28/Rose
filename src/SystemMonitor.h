@@ -13,6 +13,10 @@
 
 namespace rose {
 
+    enum CpuTimeIndex : std::size_t {
+        USER = 0, NICE, SYSTEM, IDLE, IOWAIT, IRQ, SOFTIRQ, STEAL, GUEST, GUEST_NICE, ARRAY_SIZE
+    };
+
     /**
      * @class SystemData
      * @brief Gather system data to transmit on Signal objects.
@@ -38,11 +42,16 @@ namespace rose {
          */
         void cpuCount();
 
-        int mCpuCount{0};    ///< The number of CPUs in the system.
-        int cpuTimeUse{},    ///< The current CPU time use
-        cpuTimeStart{0};     ///< The CPU time use at the start of this interval
-        int procTimeUse{},   ///< The current process time use
-        procTimeStart{0};    ///< The process time use at the start of this interval
+        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mCpuTime{};
+        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mPastCpuTime{};
+        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mProcTime{};
+        std::array<uint64_t,CpuTimeIndex::ARRAY_SIZE> mPastProcTime{};
+
+        int mCpuCount{0};        ///< The number of CPUs in the system.
+        float mCpuTimeUse{};     ///< The current CPU time use
+        float mCpuTotalTime{};   ///< The total CPU time available.
+        int mProcTimeUse{};      ///< The current process time use
+        int mProcTimeStart{};    ///< The process time use at interval start
 
         float mUsage{0.f};           ///< The process usage as percent of a CPU.
         float mTemperature{0.f};     ///< The cpu temperature.
@@ -57,11 +66,14 @@ namespace rose {
 
         std::shared_ptr<Slot<int>> rxTrigger;   ///< The slot to receive interval triggers on.
 
-        using TemperatureSignal = std::array<float,3>;  ///< The type used for system temperature signals.
+        using TemperatureSignal = std::array<float,3>;  ///< The type used for system temperature signal.
         Signal<TemperatureSignal> txTemperature{};      ///< The Signal object to transmit temperature.
 
-        using ProcessSignal = std::array<float,3>;      ///< The type used for process usage signals.
-        Signal<ProcessSignal > txProcess{};             ///< The Signal object to transmit process usage.
+        using ProcessSignal = std::array<float,3>;      ///< The type used for process usage signal.
+        Signal<ProcessSignal> txProcess{};              ///< The Signal object to transmit process usage.
+
+        using SystemSignal = std::array<float,3>;       ///< The type used for the system usage signal.
+        Signal<SystemSignal> txSystem{};
     };
 
     /**

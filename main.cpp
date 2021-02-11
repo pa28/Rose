@@ -206,7 +206,7 @@ public:
         clearSkyEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
         mSecondTick->txSecond.connect(mSystemData.rxTrigger);
         mSystemData.txTemperature.connect(mSystemStatus->rxScaledValue0);
-        mSystemData.txProcess.connect(mSystemStatus->rxScaledValue1);
+        mSystemData.txSystem.connect(mSystemStatus->rxScaledValue1);
 
         /**
          *  Fetch calls should occur after all the Signal/Slot connections are made to avoid a race between
