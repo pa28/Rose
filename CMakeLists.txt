@@ -147,6 +147,9 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     add_library(rose SHARED ${ROSE_SRC})
 else()
     add_library(rose STATIC ${ROSE_SRC})
+    add_executable(Test tests/WidgetTest.cpp)
+    target_link_libraries(Test ${RoseLibraries})
+    add_dependencies(Test rose)
 endif()
 
 
