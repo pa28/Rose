@@ -221,6 +221,33 @@ namespace rose {
         }
     }
 
+    void
+    EventSemantics::fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
+                               float dy, float pressure) {
+//        print(std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        auto position = convertFingerCoordinates(x, y);
+//        print(std::cout, __FUNCTION__, position, '\n');
+        mClickTransaction = true;
+        mTransactionPos = position;
+        mButtonState = 1;
+        auto widget = identifyFocusWidget(position);
+        if (widget)
+            widget->mouseButtonEvent(position, 1, true, SDL_GetModState());
+    }
+
+    void
+    EventSemantics::fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
+                             float dy, float pressure) {
+//        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
+        auto position = convertFingerCoordinates(x, y);
+//        print(std::cout, __FUNCTION__, position, '\n');
+        mClickTransaction = false;
+        mButtonState = 0;
+        auto widget = identifyFocusWidget(position);
+        if (widget)
+            widget->mouseButtonEvent(position, 1, false, SDL_GetModState());
+    }
+
     void EventSemantics::fingerMotion(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y,
                                       float dx, float dy, float pressure) {
 //        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
@@ -247,33 +274,6 @@ namespace rose {
         if (widget) {
             widget->mouseDragEvent(position, positionRel, 1, modifiers);
         }
-    }
-
-    void
-    EventSemantics::fingerDown(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
-                               float dy, float pressure) {
-//        print(std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
-        auto position = convertFingerCoordinates(x, y);
-//        print(std::cout, __FUNCTION__, position, '\n');
-        mClickTransaction = true;
-        mTransactionPos = position;
-        mButtonState = 1;
-        auto widget = identifyFocusWidget(position);
-        if (widget)
-            widget->mouseButtonEvent(position, 1, true, SDL_GetModState());
-    }
-
-    void
-    EventSemantics::fingerUp(SDL_Event &event, SDL_TouchID touchId, SDL_TouchID fingerId, float x, float y, float dx,
-                             float dy, float pressure) {
-//        print( std::cout, __FUNCTION__, event.tfinger.timestamp, touchId, fingerId, x, y, dx, dy, pressure, '\n');
-        auto position = convertFingerCoordinates(x, y);
-//        print(std::cout, __FUNCTION__, position, '\n');
-        mClickTransaction = false;
-        mButtonState = 0;
-        auto widget = identifyFocusWidget(position);
-        if (widget)
-            widget->mouseButtonEvent(position, 1, false, SDL_GetModState());
     }
 
     void
@@ -305,6 +305,7 @@ namespace rose {
         auto [widgetType,focusWidget] = mRose.findWidget(focusPos);
         switch (widgetType) {
             case FoundWidgetType::RegularWidget:
+                std::cout << __PRETTY_FUNCTION__  << "RegularWidget\n";
                 if (focusWidget) {
                     if (!mFocusTrail.empty()) {
                         if (!mFocusTrail.front().expired()) {
@@ -332,13 +333,16 @@ namespace rose {
                 }
                 break;
             case FoundWidgetType::PopupWindow:
+                std::cout << __PRETTY_FUNCTION__  << "PopupWindow\n";
                 if (auto window = focusWidget->as<Window>(); window) {
-                    std::cout << "stop\n";
                     mRose.removeWindow(window);
                     return identifyFocusWidget(focusPos);
+                } else {
+                    std::cout << "PopupWindow is not a Window\n";
                 }
                 break;
             case FoundWidgetType::ModalWindow:
+                std::cout << __PRETTY_FUNCTION__  << "ModalWindow\n";
                 return nullptr;
                 break;
         }

@@ -74,7 +74,7 @@ namespace rose {
             mLowerBound1 = signal[1];
             mUpperBound1 = signal[2];
             mValue1 = std::clamp(signal[0], mLowerBound1, mUpperBound1);
-            std::cout << "Rx Proc: " << mValue1 << ',' << mLowerBound1 << ',' << mUpperBound1 << '\n';
+//            std::cout << "Rx Proc: " << mValue1 << ',' << mLowerBound1 << ',' << mUpperBound1 << '\n';
             setNeedsDrawing();
         });
     }
