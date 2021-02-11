@@ -305,7 +305,7 @@ namespace rose {
         auto [widgetType,focusWidget] = mRose.findWidget(focusPos);
         switch (widgetType) {
             case FoundWidgetType::RegularWidget:
-                std::cout << __PRETTY_FUNCTION__  << "RegularWidget\n";
+//                std::cout << __PRETTY_FUNCTION__  << "RegularWidget\n";
                 if (focusWidget) {
                     if (!mFocusTrail.empty()) {
                         if (!mFocusTrail.front().expired()) {
@@ -333,7 +333,7 @@ namespace rose {
                 }
                 break;
             case FoundWidgetType::PopupWindow:
-                std::cout << __PRETTY_FUNCTION__  << "PopupWindow\n";
+//                std::cout << __PRETTY_FUNCTION__  << "PopupWindow\n";
                 if (auto window = focusWidget->as<Window>(); window) {
                     mRose.removeWindow(window);
                     return identifyFocusWidget(focusPos);
@@ -342,7 +342,7 @@ namespace rose {
                 }
                 break;
             case FoundWidgetType::ModalWindow:
-                std::cout << __PRETTY_FUNCTION__  << "ModalWindow\n";
+//                std::cout << __PRETTY_FUNCTION__  << "ModalWindow\n";
                 return nullptr;
                 break;
         }
