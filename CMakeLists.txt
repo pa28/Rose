@@ -61,6 +61,15 @@ endfunction()
 rfc2822stamp()
 
 set(CPACK_DEBIAN_PACKAGE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+find_program(LSB_RELEASE_CMD lsb_release)
+mark_as_advanced(LSB_RELEASE_CMD)
+if (LSB_RELEASE_CMD)
+    execute_process(COMMAND "${LSB_RELEASE_CMD}" --codename --short
+            OUTPUT_VARIABLE DISTRO_CODENAME
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif ()
+
 # generate a Debian compliant changelog
 set(CHANGELOG_HEADER "${PROJECT_NAME} (${CPACK_DEBIAN_PACKAGE_VERSION}) ${DISTRO_CODENAME}\; urgency=high")
 set(CHANGELOG "  * Development Release.")
@@ -78,6 +87,7 @@ add_custom_command(
 )
 
 add_custom_target(changelog ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+add_dependencies(changelog rose)
 
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${SDL2TTF_INCLUDE_DIR})
@@ -130,42 +140,36 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_compile_definitions(VERSION=${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-${PROJECT_VERSION_TWEAK})
 
+list(APPEND RoseLibraries rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES} ${SOCI_LIBRARY}
+        ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
+
 if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
-    add_executable(Rose main.cpp)
-    add_executable(Life applications/ConwayLife.cpp)
-    add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
-    add_executable(RoseShell applications/RoseShell.cpp)
-
-    target_link_libraries(Rose rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
-            ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
-    target_link_libraries(Life rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
-            ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
-    target_link_libraries(RoseExec stdc++fs)
-    target_link_libraries(RoseShell rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
-            ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
+    add_library(rose SHARED ${ROSE_SRC})
 else()
-    add_executable(Rose main.cpp ${ROSE_SRC})
-    add_executable(Life applications/ConwayLife.cpp ${ROSE_SRC})
-    add_executable(Test tests/WidgetTest.cpp ${ROSE_SRC})
-    add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
-    add_executable(RoseShell applications/RoseShell.cpp ${ROSE_SRC})
+    add_library(rose STATIC ${ROSE_SRC})
+endif()
 
-    target_link_libraries(Rose rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
-            ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
-    target_link_libraries(Life ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
-            ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
-    target_link_libraries(Test ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
-            ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
-    target_link_libraries(RoseExec)
-    target_link_libraries(RoseShell ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES}
-            ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
-endif ()
+
+add_executable(Rose main.cpp)
+add_executable(Life applications/ConwayLife.cpp)
+add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
+add_executable(RoseShell applications/RoseShell.cpp)
+#add_executable(HamChrono applications/HamChrono.cpp)
+
+target_link_libraries(Rose ${RoseLibraries})
+target_link_libraries(Life ${RoseLibraries})
+target_link_libraries(RoseExec stdc++fs)
+target_link_libraries(RoseShell ${RoseLibraries})
+#target_link_libraries(HamChrono ${RoseLibraries})
+
+add_dependencies(Rose rose)
+add_dependencies(Life rose)
+add_dependencies(RoseShell rose)
+#add_dependencies(HamChrono rose)
 
 if (NOT APPLE)
     set(CMAKE_INSTALL_RPATH $ORIGIN)
 endif ()
-
-add_library(rose SHARED ${ROSE_SRC})
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
