@@ -131,12 +131,12 @@ namespace rose {
 
         std::vector<std::shared_ptr<Window>> mWindowList{};   ///< The list of Rose::Window objects in the scene.
 
-        /**
-         * @brief Handle events from the SDL library.
-         * @param e the SDL_Event
-         * @return true if the event was handled by a UI element
-         */
-        bool onEvent(SDL_Event &e);
+//        /**
+//         * @brief Handle events from the SDL library.
+//         * @param e the SDL_Event
+//         * @return true if the event was handled by a UI element
+//         */
+//        bool onEvent(SDL_Event &e);
 
         /// Handle or propagate scroll callback events
         bool scrollCallbackEvent(double x, double y);
@@ -144,14 +144,14 @@ namespace rose {
         /// Handle or propagate cursor position callback events
         bool cursorPosCallbackEvent(double x, double y);
 
-        /// Handle or propagate mouse button callback events
-        bool mouseButtonCallbackEvent(int button, int action, int modifiers);
+//        /// Handle or propagate mouse button callback events
+//        bool mouseButtonCallbackEvent(int button, int action, int modifiers);
 
-        /// Handle or propagate keyboard callback events
-        bool keyCallbackEvent(int key, int scancode, int action, int mods);
+//        /// Handle or propagate keyboard callback events
+//        bool keyCallbackEvent(int key, int scancode, int action, int mods);
 
-        /// Handle or propagate character callback events
-        bool charCallbackEvent(unsigned int codepoint);
+//        /// Handle or propagate character callback events
+//        bool charCallbackEvent(unsigned int codepoint);
 
         /// Move a Window to the front of the scene
         void moveToFront(std::shared_ptr<Widget> widget);
@@ -245,9 +245,17 @@ namespace rose {
          */
         void createCenters(sdl::Renderer &renderer, int scale, int radius);
 
+        /**
+         * @brief Common initialization procedures step one.
+         * @details This initializes XDG configuration file paths for user data, configuration and settings.
+         */
+        void initializeStepOne();
+
+        void initializeStepTwo(string_view title);
+
     public:
 
-        Rose() = delete;
+        Rose() = default;
         virtual ~Rose();
         Rose(Rose &&) = delete;
         Rose(const Rose &) = delete;
@@ -273,6 +281,20 @@ namespace rose {
          * @param title The window title if the application is running under a desktop.
          */
         Rose(Size screenSize, int argc, char **argv, std::string_view title = "");
+
+        /**
+         * @brief Rose object constructor.
+         * @details The screen size is taken from a settings database opened at $HOME/.config/rose_settings.db. If there
+         * are no screen size values held in the database the screen is set to 800x480. The command line is then
+         * searched for arguments of the form -WIDTHxHEIGHT. If found the screen size is set to the indicated value.
+         * what ever value is finally arrived at is written back to the settings database and will be used as
+         * the default on next run if no appropriate argument is found.</p>
+         * Supported values are 800x480, 1600x960, 2400x1440, and 3200x1920.
+         * @param argc from the arguments to main()
+         * @param argv from the arguments to main()
+         * @param title The window title if the application is running under a desktop.
+         */
+        Rose(int argc, char **argv, std::string_view title = "");
 
         /**
          * @brief Access the SDL_Window (screen) width.

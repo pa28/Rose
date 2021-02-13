@@ -47,16 +47,10 @@ namespace rose {
     Rose::~Rose() {
     }
 
-    Rose::Rose(Size screenSize, int argc, char **argv, const std::string_view title) : mCmdLineParser(argc, argv),
-            mEventSemantics(*this) {
-        mWidth = screenSize.width();
-        mHeight = screenSize.height();
-
+    void Rose::initializeStepOne() {
         mHomeDirectory = std::string{getenv("HOME")};
-        auto pid = getpid();
-
         std::filesystem::path procExec{"/proc"};
-        procExec.append(to_string(pid)).append("exe");
+        procExec.append("self").append("exe");
 
         if (std::filesystem::is_symlink(procExec)) {
             auto appName = std::filesystem::read_symlink(procExec).filename().string();
@@ -69,7 +63,9 @@ namespace rose {
             mErrorCode = RoseErrorCode::XDG_PATH_FAIL;
             return;
         }
+    }
 
+    void Rose::initializeStepTwo(const string_view title) {
         SDL_RendererInfo info;
 
         // Set image scaling quality to the highest value available
@@ -109,7 +105,7 @@ namespace rose {
 
         if (mSdlWindow) {
             mRenderer = sdl::Renderer{mSdlWindow, -1, SDL_RENDERER_ACCELERATED
-                                      | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC};
+                                                      | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC};
 
             if (mRenderer) {
                 mRenderer.setDrawBlendMode(SDL_BLENDMODE_BLEND);
@@ -121,6 +117,45 @@ namespace rose {
             std::cerr << "Could not create window: " << SDL_GetError() << '\n';
             mErrorCode = RoseErrorCode::SDL_WINDOW_CREATE;
         }
+    }
+
+    Rose::Rose(Size screenSize, int argc, char **argv, const std::string_view title) : mCmdLineParser(argc, argv),
+            mEventSemantics(*this) {
+        mWidth = screenSize.width();
+        mHeight = screenSize.height();
+        initializeStepOne();
+        initializeStepTwo(title);
+    }
+
+    Rose::Rose(int argc, char **argv, std::string_view title) : mCmdLineParser(argc, argv), mEventSemantics(*this) {
+        static constexpr std::string_view screenWidth = "screen_width";
+        static constexpr std::string_view screenHeight = "screen_height";
+
+        initializeStepOne();
+
+        mSettings = std::make_unique<Settings>(mConfigHome, "rose_settings.db");
+        mSettings->initializeDatabase();
+        mWidth = mSettings->getValue(screenWidth, 800);
+        mHeight = mSettings->getValue(screenHeight, 480);
+
+        if (mCmdLineParser.cmdOptionExists("-800x480")) {
+            mWidth = 800;
+            mHeight = 480;
+        } else if (mCmdLineParser.cmdOptionExists("-1600x960")) {
+            mWidth = 1600;
+            mHeight = 960;
+        } else if (mCmdLineParser.cmdOptionExists("-2400x1440")) {
+            mWidth = 2400;
+            mHeight = 1440;
+        } else if (mCmdLineParser.cmdOptionExists("-3200x1920")) {
+            mWidth = 3200;
+            mHeight = 1920;
+        }
+
+        mSettings->setValue(screenWidth, mWidth);
+        mSettings->setValue(screenHeight, mHeight);
+
+        initializeStepTwo(title);
     }
 
     /**
@@ -177,29 +212,6 @@ namespace rose {
                         mRunEventLoop = false;
                         continue;
                     }
-
-//                    if (mTranslateFingerEvents) {
-//                        // Translate finger events to equivalent mouse events
-//                        if (e.type == SDL_FINGERDOWN || e.type == SDL_FINGERUP) {
-//                            SDL_Event mbe;
-//
-//                            // Translate finger events to mouse evnets.
-//                            mbe.type = (e.type == SDL_FINGERDOWN) ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
-//                            mbe.button.timestamp = e.tfinger.timestamp;
-//                            mbe.button.windowID = SDL_GetWindowID(mSdlWindow.get());
-//                            mbe.button.which = SDL_TOUCH_MOUSEID;
-//                            mbe.button.button = SDL_BUTTON_LEFT;
-//                            mbe.button.state = (e.type == SDL_FINGERDOWN) ? SDL_PRESSED : SDL_RELEASED;
-//                            mbe.button.clicks = 1;
-//                            mbe.button.x = (Sint32) (e.tfinger.x * (float) mWidth);
-//                            mbe.button.y = (Sint32) (e.tfinger.y * (float) mHeight);
-//                            SDL_WarpMouseGlobal(mbe.button.x, mbe.button.y);
-//                            SDL_PushEvent(&mbe);
-//                        } else if (e.type == SDL_FINGERMOTION) {
-//                            SDL_WarpMouseGlobal((Sint32) (e.tfinger.x * (float) mWidth),
-//                                                (Sint32) (e.tfinger.y * (float) mHeight));
-//                        }
-//                    }
                     mEventSemantics.onEvent(e);
                 }
                 mEventSemantics.flushFifo();
