@@ -63,11 +63,27 @@ namespace rose {
     };
 
     /**
+     * @struct FillToEnd
+     * @brief A manipulator to set the fill to end flag on a Box widget or subclasses.
+     */
+    struct FillToEnd {
+        bool mFillToEnd;        ///< The value of the fill to end flag.
+    };
+
+    /**
      * @struct InternalSpace
      * @brief A manipulator to specify the internal spacing between children along the primary axis.
      */
     struct InternalSpace {
         int mInternalSpace;     ///< The internal spacing value, pixels.
+    };
+
+    /**
+     * @struct MinimumOrthogonal
+     * @brief A manipulator to specify the minimum orthogonal size of a Widget, if supported.
+     */
+    struct MinimumOrthogonal {
+        int mMinimumOrthogonal; ///< The minimum orthogonal size.
     };
 
     /**

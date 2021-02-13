@@ -18,6 +18,32 @@
  */
 
 /**
+ * @brief A Widget manipulator to set the minimum orthogonal size of a widget that supports that parameter.
+ * @tparam WidgetClass The type of Widget to manipulate.
+ * @param widget The Widget to manipulate.
+ * @param mo The minimum orthogonal value.
+ * @return The manipulated Widget.
+ */
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::MinimumOrthogonal mo) {
+    widget->setMinimumOrthogonal(mo.mMinimumOrthogonal);
+    return widget;
+}
+
+/**
+ * @brief A Widget manipulator to set the fill to end flag of a widget that supports that parameter.
+ * @tparam WidgetClass The type of Widget to manipulate.
+ * @param widget The Widget to manipulate.
+ * @param fillToEnd The value of the flag.
+ * @return The manipulated Widget.
+ */
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::FillToEnd fillToEnd) {
+    widget->containerLayoutHints().fillToEnd = fillToEnd.mFillToEnd;
+    return widget;
+}
+
+/**
  * @brief A Widget manipulator to set the FontSize.
  * @tparam WidgetClass The type of Widget to manipulate.
  * @param widget The Widget to manipulate.
