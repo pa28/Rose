@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(Rose VERSION 0.1.26.26)
+project(Rose VERSION 0.1.27.27)
 set(PACKAGE_CONTACT "Richard Buckley <richard.buckley>@ieee.org>")
 include(GNUInstallDirs)
 
@@ -193,7 +193,7 @@ set_target_properties(
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
 
 install(TARGETS
-        rose Rose Life RoseExec RoseShell
+        rose Rose Life RoseExec RoseShell HamChrono
         COMPONENT ROSE_RUNTIME EXCLUDE_FROM_ALL
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
