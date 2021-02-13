@@ -346,6 +346,8 @@ namespace rose {
          * @return the response code.
          */
         [[nodiscard]] long responseCode() const { return mResponseCode; }
+
+        [[nodiscard]] const std::string& sourceURI() const { return mSourceURI; }
     };
 
     /**

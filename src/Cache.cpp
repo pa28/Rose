@@ -214,7 +214,10 @@ namespace rose {
                             itemFetched.transmit(mSignalSerialNumber(), result);
                             cacheObject.setFirstProcess();
                         } else {
-                            std::cerr << "Future failed.\n";
+                            std::cerr << "Future failed: "
+                                      << cacheObject.getStatusCode() << ' '
+                                      << cacheObject.objectSrcName() << ' '
+                                      << '\n';
                         }
                     }
                 } else {
