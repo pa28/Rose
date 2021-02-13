@@ -57,7 +57,6 @@ void HamChrono::build() {
         if (surface) {
             mImageRepository.setImageSurface(item, surface);
             needsLayout();
-            needsDrawing(true);
         } else
             std::cout << filePath << " load failed.\n";
     });
@@ -90,6 +89,9 @@ void HamChrono::build() {
     mMapWidth = (mWidth / mapScale - 140) * mapScale;
     mMapHeight = (mHeight / mapScale - 150) * mapScale;
 
+    auto aboveMap = mHeight - mMapHeight;
+    auto leftMap = mWidth - mMapWidth;
+
     std::stringstream ss;
     ss << mMapWidth << 'x' << mMapHeight;
     auto mapSize = ss.str();
@@ -111,14 +113,18 @@ void HamChrono::build() {
     }
 
     auto mainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
-    auto id = mMapNameToId["D_Terrain"];
-    std::shared_ptr<Row> row;
-    std::shared_ptr<Column> column;
-    mainWindow << wdg<Column>() << FillToEnd{true} << MinimumOrthogonal{mWidth}
-                   << wdg<Frame>(6) << BorderStyle::Notch << Elastic(Orientation::Both) << Manip::Parent
-                   << wdg<Row>() << FillToEnd{true}
-                       << wdg<Frame>(6) << BorderStyle::Notch << Elastic(Orientation::Both) << Manip::Parent
-                       << wdg<ImageView>(id);
+
+    auto topRow = mainWindow << wdg<Container>() << Size{mWidth, aboveMap} << Position::Zero
+            << wdg<Row>();
+
+    for (auto &solar : *solarImageCache) {
+        topRow << wdg<ImageView>(solar.first);
+    }
+
+    mainWindow << wdg<Container>() << Size{leftMap, mHeight - aboveMap} << Position{0, aboveMap};
+
+    mainWindow << wdg<Container>() << Position{leftMap, aboveMap}
+               << wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     celesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
