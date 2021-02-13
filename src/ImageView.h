@@ -37,10 +37,23 @@ namespace rose {
 
         /**
          * @brief Constructor
+         * @param imageId A std::optional<ImageId> if empty RoseImageInvalid is used.
+         */
+        explicit ImageView(std::optional<ImageId> imageId) : ImageView(imageId ? imageId.value() : RoseImageInvalid) {}
+
+        /**
+         * @brief Constructor
          * @param imageId The ImageId to display from the ImageRepository.
          * @param shrinkable True of the image may be shrunk to fit.
          */
         ImageView(ImageId imageId, bool shrinkable);
+
+        /**
+         * @brief Constructor
+         * @param imageId  A std::optional<ImageId> if empty RoseImageInvalid is used.
+         * @param shrinkable True of the image may be shrunk to fit.
+         */
+        ImageView(std::optional<ImageId> imageId, bool shrinkable) : ImageView(imageId ? imageId.value() : RoseImageInvalid, shrinkable) {}
 
         /// See Widget::initializeComposite()
         void initializeComposite() override;
