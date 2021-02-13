@@ -169,12 +169,13 @@ namespace rose {
          */
         Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override {
             auto containerAvailable = clampAvailableArea(available, mPos, mSize);
-            for (auto &child : mChildren) {
-                auto layout = child->widgetLayout(renderer, containerAvailable, 0);
-                if (auto position = child->getPos(); position)
-                    layout = position.value();
-                child->mLayoutHints.mAssignedRect = layout;
-            }
+            for (int layoutStage = 0; layoutStage < 2; ++layoutStage)
+                for (auto &child : mChildren) {
+                    auto layout = child->widgetLayout(renderer, containerAvailable, layoutStage);
+                    if (auto position = child->getPos(); position)
+                        layout = position.value();
+                    child->mLayoutHints.mAssignedRect = layout;
+                }
             return available;
         }
 
