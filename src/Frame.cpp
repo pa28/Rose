@@ -64,6 +64,8 @@ namespace rose {
         }
         layout = mLayoutHints.layoutEnd(layout);
 
+        mTexture.reset();
+        mTextureValid = false;
         return layout;
     }
 
