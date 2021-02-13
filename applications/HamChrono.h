@@ -21,6 +21,8 @@ class HamChrono : public rose::Rose {
 protected:
     int mMapWidth{};
     int mMapHeight{};
+    int mAboveMap{};
+    int mLeftMap{};
 
     rose::SecondTickPtr mSecondTick{};
     rose::SystemData mSystemData{};
@@ -34,6 +36,8 @@ protected:
 
     std::shared_ptr<rose::Slot<uint32_t>> mSolarImageCacheSlot;
     std::shared_ptr<rose::Slot<uint32_t>> mMapsCacheSlot;
+
+    void callsignBlock(std::shared_ptr<rose::Row> &parent);
 
 public:
     HamChrono() = delete;

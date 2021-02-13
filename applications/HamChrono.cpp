@@ -12,8 +12,11 @@
 #include "Frame.h"
 #include "HamChrono.h"
 #include "ImageView.h"
+#include "LinearScale.h"
 #include "Manipulators.h"
 #include "MapProjection.h"
+#include "Menu.h"
+#include "TimeBox.h"
 
 using namespace rose;
 
@@ -34,7 +37,7 @@ void HamChrono::build() {
                                                   mCacheHome, "ClearSkyMaps",
                                                   std::chrono::hours{24 * 30});
 
-    mSecondTick = std::make_shared<SecondTick>();
+    std::make_shared<SecondTick>();
 
     mSolarImageCacheSlot = std::make_shared<Slot<uint32_t>>();
     mSolarImageCacheSlot->setCallback([=](uint32_t, uint32_t item) {
@@ -90,8 +93,8 @@ void HamChrono::build() {
     mMapWidth = (mWidth / mapScale - 140) * mapScale;
     mMapHeight = (mHeight / mapScale - 150) * mapScale;
 
-    auto aboveMap = mHeight - mMapHeight;
-    auto leftMap = mWidth - mMapWidth;
+    mAboveMap = mHeight - mMapHeight;
+    mLeftMap = mWidth - mMapWidth;
 
     std::stringstream ss;
     ss << mMapWidth << 'x' << mMapHeight;
@@ -113,21 +116,27 @@ void HamChrono::build() {
         }
     }
 
+    mSecondTick = std::make_shared<SecondTick>();
+    mSecondTick->txSecond.connect(mSystemData.rxTrigger);
+
     auto mainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
 
-    auto topRow = mainWindow << wdg<Container>() << Size{mWidth, aboveMap} << Position::Zero
-            << wdg<Row>();
+    auto topRow = mainWindow << wdg<Container>() << Size{mWidth, mAboveMap} << Position::Zero
+                             << wdg<Row>();
+
+    callsignBlock(topRow);
 
     for (auto &solar : *solarImageCache) {
         topRow << wdg<ImageView>(solar.first);
     }
 
-    mainWindow << wdg<Container>() << Size{leftMap, mHeight - aboveMap} << Position{0, aboveMap};
+    mainWindow << wdg<Container>() << Size{mLeftMap, mHeight - mAboveMap} << Position{0, mAboveMap};
 
-    mainWindow << wdg<Container>() << Position{leftMap, aboveMap} //<< wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
+    mainWindow << wdg<Container>()
+               << Position{mLeftMap, mAboveMap} //<< wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
                << wdg<MapProjection>(clearSkyMaps->findByUserName("D_Terrain"),
                                      clearSkyMaps->findByUserName("N_Terrain"),
-                                     GeoPosition{45.8167,-75.9833}, Size{mMapWidth, mMapHeight});
+                                     GeoPosition{45.8167, -75.9833}, Size{mMapWidth, mMapHeight});
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     celesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
@@ -138,6 +147,20 @@ void HamChrono::build() {
     celesTrackEphemeris->fetchAll();
     clearSkyEphemeris->fetchAll();
     clearSkyMaps->fetchAll();
+}
+
+void HamChrono::callsignBlock(std::shared_ptr<Row> &parent) {
+    std::shared_ptr<LinearScale> scale;
+    parent << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round
+               << wdg<Column>() << InternalSpace{4}
+                   << wdg<CascadeButton>(Id{"CALLSIGN"}, CascadeButtonType::CascadeDown)
+                       << Elastic(Orientation::Horizontal) << Manip::Parent
+                   << wdg<TimeBox>(mSecondTick) << Manip::Parent
+                   << wdg<DateBox>(mSecondTick) << Manip::Parent
+                   << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> scale
+                       << Parent<Frame>();
+    mSystemData.txTemperature.connect(scale->rxScaledValue0);
+    mSystemData.txSystem.connect(scale->rxScaledValue1);
 }
 
 int main(int argc, char **argv) {
