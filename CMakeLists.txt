@@ -154,21 +154,23 @@ endif()
 
 
 add_executable(Rose main.cpp)
-add_executable(Life applications/ConwayLife.cpp)
-add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
-add_executable(RoseShell applications/RoseShell.cpp)
-#add_executable(HamChrono applications/HamChrono.cpp)
-
 target_link_libraries(Rose ${RoseLibraries})
-target_link_libraries(Life ${RoseLibraries})
-target_link_libraries(RoseExec stdc++fs)
-target_link_libraries(RoseShell ${RoseLibraries})
-#target_link_libraries(HamChrono ${RoseLibraries})
-
 add_dependencies(Rose rose)
+
+add_executable(HamChrono applications/HamChrono.cpp)
+target_link_libraries(HamChrono ${RoseLibraries})
+add_dependencies(HamChrono rose)
+
+add_executable(Life applications/ConwayLife.cpp)
+target_link_libraries(Life ${RoseLibraries})
 add_dependencies(Life rose)
+
+add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
+target_link_libraries(RoseExec stdc++fs)
+
+add_executable(RoseShell applications/RoseShell.cpp)
+target_link_libraries(RoseShell ${RoseLibraries})
 add_dependencies(RoseShell rose)
-#add_dependencies(HamChrono rose)
 
 if (NOT APPLE)
     set(CMAKE_INSTALL_RPATH $ORIGIN)
