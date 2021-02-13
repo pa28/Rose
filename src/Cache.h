@@ -199,6 +199,16 @@ namespace rose {
     public:
         Cache() = default;
         virtual ~Cache() = default;
+
+        template<typename S>
+        std::optional<uint32_t> findByUserName(S userName) {
+            std::string un{userName};
+            for (auto & it : *this) {
+                if (it.second.objectUsrName() == un)
+                    return it.first;
+            }
+            return std::nullopt;
+        }
     };
 
     /**
