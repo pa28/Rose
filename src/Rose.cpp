@@ -234,6 +234,7 @@ namespace rose {
         if (mRedoLayout) {
             initialLayout(mRenderer);
             mRedoLayout = false;
+            mNeedsDrawing = true;
         }
 
         if (mNeedsDrawing) {
