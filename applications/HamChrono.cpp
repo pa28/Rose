@@ -13,6 +13,7 @@
 #include "HamChrono.h"
 #include "ImageView.h"
 #include "Manipulators.h"
+#include "MapProjection.h"
 
 using namespace rose;
 
@@ -123,8 +124,10 @@ void HamChrono::build() {
 
     mainWindow << wdg<Container>() << Size{leftMap, mHeight - aboveMap} << Position{0, aboveMap};
 
-    mainWindow << wdg<Container>() << Position{leftMap, aboveMap}
-               << wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
+    mainWindow << wdg<Container>() << Position{leftMap, aboveMap} //<< wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
+               << wdg<MapProjection>(clearSkyMaps->findByUserName("D_Terrain"),
+                                     clearSkyMaps->findByUserName("N_Terrain"),
+                                     GeoPosition{45.8167,-75.9833}, Size{mMapWidth, mMapHeight});
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     celesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);

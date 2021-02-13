@@ -157,7 +157,7 @@ add_executable(Rose main.cpp)
 target_link_libraries(Rose ${RoseLibraries})
 add_dependencies(Rose rose)
 
-add_executable(HamChrono applications/HamChrono.cpp)
+add_executable(HamChrono applications/HamChrono.cpp applications/MapProjection.cpp applications/MapProjection.h)
 target_link_libraries(HamChrono ${RoseLibraries})
 add_dependencies(HamChrono rose)
 
