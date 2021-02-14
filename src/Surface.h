@@ -51,6 +51,12 @@ namespace rose::sdl {
         explicit Surface(SDL_Surface *surface) : std::unique_ptr<SDL_Surface, SurfaceDestroy>(surface) {}
 
         /**
+         * @brief Create a surface from a file.
+         * @param path The path to the file to load.
+         */
+        explicit Surface(std::filesystem::path &path);
+
+        /**
          * @brief Constructor. Create a surface using SDL_CreateRGBSurfaceWithFormat()
          * @param width The width of the surface.
          * @param height The height of the surface.
@@ -119,6 +125,13 @@ namespace rose::sdl {
          * @return The return status from SDL_SetSurfaceBlendMode().
          */
         int setBlendMode(SDL_BlendMode blendMode) noexcept;
+
+        /**
+         * @brief Blit the contents of the source Surface to this surface.
+         * @param source The source Surface.
+         * @return the SDL_Status return code.
+         */
+        int blitSurface(Surface &source);
     };
 
     /**

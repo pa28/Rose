@@ -5,11 +5,18 @@
  * @date 2021-01-20
  */
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_pixels.h>
 #include "Renderer.h"
 #include "Surface.h"
 #include "Texture.h"
 
 namespace rose::sdl {
+
+    Surface::Surface(std::filesystem::path &path) : Surface() {
+        reset(IMG_Load(path.c_str()));
+    }
 
     Surface::Surface(int width, int height, int depth, SDL_PixelFormatEnum format) : Surface() {
         reset(SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format));
@@ -51,6 +58,10 @@ namespace rose::sdl {
 
     int Surface::setBlendMode(SDL_BlendMode blendMode) noexcept {
         return SDL_SetSurfaceBlendMode(get(), blendMode);
+    }
+
+    int Surface::blitSurface(Surface &source) {
+        return SDL_BlitSurface(source.get(), nullptr, get(), nullptr);
     }
 
     SurfaceLock::~SurfaceLock() {
