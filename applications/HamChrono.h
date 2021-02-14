@@ -8,10 +8,11 @@
 #pragma once
 
 #include "Cache.h"
+#include "MapProjection.h"
+#include "Rose.h"
 #include "Signals.h"
 #include "SystemMonitor.h"
 #include "Timer.h"
-#include "Rose.h"
 
 /**
  * @class HamChrono
@@ -26,6 +27,8 @@ protected:
 
     rose::SecondTickPtr mSecondTick{};
     rose::SystemData mSystemData{};
+
+    std::shared_ptr<rose::MapProjection> mMapProjection{};
 
     std::unique_ptr<rose::WebFileCache> solarImageCache;
     std::unique_ptr<rose::WebFileCache> celesTrackEphemeris;

@@ -21,6 +21,11 @@
 using namespace rose;
 
 void HamChrono::build() {
+    if (mCmdLineParser.cmdOptionExists("-callsign")) {
+        auto callsign = mCmdLineParser.getCmdOption("-callsign");
+        mSettings->setValue("CALLSIGN", callsign);
+    }
+
     solarImageCache = std::make_unique<WebFileCache>("https://sdo.gsfc.nasa.gov/assets/img/latest/",
                                                      mCacheHome, "NASASolarImages",
                                                      std::chrono::minutes{15});
@@ -37,7 +42,7 @@ void HamChrono::build() {
                                                   mCacheHome, "ClearSkyMaps",
                                                   std::chrono::hours{24 * 30});
 
-    std::make_shared<SecondTick>();
+    mSecondTick = std::make_shared<SecondTick>();
 
     mSolarImageCacheSlot = std::make_shared<Slot<uint32_t>>();
     mSolarImageCacheSlot->setCallback([=](uint32_t, uint32_t item) {
@@ -123,7 +128,6 @@ void HamChrono::build() {
         clearSkyMaps->emplace(std::pair{static_cast<uint32_t>(type), CacheObject{srcName, userName}});
     }
 
-    mSecondTick = std::make_shared<SecondTick>();
     mSecondTick->txSecond.connect(mSystemData.rxTrigger);
 
     auto mainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
@@ -142,12 +146,16 @@ void HamChrono::build() {
     mainWindow << wdg<Container>()
                << Position{mLeftMap, mAboveMap} //<< wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
                << wdg<MapProjection>(clearSkyMaps,
-                                     GeoPosition{45.8167, -75.9833}, Size{mMapWidth, mMapHeight});
+                                     GeoPosition{45.8167, -75.9833}, Size{mMapWidth, mMapHeight})
+                                     >> mMapProjection;
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     celesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
     clearSkyEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
     clearSkyMaps->connect(mSecondTick->txSecond, mSecondTick->txHour);
+
+    mSecondTick->txSecond.connect(mMapProjection->secondRx);
+    mSecondTick->txMinute.connect(mMapProjection->minuteRx);
 
     solarImageCache->fetchAll();
     celesTrackEphemeris->fetchAll();

@@ -36,7 +36,40 @@ namespace rose {
                 if (!surface)
                     return;
 
-            computeAzimuthalMaps();
+            mFutureAziProj = std::async(std::launch::async, &MapProjection::computeAzimuthalMaps, this);
+        });
+
+        secondRx = std::make_shared<Slot<int>>();
+        secondRx->setCallback([&](uint32_t, int second){
+            std::chrono::milliseconds span(1);      // The length of time to wait for a future.
+
+            if (mFutureAziProj.valid()) {
+                if (auto status = mFutureAziProj.wait_for(span); status == std::future_status::ready) {
+                    if (mFutureAziProj.get()) {
+                        mFutureSun = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
+                    } else {
+                        std::cerr << "Future Azimuth Projection failed.\n";
+                    }
+                }
+            }
+
+            if (mFutureSun.valid()) {
+                if (auto status = mFutureSun.wait_for(span); status == std::future_status::ready) {
+                    if (mNewSurfaces = mFutureSun.get(); mNewSurfaces) {
+                        setNeedsDrawing();
+                    } else {
+                        std::cerr << "Future Sun Illumination failed.\n";
+                    }
+                }
+            }
+        });
+
+        minuteRx = std::make_shared<Slot<int>>();
+        minuteRx->setCallback([&](uint32_t, int minute){
+            if (!mFutureSun.valid())
+                mFutureSun = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
+            else
+                std::cout << "Future sun valid.\n";
         });
 
         mMapCache->itemFetched.connect(mapFileRx);
@@ -51,8 +84,27 @@ namespace rose {
         widgetRect = parentRect.getPosition() + mLayoutHints.mAssignedRect->getPosition();
         widgetRect = mLayoutHints.mAssignedRect->getSize();
 
+        if (mNewSurfaces) {
+            mNewSurfaces = false;
+            for (size_t i = 0; i < mMercatorTemp.size(); ++i) {
+                mMercator[i*2+1] = mMercatorTemp[i].toTexture(rose()->getRenderer());
+                mMercator[i*2+1].setBlendMOde(SDL_BLENDMODE_BLEND);
+                mMercatorTemp[i].reset(nullptr);
+                mMercator[i*2] = mMapSurface[i*2+1].toTexture(rose()->getRenderer());
+                mMercator[i*2].setBlendMOde(SDL_BLENDMODE_BLEND);
+            }
+
+            for (size_t i = 0; i < mAzimuthalTemp.size(); ++i) {
+                mAzimuthal[i*2+1] = mAzimuthalTemp[i].toTexture(rose()->getRenderer());
+                mAzimuthal[i*2+1].setBlendMOde(SDL_BLENDMODE_BLEND);
+                mAzimuthalTemp[i].reset(nullptr);
+                mAzimuthal[i*2] = mAzSurface[i*2+1].toTexture(rose()->getRenderer());
+                mAzimuthal[i*2].setBlendMOde(SDL_BLENDMODE_BLEND);
+            }
+        }
+
         if (!mMercator[0] || !mAzimuthal[0]) {
-            setForegroundBackground(renderer, MapDataType::TerrainDay);
+            return;
         }
 
         switch (mProjection) {
@@ -165,23 +217,29 @@ namespace rose {
         return std::make_tuple(false, 0., 0.);
     }
 
-    void MapProjection::computeAzimuthalMaps() {
+    bool MapProjection::computeAzimuthalMaps() {
         // Compute Azmuthal maps from the Mercator maps
-        std::cout << mQthRad.lat() << ',' << mQthRad.lon() << '\n';
         auto siny = sin(mQthRad.lat());
         auto cosy = cos(mQthRad.lat());
         for (int y = 0; y < mMapSize.height(); y += 1) {
             for (int x = 0; x < mMapSize.width(); x += 1) {
                 auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapSize, mQthRad, siny, cosy);
                 if (valid) {
-                    GeoPosition position{lat,lon};
-                    auto xx = min(mMapSize.width() - 1, (int) round((double ) mMapSize.width() * ((lon + M_PI) / (2 * M_PI))));
-                    auto yy = min(mMapSize.height() - 1, (int) round((double ) mMapSize.height() * ((M_PI_2 - lat) / M_PI)));
-                    mAzSurface[0].pixel(x, y) = sdl::mapRGBA(mAzSurface[0]->format, sdl::getRGBA(mMapSurface[0]->format, mMapSurface[0].pixel(xx, yy)));
-                    mAzSurface[1].pixel(x, y) = sdl::mapRGBA(mAzSurface[1]->format, sdl::getRGBA(mMapSurface[1]->format, mMapSurface[1].pixel(xx, yy)));
+                    GeoPosition position{lat, lon};
+                    auto xx = min(mMapSize.width() - 1,
+                                  (int) round((double) mMapSize.width() * ((lon + M_PI) / (2 * M_PI))));
+                    auto yy = min(mMapSize.height() - 1,
+                                  (int) round((double) mMapSize.height() * ((M_PI_2 - lat) / M_PI)));
+                    mAzSurface[0].pixel(x, y) = sdl::mapRGBA(mAzSurface[0]->format,
+                                                             sdl::getRGBA(mMapSurface[0]->format,
+                                                                          mMapSurface[0].pixel(xx, yy)));
+                    mAzSurface[1].pixel(x, y) = sdl::mapRGBA(mAzSurface[1]->format,
+                                                             sdl::getRGBA(mMapSurface[1]->format,
+                                                                          mMapSurface[1].pixel(xx, yy)));
                 }
             }
         }
+        return true;
     }
 
     /**
@@ -209,22 +267,16 @@ namespace rose {
         return std::make_tuple(lat, lng);
     }
 
-    void MapProjection::setForegroundBackground(sdl::Renderer &renderer, MapDataType dayMap) {
-        auto mapIdx = static_cast<std::size_t>(dayMap);
+    bool MapProjection::setForegroundBackground() {
+        for (size_t i = 0; i < mMercatorTemp.size(); ++i) {
+            mMercatorTemp[i] = sdl::Surface{mMapSize};
+            mAzimuthalTemp[i] = sdl::Surface{mMapSize};
 
-        mMercator[0] = mMapSurface[mapIdx+1].toTexture(renderer);
-        mMercator[0].setBlendMOde(SDL_BLENDMODE_BLEND);
-        mAzimuthal[0] = mAzSurface[mapIdx+1].toTexture(renderer);
-        mAzimuthal[0].setBlendMOde(SDL_BLENDMODE_BLEND);
-
-        sdl::Surface mercator{mMapSize};
-        sdl::Surface azimuthal{mMapSize};
-
-        mercator.setBlendMode(SDL_BLENDMODE_BLEND);
-        azimuthal.setBlendMode(SDL_BLENDMODE_BLEND);
-
-        mercator.blitSurface(mMapSurface[mapIdx]);
-        azimuthal.blitSurface(mAzSurface[mapIdx]);
+            mMercatorTemp[i].setBlendMode(SDL_BLENDMODE_BLEND);
+            mAzimuthalTemp[i].setBlendMode(SDL_BLENDMODE_BLEND);
+            mMercatorTemp[i].blitSurface(mMapSurface[i*2]);
+            mAzimuthalTemp[i].blitSurface(mAzSurface[i*2]);
+        }
 
         auto[latS, lonS] = subSolar();
 
@@ -274,21 +326,21 @@ namespace rose {
 
                     // Set the alpha channel in the appropriate map.
                     if (az == 1) {
-                        auto pixel = sdl::getRGBA(azimuthal->format, azimuthal.pixel(x,y));
-                        pixel.a() = alpha;
-                        azimuthal.pixel(x,y) = sdl::mapRGBA(azimuthal->format, pixel);
+                        for (auto & azimuthalTemp : mAzimuthalTemp) {
+                            auto pixel = sdl::getRGBA(azimuthalTemp->format, azimuthalTemp.pixel(x, y));
+                            pixel.a() = alpha;
+                            azimuthalTemp.pixel(x, y) = sdl::mapRGBA(azimuthalTemp->format, pixel);
+                        }
                     } else {
-                        auto pixel = sdl::getRGBA(mercator->format, mercator.pixel(x,y));
-                        pixel.a() = alpha;
-                        mercator.pixel(x,y) = sdl::mapRGBA(mercator->format, pixel);
+                        for (auto & mercatorTemp : mMercatorTemp) {
+                            auto pixel = sdl::getRGBA(mercatorTemp->format, mercatorTemp.pixel(x, y));
+                            pixel.a() = alpha;
+                            mercatorTemp.pixel(x, y) = sdl::mapRGBA(mercatorTemp->format, pixel);
+                        }
                     }
                 }
             }
         }
-
-        mMercator[1] = mercator.toTexture(renderer);
-        mMercator[1].setBlendMOde(SDL_BLENDMODE_BLEND);
-        mAzimuthal[1] = azimuthal.toTexture(renderer);
-        mAzimuthal[1].setBlendMOde(SDL_BLENDMODE_BLEND);
+        return true;
     }
 }
