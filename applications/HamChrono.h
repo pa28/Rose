@@ -37,6 +37,8 @@ protected:
 
     std::shared_ptr<rose::Slot<uint32_t>> mSolarImageCacheSlot;
 
+    rose::GeoPosition mQthLocation{};
+
     void callsignBlock(std::shared_ptr<rose::Row> &parent);
 
 public:
