@@ -33,7 +33,7 @@ void HamChrono::build() {
                                                        mCacheHome, "ClearSky",
                                                        std::chrono::hours{24});
 
-    clearSkyMaps = std::make_unique<WebFileCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
+    clearSkyMaps = std::make_shared<WebFileCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
                                                   mCacheHome, "ClearSkyMaps",
                                                   std::chrono::hours{24 * 30});
 
@@ -52,20 +52,6 @@ void HamChrono::build() {
     });
 
     solarImageCache->itemFetched.connect(mSolarImageCacheSlot);
-
-    mMapsCacheSlot = std::make_shared<Slot<uint32_t>>();
-    mMapsCacheSlot->setCallback([=](uint32_t, uint32_t item) {
-        auto filePath = clearSkyMaps->cacheRootPath();
-        filePath.append(clearSkyMaps->find(item)->second.objectSrcName());
-        sdl::Surface surface{IMG_Load(filePath.string().c_str())};
-        if (surface) {
-            mImageRepository.setImageSurface(item, surface);
-            needsLayout();
-        } else
-            std::cout << filePath << " load failed.\n";
-    });
-
-    clearSkyMaps->itemFetched.connect(mMapsCacheSlot);
 
     createRoundCorners(mRenderer, 5, 10, 2,
                        Theme::dTopColor, Theme::dBotColor, Theme::dLeftColor, Theme::dRightColor);
@@ -100,20 +86,41 @@ void HamChrono::build() {
     ss << mMapWidth << 'x' << mMapHeight;
     auto mapSize = ss.str();
 
-    static constexpr std::array<std::string_view, 2> mapType = {"Terrain", "Countries"};
+    static constexpr std::array<MapDataType, 4> mapType = {MapDataType::TerrainDay,
+                                                           MapDataType::TerrainNight,
+                                                           MapDataType::CountriesDay,
+                                                           MapDataType::CountriesNight};
+
     static constexpr std::array<char, 2> dayNight = {'D', 'N'};
+
     for (auto &type : mapType) {
-        for (auto &dn : dayNight) {
-            ss.str("");
-            ss << "map-" << dn << '-' << mapSize << '-' << type << ".bmp";
-            auto srcName = ss.str();
-            ss.str("");
-            ss << dn << '_' << type;
-            auto userName = ss.str();
-            auto imageId = mImageRepository.getImageId();
-            clearSkyMaps->emplace(std::pair{imageId, CacheObject{srcName, userName}});
-            mMapNameToId.emplace(userName, imageId);
+        char dn;
+        std::string typeName;
+        switch (type) {
+            case rose::MapDataType::TerrainDay:
+                dn = 'D';
+                typeName = "Terrain";
+                break;
+            case rose::MapDataType::TerrainNight:
+                dn = 'N';
+                typeName = "Terrain";
+                break;
+            case rose::MapDataType::CountriesDay:
+                dn = 'D';
+                typeName = "Countries";
+                break;
+            case rose::MapDataType::CountriesNight:
+                dn = 'N';
+                typeName = "Countries";
+                break;
         }
+        ss.str("");
+        ss << "map-" << dn << '-' << mapSize << '-' << typeName << ".bmp";
+        auto srcName = ss.str();
+        ss.str("");
+        ss << dn << '_' << typeName;
+        auto userName = ss.str();
+        clearSkyMaps->emplace(std::pair{static_cast<uint32_t>(type), CacheObject{srcName, userName}});
     }
 
     mSecondTick = std::make_shared<SecondTick>();
@@ -134,8 +141,7 @@ void HamChrono::build() {
 
     mainWindow << wdg<Container>()
                << Position{mLeftMap, mAboveMap} //<< wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
-               << wdg<MapProjection>(clearSkyMaps->findByUserName("D_Terrain"),
-                                     clearSkyMaps->findByUserName("N_Terrain"),
+               << wdg<MapProjection>(clearSkyMaps,
                                      GeoPosition{45.8167, -75.9833}, Size{mMapWidth, mMapHeight});
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);

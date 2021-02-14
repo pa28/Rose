@@ -6,18 +6,40 @@
  */
 
 #include "MapProjection.h"
+
+#include <filesystem>
+#include <utility>
 #include "Math.h"
 
 namespace rose {
 
-    MapProjection::MapProjection(std::optional<ImageId> day, std::optional<ImageId> night, GeoPosition qth, Size mapSize) {
-        mDayMapImage = day ? day.value() : RoseImageInvalid;
-        mNightMapImage = night ? night.value() : RoseImageInvalid;
+    MapProjection::MapProjection(std::shared_ptr<WebFileCache> mapCache, GeoPosition qth, Size mapSize) {
+        mMapCache = std::move(mapCache);
         mQth = qth;
         mMapSize = mapSize;
     }
 
     void MapProjection::initializeComposite() {
+        mapFileRx = std::make_shared<Slot<uint32_t>>();
+        mQthRad = GeoPosition{deg2rad(mQth.lat()), deg2rad(mQth.lon())};
+        mAntipode = antipode(mQthRad);
+
+        mapFileRx->setCallback([&](uint32_t, uint32_t map){
+            std::filesystem::path filePath(mMapCache->cacheRootPath());
+            filePath.append(mMapCache->at(map).objectSrcName());
+            sdl::Surface bmp{filePath};
+            mMapSurface[map] = sdl::Surface{mMapSize.width(),mMapSize.height()};
+            mMapSurface[map].blitSurface(bmp);
+
+            mAzSurface[map] = sdl::Surface{mMapSurface[map]->w, mMapSurface[map]->h};
+            for (auto &surface : mMapSurface)
+                if (!surface)
+                    return;
+
+            computeAzimuthalMaps();
+        });
+
+        mMapCache->itemFetched.connect(mapFileRx);
     }
 
     Rectangle MapProjection::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
@@ -25,20 +47,18 @@ namespace rose {
     }
 
     void MapProjection::draw(sdl::Renderer &renderer, Rectangle parentRect) {
-        if (!mGeoChron) {
-            if (mDayMapImage != RoseImageInvalid && mNightMapImage != RoseImageInvalid)
-                if (!rose()->imageRepository().isValidImage(renderer, mDayMapImage) ||
-                    !rose()->imageRepository().isValidImage(renderer, mNightMapImage))
-                    return;
-        }
-
         Rectangle widgetRect{};
         widgetRect = parentRect.getPosition() + mLayoutHints.mAssignedRect->getPosition();
         widgetRect = mLayoutHints.mAssignedRect->getSize();
 
+        if (!mMercator[0] || !mAzimuthal[0]) {
+            setForegroundBackground(renderer, MapDataType::TerrainDay);
+        }
+
         switch (mProjection) {
             case ProjectionType::Mercator:
-                rose()->imageRepository().renderCopy(renderer, mDayMapImage, widgetRect);
+                renderer.renderCopy(mMercator[0], widgetRect);
+                renderer.renderCopy(mMercator[1], widgetRect);
                 break;
             case ProjectionType::StationMercator: {
                 auto lon = mQth.lon();
@@ -50,17 +70,225 @@ namespace rose {
                 Rectangle dst{widgetRect};
                 dst.width() = src.width();
                 dst.height() = src.height();
-                rose()->imageRepository().renderCopy(renderer, mDayMapImage, src, dst);
+                renderer.renderCopy(mMercator[0], src, dst);
+                renderer.renderCopy(mMercator[1], src, dst);
 
                 src.x() = 0;
                 dst.x() += src.width();
                 src.width() = splitPixel;
                 dst.width() = splitPixel;
-                rose()->imageRepository().renderCopy(renderer, mDayMapImage, src, dst);
+                renderer.renderCopy(mMercator[0], src, dst);
+                renderer.renderCopy(mMercator[1], src, dst);
             }
                 break;
             case ProjectionType::StationAzmuthal:
+                renderer.renderCopy(mAzimuthal[0], widgetRect);
+                renderer.renderCopy(mAzimuthal[1], widgetRect);
                 break;
         }
+    }
+
+    /* solve a spherical triangle:
+     *           A
+     *          /  \
+     *         /    \
+     *      c /      \ b
+     *       /        \
+     *      /          \
+     *    B ____________ C
+     *           a
+     *
+     * given A, b, c find B and a in range -PI..B..PI and 0..a..PI, respectively..
+     * cap and Bp may be NULL if not interested in either one.
+     * N.B. we pass in cos(c) and sin(c) because in many problems one of the sides
+     *   remains constant for many values of A and b.
+     */
+    void solveSphere(double A, double b, double cc, double sc, double &cap, double &Bp) {
+        double cb = cos(b), sb = sin(b);
+        double sA, cA = cos(A);
+        double x, y;
+        double ca;
+        double B;
+
+        ca = cb * cc + sb * sc * cA;
+        if (ca > 1.0F) ca = 1.0F;
+        if (ca < -1.0F) ca = -1.0F;
+        cap = ca;
+
+        if (sc < 1e-7F)
+            B = cc < 0 ? A : M_PI - A;
+        else {
+            sA = sin(A);
+            y = sA * sb * sc;
+            x = cb - ca * cc;
+            B = y != 0.0 ? (x != 0.0 ? atan2(y, x) : (y > 0.0 ? M_PI_2 : -M_PI_2)) : (x >= 0.0 ? 0.0 : M_PI);
+        }
+
+        Bp = B;
+    }
+
+    GeoPosition projected(GeoPosition location, double angDist, double bearing) {
+        auto lat = asin( sin(location.lat()) * cos(angDist) + cos(location.lat()) * sin(angDist) * cos(bearing));
+        auto lon = location.lon() + atan2(sin(bearing) * sin(angDist) * cos(location.lat()), cos(angDist) - sin(location.lat()) * sin(lat));
+        return GeoPosition{lat,lon};
+    }
+
+    /**
+     * Transform a Mercator map pixel into an Azimuthal map latitude and longitude in radians
+     * @param x The map x pixel location 0 on the left
+     * @param y The map y pixel location 0 at the top
+     * @param mapSize the width (x) and height (y) of the map in pixels
+     * @param location the longitude (x) and latitude (y) of the center of the projection
+     * @param siny pre-computed sine of the latitude
+     * @param cosy pre-computed cosine of the latitude
+     * @return [valid, latitude, longitude ], valid if the pixel is on the Earth,
+     * latitude -PI..+PI West to East, longitude +PI/2..-PI/2 North to South
+     */
+    tuple<bool, double, double>
+    xyToAzLatLong(int x, int y, const Size &mapSize, const GeoPosition &location, double siny, double cosy) {
+        bool onAntipode = x > mapSize.width() / 2;
+        auto w2 = (mapSize.height() / 2) * (mapSize.height() / 2);
+        auto dx = onAntipode ? x - (3 * mapSize.width()) / 4 : x - mapSize.width() / 4;
+        auto dy = mapSize.height() / 2 - y;
+        auto r2 = dx * dx + dy * dy;    // radius squared
+
+        if (r2 <= w2) {
+            auto b = sqrt((double ) r2 / (double ) w2) * M_PI_2;    // Great circle distance.
+            auto A = M_PI_2 - atan2((double ) dy, (double ) dx);       // Azimuth
+            double ca, B;
+            solveSphere(A, b, (onAntipode ? -siny : siny), cosy, ca, B);
+            auto lat = (float) M_PI_2 - acos(ca);
+            auto lon = location.lon() + B + (onAntipode ? 6. : 5.) * (double ) M_PI;
+            lon = fmod(location.lon() + B + (onAntipode ? 6. : 5.) * (double ) M_PI, 2 * M_PI) - (double ) M_PI;
+            return std::make_tuple(true, lat, lon);
+        }
+        return std::make_tuple(false, 0., 0.);
+    }
+
+    void MapProjection::computeAzimuthalMaps() {
+        // Compute Azmuthal maps from the Mercator maps
+        std::cout << mQthRad.lat() << ',' << mQthRad.lon() << '\n';
+        auto siny = sin(mQthRad.lat());
+        auto cosy = cos(mQthRad.lat());
+        for (int y = 0; y < mMapSize.height(); y += 1) {
+            for (int x = 0; x < mMapSize.width(); x += 1) {
+                auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapSize, mQthRad, siny, cosy);
+                if (valid) {
+                    GeoPosition position{lat,lon};
+                    auto xx = min(mMapSize.width() - 1, (int) round((double ) mMapSize.width() * ((lon + M_PI) / (2 * M_PI))));
+                    auto yy = min(mMapSize.height() - 1, (int) round((double ) mMapSize.height() * ((M_PI_2 - lat) / M_PI)));
+                    mAzSurface[0].pixel(x, y) = sdl::mapRGBA(mAzSurface[0]->format, sdl::getRGBA(mMapSurface[0]->format, mMapSurface[0].pixel(xx, yy)));
+                    mAzSurface[1].pixel(x, y) = sdl::mapRGBA(mAzSurface[1]->format, sdl::getRGBA(mMapSurface[1]->format, mMapSurface[1].pixel(xx, yy)));
+                }
+            }
+        }
+    }
+
+    /**
+     * Compute the sub-solar geographic coordinates, used in plotting the solar ilumination.
+     * @return a tuple with the latitude, longitude in radians
+     */
+    std::tuple<double, double> subSolar() {
+        using namespace std::chrono;
+        auto epoch = system_clock::now();
+        time_t tt = system_clock::to_time_t(epoch);
+
+        double JD = (tt / 86400.0) + 2440587.5;
+        double D = JD - 2451545.0;
+        double g = 357.529 + 0.98560028 * D;
+        double q = 280.459 + 0.98564736 * D;
+        double L = q + 1.915 * sin(M_PI / 180 * g) + 0.020 * sin(M_PI / 180 * 2 * g);
+        double e = 23.439 - 0.00000036 * D;
+        double RA = 180 / M_PI * atan2(cos(M_PI / 180 * e) * sin(M_PI / 180 * L), cos(M_PI / 180 * L));
+        auto lat = asin(sin(M_PI / 180 * e) * sin(M_PI / 180 * L));
+        auto lat_d = rad2deg(lat);
+        double GMST = fmod(15 * (18.697374558 + 24.06570982441908 * D), 360.0);
+        auto lng_d = fmod(RA - GMST + 36000.0 + 180.0, 360.0) - 180.0;
+        auto lng = deg2rad(lng_d);
+
+        return std::make_tuple(lat, lng);
+    }
+
+    void MapProjection::setForegroundBackground(sdl::Renderer &renderer, MapDataType dayMap) {
+        auto mapIdx = static_cast<std::size_t>(dayMap);
+
+        mMercator[0] = mMapSurface[mapIdx+1].toTexture(renderer);
+        mMercator[0].setBlendMOde(SDL_BLENDMODE_BLEND);
+        mAzimuthal[0] = mAzSurface[mapIdx+1].toTexture(renderer);
+        mAzimuthal[0].setBlendMOde(SDL_BLENDMODE_BLEND);
+
+        sdl::Surface mercator{mMapSize};
+        sdl::Surface azimuthal{mMapSize};
+
+        mercator.setBlendMode(SDL_BLENDMODE_BLEND);
+        azimuthal.setBlendMode(SDL_BLENDMODE_BLEND);
+
+        mercator.blitSurface(mMapSurface[mapIdx]);
+        azimuthal.blitSurface(mAzSurface[mapIdx]);
+
+        auto[latS, lonS] = subSolar();
+
+        auto siny = sin(mQthRad.lat());
+        auto cosy = cos(mQthRad.lat());
+
+        // Three loops for: Longitude, Latitude, and map form (Mercator, Azimuthal).
+        // This lets us use the common calculations without repeating them, easier than
+        // debugging two areas with the same computation.
+        for (int x = 0; x < mMapSize.width(); x += 1) {
+            for (int y = 0; y < mMapSize.height(); y += 1) {
+                for (int az = 0; az < 2; ++az) {
+                    float alpha = 1.;
+                    bool valid;
+                    float latE;
+                    float lonE;
+                    if (az == 1) {
+                        // The Azimuthal coordinates that correspond to a map pixel
+                        auto tuple = xyToAzLatLong(x, y, mMapSize,
+                                                   mQthRad, siny, cosy);
+                        valid = get<0>(tuple);
+                        latE = get<1>(tuple);
+                        lonE = get<2>(tuple);
+                    } else {
+                        // The Mercator coordinates for the same map pixel
+                        valid = true;
+                        lonE = (float) ((float) x - (float) mMapSize.width() / 2.f) * (float) M_PI /
+                               (float) ((float) mMapSize.width() / 2.);
+                        latE = (float) ((float) mMapSize.height() / 2.f - (float) y) * (float) M_PI_2 /
+                               (float) ((float) mMapSize.height() / 2.);
+                    }
+                    if (valid) {
+                        // Compute the amont of solar illumination and use it to compute the pixel alpha value
+                        // GrayLineCos sets the interior angle between the sub-solar point and the location.
+                        // GrayLinePower sets how fast it gets dark.
+                        auto cosDeltaSigma = sin(latS) * sin(latE) + cos(latS) * cos(latE) * cos(abs(lonS - lonE));
+                        double fract_day;
+                        if (cosDeltaSigma < 0) {
+                            if (cosDeltaSigma > GrayLineCos) {
+                                fract_day = 1.0 - pow(cosDeltaSigma / GrayLineCos, GrayLinePow);
+                                alpha = std::clamp((float)fract_day, 0.0313f, 1.f);
+                            } else
+                                alpha = 0.0313;  // Set the minimun alpha to keep some daytime colour on the night side
+                        }
+                    } else
+                        alpha = 0;
+
+                    // Set the alpha channel in the appropriate map.
+                    if (az == 1) {
+                        auto pixel = sdl::getRGBA(azimuthal->format, azimuthal.pixel(x,y));
+                        pixel.a() = alpha;
+                        azimuthal.pixel(x,y) = sdl::mapRGBA(azimuthal->format, pixel);
+                    } else {
+                        auto pixel = sdl::getRGBA(mercator->format, mercator.pixel(x,y));
+                        pixel.a() = alpha;
+                        mercator.pixel(x,y) = sdl::mapRGBA(mercator->format, pixel);
+                    }
+                }
+            }
+        }
+
+        mMercator[1] = mercator.toTexture(renderer);
+        mMercator[1].setBlendMOde(SDL_BLENDMODE_BLEND);
+        mAzimuthal[1] = azimuthal.toTexture(renderer);
+        mAzimuthal[1].setBlendMOde(SDL_BLENDMODE_BLEND);
     }
 }
