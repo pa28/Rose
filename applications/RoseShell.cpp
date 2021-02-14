@@ -39,6 +39,10 @@ void RoseShell::build() {
                     std::cout << "/usr/local/bin/hamchrono\n";
                     mRunEventLoop = false;
                     break;
+                case HamChronoButton:
+                    std::cout << "HamChrono\n";
+                    mRunEventLoop = false;
+                    break;
                 case UpgradeButton:
                     std::cout << "upgrade\n";
                     mRunEventLoop = false;
