@@ -32,33 +32,6 @@ namespace rose {
     };
 
     /**
-     * @class GeoPosition
-     * @brief A geographic position holding Latitude and Longitude.
-     */
-    class GeoPosition : public std::array<double, 2> {
-    public:
-        constexpr GeoPosition() noexcept: std::array<double,2>({0., 0.}) {}
-
-        constexpr GeoPosition(double lat, double lon) noexcept : std::array<double,2>({lat,lon}) {}
-
-        constexpr double& lat() noexcept {
-            return at(0);
-        }
-
-        constexpr double& lon() noexcept {
-            return at(1);
-        }
-
-        [[nodiscard]] constexpr double lat() const noexcept {
-            return at(0);
-        }
-
-        [[nodiscard]] constexpr double lon() const noexcept {
-            return at(1);
-        }
-    };
-
-    /**
      * @class MapProjections
      * @brief
      */
