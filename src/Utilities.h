@@ -19,6 +19,13 @@
 
 namespace rose::util {
 
+    template<typename T>
+    std::string fmtReal(T value, int precision) {
+        std::stringstream strm{};
+        strm << std::setprecision(precision) << value;
+        return strm.str();
+    }
+
     /**
      * @struct iterator_pair
      * @brief A pair of iterators which may be used as first and last in the sequence [first .. last)
