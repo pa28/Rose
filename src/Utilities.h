@@ -9,6 +9,7 @@
 
 #include <exception>
 #include <filesystem>
+#include <iomanip>
 #include <memory>
 #include <optional>
 #include <sstream>
