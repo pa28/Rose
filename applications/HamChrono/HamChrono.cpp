@@ -8,6 +8,7 @@
 #include "sstream"
 #include <curlpp/cURLpp.hpp>
 #include <SDL2/SDL_image.h>
+#include "ConfigDialog.h"
 #include "Container.h"
 #include "Frame.h"
 #include "HamChrono.h"
@@ -21,6 +22,25 @@
 using namespace rose;
 
 void HamChrono::build() {
+    mConfigButtonRx = std::make_shared<Slot<Button::SignalType>>();
+    mConfigButtonRx->setCallback([&](uint32_t, Button::SignalType button){
+        switch (button.second) {
+            case ExitButton:
+                createPopup<ExitDialog>() << mConfigButtonRx;
+                needsLayout();
+                break;
+            case ConfigButton:
+                createPopup<ConfigDialog>() << mConfigButtonRx;
+                needsLayout();
+                break;
+            case DialogOk:
+                break;
+            case ExitDialogOk:
+                mRunEventLoop = false;
+                break;
+        }
+    });
+
     if (mCmdLineParser.cmdOptionExists("-callsign")) {
         auto callsign = mCmdLineParser.getCmdOption("-callsign");
         mSettings->setValue("CALLSIGN", callsign);
@@ -188,11 +208,18 @@ void HamChrono::callsignBlock(std::shared_ptr<Row> &parent) {
 
     column << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round
                << wdg<Column>() << InternalSpace{4}
-                   << wdg<CascadeButton>(Id{"CALLSIGN"}, CascadeButtonType::CascadeDown)
-                       << Elastic(Orientation::Horizontal) << Manip::Parent
-                   << wdg<TimeBox>(mSecondTick) << Manip::Parent
-                   << wdg<DateBox>(mSecondTick) << Manip::Parent
-                   << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> scale
+                    << wdg<CascadeButton>(Id{"CALLSIGN"}, CascadeButtonType::CascadeDown)
+                        << ConfigMenu
+                        << mConfigButtonRx
+                        << CornerStyle::Square
+                        << HorizontalAlignment::Center
+                        << VerticalAlignment::Center
+                        << Elastic(Orientation::Horizontal)
+                        << Manip::Parent
+
+                    << wdg<TimeBox>(mSecondTick) << Manip::Parent
+                    << wdg<DateBox>(mSecondTick) << Manip::Parent
+                    << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> scale
                        << Parent<Frame>();
     mSystemData.txTemperature.connect(scale->rxScaledValue0);
     mSystemData.txSystem.connect(scale->rxScaledValue1);

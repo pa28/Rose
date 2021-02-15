@@ -9,10 +9,21 @@
 
 #include "Cache.h"
 #include "MapProjection.h"
+#include "Menu.h"
 #include "Rose.h"
 #include "Signals.h"
 #include "SystemMonitor.h"
 #include "Timer.h"
+
+enum UserSignalTokenValues : rose::SignalToken {
+    ConfigButton = rose::FirstUserSignalToken,         ///< Exit the application.
+    ExitButton,
+};
+
+static constexpr std::array<rose::MenuButtonData,2> ConfigMenu{
+        rose::MenuButtonData{ "Config", ConfigButton },
+        rose::MenuButtonData{ "Exit", ExitButton},
+};
 
 /**
  * @class HamChrono
@@ -40,6 +51,8 @@ protected:
     rose::GeoPosition mQthLocation{};
 
     void callsignBlock(std::shared_ptr<rose::Row> &parent);
+
+    std::shared_ptr<rose::Slot<rose::Button::SignalType>> mConfigButtonRx{};
 
 public:
     HamChrono() = delete;
