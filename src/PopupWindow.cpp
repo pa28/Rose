@@ -65,14 +65,6 @@ namespace rose {
         }
     }
 
-    template<class C>
-    void Popup::setActionButtons(C actionButtonList) {
-        std::for_each(actionButtonList.begin(), actionButtonList.end(),
-                      [this](const DialogActionButton &dialogActionButton){
-            createActionButton(dialogActionButton);
-        });
-    }
-
     PopupWindow::PopupWindow(shared_ptr <Rose> parent) : Popup(parent) {
         mClassName = "PopupWindow";
         mSupportsDrag = true;

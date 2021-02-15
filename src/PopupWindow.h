@@ -96,7 +96,12 @@ namespace rose {
          * @param actionButtonList The DialogActionButton container
          */
         template<class C>
-        void setActionButtons(C actionButtonList);
+        void setActionButtons(C actionButtonList) {
+            std::for_each(actionButtonList.begin(), actionButtonList.end(),
+                          [this](const DialogActionButton &dialogActionButton){
+                              createActionButton(dialogActionButton);
+                          });
+        }
 
         /**
          * @brief Create a DialogActionButton on derivatives of Popup that support them.
@@ -245,8 +250,8 @@ namespace rose {
         static constexpr std::string_view mExitTitle = "Exit?";
         static constexpr std::string_view mExitMessage = "Exit the program?";
         static constexpr std::array<DialogActionButton,2> mActionButtons = {
-                DialogActionButton{ ActionButtonOk, ExitDialogOk },
-                DialogActionButton{ ActionButtonCancel, ExitDialogCancel }
+                DialogActionButton{ActionButtonOk, ExitDialogOk },
+                DialogActionButton{ActionButtonCancel, ExitDialogCancel }
         };
 
     public:
