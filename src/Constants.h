@@ -44,6 +44,7 @@ namespace rose {
      */
     enum SignalTokenValues : uint32_t {
         DialogOk,                       ///< General Dialog Ok Action Button
+        DialogSave,                     ///< Save data entered in the dialog.
         DialogCancel,                   ///< General Dialog Cancel Action Button
         ExitDialogOk,                   ///< ExitDialog Ok ActionButton
         ExitDialogCancel,               ///< ExitDialog Cancel ActionButton
@@ -58,6 +59,7 @@ namespace rose {
     enum ActionButtonType {
         ActionButtonOk,     ///< Acknowledge the message or authorize the action described in the dialog.
         ActionButtonCancel, ///< Cancel the action described in the dialog.
+        ActionButtonSave,   ///< Save changes made.
     };
 
     /**
@@ -83,9 +85,10 @@ namespace rose {
         MenuCascade,        ///< A Cascade Button, treated as a NormalButton
     };
 
-    static constexpr std::array<std::string_view,2> ActionButtonLabel {
+    static constexpr std::array<std::string_view,3> ActionButtonLabel {
             "OK",       ///< Label for ActionButtonOk
             "Cancel",   ///< Label for ActionButtonCancel
+            "Save",     ///< Label for ActionButtonSave
     };
 
     /**

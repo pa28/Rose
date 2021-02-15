@@ -30,7 +30,7 @@ void HamChrono::build() {
                 needsLayout();
                 break;
             case ConfigButton:
-                createPopup<ConfigDialog>() << mConfigButtonRx;
+                createPopup<ConfigDialog>();
                 needsLayout();
                 break;
             case DialogOk:

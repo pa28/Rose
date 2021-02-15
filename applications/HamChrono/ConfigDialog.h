@@ -18,16 +18,23 @@ namespace rose {
  * @class ConfigDialog
  * @brief
  */
-    class ConfigDialog : public PopupWindow {
+    class ConfigDialog : public Dialog {
     protected:
         static constexpr std::string_view mTitle = "Configure";
         static constexpr std::string_view CallPattern = "[A-Z]+[0-9][A-Z]+";
         static constexpr std::string_view FloatPattern = "[+-]?([0-9]*[.])?[0-9]+";
 
-        void qthConfigure(shared_ptr <Container> &parent);
+        static constexpr std::array<DialogActionButton,2> mActionButtons = {
+                DialogActionButton{ActionButtonSave, DialogSave },
+                DialogActionButton{ActionButtonCancel, DialogCancel }
+        };
+
+        void qthConfigure(shared_ptr <Row> &parent);
 
         std::shared_ptr<std::regex> mCallRegex{};
         std::shared_ptr<std::regex> mFloatRegex{};
+
+        std::shared_ptr<Slot<Button::SignalType>> mActionButtonSlot{};
 
     public:
         ConfigDialog() = delete;
@@ -38,11 +45,12 @@ namespace rose {
         ConfigDialog& operator=(const ConfigDialog &) = delete;
 
         /**
-         * @brief Construct a PopupWindow which covers the entire screen.
+         * @brief Construct a Dialog which covers the entire screen.
          * @param parent the Rose application object.
          */
-        explicit ConfigDialog(shared_ptr <Rose> parent) : PopupWindow(std::move(parent)) {
+        explicit ConfigDialog(shared_ptr <Rose> parent) : Dialog(std::move(parent)) {
             mWindowTitle = mTitle;
+            mSupportsDrag = true;
         }
 
         /**
@@ -51,8 +59,9 @@ namespace rose {
          * @param parent the Rose application object.
          * @param position the Window size.
          */
-        ConfigDialog(shared_ptr <Rose> parent, const Position &position) : PopupWindow(std::move(parent), position) {
+        ConfigDialog(shared_ptr <Rose> parent, const Position &position) : Dialog(std::move(parent), position) {
             mWindowTitle = mTitle;
+            mSupportsDrag = true;
         }
 
         /**
@@ -62,8 +71,9 @@ namespace rose {
          * @param size the Window size.
          */
         ConfigDialog(shared_ptr <Rose> parent, const Position &pos, const Size &size)
-            : PopupWindow(std::move(parent), pos, size) {
+            : Dialog(std::move(parent), pos, size) {
             mWindowTitle = mTitle;
+            mSupportsDrag = true;
         }
 
         /**

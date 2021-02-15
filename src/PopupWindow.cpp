@@ -62,7 +62,11 @@ namespace rose {
 
         for (auto &child : mChildren) {
             child->draw(renderer, widgetRect);
-        }
+        }        static constexpr std::array<DialogActionButton,2> mActionButtons = {
+                DialogActionButton{ActionButtonOk, ExitDialogOk },
+                DialogActionButton{ActionButtonCancel, ExitDialogCancel }
+        };
+
     }
 
     PopupWindow::PopupWindow(shared_ptr <Rose> parent) : Popup(parent) {
@@ -150,6 +154,10 @@ namespace rose {
             case ActionButtonOk:
                 badge = RoseImageId::IconCheck;
                 label = ActionButtonLabel[0];
+                break;
+            case ActionButtonSave:
+                badge = RoseImageId::IconCancel;
+                label = ActionButtonLabel[2];
                 break;
             case ActionButtonCancel:
                 badge = RoseImageId::IconCancel;

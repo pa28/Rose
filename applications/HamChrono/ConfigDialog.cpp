@@ -14,26 +14,28 @@
 namespace rose {
 
     void ConfigDialog::initializeComposite() {
-        PopupWindow::initializeComposite();
+        Dialog::initializeComposite();
         mModal = Modality::Modal;
         mCallRegex = std::make_shared<std::regex>(std::string{CallPattern}.c_str());
         mFloatRegex = std::make_shared<std::regex>(std::string{FloatPattern}.c_str());
 
-        mFrame << BorderStyle::BevelIn;
-        mFrame->setInvert(true);
-        auto frame = mColumn << wdg<Frame>(4) << BorderStyle::BevelIn;
-        auto column = frame << wdg<Column>() << InternalSpace{4};
-        std::shared_ptr<Container> row1 = column << wdg<Row>();
+        mActionButtonSlot = std::make_shared<Slot<Button::SignalType>>();
+        mActionButtonSlot->setCallback([&](uint32_t, Button::SignalType button){
+        });
+
+        auto column = mMessageRow << wdg<Column>();
+        auto row1 = column << wdg<Row>();
 
         qthConfigure(row1);
 
         auto keyboard = std::make_shared<QUERTY>();
         column << wdg<Keyboard>(keyboard);
         requestFocus();
-
+        setActionButtons(mActionButtons);
+        setButtonSlot(mActionButtonSlot);
     }
 
-    void ConfigDialog::qthConfigure(shared_ptr <Container> &parent) {
+    void ConfigDialog::qthConfigure(shared_ptr <Row> &parent) {
         auto callsign = rose()->settings()->getValue("CALLSIGN",std::string{});
         auto qth = rose()->settings()->getValue<GeoPosition>("QTH_Location");
 
