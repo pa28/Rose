@@ -68,8 +68,6 @@ namespace rose {
         minuteRx->setCallback([&](uint32_t, int minute){
             if (!mFutureSun.valid())
                 mFutureSun = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
-            else
-                std::cout << "Future sun valid.\n";
         });
 
         mMapCache->itemFetched.connect(mapFileRx);
