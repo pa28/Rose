@@ -10,12 +10,9 @@
 
 namespace rose {
 
-    TimeBox::TimeBox(SecondTickPtr secondTick, bool small) : Container(),
-                                                             mIsSmall(small),
-                                                             mSecondTick(std::move(secondTick)),
-                                                             locale_time_put(
-                                                                     std::use_facet<std::time_put<char>>(
-                                                                             std::locale())) {
+    TimeBox::TimeBox(SecondTickPtr secondTick, bool small, bool localTime)
+        : Container(), mIsSmall(small), mIsLocalTime(localTime), mSecondTick(std::move(secondTick)),
+        locale_time_put( std::use_facet<std::time_put<char>>( std::locale())) {
     }
 
     void TimeBox::initializeComposite() {
@@ -24,8 +21,6 @@ namespace rose {
         rxSecond->setCallback([&](uint32_t sn, int) {
             this->timeCallback();
         });
-
-        mIsLocalTime = false;
 
         mHoursMinutes = add<Label>()
                 ->withFontName(Widget::rose()->theme().mTimeBoxTimeFont)
@@ -106,11 +101,10 @@ namespace rose {
         return mLayoutHints.mAssignedRect.value();
     }
 
-    DateBox::DateBox(SecondTickPtr secondTick, bool small) : Label(),
-                                                             mIsSmall(small),
-                                                             mSecondTick(std::move(secondTick)),
-                                                             locale_time_put(std::use_facet<std::time_put<char>>(
-                                                                     std::locale())) {}
+    DateBox::DateBox(SecondTickPtr secondTick, bool small, bool localTime)
+        : Label(), mIsSmall(small), mIsLocalTime(localTime), mSecondTick(std::move(secondTick)),
+        locale_time_put(std::use_facet<std::time_put<char>>(std::locale())) {
+    }
 
     void DateBox::initializeComposite() {
         Label::initializeComposite();

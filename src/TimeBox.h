@@ -63,7 +63,7 @@ namespace rose {
          * @param secondTick A pointer to the SecondTick object from which timing will be received.
          * @param small if true display the small version of the time.
          */
-        explicit TimeBox(SecondTickPtr secondTick, bool small = false);
+        explicit TimeBox(SecondTickPtr secondTick, bool small = false, bool localTime = false);
 
         void initializeComposite() override;    ///< See Widget::initializeComposit().
 
@@ -145,7 +145,7 @@ namespace rose {
          * @param secondTick A pointer to the SecondTick timing object.
          * @param small if true display the small version of the date.
          */
-        explicit DateBox(SecondTickPtr secondTick, bool small = false);
+        explicit DateBox(SecondTickPtr secondTick, bool small = false, bool localTime = false);
 
         /**
          * @brief See Widget::initializeComposite.
