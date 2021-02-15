@@ -9,6 +9,7 @@
 
 #include <regex>
 #include <utility>
+#include "Constants.h"
 #include "Frame.h"
 #include "Texture.h"
 
@@ -20,7 +21,22 @@ namespace rose {
      * @details The text may have a validation regular expression.
      */
     class TextField : public Frame {
+    public:
+        struct FieldSettings {
+            DataType dataType;
+            std::string_view id, prefix, suffix;
+            int maxLength;
+            char eM;
+        };
+
+    protected:
+        static void enterSettings(std::unique_ptr<rose::Settings> &db, const FieldSettings &setting);
+
+        void saveValue();
+
+        DataType mDataType{DataType::Unset};                ///< The type of data expected by the TextField.
         char mEm{'M'};                                      ///< The largest Glyph that will be in the text.
+        bool mModified{};                                   ///< True when the value has been modified.
         bool mValidEntry{};                                 ///< True if the current value passes validation.
         bool mHasFocus{};                                   ///< True if the TextField has keyboard focus.
         bool mToUpper{};                                    ///< Convert chars to upper case.
@@ -31,6 +47,7 @@ namespace rose {
         FontMetrics mFontMetrics{};                         ///< The metrics of the current font.
         color::RGBA mTextColor{};                           ///< Text foreground color.
         color::RGBA mErrorColor{};                          ///< The color used when validation fails.
+        color::RGBA mUnmodifiedColor{};                     ///< The color used when data is unmodified.
         std::string mPrefix{};                              ///< The prefix to the text.
         std::string mSuffix{};                              ///< The suffix to the text.
         std::string mText{};                                ///< The current text value.
@@ -76,6 +93,22 @@ namespace rose {
         TextField(int maxLenght, const std::string &text, const std::string &suffix = "", const std::string &prefix = "",
                   int padding = 0, FontSize fontSize = 0, const string &fontName = "");
 
+        /**
+         * @brief Constructor
+         * @details Create a TextField with parameters taken from the Settings database. Settings must be
+         * previously set by a call to TextField::Settings(). This has the added benefit of enabling automatic
+         * saving and propagation of values.
+         * @param id The Id used to identify the TextFiled and its settings.
+         */
+        explicit TextField(Id id, int padding = 0, FontSize fontSize = 0, const string &fontName = "");
+
+        template<size_t N>
+        static void Settings(std::unique_ptr<rose::Settings> &db, const std::array<FieldSettings,N> &settings) {
+            for (const auto& setting : settings) {
+                enterSettings(db, setting);
+            }
+        }
+
         /// See Frame::widgetLayout()
         Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
 
@@ -115,6 +148,8 @@ namespace rose {
         void setToUpper(bool toUpper) {
             mToUpper = toUpper;
         }
+
+        bool isModified() const { return mModified; }
     };
 
     struct ToUpperCase {

@@ -25,16 +25,13 @@ namespace rose {
         static constexpr std::string_view CallPattern = "[A-Z]+[0-9][A-Z]+";
         static constexpr std::string_view FloatPattern = "[+-]?([0-9]*[.])?[0-9]+";
 
-        static constexpr std::array<DialogActionButton,2> mActionButtons = {
-                DialogActionButton{ActionButtonSave, DialogSave },
-                DialogActionButton{ActionButtonCancel, DialogCancel }
+        static constexpr std::array<DialogActionButton,1> mActionButtons = {
+                DialogActionButton{ActionButtonClose, DialogClose }
         };
 
         void qthConfigure(shared_ptr <Row> &parent);
 
-        std::shared_ptr<TextField> mCallSign{};
-        std::shared_ptr<TextField> mLatitude{};
-        std::shared_ptr<TextField> mLongitude{};
+        std::array<std::shared_ptr<TextField>,3> mTextFields{};
 
         std::shared_ptr<std::regex> mCallRegex{};
         std::shared_ptr<std::regex> mFloatRegex{};

@@ -171,7 +171,7 @@ namespace rose {
         }
 
         /// See Widget::setButtonSlot()
-        void setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) { mAppButtonSlot = buttonSlot; }
+        void setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot, bool) { mAppButtonSlot = buttonSlot; }
     };
 }
 
@@ -218,7 +218,7 @@ inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget
                                               std::shared_ptr<rose::Slot<rose::Button::SignalType>> buttonRxSlot) {
     static_assert(std::is_base_of_v<rose::Popup, WidgetType> || std::is_base_of_v<rose::CascadeButton, WidgetType>,
                   "Button signals can only be set on Popup or CascadeButton objects." );
-    widget->setButtonSlot(buttonRxSlot);
+    widget->setButtonSlot(buttonRxSlot,true);
     return widget;
 }
 

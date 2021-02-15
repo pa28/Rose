@@ -94,7 +94,9 @@ namespace rose {
     public:
         constexpr GeoPosition() noexcept: std::array<double,2>({0., 0.}) {}
 
-        constexpr GeoPosition(double lat, double lon) noexcept : std::array<double,2>({lat,lon}) {}
+        constexpr GeoPosition(double lat, double lon) noexcept
+            : std::array<double,2>({std::clamp(lat,-90.,90.),
+                                    std::clamp(lon,-180.,180.)}) {}
 
         constexpr double& lat() noexcept {
             return at(0);

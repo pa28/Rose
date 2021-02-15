@@ -24,7 +24,7 @@ void ConwayLife::build() {
         if (status.first) {
             switch (status.second) {
                 case ExitButton:
-                    createPopup<ExitDialog>()->setButtonSlot(mButtonRx);
+                    createPopup<ExitDialog>()->setButtonSlot(mButtonRx, true);
                     needsLayout();
                     break;
                 case ExitDialogOk:

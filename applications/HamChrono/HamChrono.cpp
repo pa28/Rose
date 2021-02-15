@@ -23,6 +23,8 @@
 using namespace rose;
 
 void HamChrono::build() {
+    TextField::Settings(mSettings, ConfigTextFieldSettings);
+
     mConfigButtonRx = std::make_shared<Slot<Button::SignalType>>();
     mConfigButtonRx->setCallback([&](uint32_t, Button::SignalType button){
         switch (button.second) {
@@ -47,15 +49,14 @@ void HamChrono::build() {
         mSettings->setValue(set::CALLSIGN, callsign);
     }
 
-    if (mCmdLineParser.cmdOptionExists(set::QTH_Lat) && mCmdLineParser.cmdOptionExists(set::QTH_Lon)) {
-        auto lat = strtod(mCmdLineParser.getCmdOption(set::QTH_Lat).c_str(), nullptr);
-        auto lon = strtod(mCmdLineParser.getCmdOption(set::QTH_Lon).c_str(), nullptr);
-        mQthLocation = GeoPosition{lat,lon};
-        mSettings->setValue(set::QTH_Location, mQthLocation);
+    if (mCmdLineParser.cmdOptionExists(set::QTH_Lat_Opt) && mCmdLineParser.cmdOptionExists(set::QTH_Lon_Opt)) {
+        auto lat = strtod(mCmdLineParser.getCmdOption(set::QTH_Lat_Opt).c_str(), nullptr);
+        auto lon = strtod(mCmdLineParser.getCmdOption(set::QTH_Lon_Opt).c_str(), nullptr);
+        mSettings->setValue(set::QTH_Loc_Lat, lat);
+        mSettings->setValue(set::QTH_Loc_Lon, lon);
     } else {
-        auto qth = mSettings->getValue<GeoPosition>(set::QTH_Location);
-        if (qth)
-            mQthLocation = qth.value();
+        mQthLocation = GeoPosition{mSettings->getValue(set::QTH_Loc_Lat, 0.),
+                                   mSettings->getValue(set::QTH_Loc_Lon, 0.)};
     }
 
     solarImageCache = std::make_unique<WebFileCache>("https://sdo.gsfc.nasa.gov/assets/img/latest/",

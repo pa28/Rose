@@ -21,7 +21,7 @@
 namespace rose::util {
 
     template<typename T>
-    std::string fmtReal(T value, int precision) {
+    std::string fmtNumber(T value, int precision) {
         std::stringstream strm{};
         strm << std::setprecision(precision) << value;
         return strm.str();

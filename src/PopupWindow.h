@@ -116,7 +116,7 @@ namespace rose {
          * to buttonSlot.
          * @param buttonSlot
          */
-        virtual void setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) {
+        virtual void setButtonSlot(shared_ptr <Slot<Button::SignalType>> &buttonSlot, bool dismissAll) {
             mActionButtonRx = buttonSlot;
         }
     };
@@ -238,7 +238,7 @@ namespace rose {
          * to buttonSlot.
          * @param buttonSlot
          */
-        void setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) override;
+        void setButtonSlot(shared_ptr <Slot<Button::SignalType>> &buttonSlot, bool dismissAll) override;
     };
 
     /**
@@ -283,6 +283,56 @@ namespace rose {
          * @param size the Window size.
          */
         ExitDialog(shared_ptr <Rose> parent, const Position &pos, const Size &size);
+
+        /**
+         * @brief See Widget::initializeComposite()
+         */
+        void initializeComposite() override;
+
+    };
+
+    /**
+     * @class UnsavedDialog
+     * @brief A Dialog specialized to guard the exit path.
+     */
+    class UnsavedDialog : public Dialog {
+    protected:
+        static constexpr std::string_view mTitle = "Discard Changes?";
+        static constexpr std::string_view mMessage = "You have unsaved changes, discard them?";
+        static constexpr std::array<DialogActionButton,2> mActionButtons = {
+                DialogActionButton{ActionButtonOk, DialogOk },
+                DialogActionButton{ActionButtonCancel, DialogCancel }
+        };
+
+    public:
+        UnsavedDialog() = delete;
+        ~UnsavedDialog() override = default;
+        UnsavedDialog(UnsavedDialog &&) = delete;
+        UnsavedDialog(const UnsavedDialog &) = delete;
+        UnsavedDialog& operator=(UnsavedDialog &&) = delete;
+        UnsavedDialog& operator=(const UnsavedDialog &) = delete;
+
+        /**
+         * @brief Construct a PopupWindow which covers the entire screen.
+         * @param parent the Rose application object.
+         */
+        explicit UnsavedDialog(shared_ptr <Rose> parent);
+
+        /**
+         * @brief Construct a Window of specified position.
+         * @details The position is clamped to be inside the screen.
+         * @param parent the Rose application object.
+         * @param position the Window size.
+         */
+        UnsavedDialog(shared_ptr <Rose> parent, const Position &position);
+
+        /**
+         * @brief Construct a Window of specified position and size.
+         * @param parent the Rose application object.
+         * @param pos the Window position
+         * @param size the Window size.
+         */
+        UnsavedDialog(shared_ptr <Rose> parent, const Position &pos, const Size &size);
 
         /**
          * @brief See Widget::initializeComposite()
@@ -336,7 +386,7 @@ inline std::shared_ptr<WidgetType> operator << (std::shared_ptr<WidgetType> &wid
         std::shared_ptr<rose::Slot<rose::Button::SignalType>> &rxSlot) {
     static_assert(std::is_base_of_v<rose::Popup, WidgetType>,
             "Button Slot can only be set on objects derived from rose::Popup." );
-    widget->setButtonSlot(rxSlot);
+    widget->setButtonSlot(rxSlot, true);
     return widget;
 }
 

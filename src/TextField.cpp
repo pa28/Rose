@@ -6,7 +6,9 @@
  */
 
 #include <numeric>
+#include <utility>
 #include "TextField.h"
+#include "Utilities.h"
 
 namespace rose {
 
@@ -24,6 +26,12 @@ namespace rose {
         mPrefix = prefix;
         mSuffix = suffix;
         mText = text;
+    }
+
+    TextField::TextField(Id id, int padding, FontSize fontSize, const string &fontName) : Frame(padding) {
+        mId = std::move(id);
+        mFontSize = fontSize;
+        mFontName = fontName;
     }
 
     Rectangle TextField::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
@@ -75,7 +83,7 @@ namespace rose {
                 } else {
                     mValidEntry = true;
                 }
-                auto textColor = (mValidEntry ? mTextColor : mErrorColor);
+                auto textColor = mModified ? (mValidEntry ? mTextColor : mErrorColor) : mUnmodifiedColor;
                 mTextTexture = sdl::renderTextureBlendedUTF8(renderer, mFont, mText, textColor);
                 mTextSize = mTextTexture.getSize();
             }
@@ -119,8 +127,60 @@ namespace rose {
 
     }
 
+    static constexpr char SET_PRE[] = "_pre";
+    static constexpr char SET_SUF[] = "_suf";
+    static constexpr char SET_MAXLEN[] = "_maxLen";
+    static constexpr char SET_EM[] = "_Em";
+    static constexpr char SET_TYPE[] = "_type";
+
+    void TextField::enterSettings(std::unique_ptr<rose::Settings> &db, const TextField::FieldSettings &setting) {
+        if (!setting.id.empty()) {
+            Id id{setting.id};
+            db->setValue(id + SET_TYPE, static_cast<int>(setting.dataType));
+            if (!setting.suffix.empty())
+                db->setValue(id + SET_SUF, setting.suffix);
+            if (!setting.prefix.empty())
+                db->setValue(id + SET_PRE, setting.prefix);
+            if (setting.maxLength)
+                db->setValue(id + SET_MAXLEN, setting.maxLength);
+            if (setting.eM)
+                db->setValue(id + SET_EM, static_cast<int>(setting.eM));
+        }
+    }
+
     void TextField::initializeComposite() {
         Frame::initializeComposite();
+
+        if (!mId.empty() && rose()->settings()) {
+            mDataType = static_cast<DataType>(rose()->settings()->getValue(mId + SET_TYPE,
+                                                                           static_cast<int>(DataType::Unset)));
+            switch (mDataType) {
+                case DataType::Char: {
+                    auto value = rose()->settings()->getValue<int>(mId);
+                    if (value) {
+                        mText = static_cast<char>(value.value());
+                    } else {
+                        mText.clear();
+                    }
+                }
+                    break;
+                case DataType::Int:
+                    mText = util::fmtNumber(rose()->settings()->getValue(mId, 0), mMaxLength-1);
+                    break;
+                case DataType::Real:
+                    mText = util::fmtNumber(rose()->settings()->getValue(mId, 0.), mMaxLength-1);
+                    break;
+                case DataType::Unset:
+                case DataType::String:
+                    mText = rose()->settings()->getValue(mId, std::string{});
+                    break;
+            }
+            mPrefix = rose()->settings()->getValue(mId + SET_PRE, std::string{});
+            mSuffix = rose()->settings()->getValue(mId + SET_SUF, std::string{});
+            mMaxLength = rose()->settings()->getValue(mId + SET_MAXLEN, (int) 10);
+            mEm = static_cast<char>(rose()->settings()->getValue(mId + SET_EM, (int) 'M'));
+        }
+
         mSupportsKeyboard = true;
 
         if (mFontSize == 0)
@@ -131,7 +191,9 @@ namespace rose {
 
         mTextColor = rose()->theme().mTextColour;
         mErrorColor = rose()->theme().mRed;
+        mUnmodifiedColor = rose()->theme().mGreen;
         mCaretLoc = mText.end();
+        mModified = false;
     }
 
     void TextField::setFontSize(FontSize fontSize) {
@@ -146,17 +208,60 @@ namespace rose {
         rose()->needsLayout();
     }
 
+    void TextField::saveValue() {
+        if (!mId.empty() && rose()->hasSettings()) {
+            if (mValidationPattern) {
+                mValidEntry = std::regex_match(mText, *mValidationPattern);
+            } else {
+                mValidEntry = true;
+            }
+
+            if (mValidEntry) {
+                switch(mDataType) {
+                    case DataType::Char:
+                        if (mText.empty())
+                            rose()->settings()->setValue(mId, 0);
+                        else
+                            rose()->settings()->setValue(mId, static_cast<int>(mText.front()));
+                        break;
+                    case DataType::Int:
+                        if (mText.empty())
+                            rose()->settings()->setValue(mId, 0);
+                        else
+                            rose()->settings()->setValue(mId, stoi(mText));
+                        break;
+                    case DataType::Real:
+                        if (mText.empty())
+                            rose()->settings()->setValue(mId, 0);
+                        else
+                            rose()->settings()->setValue(mId, stod(mText));
+                        break;
+                    case DataType::Unset:
+                    case DataType::String:
+                        rose()->settings()->setValue(mId, mText);
+                        break;
+                }
+
+                mTextTexture.reset();
+                mModified = false;
+                setNeedsDrawing();
+            }
+        }
+    }
+
     bool TextField::textInputEvent(const string &text) {
         for (auto c:text) {
             switch (c) {
                 case '\t':
                 case '\r':
                     mCaretLoc = mText.end();
+                    saveValue();
                     break;
                 case '\b':
-                    if (!mText.empty()) {
+                    if (!mText.empty() && mCaretLoc != mText.begin()) {
                         mCaretLoc--;
                         mText.erase(mCaretLoc);
+                        mModified = true;
                     }
                     break;
                 default:
@@ -168,6 +273,7 @@ namespace rose {
                             mText.insert(mCaretLoc, mToUpper ? toupper(c) :  c);
                             mCaretLoc++;
                         }
+                        mModified = true;
                     } else
                         return false;
             }

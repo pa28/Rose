@@ -11,13 +11,21 @@
 #include "MapProjection.h"
 #include "Menu.h"
 #include "Rose.h"
+#include "SettingsNames.h"
 #include "Signals.h"
 #include "SystemMonitor.h"
+#include "TextField.h"
 #include "Timer.h"
 
 enum UserSignalTokenValues : rose::SignalToken {
     ConfigButton = rose::FirstUserSignalToken,         ///< Exit the application.
     ExitButton,
+};
+
+static constexpr std::array<rose::TextField::FieldSettings,3> ConfigTextFieldSettings = {
+        rose::TextField::FieldSettings{rose::DataType::String, set::CALLSIGN, "Call", "", 10, 'M'},
+        rose::TextField::FieldSettings{rose::DataType::Real, set::QTH_Loc_Lat, "Lat", "Deg", 8, '0'},
+        rose::TextField::FieldSettings{rose::DataType::Real, set::QTH_Loc_Lon, "Lon", "Deg", 9, '0'},
 };
 
 static constexpr std::array<rose::MenuButtonData,2> ConfigMenu{

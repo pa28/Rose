@@ -21,6 +21,27 @@ namespace rose {
 
         mActionButtonSlot = std::make_shared<Slot<Button::SignalType>>();
         mActionButtonSlot->setCallback([&](uint32_t, Button::SignalType button){
+            std::cout << __PRETTY_FUNCTION__ << '\n';
+            switch (button.second) {
+                case DialogClose:
+                    if (std::find_if(mTextFields.begin(), mTextFields.end(), [](const std::shared_ptr<TextField>& it){
+                        return it->isModified();
+                    }) != mTextFields.end()) {
+                        std::cout << "Modified values\n";
+                        rose()->createPopup<UnsavedDialog>() << mActionButtonSlot;
+                        rose()->needsLayout();
+                    } else {
+                        rose()->needsDrawing(true);
+                        rose()->removeWindow(getWidget<Window>());
+                    }
+                    break;
+                case DialogOk:
+                    rose()->needsDrawing(true);
+                    rose()->removeWindow(getWidget<Window>());
+                    break;
+                case DialogCancel:
+                    break;
+            }
         });
 
         auto column = mMessageRow << wdg<Column>();
@@ -32,7 +53,7 @@ namespace rose {
         column << wdg<Keyboard>(keyboard);
         requestFocus();
         setActionButtons(mActionButtons);
-        setButtonSlot(mActionButtonSlot);
+        setButtonSlot(mActionButtonSlot, false);
     }
 
     void ConfigDialog::qthConfigure(shared_ptr <Row> &parent) {
@@ -41,21 +62,21 @@ namespace rose {
 
         std::string latTxt, lonTxt;
         if (qth) {
-            latTxt = util::fmtReal(qth->lat(), 6);
-            lonTxt = util::fmtReal(qth->lon(), 7);
+            latTxt = util::fmtNumber(qth->lat(), 6);
+            lonTxt = util::fmtNumber(qth->lon(), 7);
         }
 
         parent << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round
-                   << wdg<Column>()
-                       << wdg<Label>("QTH") << Manip::Parent
-                       << wdg<TextField>(10, callsign, "", "Call", 6) >> mCallSign
-                           << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
-                           << ToUpperCase{} << mCallRegex
-                           << Manip::Parent
-                       << wdg<TextField>(8, latTxt, "Deg", "Lat", 6) >> mLatitude
-                           << BorderStyle::Notch << CornerStyle::Round << FontSize{20} << mFloatRegex
-                           << Manip::Parent
-                       << wdg<TextField>(9, lonTxt, "Deg", "Lon", 6) >> mLongitude
+               << wdg<Column>()
+               << wdg<Label>("QTH") << Manip::Parent
+               << wdg<TextField>(Id{set::CALLSIGN}, 6) >> mTextFields[0]
+               << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
+               << ToUpperCase{} << mCallRegex
+               << Manip::Parent
+               << wdg<TextField>(Id{set::QTH_Loc_Lat}, 6) >> mTextFields[1]
+               << BorderStyle::Notch << CornerStyle::Round << FontSize{20} << mFloatRegex
+               << Manip::Parent
+               << wdg<TextField>(Id{set::QTH_Loc_Lon}, 6) >> mTextFields[2]
                            << BorderStyle::Notch << CornerStyle::Round << FontSize{20} << mFloatRegex
                            << Manip::Parent;
     }

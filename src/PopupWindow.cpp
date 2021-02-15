@@ -159,6 +159,10 @@ namespace rose {
                 badge = RoseImageId::IconCancel;
                 label = ActionButtonLabel[2];
                 break;
+            case ActionButtonClose:
+                badge = RoseImageId::IconCancel;
+                label = ActionButtonLabel[3];
+                break;
             case ActionButtonCancel:
                 badge = RoseImageId::IconCancel;
                 label = ActionButtonLabel[1];
@@ -173,14 +177,15 @@ namespace rose {
 //            button->txPushed.connect(mDismissButtonRx);
     }
 
-    void Dialog::setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot) {
+    void Dialog::setButtonSlot(shared_ptr<Slot<Button::SignalType>> &buttonSlot, bool dismissAll) {
         mActionButtonRx = buttonSlot;
         std::for_each(mButtonRow->begin(), mButtonRow->end(),
-                      [this](auto widget){
+                      [this,dismissAll](auto widget){
             if (auto button = widget->template as<Button>(); button) {
                 button->txPushed.disconnectAll();
                 button->txPushed.connect(mActionButtonRx);
-                button->txPushed.connect(mDismissButtonRx);
+                if (dismissAll)
+                    button->txPushed.connect(mDismissButtonRx);
             }
         });
     }
@@ -200,6 +205,26 @@ namespace rose {
     void ExitDialog::initializeComposite() {
         Dialog::initializeComposite();
         mMessageRow << wdg<Label>(mExitMessage);
+        setActionButtons(mActionButtons);
+    }
+
+    UnsavedDialog::UnsavedDialog(shared_ptr<Rose> parent) : Dialog(parent) {
+        mWindowTitle = mTitle;
+    }
+
+    UnsavedDialog::UnsavedDialog(shared_ptr<Rose> parent, const Position &position)
+        : Dialog(parent, position) {
+        mWindowTitle = mTitle;
+    }
+
+    UnsavedDialog::UnsavedDialog(shared_ptr<Rose> parent, const Position &pos, const Size &size)
+        : Dialog(parent, pos, size) {
+        mWindowTitle = mTitle;
+    }
+
+    void UnsavedDialog::initializeComposite() {
+        Dialog::initializeComposite();
+        mMessageRow << wdg<Label>(mMessage);
         setActionButtons(mActionButtons);
     }
 }

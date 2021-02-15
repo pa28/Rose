@@ -39,6 +39,14 @@ namespace rose {
      */
 
     /**
+     * @enum DataType
+     * @brief Encode expected data types.
+     */
+    enum class DataType : int {
+        Unset, Char, Int, Real, String,
+    };
+
+    /**
      * @enum SignalTokenValues
      * @brief These are the signal tokens used by built-in Widgets that transmit Signals with SignalTokens.
      */
@@ -46,6 +54,7 @@ namespace rose {
         DialogOk,                       ///< General Dialog Ok Action Button
         DialogSave,                     ///< Save data entered in the dialog.
         DialogCancel,                   ///< General Dialog Cancel Action Button
+        DialogClose,                    ///< Close the dialog.
         ExitDialogOk,                   ///< ExitDialog Ok ActionButton
         ExitDialogCancel,               ///< ExitDialog Cancel ActionButton
         FirstUserSignalToken            ///< The value that can be used for the first SignalToken of a user application.
@@ -59,6 +68,7 @@ namespace rose {
     enum ActionButtonType {
         ActionButtonOk,     ///< Acknowledge the message or authorize the action described in the dialog.
         ActionButtonCancel, ///< Cancel the action described in the dialog.
+        ActionButtonClose,  ///< Close the dialog.
         ActionButtonSave,   ///< Save changes made.
     };
 
@@ -85,10 +95,11 @@ namespace rose {
         MenuCascade,        ///< A Cascade Button, treated as a NormalButton
     };
 
-    static constexpr std::array<std::string_view,3> ActionButtonLabel {
+    static constexpr std::array<std::string_view,4> ActionButtonLabel {
             "OK",       ///< Label for ActionButtonOk
             "Cancel",   ///< Label for ActionButtonCancel
             "Save",     ///< Label for ActionButtonSave
+            "Close",    ///< Label for ActionButtonClose
     };
 
     /**
