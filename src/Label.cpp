@@ -23,10 +23,12 @@ namespace rose {
         mTextColor = theme.mTextColour;
         mLabelBadgeSpace = theme.mLabelBadgeSpace;
         mTextureDirty = true;
+
         mTextRx = std::make_shared<Slot<std::string>>();
         mTextRx->setCallback([=](uint32_t, const std::string &text){
             setText(text);
         });
+
         mClassName = "Label";
     }
 

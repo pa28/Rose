@@ -24,7 +24,8 @@ namespace rose {
      */
     class Settings {
     protected:
-        std::filesystem::path mDbPath;      ///< The file path to the settings database
+        SignalSerialNumber mSignalSerialNumber{};       ///< The serial number to identify this object.
+        std::filesystem::path mDbPath;                  ///< The file path to the settings database
 
         static constexpr std::string_view string_table = "settings_string";         ///< The string table
         static constexpr std::string_view int_table = "settings_int";               ///< The integer table
@@ -32,6 +33,12 @@ namespace rose {
         static constexpr std::string_view int_pair_table = "settings_int_pair";     ///< The integer pair table
         static constexpr std::string_view real_pair_table = "settings_real_pair";   ///< The real pair table
         static constexpr std::string_view color_table = "settings_color";           ///< The color table
+
+        /**
+         * @brief Send out notification that data has changed.
+         * @param dataName The name of the data item that has changed.
+         */
+        void transmitDataUpdate(const std::string& dataName);
 
     public:
         Settings() = delete;
@@ -57,6 +64,8 @@ namespace rose {
          * @brief Initialize the database, creating the required tables if they have not been created.
          */
         void initializeDatabase();
+
+        Signal<std::string> dataChangeTx{};
 
         /**
          * @brief Get a value from settings the database.
@@ -149,7 +158,6 @@ namespace rose {
          */
         template<typename T, typename S>
         void setDatabaseValue(soci::session &sql, S name, T value) {
-            string_view table;
             if constexpr (is_integral_v<T>) {
                 sql << "INSERT OR REPLACE INTO " << int_table << " (name,value) VALUES (\"" << name << "\"," << value << ')';
             } else if constexpr (is_floating_point_v<T>) {
@@ -170,7 +178,9 @@ namespace rose {
                     << (float)value.mHue << ',' << value.mSaturation << ',' << value.mLightness << ',' << value.mAlpha << ");";
             } else {
                 static_assert(is_integral_v<T>, "Value type not supported by Settings implementation." );
+                return;
             }
+            transmitDataUpdate(std::string{name});
         }
 
         /**

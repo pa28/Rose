@@ -49,4 +49,8 @@ namespace rose {
             std::cerr << e.what() << '\n';
         }
     }
+
+    void Settings::transmitDataUpdate(const std::string& dataName) {
+        dataChangeTx.transmit(mSignalSerialNumber.serialNumber(), dataName);
+    }
 }

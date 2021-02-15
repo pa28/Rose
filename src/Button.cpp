@@ -84,6 +84,17 @@ namespace rose {
             getWidget<Button>() << wdg<Label>(mLabelText, mBadge)
                     << FontSize(mLabelFontSize);
         }
+
+        mSettingsUpdated = std::make_shared<Slot<std::string>>();
+        mSettingsUpdated->setCallback([&](uint32_t,const std::string& text){
+            if (mId == text)
+                setText(rose()->settings()->getValue(mId,std::string{}));
+        });
+
+        if (!mId.empty() && rose()->hasSettings()) {
+            rose()->settings()->dataChangeTx.connect(mSettingsUpdated);
+        }
+
         mClassName = "Button";
     }
 
@@ -103,7 +114,6 @@ namespace rose {
                         setInvert(!mInvert);
                         break;
                     case RadioButton:
-                        break;
                     case TabButton:
                         break;
                 }

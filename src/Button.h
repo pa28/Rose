@@ -157,6 +157,8 @@ namespace rose {
          */
         Signal<SignalType> txState;
 
+        std::shared_ptr<Slot<std::string>> mSettingsUpdated{};   ///< A Slot to receive label updates on.
+
         /**
          * @brief Set the button select state
          * @param state The new select state.
