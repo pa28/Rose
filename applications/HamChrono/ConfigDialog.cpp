@@ -21,13 +21,11 @@ namespace rose {
 
         mActionButtonSlot = std::make_shared<Slot<Button::SignalType>>();
         mActionButtonSlot->setCallback([&](uint32_t, Button::SignalType button){
-            std::cout << __PRETTY_FUNCTION__ << '\n';
             switch (button.second) {
                 case DialogClose:
                     if (std::find_if(mTextFields.begin(), mTextFields.end(), [](const std::shared_ptr<TextField>& it){
                         return it->isModified();
                     }) != mTextFields.end()) {
-                        std::cout << "Modified values\n";
                         rose()->createPopup<UnsavedDialog>() << mActionButtonSlot;
                         rose()->needsLayout();
                     } else {
