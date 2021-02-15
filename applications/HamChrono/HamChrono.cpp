@@ -110,6 +110,7 @@ void HamChrono::build() {
     static constexpr std::array<char, 2> dayNight = {'D', 'N'};
 
     for (auto &type : mapType) {
+        bool validType = true;
         char dn;
         std::string typeName;
         switch (type) {
@@ -129,14 +130,20 @@ void HamChrono::build() {
                 dn = 'N';
                 typeName = "Countries";
                 break;
+            case rose::MapDataType::MapCount:
+                validType = false;
+                break;
         }
-        ss.str("");
-        ss << "map-" << dn << '-' << mapSize << '-' << typeName << ".bmp";
-        auto srcName = ss.str();
-        ss.str("");
-        ss << dn << '_' << typeName;
-        auto userName = ss.str();
-        clearSkyMaps->emplace(std::pair{static_cast<uint32_t>(type), CacheObject{srcName, userName}});
+
+        if (validType) {
+            ss.str("");
+            ss << "map-" << dn << '-' << mapSize << '-' << typeName << ".bmp";
+            auto srcName = ss.str();
+            ss.str("");
+            ss << dn << '_' << typeName;
+            auto userName = ss.str();
+            clearSkyMaps->emplace(std::pair{static_cast<uint32_t>(type), CacheObject{srcName, userName}});
+        }
     }
 
     mSecondTick->txSecond.connect(mSystemData.rxTrigger);
@@ -149,7 +156,7 @@ void HamChrono::build() {
     callsignBlock(topRow);
 
     for (auto &solar : *solarImageCache) {
-        topRow << wdg<ImageView>(solar.first);
+        topRow << wdg<Frame>() << BorderStyle::BevelIn << wdg<ImageView>(solar.first);
     }
 
     mainWindow << wdg<Container>() << Size{mLeftMap, mHeight - mAboveMap} << Position{0, mAboveMap};
@@ -176,7 +183,10 @@ void HamChrono::build() {
 
 void HamChrono::callsignBlock(std::shared_ptr<Row> &parent) {
     std::shared_ptr<LinearScale> scale;
-    parent << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round
+    std::shared_ptr<Column> column;
+    column = parent << wdg<Column>();
+
+    column << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round
                << wdg<Column>() << InternalSpace{4}
                    << wdg<CascadeButton>(Id{"CALLSIGN"}, CascadeButtonType::CascadeDown)
                        << Elastic(Orientation::Horizontal) << Manip::Parent
@@ -186,6 +196,13 @@ void HamChrono::callsignBlock(std::shared_ptr<Row> &parent) {
                        << Parent<Frame>();
     mSystemData.txTemperature.connect(scale->rxScaledValue0);
     mSystemData.txSystem.connect(scale->rxScaledValue1);
+
+    if (mWidth > 800) {
+        column << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round << Elastic(Orientation::Horizontal)
+            << wdg<Column>() << InternalSpace{4}
+                << wdg<TimeBox>(mSecondTick,true,true) << Manip::Parent
+                << wdg<DateBox>(mSecondTick, true, true) << Manip::Parent;
+    }
 }
 
 int main(int argc, char **argv) {

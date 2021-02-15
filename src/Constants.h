@@ -43,6 +43,8 @@ namespace rose {
      * @brief These are the signal tokens used by built-in Widgets that transmit Signals with SignalTokens.
      */
     enum SignalTokenValues : uint32_t {
+        DialogOk,                       ///< General Dialog Ok Action Button
+        DialogCancel,                   ///< General Dialog Cancel Action Button
         ExitDialogOk,                   ///< ExitDialog Ok ActionButton
         ExitDialogCancel,               ///< ExitDialog Cancel ActionButton
         FirstUserSignalToken            ///< The value that can be used for the first SignalToken of a user application.
