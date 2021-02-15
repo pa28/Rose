@@ -17,6 +17,7 @@
 #include "Manipulators.h"
 #include "MapProjection.h"
 #include "Menu.h"
+#include "SettingsNames.h"
 #include "TimeBox.h"
 
 using namespace rose;
@@ -41,18 +42,18 @@ void HamChrono::build() {
         }
     });
 
-    if (mCmdLineParser.cmdOptionExists("-callsign")) {
-        auto callsign = mCmdLineParser.getCmdOption("-callsign");
-        mSettings->setValue("CALLSIGN", callsign);
+    if (mCmdLineParser.cmdOptionExists(set::CALLSIGN_OPT)) {
+        auto callsign = mCmdLineParser.getCmdOption(set::CALLSIGN_OPT);
+        mSettings->setValue(set::CALLSIGN, callsign);
     }
 
-    if (mCmdLineParser.cmdOptionExists("-lat") && mCmdLineParser.cmdOptionExists("-lon")) {
-        auto lat = strtod(mCmdLineParser.getCmdOption("-lat").c_str(), nullptr);
-        auto lon = strtod(mCmdLineParser.getCmdOption("-lon").c_str(), nullptr);
+    if (mCmdLineParser.cmdOptionExists(set::QTH_Lat) && mCmdLineParser.cmdOptionExists(set::QTH_Lon)) {
+        auto lat = strtod(mCmdLineParser.getCmdOption(set::QTH_Lat).c_str(), nullptr);
+        auto lon = strtod(mCmdLineParser.getCmdOption(set::QTH_Lon).c_str(), nullptr);
         mQthLocation = GeoPosition{lat,lon};
-        mSettings->setValue("QTH_Location", mQthLocation);
+        mSettings->setValue(set::QTH_Location, mQthLocation);
     } else {
-        auto qth = mSettings->getValue<GeoPosition>("QTH_Location");
+        auto qth = mSettings->getValue<GeoPosition>(set::QTH_Location);
         if (qth)
             mQthLocation = qth.value();
     }

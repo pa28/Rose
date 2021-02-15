@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "PopupWindow.h"
+#include "TextField.h"
 
 namespace rose {
 
@@ -30,6 +31,10 @@ namespace rose {
         };
 
         void qthConfigure(shared_ptr <Row> &parent);
+
+        std::shared_ptr<TextField> mCallSign{};
+        std::shared_ptr<TextField> mLatitude{};
+        std::shared_ptr<TextField> mLongitude{};
 
         std::shared_ptr<std::regex> mCallRegex{};
         std::shared_ptr<std::regex> mFloatRegex{};
