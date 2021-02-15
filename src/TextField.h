@@ -8,6 +8,7 @@
 #pragma once
 
 #include <regex>
+#include <utility>
 #include "Frame.h"
 #include "Texture.h"
 
@@ -22,6 +23,7 @@ namespace rose {
         char mEm{'M'};                                      ///< The largest Glyph that will be in the text.
         bool mValidEntry{};                                 ///< True if the current value passes validation.
         bool mHasFocus{};                                   ///< True if the TextField has keyboard focus.
+        bool mToUpper{};                                    ///< Convert chars to upper case.
         int mMaxLength{};                                   ///< The maximum length of the text.
         FontSize mFontSize{};                               ///< The font size in pixels.
         std::string mFontName{};                            ///< The font name.
@@ -43,7 +45,7 @@ namespace rose {
         sdl::Texture mSuffixTexture{};                      ///< Texture to render the Suffix;
         sdl::Texture mTextTexture{};                        ///< Texture to render the Text;
 
-        std::regex mValidationPattern{};                    ///< Regular expression to validate content.
+        std::shared_ptr<std::regex> mValidationPattern{};   ///< Regular expression to validate content.
 
     public:
         TextField() = delete;
@@ -97,6 +99,53 @@ namespace rose {
 
         /// Handle KeyboardEvent
         bool keyboardEvent(uint state, uint repeat, SDL_Keysym keysym) override;
+
+        /**
+         * @brief Set the validation regex.
+         * @param regex The validation pattern.
+         */
+        void setRegex(std::shared_ptr<std::regex> regex) {
+            mValidationPattern = std::move(regex);
+        }
+
+        /**
+         * @brief Set the ToUpper flag.
+         * @param toUpper The ToUpper value.
+         */
+        void setToUpper(bool toUpper) {
+            mToUpper = toUpper;
+        }
+    };
+
+    struct ToUpperCase {
+        bool mToUpperCase{true};
     };
 }
 
+/**
+ * @brief A Manipulator to set a regular expression on a text field.
+ * @tparam WidgetClass The type of Widget.
+ * @param widget The Widget.
+ * @param regex A std::shared_ptr<std::regex>.
+ * @return The Widget.
+ */
+template <class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const std::shared_ptr<std::regex>& regex) {
+    static_assert(std::is_base_of_v<rose::TextField,WidgetClass>, "Regex can only be set on TextField Widgets." );
+    widget->setRegex(regex);
+    return widget;
+}
+
+/**
+ * @brief A Manipulator to set the ToUpperCase flag on a TextField.
+ * @tparam WidgetClass The type of Widget.
+ * @param widget The Widget.
+ * @param toUpper The flag value
+ * @return The Widget.
+ */
+template <class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::ToUpperCase toUpperCase) {
+    static_assert(std::is_base_of_v<rose::TextField,WidgetClass>, "ToUpperCase can only be set on TextField Widgets." );
+    widget->setToUpper(toUpperCase.mToUpperCase);
+    return widget;
+}

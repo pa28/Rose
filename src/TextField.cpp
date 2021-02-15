@@ -70,6 +70,11 @@ namespace rose {
             }
 
             if (!mTextTexture && !mText.empty()) {
+                if (mValidationPattern) {
+                    mValidEntry = std::regex_match(mText, *mValidationPattern);
+                } else {
+                    mValidEntry = true;
+                }
                 auto textColor = (mValidEntry ? mTextColor : mErrorColor);
                 mTextTexture = sdl::renderTextureBlendedUTF8(renderer, mFont, mText, textColor);
                 mTextSize = mTextTexture.getSize();
@@ -157,10 +162,10 @@ namespace rose {
                 default:
                     if (mText.size() < mMaxLength && c > SDLK_ESCAPE && c < SDLK_DELETE) {
                         if (mCaretLoc == mText.end()) {
-                            mText.push_back(c);
+                            mText.push_back(mToUpper ? toupper(c) : c);
                             mCaretLoc = mText.end();
                         } else {
-                            mText.insert(mCaretLoc, c);
+                            mText.insert(mCaretLoc, mToUpper ? toupper(c) :  c);
                             mCaretLoc++;
                         }
                     } else
