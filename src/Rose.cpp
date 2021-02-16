@@ -454,7 +454,7 @@ namespace rose {
 
     enum class IconColor : size_t {
         TextColor, BaseColor,
-        Black, Red, Yellow, Green, White,
+        Black, Red, ThemeRed, Yellow, ThemeYellow, Green, ThemeGreen, White,
     };
     struct IconItem {
         RoseImageId imageId;
@@ -504,9 +504,11 @@ namespace rose {
                 IconItem{ IconTargetGreen, ENTYPO_ICON_TARGET, IconColor::Green},
         };
 
-        std::array<color::RGBA,7> iconColor = {
-                mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack, color::RGBA{255u, 0u, 0u, 255u},
-                mTheme.mYellow, color::RGBA{0u, 255u, 0u, 255u}, mTheme.mWhite
+        std::array<color::RGBA,10> iconColor = {
+                mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack,
+                color::RGBA{255u, 0u, 0u, 255u}, mTheme.mRed,
+                color::RGBA{255u, 255u, 0u, 255u}, mTheme.mYellow,
+                color::RGBA{0u, 255u, 0u, 255u}, mTheme.mGreen, mTheme.mWhite
         };
 
         for (auto& iconItem : minimalIcons) {
