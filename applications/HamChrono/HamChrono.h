@@ -58,7 +58,7 @@ protected:
 
     rose::GeoPosition mQthLocation{};
 
-    void callsignBlock(std::shared_ptr<rose::Row> &parent);
+    void callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_ptr<rose::Column> &sideColumn);
 
     std::shared_ptr<rose::Slot<rose::Button::SignalType>> mConfigButtonRx{};
 

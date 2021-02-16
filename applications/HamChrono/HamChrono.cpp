@@ -174,18 +174,19 @@ void HamChrono::build() {
     auto topRow = mainWindow << wdg<Container>() << Size{mWidth, mAboveMap} << Position::Zero
                              << wdg<Row>();
 
-    callsignBlock(topRow);
+    auto sideColumn = mainWindow << wdg<Container>() << Size{mLeftMap, mHeight - mAboveMap} << Position{0, mAboveMap}
+                                 << wdg<Column>();
+
+    callsignBlock(topRow, sideColumn);
 
     for (auto &solar : *solarImageCache) {
         topRow << wdg<Frame>() << BorderStyle::BevelIn << wdg<ImageView>(solar.first);
     }
 
-    mainWindow << wdg<Container>() << Size{mLeftMap, mHeight - mAboveMap} << Position{0, mAboveMap};
-
     mainWindow << wdg<Container>()
-               << Position{mLeftMap, mAboveMap} //<< wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
-               << wdg<MapProjection>(clearSkyMaps,Size{mMapWidth, mMapHeight})
-                                     >> mMapProjection;
+               << Position{mLeftMap, mAboveMap}
+               << wdg<MapProjection>(clearSkyMaps, Size{mMapWidth, mMapHeight})
+               >> mMapProjection;
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     celesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
@@ -201,13 +202,13 @@ void HamChrono::build() {
     clearSkyMaps->fetchAll();
 }
 
-void HamChrono::callsignBlock(std::shared_ptr<Row> &parent) {
+void HamChrono::callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_ptr<Column> &sideColumn) {
     std::shared_ptr<LinearScale> scale;
     std::shared_ptr<Column> column;
-    column = parent << wdg<Column>();
+    column = topRow << wdg<Column>();
 
     column << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round
-               << wdg<Column>() << InternalSpace{4}
+                << wdg<Column>() << InternalSpace{4}
                     << wdg<CascadeButton>(Id{"CALLSIGN"}, CascadeButtonType::CascadeDown)
                         << ConfigMenu
                         << mConfigButtonRx
@@ -220,16 +221,22 @@ void HamChrono::callsignBlock(std::shared_ptr<Row> &parent) {
                     << wdg<TimeBox>(mSecondTick) << Manip::Parent
                     << wdg<DateBox>(mSecondTick) << Manip::Parent
                     << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> scale
-                       << Parent<Frame>();
+                        << Parent<Frame>();
+
     mSystemData.txTemperature.connect(scale->rxScaledValue0);
     mSystemData.txSystem.connect(scale->rxScaledValue1);
 
-    if (mWidth > 800) {
-        column << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round << Elastic(Orientation::Horizontal)
-            << wdg<Column>() << InternalSpace{4}
-                << wdg<TimeBox>(mSecondTick,true,true) << Manip::Parent
-                << wdg<DateBox>(mSecondTick, true, true) << Manip::Parent;
+    auto qthBlockColumn = column;
+    int framPadding = 6;
+    if (mWidth == 800) {
+        qthBlockColumn = sideColumn;
+        framPadding = 3;
     }
+
+    qthBlockColumn << wdg<Frame>(framPadding) << BorderStyle::Notch << CornerStyle::Round << Elastic(Orientation::Horizontal)
+                        << wdg<Column>() << InternalSpace{4}
+                            << wdg<TimeBox>(mSecondTick, true, true) << Manip::Parent
+                            << wdg<DateBox>(mSecondTick, true, true) << Manip::Parent;
 }
 
 int main(int argc, char **argv) {

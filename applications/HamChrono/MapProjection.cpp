@@ -242,6 +242,11 @@ namespace rose {
         auto cosy = cos(mQthRad.lat());
         for (int y = 0; y < mMapSize.height(); y += 1) {
             for (int x = 0; x < mMapSize.width(); x += 1) {
+                if (mAbortFuture) {
+                    mAbortFuture = false;
+                    return false;
+                }
+                
                 auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapSize, mQthRad, siny, cosy);
                 if (valid) {
                     GeoPosition position{lat, lon};
@@ -312,6 +317,12 @@ namespace rose {
                     bool valid;
                     float latE;
                     float lonE;
+
+                    if (mAbortFuture) {
+                        mAbortFuture = false;
+                        return false;
+                    }
+
                     if (az == 1) {
                         // The Azimuthal coordinates that correspond to a map pixel
                         auto tuple = xyToAzLatLong(x, y, mMapSize,
