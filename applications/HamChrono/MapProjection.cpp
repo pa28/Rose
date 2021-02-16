@@ -10,17 +10,18 @@
 #include <filesystem>
 #include <utility>
 #include "Math.h"
+#include "SettingsNames.h"
 
 namespace rose {
 
-    MapProjection::MapProjection(std::shared_ptr<WebFileCache> mapCache, GeoPosition qth, Size mapSize) {
+    MapProjection::MapProjection(std::shared_ptr<WebFileCache> mapCache, Size mapSize) {
         mMapCache = std::move(mapCache);
-        mQth = qth;
         mMapSize = mapSize;
     }
 
     void MapProjection::initializeComposite() {
         mapFileRx = std::make_shared<Slot<uint32_t>>();
+        mQth = rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.});
         mQthRad = GeoPosition{deg2rad(mQth.lat()), deg2rad(mQth.lon())};
         mAntipode = antipode(mQthRad);
 
@@ -71,6 +72,15 @@ namespace rose {
         });
 
         mMapCache->itemFetched.connect(mapFileRx);
+
+        settingsUpdateRx = std::make_shared<Slot<std::string>>();
+        settingsUpdateRx->setCallback([&](uint32_t, const std::string& name){
+            std::cerr << __PRETTY_FUNCTION__ << ' ' << name << '\n';
+        });
+
+        rose()->settings()->dataChangeTx.connect(settingsUpdateRx);
+
+        mClassName = "MapProjection";
     }
 
     Rectangle MapProjection::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {

@@ -12,8 +12,9 @@
 namespace set {
     static constexpr std::string_view CALLSIGN = "CALLSIGN";
     static constexpr std::string_view CALLSIGN_OPT = "-callsign";
-    static constexpr std::string_view QTH_Loc_Lat = "lat";
-    static constexpr std::string_view QTH_Loc_Lon = "lon";
+    static constexpr std::string_view QTH = "qth";
+    static constexpr std::string_view QTH_Lat = "qth_lat";
+    static constexpr std::string_view QTH_Lon = "qth_lon";
     static constexpr std::string_view QTH_Lat_Opt = "-lat";
     static constexpr std::string_view QTH_Lon_Opt = "-lon";
 }

@@ -52,11 +52,10 @@ void HamChrono::build() {
     if (mCmdLineParser.cmdOptionExists(set::QTH_Lat_Opt) && mCmdLineParser.cmdOptionExists(set::QTH_Lon_Opt)) {
         auto lat = strtod(mCmdLineParser.getCmdOption(set::QTH_Lat_Opt).c_str(), nullptr);
         auto lon = strtod(mCmdLineParser.getCmdOption(set::QTH_Lon_Opt).c_str(), nullptr);
-        mSettings->setValue(set::QTH_Loc_Lat, lat);
-        mSettings->setValue(set::QTH_Loc_Lon, lon);
+        GeoPosition qth{lat,lon};
+        mSettings->setValue(set::QTH, qth);
     } else {
-        mQthLocation = GeoPosition{mSettings->getValue(set::QTH_Loc_Lat, 0.),
-                                   mSettings->getValue(set::QTH_Loc_Lon, 0.)};
+        mQthLocation = mSettings->getValue(set::QTH, GeoPosition{0.,0.});
     }
 
     solarImageCache = std::make_unique<WebFileCache>("https://sdo.gsfc.nasa.gov/assets/img/latest/",
@@ -185,8 +184,7 @@ void HamChrono::build() {
 
     mainWindow << wdg<Container>()
                << Position{mLeftMap, mAboveMap} //<< wdg<ImageView>(clearSkyMaps->findByUserName("D_Terrain"));
-               << wdg<MapProjection>(clearSkyMaps,
-                                     mQthLocation, Size{mMapWidth, mMapHeight})
+               << wdg<MapProjection>(clearSkyMaps,Size{mMapWidth, mMapHeight})
                                      >> mMapProjection;
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);

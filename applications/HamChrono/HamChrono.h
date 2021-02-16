@@ -24,8 +24,8 @@ enum UserSignalTokenValues : rose::SignalToken {
 
 static constexpr std::array<rose::TextField::FieldSettings,3> ConfigTextFieldSettings = {
         rose::TextField::FieldSettings{rose::DataType::String, set::CALLSIGN, "Call", "", 10, 'M'},
-        rose::TextField::FieldSettings{rose::DataType::Real, set::QTH_Loc_Lat, "Lat", "Deg", 8, '0'},
-        rose::TextField::FieldSettings{rose::DataType::Real, set::QTH_Loc_Lon, "Lon", "Deg", 9, '0'},
+        rose::TextField::FieldSettings{rose::DataType::Real, set::QTH_Lat, "Lat", "Deg", 8, '0'},
+        rose::TextField::FieldSettings{rose::DataType::Real, set::QTH_Lon, "Lon", "Deg", 9, '0'},
 };
 
 static constexpr std::array<rose::MenuButtonData,2> ConfigMenu{

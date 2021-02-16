@@ -148,6 +148,31 @@ namespace rose {
         }
     }
 
+    void TextField::setPair(const Id &pairId, shared_ptr<TextField> &pair) {
+        if (mPair) {
+            mPair->mPair.reset();
+            mPair->mPairId.clear();
+            mPair->mPairIdx = 0;
+            mPair.reset();
+        }
+        mPair = pair;
+        mPairId = pairId;
+        mPairIdx = 0;
+        mPair->mPair = getWidget<TextField>();
+        mPair->mPairId = pairId;
+        mPair->mPairIdx = 1;
+
+        if (mDataType == DataType::Int) {
+            auto pairValue = rose()->settings()->getValue(mPairId,Position::Zero);
+            mText = util::fmtNumber(pairValue.at(mPairIdx), mMaxLength - 1);
+            mPair->mText = util::fmtNumber(pairValue.at(mPair->mPairIdx), mPair->mMaxLength - 1);
+        } else {
+            auto pairValue = rose()->settings()->getValue(mPairId,GeoPosition{0.,0.});
+            mText = util::fmtNumber(pairValue.at(mPairIdx), mMaxLength - 1);
+            mPair->mText = util::fmtNumber(pairValue.at(mPair->mPairIdx), mPair->mMaxLength - 1);
+        }
+    }
+
     void TextField::initializeComposite() {
         Frame::initializeComposite();
 
@@ -165,10 +190,10 @@ namespace rose {
                 }
                     break;
                 case DataType::Int:
-                    mText = util::fmtNumber(rose()->settings()->getValue(mId, 0), mMaxLength-1);
+                    mText = util::fmtNumber(rose()->settings()->getValue(mId, 0), mMaxLength - 1);
                     break;
                 case DataType::Real:
-                    mText = util::fmtNumber(rose()->settings()->getValue(mId, 0.), mMaxLength-1);
+                    mText = util::fmtNumber(rose()->settings()->getValue(mId, 0.), mMaxLength - 1);
                     break;
                 case DataType::Unset:
                 case DataType::String:
@@ -209,7 +234,26 @@ namespace rose {
     }
 
     void TextField::saveValue() {
-        if (!mId.empty() && rose()->hasSettings()) {
+        if (!mPairId.empty() && rose()->hasSettings()) {
+            if (mValidEntry && mPair->mValidEntry) {
+                if (mModified || mPair->mModified) {
+                    if (mDataType == DataType::Int) {
+                        Position p{};
+                        p.at(mPairIdx) = mText.empty() ? 0 : stoi(mText);
+                        p.at(mPair->mPairIdx) = mPair->mText.empty() ? 0 : stoi(mPair->mText);
+                        rose()->settings()->setValue(mPairId, p);
+                    } else if (mDataType == DataType::Real) {
+                        GeoPosition p{};
+                        p.at(mPairIdx) = mText.empty() ? 0 : stod(mText);
+                        p.at(mPair->mPairIdx) = mPair->mText.empty() ? 0 : stod(mPair->mText);
+                        rose()->settings()->setValue(mPairId, p);
+                    }
+                    mModified = false;
+                    mPair->mModified = false;
+                    mTextTexture.reset();
+                }
+            }
+        } else if (!mId.empty() && rose()->hasSettings()) {
             if (mValidationPattern) {
                 mValidEntry = std::regex_match(mText, *mValidationPattern);
             } else {

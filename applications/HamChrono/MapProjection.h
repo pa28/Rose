@@ -65,6 +65,8 @@ namespace rose {
         sdl::Texture mNightAz{};        ///< The Texture with the Night Azimuthal map.
         sdl::Texture mDayAz{};          ///< The Texture with the Day Azimuthal map.
 
+        std::shared_ptr<Slot<std::string>> settingsUpdateRx{};  ///< Slot to receive settings updates on.
+
         /**
          * @brief Compute Azimuthal map projections.
          * @details This should be called by creating the std::future mAzimuthalProjection which will be
@@ -90,7 +92,7 @@ namespace rose {
 
         ~MapProjection() override = default;
 
-        MapProjection(std::shared_ptr<WebFileCache> mapCache, GeoPosition qth, Size mapSize);
+        MapProjection(std::shared_ptr<WebFileCache> mapCache, Size mapSize);
 
         /// See Widget::initializeComposite()
         void initializeComposite() override;

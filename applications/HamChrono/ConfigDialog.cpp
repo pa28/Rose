@@ -71,11 +71,13 @@ namespace rose {
                << BorderStyle::Notch << CornerStyle::Round << FontSize{20}
                << ToUpperCase{} << mCallRegex
                << Manip::Parent
-               << wdg<TextField>(Id{set::QTH_Loc_Lat}, 6) >> mTextFields[1]
+               << wdg<TextField>(Id{set::QTH_Lat}, 6) >> mTextFields[1]
                << BorderStyle::Notch << CornerStyle::Round << FontSize{20} << mFloatRegex
                << Manip::Parent
-               << wdg<TextField>(Id{set::QTH_Loc_Lon}, 6) >> mTextFields[2]
+               << wdg<TextField>(Id{set::QTH_Lon}, 6) >> mTextFields[2]
                            << BorderStyle::Notch << CornerStyle::Round << FontSize{20} << mFloatRegex
                            << Manip::Parent;
+
+        mTextFields[1]->setPair(Id{set::QTH}, mTextFields[2]);
     }
 }

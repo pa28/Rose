@@ -63,6 +63,9 @@ namespace rose {
         sdl::Texture mTextTexture{};                        ///< Texture to render the Text;
 
         std::shared_ptr<std::regex> mValidationPattern{};   ///< Regular expression to validate content.
+        std::shared_ptr<TextField> mPair{};                 ///< The companion in a TextField pair.
+        Id mPairId{};                                       ///< The Id of the pair.
+        size_t mPairIdx{};                                  ///< The index of this object in the pair (0 or 1).
 
     public:
         TextField() = delete;
@@ -108,6 +111,14 @@ namespace rose {
                 enterSettings(db, setting);
             }
         }
+
+        /**
+         * @brief Set up a pair of TextField widgets.
+         * @details A pair of TextField widgets cooperate in editing a pair of integer or real values. This pair
+         * takes index = 0.
+         * @param pair The other member of the pair.
+         */
+        void setPair(const Id &pairId, std::shared_ptr<TextField> &pair);
 
         /// See Frame::widgetLayout()
         Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override;
