@@ -493,11 +493,15 @@ namespace rose {
                 IconItem{IconCamera, ENTYPO_ICON_CAMERA, IconColor::TextColor},
         };
 
-        static constexpr std::array<IconItem,4> minimalIcons = {
+        static constexpr std::array<IconItem,8> minimalIcons = {
                 IconItem{ ScaleNeedleUp, ENTYPO_ICON_UP_DIR, IconColor::BaseColor },
                 IconItem{ ScaleNeedleDown, ENTYPO_ICON_DOWN_DIR, IconColor::BaseColor },
                 IconItem{ ScaleNeedleLeft, ENTYPO_ICON_LEFT_DIR, IconColor::BaseColor },
                 IconItem{ ScaleNeedleRight, ENTYPO_ICON_RIGHT_DIR, IconColor::BaseColor },
+                IconItem{ IconTarget, ENTYPO_ICON_TARGET, IconColor::BaseColor},
+                IconItem{ IconTargetRed, ENTYPO_ICON_TARGET, IconColor::Red},
+                IconItem{ IconTargetYellow, ENTYPO_ICON_TARGET, IconColor::Yellow},
+                IconItem{ IconTargetGreen, ENTYPO_ICON_TARGET, IconColor::Green},
         };
 
         std::array<color::RGBA,7> iconColor = {

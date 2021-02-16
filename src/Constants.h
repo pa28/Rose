@@ -201,6 +201,10 @@ namespace rose {
         ScaleNeedleDown,
         ScaleNeedleLeft,
         ScaleNeedleRight,
+        IconTarget,
+        IconTargetRed,
+        IconTargetGreen,
+        IconTargetYellow,
         BevelOutRoundCorners,   ///< Sheet of round corners beveled out
         BevelInRoundCorners,    ///< Sheet of round corners beveled in
         NotchOutRoundCorners,   ///< Sheet of round corners notched out
