@@ -505,13 +505,14 @@ namespace rose {
         };
 
         std::array<color::RGBA,7> iconColor = {
-                mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack, mTheme.mRed, mTheme.mYellow, mTheme.mGreen, mTheme.mWhite
+                mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack, color::RGBA{255u, 0u, 0u, 255u},
+                mTheme.mYellow, color::RGBA{0u, 255u, 0u, 255u}, mTheme.mWhite
         };
 
         for (auto& iconItem : minimalIcons) {
             auto icon = utf8(iconItem.entypoCode);
             auto textureData = getMinimalIcon(mRenderer, icon.data(), mTheme.mIconFontName,
-                                              mTheme.mIconFontSize, mTheme.mBaseColor);
+                                              mTheme.mIconFontSize, iconColor[static_cast<size_t>(iconItem.color)]);
             mImageRepository.setImage(iconItem.imageId, std::move(textureData));
         }
 

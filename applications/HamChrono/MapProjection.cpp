@@ -21,9 +21,7 @@ namespace rose {
 
     void MapProjection::initializeComposite() {
         mapFileRx = std::make_shared<Slot<uint32_t>>();
-        mQth = rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.});
-        mQthRad = GeoPosition{deg2rad(mQth.lat()), deg2rad(mQth.lon())};
-        mAntipode = antipode(mQthRad);
+        setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
 
         mapFileRx->setCallback([&](uint32_t, uint32_t map){
             std::filesystem::path filePath(mMapCache->cacheRootPath());
@@ -83,8 +81,7 @@ namespace rose {
                     mFutureSun.get();
                 }
                 mAbortFuture = false;
-                mQth = rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.});
-                mQthRad = GeoPosition{deg2rad(mQth.lat()), deg2rad(mQth.lon())};
+                setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
                 mFutureAziProj = std::async(std::launch::async, &MapProjection::computeAzimuthalMaps, this);
             }
         });
@@ -130,6 +127,8 @@ namespace rose {
             case ProjectionType::Mercator:
                 renderer.renderCopy(mMercator[0], widgetRect);
                 renderer.renderCopy(mMercator[1], widgetRect);
+                drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
+                             widgetRect.getPosition(), false);
                 break;
             case ProjectionType::StationMercator: {
                 auto lon = mQth.lon();
@@ -150,13 +149,34 @@ namespace rose {
                 dst.width() = splitPixel;
                 renderer.renderCopy(mMercator[0], src, dst);
                 renderer.renderCopy(mMercator[1], src, dst);
+
+                drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
+                             widgetRect.getPosition(), false, splitPixel);
             }
                 break;
             case ProjectionType::StationAzmuthal:
                 renderer.renderCopy(mAzimuthal[0], widgetRect);
                 renderer.renderCopy(mAzimuthal[1], widgetRect);
+                drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
+                             widgetRect.getPosition(), true);
                 break;
         }
+    }
+
+    void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Position renderPos, bool azimuthal,
+                                    int splitPixel) {
+        auto mapPos = geoToMap(mapItem.geo, azimuthal);
+        auto iconSize = rose()->imageRepository(mapItem.imageId).getSize();
+        mapPos.x() -= iconSize.width()/2;
+        mapPos.y() -= iconSize.height()/2;
+
+        if (!azimuthal && splitPixel > 0) {
+            mapPos.x() = (mapPos.x() + mMapSize.width() - splitPixel) % mMapSize.width();
+        }
+
+        mapPos = mapPos + renderPos;
+        Rectangle dst{mapPos, iconSize};
+        rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
     }
 
     /* solve a spherical triangle:
@@ -246,7 +266,7 @@ namespace rose {
                     mAbortFuture = false;
                     return false;
                 }
-                
+
                 auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapSize, mQthRad, siny, cosy);
                 if (valid) {
                     GeoPosition position{lat, lon};
@@ -372,5 +392,33 @@ namespace rose {
             }
         }
         return true;
+    }
+
+    Position MapProjection::geoToMap(GeoPosition geo, bool azimuthal) {
+        if (azimuthal) {
+            double ca, B;
+            solveSphere(geo.lon() - mQthRad.lon(), M_PI_2 - geo.lat(), sin(mQthRad.lat()),
+                        cos(mQthRad.lat()), ca, B);
+            if (ca > 0) {
+                auto a = acos(ca);
+                auto R0 = (double)mMapSize.width() / 4. - 1.;
+                auto R = a * (double)mMapSize.width() / (2. * M_PI);
+                R = std::min(R, R0);
+                auto dx = R * sin(B);
+                auto dy = R * cos(B);
+                return Position{mMapSize.width() / 4 + roundToInt(dx), mMapSize.height() / 2 - roundToInt(dy)};
+            } else {
+                auto a = M_PI - acos(ca);
+                auto R0 = (double) mMapSize.width() / 4 - 1;
+                auto R = a * (double) mMapSize.width() / (2.f * (float)M_PI);
+                R = std::min(R, R0);
+                auto dx = -R * sin(B);
+                auto dy = R * cos(B);
+                return Position{3 * mMapSize.width() / 4 + roundToInt(dx), mMapSize.height() / 2 - roundToInt(dy)};
+            }
+        } else {
+            return Position{roundToInt(mMapSize.width() * (geo.lon() + M_PI) / (2. * M_PI)) % mMapSize.width(),
+                            roundToInt(mMapSize.height() * (M_PI_2 - geo.lat()) / M_PI)};
+        }
     }
 }

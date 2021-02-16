@@ -88,6 +88,54 @@ namespace rose {
          */
         bool setForegroundBackground();
 
+        /**
+         * @struct MapItem
+         * @brief The information needed to render an Icon on the map.
+         */
+        struct MapIcon {
+            ImageId imageId{RoseImageInvalid};    ///< The ImageId of the icon to render.
+            GeoPosition geo{};                    ///< The GeoPosition in radians.
+        };
+
+        std::array<MapIcon,2> mStationIcons{};      ///< Icons for QTH and Antipode.
+
+        void setStationIcons(GeoPosition qth) {
+            mQth = qth;
+            mQthRad = GeoPosition{deg2rad(qth.lat()), deg2rad(qth.lon())};
+            mAntipode = antipode(mQthRad);
+            mStationIcons[0].geo = mQthRad;
+            mStationIcons[1].geo = mAntipode;
+            mStationIcons[0].imageId = IconTargetGreen;
+            mStationIcons[1].imageId = IconTargetRed;
+        }
+
+        /**
+         * @brief Render a single icon on the map.
+         * @param mapItem The MapItem data.
+         * @param renderer The Renderer.
+         * @param azimuthal True if the projection is Azimuthal.
+         * @param splitPixel The split location for Mercator station centric projections.
+         */
+        void drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Position renderPos, bool azimuthal,
+                         int splitPixel);
+
+        /**
+         * @brief Render a container of icons [first ... last) on the map.
+         * @param first The first item in the container.
+         * @param last One past the end of the container.
+         * @param renderer The Renderer.
+         * @param azimuthal True if the projection is Azimuthal.
+         * @param splitPixel The split location for Mercator station centric projections.
+         */
+        template<typename InputIterator>
+        void drawMapItems(InputIterator first, InputIterator last, sdl::Renderer &renderer, Position renderPos,
+                          bool azimuthal, int splitPixel = 0) {
+            while (first != last) {
+                drawMapItem(*first, renderer, renderPos, azimuthal, splitPixel);
+                ++first;
+            }
+        }
+
     public:
         MapProjection() = delete;
 
@@ -124,7 +172,7 @@ namespace rose {
          * @return The GeoPosition of the Antipode in radians.
          */
         static GeoPosition antipode(const GeoPosition posRadians) {
-            return GeoPosition{-posRadians.lat(), (posRadians.lon() < 0. ? 1. : -1.) * (M_PI - abs(posRadians.lat()))};
+            return GeoPosition{-posRadians.lat(), (posRadians.lon() < 0. ? 1. : -1.) * (M_PI - abs(posRadians.lon()))};
         }
 
         /**
@@ -151,6 +199,13 @@ namespace rose {
             int y = util::roundToInt((M_PI_2 - map.lat()) / M_PI * (double)mapSize.height());
             return Position{x, y};
         }
+
+        /**
+         * @brief Convert a GeoPosition in radians to a map Position in pixels.
+         * @param azimuthal True if the desired map is an Azimuthal projection.
+         * @return The map Position.
+         */
+        Position geoToMap(GeoPosition geo, bool azimuthal);
     };
 }
 
