@@ -128,7 +128,7 @@ namespace rose {
                 renderer.renderCopy(mMercator[0], widgetRect);
                 renderer.renderCopy(mMercator[1], widgetRect);
                 drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
-                             widgetRect.getPosition(), false);
+                             widgetRect, false);
                 break;
             case ProjectionType::StationMercator: {
                 auto lon = mQth.lon();
@@ -151,19 +151,19 @@ namespace rose {
                 renderer.renderCopy(mMercator[1], src, dst);
 
                 drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
-                             widgetRect.getPosition(), false, splitPixel);
+                             widgetRect, false, splitPixel);
             }
                 break;
             case ProjectionType::StationAzmuthal:
                 renderer.renderCopy(mAzimuthal[0], widgetRect);
                 renderer.renderCopy(mAzimuthal[1], widgetRect);
                 drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
-                             widgetRect.getPosition(), true);
+                             widgetRect, true);
                 break;
         }
     }
 
-    void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Position renderPos, bool azimuthal,
+    void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, bool azimuthal,
                                     int splitPixel) {
         auto mapPos = geoToMap(mapItem.geo, azimuthal);
         auto iconSize = rose()->imageRepository(mapItem.imageId).getSize();
@@ -174,7 +174,7 @@ namespace rose {
             mapPos.x() = (mapPos.x() + mMapSize.width() - splitPixel) % mMapSize.width();
         }
 
-        mapPos = mapPos + renderPos;
+        mapPos = mapPos + mapRectangle.getPosition();
         Rectangle dst{mapPos, iconSize};
         rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
     }

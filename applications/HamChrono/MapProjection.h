@@ -45,7 +45,7 @@ namespace rose {
         std::atomic_bool mNewSurfaces{};          ///< True when there are new Surfaces to render into Textures.
         std::atomic_bool mAbortFuture{};          ///< Set to true to abort a running std::future.
 
-        ProjectionType mProjection{ProjectionType::StationMercator};   ///< The desired projection display
+        ProjectionType mProjection{ProjectionType::StationAzmuthal};   ///< The desired projection display
         std::shared_ptr<WebFileCache> mMapCache{};
         ImageId mDayMapImage{};         ///< The base day Mercator map image.
         ImageId mNightMapImage{};       ///< The base night Mercator map image.
@@ -105,7 +105,7 @@ namespace rose {
             mAntipode = antipode(mQthRad);
             mStationIcons[0].geo = mQthRad;
             mStationIcons[1].geo = mAntipode;
-            mStationIcons[0].imageId = IconTargetGreen;
+            mStationIcons[0].imageId = IconTargetYellow;
             mStationIcons[1].imageId = IconTargetRed;
         }
 
@@ -116,7 +116,7 @@ namespace rose {
          * @param azimuthal True if the projection is Azimuthal.
          * @param splitPixel The split location for Mercator station centric projections.
          */
-        void drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Position renderPos, bool azimuthal,
+        void drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, bool azimuthal,
                          int splitPixel);
 
         /**
@@ -128,10 +128,10 @@ namespace rose {
          * @param splitPixel The split location for Mercator station centric projections.
          */
         template<typename InputIterator>
-        void drawMapItems(InputIterator first, InputIterator last, sdl::Renderer &renderer, Position renderPos,
+        void drawMapItems(InputIterator first, InputIterator last, sdl::Renderer &renderer, Rectangle mapRect,
                           bool azimuthal, int splitPixel = 0) {
             while (first != last) {
-                drawMapItem(*first, renderer, renderPos, azimuthal, splitPixel);
+                drawMapItem(*first, renderer, mapRect, azimuthal, splitPixel);
                 ++first;
             }
         }
