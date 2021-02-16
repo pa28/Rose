@@ -74,16 +74,14 @@ namespace rose {
          * @details The primary access differs depending on the orientation
          */
         int &primary(Orientation orientation) {
-            int r = 0;
             switch (orientation) {
                 case Orientation::Unset:
-                    break;
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return width();
                 case Orientation::Vertical:
                     return height();
             }
-            return width();
         }
 
         /**
@@ -93,13 +91,12 @@ namespace rose {
         [[nodiscard]] constexpr int primary(Orientation orientation) const noexcept {
             switch (orientation) {
                 case Orientation::Unset:
-                    break;
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return width();
                 case Orientation::Vertical:
                     return height();
             }
-            return width();
         }
 
         /**
@@ -109,7 +106,7 @@ namespace rose {
         int &secondary(Orientation orientation) {
             switch (orientation) {
                 case Orientation::Unset:
-                    break;
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return height();
                 case Orientation::Vertical:
@@ -125,7 +122,7 @@ namespace rose {
         [[nodiscard]] constexpr int secondary(Orientation orientation) const noexcept {
             switch (orientation) {
                 case Orientation::Unset:
-                    break;
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return height();
                 case Orientation::Vertical:
@@ -194,7 +191,7 @@ namespace rose {
         int &primary(Orientation orientation) {
             switch (orientation) {
                 case Orientation::Unset:
-                    break;
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return x();
                 case Orientation::Vertical:
@@ -210,6 +207,7 @@ namespace rose {
         [[nodiscard]] constexpr int primary(Orientation orientation) const noexcept {
             switch (orientation) {
                 case Orientation::Unset:
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return x();
                 case Orientation::Vertical:
@@ -224,7 +222,7 @@ namespace rose {
         int &secondary(Orientation orientation) {
             switch (orientation) {
                 case Orientation::Unset:
-                    break;
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return y();
                 case Orientation::Vertical:
@@ -240,7 +238,7 @@ namespace rose {
         [[nodiscard]] constexpr int secondary(Orientation orientation) const noexcept {
             switch (orientation) {
                 case Orientation::Unset:
-                    break;
+                case Orientation::Both:
                 case Orientation::Horizontal:
                     return y();
                 case Orientation::Vertical:
@@ -265,7 +263,7 @@ namespace rose {
          * of the scalar distance between the two positions.
          * @return the distance squared
          */
-        constexpr int abs() const noexcept {
+        [[nodiscard]] constexpr int abs() const noexcept {
             return x() * x() + y() * y();
         }
     };
@@ -454,7 +452,7 @@ namespace rose {
             return !noOverlap(o);
         }
 
-        Rectangle intersection(const Rectangle &o) const {
+        [[nodiscard]] Rectangle intersection(const Rectangle &o) const {
             // gives bottom-left point
             // of intersection rectangle
 
