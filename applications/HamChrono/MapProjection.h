@@ -43,6 +43,7 @@ namespace rose {
         std::future<bool> mFutureAziProj{};       ///< A future for the map azimuthal projections.
         std::future<bool> mFutureSun{};           ///< A future for the map sun illumination.
         std::atomic_bool mNewSurfaces{};          ///< True when there are new Surfaces to render into Textures.
+        std::atomic_bool mAbortFuture{};          ///< Set to true to abort a running std::future.
 
         ProjectionType mProjection{ProjectionType::StationAzmuthal};   ///< The desired projection display
         std::shared_ptr<WebFileCache> mMapCache{};

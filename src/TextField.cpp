@@ -26,6 +26,7 @@ namespace rose {
         mPrefix = prefix;
         mSuffix = suffix;
         mText = text;
+        mCaretLoc = mText.end();
     }
 
     TextField::TextField(Id id, int padding, FontSize fontSize, const string &fontName) : Frame(padding) {
@@ -165,11 +166,15 @@ namespace rose {
         if (mDataType == DataType::Int) {
             auto pairValue = rose()->settings()->getValue(mPairId,Position::Zero);
             mText = util::fmtNumber(pairValue.at(mPairIdx), mMaxLength - 1);
+            mCaretLoc = mText.end();
             mPair->mText = util::fmtNumber(pairValue.at(mPair->mPairIdx), mPair->mMaxLength - 1);
+            mPair->mCaretLoc = mPair->mText.end();
         } else {
             auto pairValue = rose()->settings()->getValue(mPairId,GeoPosition{0.,0.});
             mText = util::fmtNumber(pairValue.at(mPairIdx), mMaxLength - 1);
+            mCaretLoc = mText.end();
             mPair->mText = util::fmtNumber(pairValue.at(mPair->mPairIdx), mPair->mMaxLength - 1);
+            mPair->mCaretLoc = mPair->mText.end();
         }
     }
 
@@ -200,6 +205,7 @@ namespace rose {
                     mText = rose()->settings()->getValue(mId, std::string{});
                     break;
             }
+            mCaretLoc = mText.end();
             mPrefix = rose()->settings()->getValue(mId + SET_PRE, std::string{});
             mSuffix = rose()->settings()->getValue(mId + SET_SUF, std::string{});
             mMaxLength = rose()->settings()->getValue(mId + SET_MAXLEN, (int) 10);
@@ -251,6 +257,7 @@ namespace rose {
                     mModified = false;
                     mPair->mModified = false;
                     mTextTexture.reset();
+                    mPair->mTextTexture.reset();
                 }
             }
         } else if (!mId.empty() && rose()->hasSettings()) {

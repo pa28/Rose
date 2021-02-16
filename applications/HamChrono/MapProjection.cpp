@@ -75,7 +75,18 @@ namespace rose {
 
         settingsUpdateRx = std::make_shared<Slot<std::string>>();
         settingsUpdateRx->setCallback([&](uint32_t, const std::string& name){
-            std::cerr << __PRETTY_FUNCTION__ << ' ' << name << '\n';
+            if (name == set::QTH) {
+                mAbortFuture = true;
+                if (mFutureAziProj.valid()) {
+                    mFutureAziProj.get();
+                } else if (mFutureSun.valid()) {
+                    mFutureSun.get();
+                }
+                mAbortFuture = false;
+                mQth = rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.});
+                mQthRad = GeoPosition{deg2rad(mQth.lat()), deg2rad(mQth.lon())};
+                mFutureAziProj = std::async(std::launch::async, &MapProjection::computeAzimuthalMaps, this);
+            }
         });
 
         rose()->settings()->dataChangeTx.connect(settingsUpdateRx);
