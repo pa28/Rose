@@ -452,101 +452,67 @@ namespace rose {
                           iconColor, textureData);
     }
 
+    enum class IconColor : size_t {
+        TextColor, BaseColor,
+        Black, Red, Yellow, Green, White,
+    };
+    struct IconItem {
+        RoseImageId imageId;
+        int entypoCode;
+        IconColor color;
+    };
+
     void Rose::createStandardIcons() {
-        static constexpr std::array<RoseImageId, 23> iconList{IconCancel, IconHelp,
-                                                              IconInfo, IconCheck,
-                                                              IconAlert, IconLock,
-                                                              IconUpBold, IconUpOpenBig,
-                                                              IconLeft, IconRight,
-                                                              IconToEnd, IconBack,
-                                                              IconLevelDown, Icon1Dot,
-                                                              Icon2Dots, Icon3Dots,
-                                                              IconUpDir, IconDownDir,
-                                                              IconLeftDir, IconRightDir,
-                                                             IconKeyboard, ScaleNeedleUp,
-                                                             ScaleNeedleDown};
+        static constexpr std::array<IconItem,31> iconItems {
+                IconItem{ IconCancel, ENTYPO_ICON_CANCEL_CIRCLED, IconColor::TextColor },
+                IconItem{ IconHelp, ENTYPO_ICON_CIRCLED_HELP, IconColor::TextColor },
+                IconItem{ IconInfo, ENTYPO_ICON_INFO, IconColor::TextColor },
+                IconItem{ IconCheck, ENTYPO_ICON_CHECK, IconColor::TextColor },
+                IconItem{ IconAlert, ENTYPO_ICON_ALERT, IconColor::TextColor },
+                IconItem{ IconLock, ENTYPO_ICON_LOCK, IconColor::TextColor },
+                IconItem{ IconUpBold, ENTYPO_ICON_UP_BOLD, IconColor::TextColor },
+                IconItem{ IconUpOpenBig, ENTYPO_ICON_UP_OPEN_BIG, IconColor::TextColor },
+                IconItem{ IconLeft, ENTYPO_ICON_LEFT, IconColor::TextColor },
+                IconItem{ IconRight, ENTYPO_ICON_RIGHT, IconColor::TextColor },
+                IconItem{ IconToEnd, ENTYPO_ICON_TO_END, IconColor::TextColor },
+                IconItem{ IconBack, ENTYPO_ICON_BACK, IconColor::TextColor },
+                IconItem{ IconLevelDown, ENTYPO_ICON_LEVEL_DOWN, IconColor::TextColor },
+                IconItem{ Icon1Dot, ENTYPO_ICON_DOT, IconColor::TextColor },
+                IconItem{ Icon2Dots, ENTYPO_ICON_TWO_DOTS, IconColor::TextColor },
+                IconItem{ Icon3Dots, ENTYPO_ICON_THREE_DOTS, IconColor::TextColor },
+                IconItem{ IconUpDir, ENTYPO_ICON_UP_DIR, IconColor::TextColor },
+                IconItem{ IconDownDir, ENTYPO_ICON_DOWN_DIR, IconColor::TextColor },
+                IconItem{ IconLeftDir, ENTYPO_ICON_LEFT_DIR, IconColor::TextColor },
+                IconItem{ IconRightDir, ENTYPO_ICON_RIGHT_DIR, IconColor::TextColor },
+                IconItem{ IconKeyboard, ENTYPO_ICON_KEYBOARD, IconColor::TextColor },
+                IconItem{ IconGlobe, ENTYPO_ICON_GLOBE, IconColor::TextColor },
+                IconItem{ IconNetwork, ENTYPO_ICON_NETWORK, IconColor::TextColor },
+                IconItem{ IconRocket, ENTYPO_ICON_ROCKET, IconColor::TextColor },
+                IconItem{ IconLocation, ENTYPO_ICON_LOCATION, IconColor::TextColor },
+                IconItem{ IconCompass, ENTYPO_ICON_COMPASS, IconColor::TextColor },
+                IconItem{ IconCamera, ENTYPO_ICON_CAMERA, IconColor::TextColor },
+                IconItem{ ScaleNeedleUp, ENTYPO_ICON_UP_DIR, IconColor::BaseColor },
+                IconItem{ ScaleNeedleDown, ENTYPO_ICON_DOWN_DIR, IconColor::BaseColor },
+                IconItem{ ScaleNeedleLeft, ENTYPO_ICON_LEFT_DIR, IconColor::BaseColor },
+                IconItem{ ScaleNeedleRight, ENTYPO_ICON_RIGHT_DIR, IconColor::BaseColor },
+        };
 
-        for (auto &iconId : iconList) {
-            int iconCode;
-            switch (iconId) {
-                case IconCancel:
-                    iconCode = ENTYPO_ICON_CANCEL_CIRCLED;
-                    break;
-                case IconHelp:
-                    iconCode = ENTYPO_ICON_CIRCLED_HELP;
-                    break;
-                case IconInfo:
-                    iconCode = ENTYPO_ICON_INFO;
-                    break;
-                case IconCheck:
-                    iconCode = ENTYPO_ICON_CHECK;
-                    break;
-                case IconAlert:
-                    iconCode = ENTYPO_ICON_ALERT;
-                    break;
-                case IconUpDir:
-                case ScaleNeedleUp:
-                    iconCode = ENTYPO_ICON_UP_DIR;
-                    break;
-                case IconDownDir:
-                case ScaleNeedleDown:
-                    iconCode = ENTYPO_ICON_DOWN_DIR;
-                    break;
-                case IconRightDir:
-                    iconCode = ENTYPO_ICON_RIGHT_DIR;
-                    break;
-                case IconLeftDir:
-                    iconCode = ENTYPO_ICON_LEFT_DIR;
-                    break;
-                case IconLock:
-                    iconCode = ENTYPO_ICON_LOCK;
-                    break;
-                case IconUpOpenBig:
-                    iconCode = ENTYPO_ICON_UP_OPEN_BIG;
-                    break;
-                case IconUpBold:
-                    iconCode = ENTYPO_ICON_UP_BOLD;
-                    break;
-                case IconLeft:
-                    iconCode = ENTYPO_ICON_LEFT;
-                    break;
-                case IconRight:
-                    iconCode = ENTYPO_ICON_RIGHT;
-                    break;
-                case IconToEnd:
-                    iconCode = ENTYPO_ICON_TO_END;
-                    break;
-                case IconBack:
-                    iconCode = ENTYPO_ICON_BACK;
-                    break;
-                case IconLevelDown:
-                    iconCode = ENTYPO_ICON_LEVEL_DOWN;
-                    break;
-                case Icon1Dot:
-                    iconCode = ENTYPO_ICON_DOT;
-                    break;
-                case Icon2Dots:
-                    iconCode = ENTYPO_ICON_TWO_DOTS;
-                    break;
-                case Icon3Dots:
-                    iconCode = ENTYPO_ICON_THREE_DOTS;
-                    break;
-                case IconKeyboard:
-                    iconCode = ENTYPO_ICON_KEYBOARD;
-                    break;
-                default:
-                    throw std::runtime_error("Unhandled icon id.");
-            }
+        std::array<color::RGBA,7> iconColor = {
+                mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack, mTheme.mRed, mTheme.mYellow, mTheme.mGreen, mTheme.mWhite
+        };
 
-            if (iconId == ScaleNeedleDown || iconId == ScaleNeedleUp) {
-                auto icon = utf8(iconCode);
+        for (auto& iconItem : iconItems) {
+            if (iconItem.imageId == ScaleNeedleDown || iconItem.imageId == ScaleNeedleUp
+                || iconItem.imageId == ScaleNeedleLeft || iconItem.imageId == ScaleNeedleRight) {
+                auto icon = utf8(iconItem.entypoCode);
                 auto texturData = getMinimalIcon(mRenderer, icon.data(), mTheme.mIconFontName,
                                                  mTheme.mIconFontSize, mTheme.mBaseColor);
-                mImageRepository.setImage(iconId, std::move(texturData));
+                mImageRepository.setImage(iconItem.imageId, std::move(texturData));
             } else {
                 sdl::TextureData textureData;
-                createIcon(iconCode, mTheme.mIconFontSize, mTheme.mTextColour, textureData);
-                mImageRepository.setImage(iconId, std::move(textureData));
+                createIcon(iconItem.entypoCode, mTheme.mIconFontSize, iconColor[static_cast<size_t>(iconItem.color)],
+                           textureData);
+                mImageRepository.setImage(iconItem.imageId, std::move(textureData));
             }
         }
     }

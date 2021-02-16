@@ -191,8 +191,16 @@ namespace rose {
         Icon2Dots,              ///< Two Dots
         Icon3Dots,              ///< Three Dots
         IconKeyboard,           ///< Keyboard
-        ScaleNeedleUp,          ///< A horizontal linear scale needle pointing up.
-        ScaleNeedleDown,        ///< A horizontal linear scale needle pointing down.
+        IconGlobe,              ///< Globe
+        IconNetwork,            ///< Sphere with encircling lines
+        IconRocket,             ///< Rocket ship.
+        IconLocation,           ///< POI Icon.
+        IconCompass,            ///< Compass.
+        IconCamera,             ///< Camera
+        ScaleNeedleUp,
+        ScaleNeedleDown,
+        ScaleNeedleLeft,
+        ScaleNeedleRight,
         BevelOutRoundCorners,   ///< Sheet of round corners beveled out
         BevelInRoundCorners,    ///< Sheet of round corners beveled in
         NotchOutRoundCorners,   ///< Sheet of round corners notched out
