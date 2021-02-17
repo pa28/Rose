@@ -45,7 +45,7 @@ namespace rose {
         std::atomic_bool mNewSurfaces{};          ///< True when there are new Surfaces to render into Textures.
         std::atomic_bool mAbortFuture{};          ///< Set to true to abort a running std::future.
 
-        ProjectionType mProjection{ProjectionType::Mercator};   ///< The desired projection display
+        ProjectionType mProjection{ProjectionType::StationMercator};   ///< The desired projection display
         std::shared_ptr<WebFileCache> mMapCache{};
         ImageId mDayMapImage{};         ///< The base day Mercator map image.
         ImageId mNightMapImage{};       ///< The base night Mercator map image.
@@ -105,7 +105,7 @@ namespace rose {
             mAntipode = antipode(mQthRad);
             mStationIcons[0].geo = mQthRad;
             mStationIcons[1].geo = mAntipode;
-            mStationIcons[0].imageId = IconTargetYellow;
+            mStationIcons[0].imageId = IconTargetGreen;
             mStationIcons[1].imageId = IconTargetRed;
         }
 

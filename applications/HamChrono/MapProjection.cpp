@@ -164,8 +164,10 @@ namespace rose {
                                     int splitPixel) {
         auto mapPos = geoToMap(mapItem.geo, azimuthal);
         auto iconSize = rose()->imageRepository(mapItem.imageId).getSize();
-        mapPos.x() -= iconSize.width()/2;
-        mapPos.y() -= iconSize.height()/2;
+        mapPos.x() -= iconSize.width() / 2;
+        mapPos.y() -= iconSize.height() / 2;
+
+        sdl::ClipRectangleGuard clipRectangleGuard(renderer, mapRectangle);
 
         if (!azimuthal && splitPixel > 0) {
             mapPos.x() = (mapPos.x() + mMapSize.width() - splitPixel) % mMapSize.width();
@@ -173,7 +175,49 @@ namespace rose {
 
         mapPos = mapPos + mapRectangle.getPosition();
         Rectangle dst{mapPos, iconSize};
-        rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+        int h = 0;
+        if (dst.y() < mapRectangle.y()) {
+            // Top hang
+            h = mapRectangle.y() - dst.y();
+        } else if (dst.y() + dst.height() > mapRectangle.y() + mapRectangle.height()) {
+            // Bottom hang
+            h = mapRectangle.y() + mapRectangle.height() - dst.y();
+        }
+
+        int w = 0;
+        if (dst.x() < mapRectangle.x()) {
+            w = mapRectangle.x() - dst.x();
+        } else if (dst.x() + dst.width() > mapRectangle.x() + mapRectangle.width()) {
+            w = mapRectangle.x() + mapRectangle.width() - dst.x();
+        }
+
+        if (h == 0 && w == 0){
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            return;
+        }
+
+        if (h == 0 && w > 0) {
+            // Left/Right hang - draw left side on right of map
+            dst.x() = mapRectangle.x() - w;
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            dst.x() += mapRectangle.width();
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+        } else if (h > 0 && w == 0) {
+            dst.y() = mapRectangle.y() - h;
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            dst.y() += mapRectangle.height();
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+        } else if (h > 0 && w > 0) {
+            dst.x() = mapRectangle.x() - w;
+            dst.y() = mapRectangle.y() - h;
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            dst.x() += mapRectangle.width();
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            dst.y() += mapRectangle.height();
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            dst.x() -= mapRectangle.width();
+            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+        }
     }
 
     /* solve a spherical triangle:
@@ -232,7 +276,7 @@ namespace rose {
      * @return [valid, latitude, longitude ], valid if the pixel is on the Earth,
      * latitude -PI..+PI West to East, longitude +PI/2..-PI/2 North to South
      */
-    tuple<bool, double, double>
+    std::tuple<bool, double, double>
     xyToAzLatLong(int x, int y, const Size &mapSize, const GeoPosition &location, double siny, double cosy) {
         bool onAntipode = x > mapSize.width() / 2;
         auto w2 = (mapSize.height() / 2) * (mapSize.height() / 2);
