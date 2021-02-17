@@ -444,6 +444,9 @@ namespace rose {
         auto [lat,lon] = subSolar();
         mCelestialIcons[0].imageId = static_cast<ImageId>(set::AppImageId::Sun);
         mCelestialIcons[0].geo = GeoPosition{lat,lon};
+        mCelestialIcons[1].imageId = static_cast<ImageId>(set::AppImageId::Moon);
+        // ToDo: implement ephemeris and moon phase.
+        mCelestialIcons[1].geo = antipode(mCelestialIcons[0].geo);
     }
 
     Position MapProjection::geoToMap(GeoPosition geo, bool azimuthal) {
