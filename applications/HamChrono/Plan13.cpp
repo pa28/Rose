@@ -188,11 +188,16 @@ getlong(const std::string_view &c, int i0, int i1) {
     return strtol(buf, nullptr, 10);
 }
 
-Satellite::Satellite(const std::array<std::string, 3> &ephemeris)
+Satellite::Satellite(const std::array<std::string_view, 3> &ephemeris)
         : Satellite() {
+    setEphemeris(ephemeris);
+}
+
+void Satellite::setEphemeris(const std::array<std::string_view, 3> &ephemeris) {
     name = ephemeris[0];
     isMoon = name == "Moon";
     tle(ephemeris[1], ephemeris[2]);
+    isValid = true;
 }
 
 void

@@ -17,10 +17,8 @@
  * @class Ephemeris
  * @brief
  */
-class Ephemeris {
+class Ephemeris : public std::map<std::string_view, std::array<std::string_view,3>> {
 protected:
-
-    std::map<std::string_view,std::string_view> mEphemerisMap{};
     std::string mEphemerisSet{};
 
 public:

@@ -279,6 +279,7 @@ public:
 
 class Satellite {
     bool isMoon{};
+    bool isValid{};
     std::string_view name;
     long N{};
     long YE{};
@@ -323,9 +324,13 @@ public:
      * Initialize satellite from two line ephemeris data
      * @param ephemeris An array containing the name, line 1, and line 2
      */
-    explicit Satellite(const std::array<std::string, 3> &ephemeris);
+    explicit Satellite(const std::array<std::string_view, 3> &ephemeris);
+
+    void setEphemeris(const std::array<std::string_view,3> &ephemeris);
 
     ~Satellite() = default;
+
+    constexpr operator bool() const noexcept { return isValid; }
 
     /**
      * Predict the satelite position at given DateTime.

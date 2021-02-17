@@ -167,6 +167,9 @@ namespace rose {
 
     void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, bool azimuthal,
                                     int splitPixel) {
+        if (mapItem.imageId == RoseImageInvalid)
+            return;
+
         auto mapPos = geoToMap(mapItem.geo, azimuthal);
         auto iconSize = rose()->imageRepository(mapItem.imageId).getSize();
         mapPos.x() -= iconSize.width() / 2;
@@ -444,9 +447,16 @@ namespace rose {
         auto [lat,lon] = subSolar();
         mCelestialIcons[0].imageId = static_cast<ImageId>(set::AppImageId::Sun);
         mCelestialIcons[0].geo = GeoPosition{lat,lon};
-        mCelestialIcons[1].imageId = static_cast<ImageId>(set::AppImageId::Moon);
-        // ToDo: implement ephemeris and moon phase.
-        mCelestialIcons[1].geo = antipode(mCelestialIcons[0].geo);
+
+        if (mMoon) {
+            DateTime predictTime{true};
+            mMoon.predict(predictTime);
+            auto [lat,lon] = mMoon.geo();
+            mCelestialIcons[1].imageId = static_cast<ImageId>(set::AppImageId::Moon);
+            mCelestialIcons[1].geo = GeoPosition{lat,lon};
+        } else {
+            mCelestialIcons[1].imageId = RoseImageInvalid;
+        }
     }
 
     Position MapProjection::geoToMap(GeoPosition geo, bool azimuthal) {

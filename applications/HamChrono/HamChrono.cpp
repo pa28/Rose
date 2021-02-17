@@ -20,6 +20,7 @@
 #include "SettingsNames.h"
 #include "TimeBox.h"
 #include "Ephemeris.h"
+#include "Plan13.h"
 
 using namespace rose;
 
@@ -47,9 +48,6 @@ void HamChrono::build() {
 #  endif
 #endif
     TextField::Settings(mSettings, ConfigTextFieldSettings);
-
-    std::filesystem::path ephemerisFile{"/home/richard/.cache/HamChrono/ClearSky/esats.pl?getall="};
-    Ephemeris ephemeris{ephemerisFile};
 
     std::array<color::RGBA,10> mIconColor = {
             mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack,
@@ -233,6 +231,12 @@ void HamChrono::build() {
     celesTrackEphemeris->fetchAll();
     clearSkyEphemeris->fetchAll();
     clearSkyMaps->fetchAll();
+
+
+    std::filesystem::path ephemerisFile{"/home/richard/.cache/HamChrono/ClearSky/esats.pl?tlename=Moon"};
+    Ephemeris ephemeris{ephemerisFile};
+
+    mMapProjection->setMoonEphemeris(ephemeris["Moon"]);
 }
 
 void HamChrono::callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_ptr<Column> &sideColumn) {

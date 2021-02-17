@@ -12,7 +12,7 @@ Ephemeris::Ephemeris(const std::filesystem::path& filePath) {
 }
 
 void Ephemeris::readFile(const std::filesystem::path &filePath) {
-    mEphemerisMap.clear();
+    clear();
     mEphemerisSet.clear();
 
     std::ifstream ephemFile(filePath.string());
@@ -30,9 +30,12 @@ void Ephemeris::readFile(const std::filesystem::path &filePath) {
         ++ptr;
         data = ptr;
         while (*ptr != '\n' && ptr < last) ++ptr;
+        std::string_view l1{data, static_cast<std::string_view::size_type>(ptr - data)};
         ++ptr;
+        data = ptr;
         while (*ptr != '\n' && ptr < last) ++ptr;
-        mEphemerisMap.emplace(name, std::string_view{data, static_cast<std::string_view::size_type>(ptr - data)});
+        std::string_view l2{data, static_cast<std::string_view::size_type>(ptr - data)};
+        emplace(name, std::array<std::string_view,3>{name,l1,l2});
         ++ptr;
     }
 }

@@ -10,6 +10,8 @@
 #include "Cache.h"
 #include "Math.h"
 #include "Rose.h"
+#include "Ephemeris.h"
+#include "Plan13.h"
 
 namespace rose {
 
@@ -99,6 +101,8 @@ namespace rose {
 
         std::array<MapIcon,2> mStationIcons{};      ///< Icons for QTH and Antipode.
         std::array<MapIcon,2> mCelestialIcons{};    ///< Near earth objects (Sun, Moon, etc.).
+
+        Satellite mMoon{};                          ///< Orbital data for the moon.
 
         void setStationIcons(GeoPosition qth) {
             mQth = qth;
@@ -209,6 +213,15 @@ namespace rose {
          * @return The map Position.
          */
         Position geoToMap(GeoPosition geo, bool azimuthal);
+
+        /**
+         * @brief Set the Moon ephemeris
+         * @param ephemeris The ephemeris.
+         */
+        void setMoonEphemeris(const std::array<std::string_view,3> &ephemeris) {
+            mMoon.setEphemeris(ephemeris);
+            setCelestialIcons();
+        }
     };
 }
 
