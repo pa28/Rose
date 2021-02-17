@@ -934,4 +934,25 @@ namespace rose {
         mWindowList.emplace_back(window);
         return window;
     }
+
+    void Rose::createFileIcon(const Rose::IconFileItem &item, const filesystem::path &resourceDirectory) {
+        auto filePath = resourceDirectory;
+        filePath.append(item.fileName);
+        sdl::Surface surface{filePath};
+        if (surface) {
+            sdl::Texture fullSize{surface.toTexture(mRenderer)};
+            sdl::TextureData icon{};
+            if (item.size != Size::Zero) {
+                icon = sdl::TextureData{mRenderer, item.size};
+                sdl::RenderTargetGuard renderTargetGuard{mRenderer, icon};
+                mRenderer.renderCopy(fullSize);
+            } else {
+                icon = sdl::TextureData{fullSize.release()};
+            }
+            icon.setBlendMOde(SDL_BLENDMODE_BLEND);
+            mImageRepository.setImage(item.imageId, std::move(icon));
+        } else {
+            throw RoseRuntimeError(StringCompositor("Could not create Surface from ", filePath.string()));
+        }
+    }
 }

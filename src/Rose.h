@@ -269,9 +269,19 @@ namespace rose {
          * @brief Provide the data required to create icons in batches.
          */
         struct IconItem {
-            ImageId imageId;
-            int entypoCode;
-            IconColor color;
+            ImageId imageId;    ///< The ImageId for storage in the ImageRepository.
+            int entypoCode;     ///< The icon code point from the Entypo Font.
+            IconColor color;    ///< The IconColor index.
+        };
+
+        /**
+         * @struct IconFileItem
+         * @brief Provide the data required to create icons from files in batches.
+         */
+        struct IconFileItem {
+            ImageId imageId;            ///< The ImageId for storage in the ImageRepository.
+            Size size;                  ///< The final size of the Icon Texture.
+            std::string_view fileName;  ///< The file name, combined with a std::filesystem::path argument.
         };
 
         Rose() = default;
@@ -518,6 +528,26 @@ namespace rose {
          * @param textureData return value for the generated texture.
          */
         void createIcon(int iconCode, int iconSize, const color::RGBA &iconColor, sdl::TextureData &textureData);
+
+        /**
+         * @brief Create a single icon from an IconFileItem structure and a resource directory.
+         * @param item The IconFileItem structure.
+         * @param resourceDirectory The resource directory path.
+         */
+        void createFileIcon(const IconFileItem &item, const std::filesystem::path& resourceDirectory );
+
+        /**
+         * @brief Create a batch of icons from a container of IconFileItem structures and a resource Directory.
+         * @tparam C The type of the container.
+         * @param iconFileItems The container.
+         * @param resourceDirectory The resource directory path.
+         */
+        template<class C>
+        void createFileIcons(const C iconFileItems, const std::filesystem::path& resourceDirectory) {
+            for (const auto &iconFileItem : iconFileItems) {
+                createFileIcon(iconFileItem, resourceDirectory);
+            }
+        }
 
         /**
          * @brief Create textures in the Rose ImageRepository for standard icons.

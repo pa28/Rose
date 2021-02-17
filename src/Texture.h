@@ -63,6 +63,15 @@ namespace rose::sdl {
          */
         Texture(Renderer &renderer, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height);
 
+        /**
+         * @brief Constructor
+         * @details Builds a Texture compatible with building up textures within Rose . The pixel format is
+         * SDL_PIXELFORMAT_RGBA8888, the texture access is SDL_TEXTUREACCESS_TARGET.
+         * @param renderer The renderer to use.
+         * @param size The size of the texture.
+         */
+        Texture(Renderer &renderer, Size size);
+
         int setBlendMOde(SDL_BlendMode blendMode) {
             return SDL_SetTextureBlendMode(get(), blendMode);
         }
@@ -99,6 +108,17 @@ namespace rose::sdl {
          */
         TextureData(Renderer &renderer, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height)
                 : Texture(renderer, format, access, width, height) {
+            setMetaData();
+        }
+
+        /**
+         * @brief Constructor
+         * @details Builds a TextureData object compatible with building up textures within Rose . The pixel format is
+         * SDL_PIXELFORMAT_RGBA8888, the texture access is SDL_TEXTUREACCESS_TARGET.
+         * @param renderer The renderer to use.
+         * @param size The size of the texture.
+         */
+        TextureData(Renderer &renderer, Size size) : Texture(renderer, size) {
             setMetaData();
         }
 

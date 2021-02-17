@@ -16,6 +16,10 @@ namespace rose::sdl {
         reset(SDL_CreateTexture(renderer.get(), format, access, width, height));
     }
 
+    Texture::Texture(Renderer &renderer, Size size) : Texture() {
+        reset(SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.width(), size.height()));
+    }
+
     GradientTexture::GradientTexture(Renderer &renderer, const color::RGBA &topLeft, const color::RGBA &topRight,
                                      const color::RGBA &bottomLeft, const color::RGBA &bottomRight) {
         reset(SDL_CreateTexture(renderer.get(),SDL_PIXELFORMAT_RGBA8888,
