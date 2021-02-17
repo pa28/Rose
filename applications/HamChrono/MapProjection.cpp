@@ -123,16 +123,15 @@ namespace rose {
             return;
         }
 
+        int splitPixel = 0;
         switch (mProjection) {
             case ProjectionType::Mercator:
                 renderer.renderCopy(mMercator[0], widgetRect);
                 renderer.renderCopy(mMercator[1], widgetRect);
-                drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
-                             widgetRect, false);
                 break;
             case ProjectionType::StationMercator: {
                 auto lon = mQth.lon();
-                int splitPixel = util::roundToInt((double)mMapSize.width() * ((lon) / 360.));
+                splitPixel = util::roundToInt((double)mMapSize.width() * ((lon) / 360.));
                 if (splitPixel < 0)
                     splitPixel += mMapSize.width();
 
@@ -149,18 +148,16 @@ namespace rose {
                 dst.width() = splitPixel;
                 renderer.renderCopy(mMercator[0], src, dst);
                 renderer.renderCopy(mMercator[1], src, dst);
-
-                drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
-                             widgetRect, false, splitPixel);
             }
                 break;
             case ProjectionType::StationAzmuthal:
                 renderer.renderCopy(mAzimuthal[0], widgetRect);
                 renderer.renderCopy(mAzimuthal[1], widgetRect);
-                drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
-                             widgetRect, true);
                 break;
         }
+
+        drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
+                     widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
     }
 
     void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, bool azimuthal,

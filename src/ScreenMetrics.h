@@ -78,10 +78,11 @@ namespace rose {
                 case Orientation::Unset:
                 case Orientation::Both:
                 case Orientation::Horizontal:
-                    return width();
+                    break;
                 case Orientation::Vertical:
                     return height();
             }
+            return width();
         }
 
         /**
