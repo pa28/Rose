@@ -8,8 +8,14 @@
 #pragma once
 
 #include <string>
+#include "ImageRepository.h"
 
 namespace set {
+
+    enum class AppImageId : size_t {
+        Sun = rose::ImageRepository::FirstApplicationImageId,
+    };
+
     static constexpr std::string_view CALLSIGN = "CALLSIGN";
     static constexpr std::string_view CALLSIGN_OPT = "-callsign";
     static constexpr std::string_view QTH = "qth";
