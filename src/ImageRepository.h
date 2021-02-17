@@ -47,8 +47,11 @@ namespace rose {
 
         static constexpr ImageId InvalidImageId = 0x0u;     ///< An invalid image ID which may be used for initialization
 
+        /// ImageId values [FirstApplicationImageId ... FirstUserImageId) are reserved for Application static images.
+        static constexpr ImageId FirstApplicationImageId = 0x100u;
+
     protected:
-        static constexpr ImageId FirstUserImageId = 0x100u; ///< This and all following image IDs are available to user applications
+        static constexpr ImageId FirstUserImageId = 0x200u; ///< This and all following image IDs are available to user applications
         ImageId mNextUserImageId;                           ///< A variable to keep track of used image IDs
 
         ImageStore mImageStore{};       ///< The texture cache
