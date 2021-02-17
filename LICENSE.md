@@ -23,3 +23,7 @@ freely, subject to the following restrictions:
 Created by [Thomas Dufranne](https://commons.wikimedia.org/wiki/User:Bcjordan)
 available under [Creative Commons License](https://creativecommons.org/licenses/by/3.0/deed.en)
 at [WikiMedia](https://commons.wikimedia.org/wiki/File:Sun.svg)
+
+### Moon Image
+
+From [WikiMedia](https://openclipart.org/detail/170669/weather-icon-full-moon) open clipart project.

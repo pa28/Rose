@@ -26,8 +26,9 @@ static constexpr std::array<Rose::IconItem,1> minimalIcons = {
         Rose::IconItem{ static_cast<ImageId>(set::AppImageId::Sun), ENTYPO_ICON_LIGHT_UP, Rose::IconColor::Yellow },
 };
 
-static constexpr std::array<Rose::IconFileItem,1> fileIcons = {
-        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Sun), Size{0,0}, "35px-Sun.png"}
+static constexpr std::array<Rose::IconFileItem,2> fileIcons = {
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Sun), Size{0,0}, "35px-Sun.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "full_moon.png"},
 };
 
 void HamChrono::build() {
