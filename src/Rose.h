@@ -255,6 +255,25 @@ namespace rose {
 
     public:
 
+        /**
+         * @enum IconColor
+         * @brief Standards color selections for creating Icon images in batches.
+         */
+        enum class IconColor : size_t {
+            TextColor, BaseColor,
+            Black, Red, ThemeRed, Yellow, ThemeYellow, Green, ThemeGreen, White,
+        };
+
+        /**
+         * @struct IconItem
+         * @brief Provide the data required to create icons in batches.
+         */
+        struct IconItem {
+            ImageId imageId;
+            int entypoCode;
+            IconColor color;
+        };
+
         Rose() = default;
         virtual ~Rose();
         Rose(Rose &&) = delete;

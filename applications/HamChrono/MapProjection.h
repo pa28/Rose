@@ -98,6 +98,7 @@ namespace rose {
         };
 
         std::array<MapIcon,2> mStationIcons{};      ///< Icons for QTH and Antipode.
+        std::array<MapIcon,1> mCelestialIcons{};    ///< Near earth objects (Sun, Moon, etc.).
 
         void setStationIcons(GeoPosition qth) {
             mQth = qth;
@@ -108,6 +109,8 @@ namespace rose {
             mStationIcons[0].imageId = IconTargetGreen;
             mStationIcons[1].imageId = IconTargetRed;
         }
+
+        void setCelestialIcons();
 
         /**
          * @brief Render a single icon on the map.

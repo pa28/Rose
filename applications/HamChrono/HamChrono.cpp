@@ -22,8 +22,26 @@
 
 using namespace rose;
 
+static constexpr std::array<Rose::IconItem,1> minimalIcons = {
+        Rose::IconItem{ static_cast<ImageId>(set::AppImageId::Sun), ENTYPO_ICON_LIGHT_UP, Rose::IconColor::Yellow },
+};
+
 void HamChrono::build() {
     TextField::Settings(mSettings, ConfigTextFieldSettings);
+
+    std::array<color::RGBA,10> mIconColor = {
+            mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack,
+            color::RGBA{255u, 0u, 0u, 255u}, mTheme.mRed,
+            color::RGBA{255u, 255u, 0u, 255u}, mTheme.mYellow,
+            color::RGBA{0u, 255u, 0u, 255u}, mTheme.mGreen, mTheme.mWhite
+    };
+
+    for (auto& iconItem : minimalIcons) {
+        auto icon = utf8(iconItem.entypoCode);
+        auto textureData = getMinimalIcon(mRenderer, icon.data(), mTheme.mIconFontName,
+                                          mTheme.mIconFontSize, mIconColor[static_cast<size_t>(iconItem.color)]);
+        mImageRepository.setImage(iconItem.imageId, std::move(textureData));
+    }
 
     mConfigButtonRx = std::make_shared<Slot<Button::SignalType>>();
     mConfigButtonRx->setCallback([&](uint32_t, Button::SignalType button){

@@ -12,7 +12,7 @@
 
 namespace set {
 
-    enum class AppImageId : size_t {
+    enum class AppImageId : rose::ImageId {
         Sun = rose::ImageRepository::FirstApplicationImageId,
     };
 

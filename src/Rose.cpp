@@ -452,16 +452,6 @@ namespace rose {
                           iconColor, textureData);
     }
 
-    enum class IconColor : size_t {
-        TextColor, BaseColor,
-        Black, Red, ThemeRed, Yellow, ThemeYellow, Green, ThemeGreen, White,
-    };
-    struct IconItem {
-        RoseImageId imageId;
-        int entypoCode;
-        IconColor color;
-    };
-
     void Rose::createStandardIcons() {
         static constexpr std::array<IconItem,27> iconItems{
                 IconItem{IconCancel, ENTYPO_ICON_CANCEL_CIRCLED, IconColor::TextColor},
@@ -504,7 +494,7 @@ namespace rose {
                 IconItem{ IconTargetGreen, ENTYPO_ICON_TARGET, IconColor::Green},
         };
 
-        std::array<color::RGBA,10> iconColor = {
+        std::array<color::RGBA,10> mIconColor = {
                 mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack,
                 color::RGBA{255u, 0u, 0u, 255u}, mTheme.mRed,
                 color::RGBA{255u, 255u, 0u, 255u}, mTheme.mYellow,
@@ -514,13 +504,13 @@ namespace rose {
         for (auto& iconItem : minimalIcons) {
             auto icon = utf8(iconItem.entypoCode);
             auto textureData = getMinimalIcon(mRenderer, icon.data(), mTheme.mIconFontName,
-                                              mTheme.mIconFontSize, iconColor[static_cast<size_t>(iconItem.color)]);
+                                              mTheme.mIconFontSize, mIconColor[static_cast<size_t>(iconItem.color)]);
             mImageRepository.setImage(iconItem.imageId, std::move(textureData));
         }
 
         for (auto& iconItem : iconItems) {
             sdl::TextureData textureData;
-            createIcon(iconItem.entypoCode, mTheme.mIconFontSize, iconColor[static_cast<size_t>(iconItem.color)],
+            createIcon(iconItem.entypoCode, mTheme.mIconFontSize, mIconColor[static_cast<size_t>(iconItem.color)],
                        textureData);
             mImageRepository.setImage(iconItem.imageId, std::move(textureData));
         }

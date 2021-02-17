@@ -22,6 +22,7 @@ namespace rose {
     void MapProjection::initializeComposite() {
         mapFileRx = std::make_shared<Slot<uint32_t>>();
         setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
+        setCelestialIcons();
 
         mapFileRx->setCallback([&](uint32_t, uint32_t map){
             std::filesystem::path filePath(mMapCache->cacheRootPath());
@@ -65,6 +66,7 @@ namespace rose {
 
         minuteRx = std::make_shared<Slot<int>>();
         minuteRx->setCallback([&](uint32_t, int minute){
+            setCelestialIcons();
             if (!mFutureSun.valid())
                 mFutureSun = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
         });
@@ -157,6 +159,9 @@ namespace rose {
         }
 
         drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
+                     widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
+
+        drawMapItems(mCelestialIcons.begin(), mCelestialIcons.end(), renderer,
                      widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
     }
 
@@ -433,6 +438,12 @@ namespace rose {
             }
         }
         return true;
+    }
+
+    void MapProjection::setCelestialIcons() {
+        auto [lat,lon] = subSolar();
+        mCelestialIcons[0].imageId = static_cast<ImageId>(set::AppImageId::Sun);
+        mCelestialIcons[0].geo = GeoPosition{lat,lon};
     }
 
     Position MapProjection::geoToMap(GeoPosition geo, bool azimuthal) {
