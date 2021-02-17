@@ -19,6 +19,7 @@
 #include "Menu.h"
 #include "SettingsNames.h"
 #include "TimeBox.h"
+#include "Ephemeris.h"
 
 using namespace rose;
 
@@ -46,6 +47,9 @@ void HamChrono::build() {
 #  endif
 #endif
     TextField::Settings(mSettings, ConfigTextFieldSettings);
+
+    std::filesystem::path ephemerisFile{"/home/richard/.cache/HamChrono/ClearSky/esats.pl?getall="};
+    Ephemeris ephemeris{ephemerisFile};
 
     std::array<color::RGBA,10> mIconColor = {
             mTheme.mTextColour, mTheme.mBaseColor, mTheme.mBlack,
