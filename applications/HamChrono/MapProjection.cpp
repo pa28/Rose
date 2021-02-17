@@ -444,7 +444,6 @@ namespace rose {
     }
 
     void MapProjection::setCelestialIcons() {
-        std::cout << __PRETTY_FUNCTION__ << '\n';
         auto [lat,lon] = subSolar();
         mCelestialIcons[0].imageId = static_cast<ImageId>(set::AppImageId::Sun);
         mCelestialIcons[0].geo = GeoPosition{lat,lon};
