@@ -40,6 +40,7 @@
 #include "Surface.h"
 #include "Texture.h"
 #include "EventSemantics.h"
+#include "XDGFilePaths.h"
 
 /**
  * @namespace rose
@@ -172,6 +173,8 @@ namespace rose {
         std::filesystem::path mDataHome;            ///< The user's XDG Data Home path
         std::filesystem::path mConfigHome;          ///< The user's XDG Config Home path
         std::filesystem::path mCacheHome;           ///< The user's XDG Cache Home path
+        std::filesystem::path mSharedImages;        ///< Image resources installed with the application.
+        XDGFilePaths mFilePaths{};                  ///< XDG Spec file paths.
         int mWidth,                                 ///< The width of the SDL_Window
         mHeight;                                    ///< The height of the SDL_Window
         sdl::Renderer mRenderer;                    ///< The Renderer used for SDL operations
@@ -631,5 +634,22 @@ namespace rose {
          * @return a reference to the FontMetrics object.
          */
         [[nodiscard]] const FontMetrics &iconFontMetrics() const { return mIconFontMetrics; }
+
+        /**
+         * @brief Find the XDG directory for a specified application name.
+         * @details If the path location does not exist, and create is set to true, it is created along with all
+         * parent directories with permissions set to std::filesystem::perms::all modified by umask(2).
+         * @param name The XDG Name.
+         * @param appName The application name.
+         * @param create Set to true if non-existent directories should be created.
+         * @return
+         */
+        std::filesystem::path getenv_path(XDGFilePaths::XDG_Name name, const std::string &appName, bool create) {
+            auto [found,path] = mFilePaths.findFilePath(name, appName);
+            if (!found && create) {
+                std::filesystem::create_directories(path);
+            }
+            return path;
+        }
     };
 }

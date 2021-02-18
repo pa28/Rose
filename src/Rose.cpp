@@ -55,9 +55,10 @@ namespace rose {
         if (std::filesystem::is_symlink(procExec)) {
             auto appName = std::filesystem::read_symlink(procExec).filename().string();
 
-            mDataHome = getenv_path("XDG_DATA_HOME", mHomeDirectory, ".local/share", appName);
-            mConfigHome = getenv_path("XDG_CONFIG_HOME", mHomeDirectory, ".config", appName);
-            mCacheHome = getenv_path("XDG_CACHE_HOME", mHomeDirectory, ".cache", appName);
+            mDataHome = getenv_path(XDGFilePaths::XDG_DATA_HOME, appName, true);
+            mConfigHome = getenv_path(XDGFilePaths::XDG_CONFIG_HOME, appName, true);
+            mCacheHome = getenv_path(XDGFilePaths::XDG_CACHE_HOME, appName, true);
+            mSharedImages = getenv_path( XDGFilePaths::XDG_DATA_DIRS, appName + "/images", false);
         } else {
             std::cerr << StringCompositor('"', procExec, '"', " is not a symbolic link to application.\n");
             mErrorCode = RoseErrorCode::XDG_PATH_FAIL;
