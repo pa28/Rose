@@ -130,6 +130,7 @@ list(APPEND ROSE_SRC
         src/Slider.cpp
         src/SystemMonitor.cpp
         src/Widget.cpp
+        src/XDGFilePaths.cpp
         )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -138,7 +139,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_compile_definitions(VERSION=${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-${PROJECT_VERSION_TWEAK})
 add_compile_definitions($<CONFIG>)
-add_compile_definitions(CurrentSourceDir="${CMAKE_CURRENT_SOURCE_DIR}")
 
 list(APPEND RoseLibraries rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES} ${SOCI_LIBRARY}
         ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})

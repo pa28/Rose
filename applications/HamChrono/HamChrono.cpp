@@ -24,10 +24,6 @@
 
 using namespace rose;
 
-static constexpr std::array<Rose::IconItem,1> minimalIcons = {
-        Rose::IconItem{ static_cast<ImageId>(set::AppImageId::Sun), ENTYPO_ICON_LIGHT_UP, Rose::IconColor::Yellow },
-};
-
 static constexpr std::array<Rose::IconFileItem,2> fileIcons = {
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Sun), Size{0,0}, "35px-Sun.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "full_moon.png"},
@@ -36,17 +32,9 @@ static constexpr std::array<Rose::IconFileItem,2> fileIcons = {
 void HamChrono::build() {
 #ifdef Debug
     std::cout << __PRETTY_FUNCTION__ << " Debug\n";
-#  ifdef CurrentSourceDir
-    createFileIcons(fileIcons, std::filesystem::path(CurrentSourceDir).append("resources/images/"));
-#  else
-    for (auto& iconItem : minimalIcons) {
-        auto icon = utf8(iconItem.entypoCode);
-        auto textureData = getMinimalIcon(mRenderer, icon.data(), mTheme.mIconFontName,
-                                          mTheme.mIconFontSize, mIconColor[static_cast<size_t>(iconItem.color)]);
-        mImageRepository.setImage(iconItem.imageId, std::move(textureData));
-    }
-#  endif
 #endif
+    createFileIcons(fileIcons, mSharedImages);
+
     TextField::Settings(mSettings, ConfigTextFieldSettings);
 
     std::array<color::RGBA,10> mIconColor = {
