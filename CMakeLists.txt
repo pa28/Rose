@@ -205,8 +205,8 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
         COMPONENT ROSE_RUNTIME
         )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/images"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/HamChrono"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/HamChrono"
         COMPONENT ROSE_RUNTIME
         )
 
