@@ -454,6 +454,18 @@ namespace rose {
             auto [lat,lon] = mMoon.geo();
             mCelestialIcons[1].imageId = static_cast<ImageId>(set::AppImageId::Moon);
             mCelestialIcons[1].geo = GeoPosition{lat,lon};
+
+            auto sg = mCelestialIcons[0].geo;
+            auto mg = mCelestialIcons[1].geo;
+
+            auto s2lat = sin((sg.lat()-mg.lat())/2.);
+            auto s2lon = sin((sg.lon()-mg.lon())/2.);
+            auto a = s2lat*s2lat + cos(sg.lat()) * cos(mg.lat()) * s2lon * s2lon;
+            auto c = 2 * atan2(sqrt(a), sqrt(1.-a));
+            auto R = 6371. * c;
+            // A simple Moon phase calculation. Not astronomically accurate but should vie pleasing results.
+            // 0 deg == New ... waxing 180 == full ... waning ... 0
+//            std::cout << __PRETTY_FUNCTION__ << " Sun-Moon angle: " << c << " rad, " << rad2deg(c) << " deg\n";
         } else {
             mCelestialIcons[1].imageId = RoseImageInvalid;
         }
