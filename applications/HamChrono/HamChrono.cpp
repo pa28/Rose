@@ -24,9 +24,8 @@
 
 using namespace rose;
 
-static constexpr std::array<Rose::IconFileItem,2> fileIcons = {
+static constexpr std::array<Rose::IconFileItem,1> fileIcons = {
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Sun), Size{0,0}, "35px-Sun.png"},
-        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "full_moon.png"},
 };
 
 void HamChrono::build() {

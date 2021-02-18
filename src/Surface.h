@@ -71,13 +71,29 @@ namespace rose::sdl {
         Surface(int width, int height, int depth, uint32_t rmask, uint32_t gmask, uint32_t bmask, uint32_t amask);
 
         /**
-         * @brief Provide access to a pixel of the surface.
+         * @brief Provide access to a pixel of the Surface.
          * @details The co-ordinates are not checked for out of range values.
          * @param x The X co-ordinate.
          * @param y The Y co-ordinate.
          * @return A reference to the pixel.
          */
         uint32_t &pixel(int x, int y);
+
+        /**
+         * @brief Get a pixel color of the Surface.
+         * @param x The x co-ordinate.
+         * @param y The y co-ordinate.
+         * @return The color as an RGBA.
+         */
+        color::RGBA color(int x, int y);
+
+        /**
+         * @brief Set a pixel color of the Surface.
+         * @param x The x co-ordinate.
+         * @param y The y co-ordinate.
+         * @param color the color as an RGBA.
+         */
+        void setColor(int x, int y, color::RGBA color);
 
         /**
          * @brief Create a surface using SDL_CreateRGBSurfaceWithFormat()

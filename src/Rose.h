@@ -651,5 +651,20 @@ namespace rose {
             }
             return path;
         }
+
+        /// The user's home directory path
+        const std::filesystem::path& getHomeDirectory() const { return mHomeDirectory; }
+
+        /// The user's XDG Data Home path
+        const std::filesystem::path& getDataHome() const { return mDataHome; }
+
+        /// The user's XDG Config Home path
+        const std::filesystem::path& getConfigHome() const { return mConfigHome; }
+
+        /// The user's XDG Cache Home path
+        const std::filesystem::path& getCacheHome() const { return mCacheHome; }
+
+        /// Image resources installed with the application.
+        const std::filesystem::path& getSharedImages() const { return mSharedImages; }
     };
 }

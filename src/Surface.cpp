@@ -31,6 +31,18 @@ namespace rose::sdl {
         return pixels[(y * get()->w) + x];
     }
 
+    color::RGBA Surface::color(int x, int y) {
+        auto p = pixel(x, y);
+        uint8_t r, g, b, a;
+        SDL_GetRGBA(p, get()->format, &r, &g, &b, &a);
+        return color::RGBA{r, g, b, a};
+    }
+
+    void Surface::setColor(int x, int y, color::RGBA color) {
+        auto c = color.toSdlColor();
+        pixel(x, y) = SDL_MapRGBA(get()->format, c.r, c.g, c.g, c.a);
+    }
+
     bool Surface::createWithFormat(int width, int height, int depth, SDL_PixelFormatEnum format) {
         reset(SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format));
         return operator bool();

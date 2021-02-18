@@ -9,6 +9,7 @@
 
 #include <filesystem>
 #include <utility>
+#include "Color.h"
 #include "Math.h"
 #include "SettingsNames.h"
 
@@ -443,29 +444,107 @@ namespace rose {
         return true;
     }
 
-    void MapProjection::setCelestialIcons() {
-        auto [lat,lon] = subSolar();
-        mCelestialIcons[0].imageId = static_cast<ImageId>(set::AppImageId::Sun);
-        mCelestialIcons[0].geo = GeoPosition{lat,lon};
+    void MapProjection::setMoonPhase() {
+        auto[sLat, sLon] = subSolar();
 
         if (mMoon) {
             DateTime predictTime{true};
             mMoon.predict(predictTime);
-            auto [lat,lon] = mMoon.geo();
-            mCelestialIcons[1].imageId = static_cast<ImageId>(set::AppImageId::Moon);
+            auto[mLat, mLon] = mMoon.geo();
+
+            auto s2lat = sin((sLat - mLat) / 2.);
+            s2lat *= s2lat;
+            auto s2lon = sin((sLon - mLon) / 2.);
+            s2lon *= s2lon;
+            auto a = s2lat + cos(sLat) * cos(mLat) * s2lon;
+            auto sC = 2 * atan2(sqrt(a), sqrt(1. - a));
+            // A simple Moon phase calculation. Not astronomically accurate but should vie pleasing results.
+            // 0 deg == New ... waxing 180 == full ... waning ... 0
+
+            // Unit vector from the Earth to the Sun.
+            auto sx = sin(sLon);
+            auto sy = cos(sLon);
+            auto sz = sin(0);
+
+            // Unit vector from the Moon to the Earth
+            auto mx0 = -sin(mLon);
+            auto my0 = -cos(mLon);
+            auto mz0 = -sin(0);
+
+            auto dot0 = sx * mx0 + sy * my0 + sz * mz0;
+
+//            std::cout << __PRETTY_FUNCTION__ << " Sun-Moon angle: " << sC << " rad, " << rad2deg(sC) << " deg\n"
+//                      << sx << ' ' << sy << ' ' << sz << '\n'
+//                      << mx0 << ' ' << my0 << ' ' << mz0 << '\n'
+//                      << dot0 << '\n';
+            auto imagePath = rose()->getSharedImages();
+            imagePath.append("full_moon.png");
+            sdl::Surface moon{imagePath};
+            if (moon) {
+                for (int y = 0; y < moon->h; ++y) {
+                    // Convert y to pseudo-Latitude.
+                    auto mpLat = M_PI_2 - M_PI * (double) y / (double) moon->h;
+                    auto countX = 0;
+                    for (int x = 0; x < moon->w; ++x) {
+                        auto color = moon.color(x, y);
+                        if (color.a() > 0.)
+                            countX++;
+                    }
+                    if (countX == 0)
+                        continue;
+                    auto dLon = M_PI / (double) countX;
+                    double mpLon = -M_PI_2;
+                    for (int x = 0; x < moon->w; ++x) {
+                        auto color = moon.color(x, y);
+                        if (color.a() > 0.) {
+                            auto mx = sin(mpLon + M_PI_2);
+                            auto my = cos(mpLon + M_PI_2);
+                            auto mz = sin(0);
+
+                            auto dot = sx * mx + sy * my + sz * mz;
+//                            std::cout << std::setw(4) << (int) (dot * 100);
+                            if (dot < 30.) {
+                                float mult = 0.95;
+                                if (dot < -10.)
+                                    mult = 0.5;
+                                else if (dot < 0.)
+                                    mult = 0.7;
+                                else if (dot < 10.)
+                                    mult = 0.9;
+                                color.r() *= mult;
+                                color.g() *= mult;
+                                color.b() *= mult;
+                                moon.setColor(x, y, color);
+                            }
+                            mpLon += dLon;
+                        } //else
+//                            std::cout << "    ";
+                    }
+//                    std::cout << '\n';
+                }
+                sdl::TextureData moonData{moon.toTexture(rose()->getRenderer())};
+                moonData.setBlendMOde(SDL_BLENDMODE_BLEND);
+                rose()->imageRepository().setImage(static_cast<ImageId>(set::AppImageId::Moon), std::move(moonData));
+                mCelestialIcons[1].imageId = static_cast<ImageId>(set::AppImageId::Moon);
+                mCelestialIcons[1].geo = GeoPosition{mLat, mLon};
+                setNeedsDrawing();
+            }
+        }
+    }
+
+    void MapProjection::setCelestialIcons() {
+        auto[lat, lon] = subSolar();
+        mCelestialIcons[0].imageId = static_cast<ImageId>(set::AppImageId::Sun);
+        mCelestialIcons[0].geo = GeoPosition{lat, lon};
+
+        if (mMoon) {
+            DateTime predictTime{true};
+            mMoon.predict(predictTime);
+            auto[lat, lon] = mMoon.geo();
             mCelestialIcons[1].geo = GeoPosition{lat,lon};
 
             auto sg = mCelestialIcons[0].geo;
             auto mg = mCelestialIcons[1].geo;
-
-            auto s2lat = sin((sg.lat()-mg.lat())/2.);
-            auto s2lon = sin((sg.lon()-mg.lon())/2.);
-            auto a = s2lat*s2lat + cos(sg.lat()) * cos(mg.lat()) * s2lon * s2lon;
-            auto c = 2 * atan2(sqrt(a), sqrt(1.-a));
-            auto R = 6371. * c;
-            // A simple Moon phase calculation. Not astronomically accurate but should vie pleasing results.
-            // 0 deg == New ... waxing 180 == full ... waning ... 0
-//            std::cout << __PRETTY_FUNCTION__ << " Sun-Moon angle: " << c << " rad, " << rad2deg(c) << " deg\n";
         } else {
             mCelestialIcons[1].imageId = RoseImageInvalid;
         }

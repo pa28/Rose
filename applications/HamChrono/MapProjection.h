@@ -12,6 +12,7 @@
 #include "Rose.h"
 #include "Ephemeris.h"
 #include "Plan13.h"
+#include "SettingsNames.h"
 
 namespace rose {
 
@@ -39,6 +40,8 @@ namespace rose {
      */
     class MapProjection : public Widget {
     protected:
+        Rose::IconFileItem mMoonIconSpec{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "full_moon.png"};
+
         static constexpr double GrayLineCos = -0.258;   ///< Sets the width of the dawn/dusk period.
         static constexpr double GrayLinePow = .99;      ///< Sets the speed of transitions, smaller is sharper.
 
@@ -114,6 +117,7 @@ namespace rose {
             mStationIcons[1].imageId = IconTargetRed;
         }
 
+        void setMoonPhase();
         void setCelestialIcons();
 
         /**
@@ -220,6 +224,7 @@ namespace rose {
          */
         void setMoonEphemeris(const std::array<std::string_view,3> &ephemeris) {
             mMoon.setEphemeris(ephemeris);
+            setMoonPhase();
             setCelestialIcons();
         }
     };
