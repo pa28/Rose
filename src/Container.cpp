@@ -174,8 +174,10 @@ namespace rose {
         if (!mVisible)
             return;
 
+        auto widgetRect = clampAvailableArea(parentRect, mLayoutHints.mAssignedRect);
+
         if (mSingleSize) {
-            auto widgetRect = parentRect.moveOrigin(mLayoutHints.mAssignedRect->getPosition());
+//            auto widgetRect = parentRect.moveOrigin(mLayoutHints.mAssignedRect->getPosition());
 
             for (auto &child : mChildren) {
                 child->draw(renderer, widgetRect);
@@ -185,14 +187,15 @@ namespace rose {
 
     Rectangle Grid::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
         auto gridAvailable = clampAvailableArea(available, mPos, mSize);
+        Rectangle gridLayout{gridAvailable};
         if (mSingleSize) {
-            size_t count = 0;
-            size_t stack = 0;
-            gridAvailable = mSingleSize.value();
+            int count = 0;
+            int stack = 0;
+            Rectangle childAvailable{Position::Zero, mSingleSize.value()};
             Position childPos{};
             for (auto &child : mChildren) {
                 LayoutHints &childHints{child->layoutHints()};
-                auto layout = child->widgetLayout(renderer, gridAvailable, 0);
+                auto layout = child->widgetLayout(renderer, childAvailable, 0);
                 layout = childPos;
                 layout = mSingleSize.value();
                 childHints.mAssignedRect = layout;
@@ -206,13 +209,12 @@ namespace rose {
                 }
             }
 
-            Size gridSize{};
-            gridSize.primary(mOrientation) = mSingleSize->primary(mOrientation) * static_cast<int>(mStride);
-            gridSize.secondary(mOrientation) = mSingleSize->secondary(mOrientation) * static_cast<int>(stack);
-            return Rectangle{0, 0, gridSize.width(), gridSize.height()};
+            Size gridSize{mSingleSize->width() * (stack+1),
+                          mSingleSize->height() * (int)(stack ? mStride : mChildren.size()) };
+            gridLayout = Rectangle{0, 0, gridSize.width(), gridSize.height()};
         }
 
-        return gridAvailable;
+        return gridLayout;
     }
 
     void Box::draw(sdl::Renderer &renderer, Rectangle parentRect) {

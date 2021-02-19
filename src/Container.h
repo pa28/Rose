@@ -169,9 +169,9 @@ namespace rose {
          */
         Rectangle widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) override {
             auto containerAvailable = clampAvailableArea(available, mPos, mSize);
-            for (int layoutStage = 0; layoutStage < 2; ++layoutStage)
+            for (int localLayoutStage = 0; localLayoutStage < 2; ++localLayoutStage)
                 for (auto &child : mChildren) {
-                    auto layout = child->widgetLayout(renderer, containerAvailable, layoutStage);
+                    auto layout = child->widgetLayout(renderer, containerAvailable, localLayoutStage);
                     if (auto position = child->getPos(); position)
                         layout = position.value();
                     child->mLayoutHints.mAssignedRect = layout;

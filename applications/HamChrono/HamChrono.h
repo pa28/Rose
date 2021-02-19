@@ -60,6 +60,8 @@ protected:
 
     void callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_ptr<rose::Column> &sideColumn);
 
+    void switchBox(std::shared_ptr<rose::Grid> &grid);
+
     std::shared_ptr<rose::Slot<rose::Button::SignalType>> mConfigButtonRx{};
 
 public:

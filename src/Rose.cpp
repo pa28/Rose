@@ -201,7 +201,7 @@ namespace rose {
      * @brief The Rose version of the SDL event loop.
      */
     void Rose::eventLoop() {
-        try {
+//        try {
             SDL_Event e;
             Fps fps;
 
@@ -224,11 +224,11 @@ namespace rose {
 
                 fps.next();
             }
-        }
+//        }
 
-        catch (const std::runtime_error &e) {
-            throw e;
-        }
+//        catch (const std::runtime_error &e) {
+//            throw e;
+//        }
     }
 
     void Rose::drawAll() {

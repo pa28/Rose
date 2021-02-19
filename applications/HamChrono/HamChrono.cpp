@@ -24,8 +24,9 @@
 
 using namespace rose;
 
-static constexpr std::array<Rose::IconFileItem,1> fileIcons = {
+static constexpr std::array<Rose::IconFileItem,2> fileIcons = {
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Sun), Size{0,0}, "35px-Sun.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "moon07.png"},
 };
 
 void HamChrono::build() {
@@ -201,6 +202,9 @@ void HamChrono::build() {
         topRow << wdg<Frame>() << BorderStyle::BevelIn << wdg<ImageView>(solar.first);
     }
 
+    auto switchBoxWdg = topRow << wdg<Grid>(3, Size{50, 50}, Orientation::Vertical);
+    switchBox(switchBoxWdg);
+
     mainWindow << wdg<Container>()
                << Position{mLeftMap, mAboveMap}
                << wdg<MapProjection>(clearSkyMaps, Size{mMapWidth, mMapHeight})
@@ -257,10 +261,20 @@ void HamChrono::callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_pt
         framPadding = 3;
     }
 
-    qthBlockColumn << wdg<Frame>(framPadding) << BorderStyle::Notch << CornerStyle::Round << Elastic(Orientation::Horizontal)
-                        << wdg<Column>() << InternalSpace{4}
-                            << wdg<TimeBox>(mSecondTick, true, true) << Manip::Parent
-                            << wdg<DateBox>(mSecondTick, true, true) << Manip::Parent;
+    qthBlockColumn << wdg<Frame>(framPadding) << BorderStyle::Notch << CornerStyle::Round
+                   << Elastic(Orientation::Horizontal)
+                   << wdg<Column>() << InternalSpace{4}
+                   << wdg<TimeBox>(mSecondTick, true, true) << Manip::Parent
+                   << wdg<DateBox>(mSecondTick, true, true) << Manip::Parent;
+}
+
+void HamChrono::switchBox(shared_ptr<rose::Grid> &grid) {
+    grid << wdg<Button>(RoseImageId::IconRocket, ButtonType::NormalButton) << Manip::Parent
+         << wdg<Button>(RoseImageId::IconGlobe, ButtonType::NormalButton) << Manip::Parent
+         << wdg<Button>( static_cast<RoseImageId>(set::AppImageId::Sun), ButtonType::NormalButton) << Manip::Parent
+         << wdg<Button>(RoseImageId::IconNetwork, ButtonType::NormalButton) << Manip::Parent
+         << wdg<Button>(RoseImageId::IconLocation, ButtonType::NormalButton) << Manip::Parent
+         << wdg<Button>(RoseImageId::IconCompass, ButtonType::NormalButton);
 }
 
 int main(int argc, char **argv) {
