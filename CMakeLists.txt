@@ -210,16 +210,21 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/HamChrono"
         COMPONENT ROSE_RUNTIME
         )
 
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts"
+        DESTINATION "${CMAKE_INSTALL_PREFIX}"
+        COMPONENT ROSE_RUNTIME
+        )
+
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
         COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL
         FILES_MATCHING PATTERN "*.h")
 
-# ToDo: Make changes in Font.h to support multiple font paths so this can be a relative path.
-install(FILES /usr/share/fonts/truetype/entypo/entypo.ttf DESTINATION /usr/share/fonts/truetype/entypo
-        COMPONENT ROSE_RUNTIME)
-install(FILES resources/systemd/rose.service DESTINATION /etc/systemd/system
-        COMPONENT ROSE_RUNTIME)
+install(FILES resources/systemd/rose.service
+        DESTINATION /etc/systemd/system
+        COMPONENT ROSE_RUNTIME
+        )
+
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/RoseConfig.cmake
         DESTINATION share/cmake/Rose/
         COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL)
