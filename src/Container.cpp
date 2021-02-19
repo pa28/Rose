@@ -209,7 +209,7 @@ namespace rose {
                 }
             }
 
-            Size gridSize{mSingleSize->width() * (stack+1),
+            Size gridSize{mSingleSize->width() * (stack + (mChildren.size() % mStride ? 1 : 0)),
                           mSingleSize->height() * (int)(stack ? mStride : mChildren.size()) };
             gridLayout = Rectangle{0, 0, gridSize.width(), gridSize.height()};
         }
