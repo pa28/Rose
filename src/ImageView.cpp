@@ -53,7 +53,7 @@ namespace rose {
                 imageRect.height() = roundToInt((float) mSize->height() * hRatio);
             }
         } else if (imageRect.width() == 0 || imageRect.height() == 0) {
-            imageRect = available.getSize();
+//            imageRect = available.getSize();
         } else {
             float wRatio = (float)imageRect.width() / (float) mSize->width();
             float hRatio = (float)imageRect.height() / (float) mSize->height();
