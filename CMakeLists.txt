@@ -211,7 +211,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/HamChrono"
         )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts"
-        DESTINATION "${CMAKE_INSTALL_PREFIX}"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}"
         COMPONENT ROSE_RUNTIME
         )
 
