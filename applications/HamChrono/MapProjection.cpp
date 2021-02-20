@@ -430,8 +430,8 @@ namespace rose {
                         auto cosDeltaSigma = sin(latS) * sin(latE) + cos(latS) * cos(latE) * cos(abs(lonS - lonE));
                         double fract_day;
                         if (cosDeltaSigma < 0) {
-                            if (cosDeltaSigma > GrayLineCos) {
-                                fract_day = 1.0 - pow(cosDeltaSigma / GrayLineCos, GrayLinePow);
+                            if (cosDeltaSigma > GrayLineCos[1]) {
+                                fract_day = 1.0 - pow(cosDeltaSigma / GrayLineCos[1], GrayLinePow);
                                 alpha = std::clamp((float)fract_day, 0.0313f, 1.f);
                             } else
                                 alpha = 0.0313;  // Set the minimun alpha to keep some daytime colour on the night side

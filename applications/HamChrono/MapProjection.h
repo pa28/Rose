@@ -16,6 +16,9 @@
 
 namespace rose {
 
+    static constexpr double GRAYLINE_COS = -0.208;      ///< cos(90 + grayline angle), we use 12 degs
+    static constexpr double GRAYLINE_POW =	0.75;       ///< cos power exponent, sqrt is too severe, 1 is too gradual
+
     enum class ProjectionType {
         Mercator,
         StationMercator,
@@ -42,8 +45,9 @@ namespace rose {
     protected:
         Rose::IconFileItem mMoonIconSpec{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "full_moon.png"};
 
-        static constexpr double GrayLineCos = -0.258;   ///< Sets the width of the dawn/dusk period.
-        static constexpr double GrayLinePow = .99;      ///< Sets the speed of transitions, smaller is sharper.
+        /// Twilight specs: civil, nautical, astronomical.
+        static constexpr std::array<double,3> GrayLineCos = {-0.105, -0.208, -0.309};   ///< Sets the width of the dawn/dusk period.
+        static constexpr double GrayLinePow = .80;      ///< Sets the speed of transitions, smaller is sharper. (.75)
 
         bool mSatelliteMode{};                    ///< True when map is in SatelliteMode
         bool mCelestialMode{};                    ///< True when map is displaying Celestial objects.
