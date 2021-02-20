@@ -71,6 +71,9 @@ namespace rose {
      * @brief Cache storage for requested fonts.
      */
     class FontCache {
+    protected:
+        std::vector<std::filesystem::path> mFontPathList{};
+
     public:
         ~FontCache() = default;
 
@@ -84,7 +87,7 @@ namespace rose {
          * @return a std::optional<std::filesystem::path> of the font file.
          */
         template<typename StringType>
-        std::optional<std::filesystem::path> locateFont(std::filesystem::path &path, StringType fontName) {
+        std::optional<std::filesystem::path> locateFont(const std::filesystem::path &path, StringType fontName) {
             for (auto &p : std::filesystem::recursive_directory_iterator(path)) {
                 if (p.path().stem() == fontName && p.is_regular_file()) {
                     return p.path();
@@ -103,13 +106,23 @@ namespace rose {
         std::optional<std::filesystem::path> getFontPath(StringType fontName) {
             if (auto found = mFontPathMap.find(fontName); found != mFontPathMap.end())
                 return found->second;
-            std::filesystem::path rootPath{Theme::dFontRootPath};
-            auto fontPath = locateFont(rootPath, fontName);
-            if (fontPath) {
-                mFontPathMap[fontName] = fontPath.value();
-//                std::cout << __PRETTY_FUNCTION__ << ' ' << fontPath.value() << '\n';
-                return fontPath;
+
+            if (mFontPathList.empty()) {
+                std::stringstream strm(std::string{Theme::dFontRootPath});
+                std::string rootPathStr{};
+                while (getline(strm, rootPathStr, ':')) {
+                    mFontPathList.emplace_back(rootPathStr);
+                }
             }
+
+            for (auto const &rootPath : mFontPathList) {
+                auto fontPath = locateFont(rootPath, fontName);
+                if (fontPath) {
+                    mFontPathMap[fontName] = fontPath.value();
+                    return fontPath;
+                }
+            }
+
             return std::nullopt;
         }
 

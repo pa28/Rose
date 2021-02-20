@@ -107,7 +107,7 @@ namespace rose {
         static constexpr int dCPUNormalMax = 55000;
         static constexpr int dCPUWarningMax = 60000;
 
-        static constexpr std::string_view dFontRootPath = "/usr/share/fonts/truetype/";
+        static constexpr std::string_view dFontRootPath = "/usr/share/fonts:/usr/local/share/fonts";
         static constexpr std::string_view dDefaultFontName = "FreeSans";
 
         static constexpr std::string_view dFixePitchFont = "FreeMonoBold";    ///< Default font name
