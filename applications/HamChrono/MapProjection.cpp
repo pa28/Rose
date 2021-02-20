@@ -74,8 +74,8 @@ namespace rose {
 
         mMapCache->itemFetched.connect(mapFileRx);
 
-        settingsUpdateRx = std::make_shared<Slot<std::string>>();
-        settingsUpdateRx->setCallback([&](uint32_t, const std::string& name){
+        mSettingsUpdateRx = std::make_shared<Slot<std::string>>();
+        mSettingsUpdateRx->setCallback([&](uint32_t, const std::string& name){
             if (name == set::QTH) {
                 mAbortFuture = true;
                 if (mFutureAziProj.valid()) {
@@ -86,10 +86,24 @@ namespace rose {
                 mAbortFuture = false;
                 setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
                 mFutureAziProj = std::async(std::launch::async, &MapProjection::computeAzimuthalMaps, this);
+            } else if (name == set::AzimuthalMode) {
+                mProjection = rose()->settings()->getValue(set::AzimuthalMode, 0) ? ProjectionType::StationAzmuthal :
+                        ProjectionType::StationMercator;
+                setNeedsDrawing();
+            } else if (name == set::CelestialMode) {
+                mCelestialMode = rose()->settings()->getValue(set::CelestialMode, 0) != 0;
+                setNeedsDrawing();
+            } else if (name == set::SatelliteMode) {
+                mSatelliteMode = rose()->settings()->getValue(set::SatelliteMode, 0) != 0;
+                setNeedsDrawing();
             }
         });
 
-        rose()->settings()->dataChangeTx.connect(settingsUpdateRx);
+        mProjection = rose()->settings()->getValue(set::AzimuthalMode, 0) ? ProjectionType::StationAzmuthal :
+                      ProjectionType::StationMercator;
+        mCelestialMode = rose()->settings()->getValue(set::CelestialMode, 0) != 0;
+        mSatelliteMode = rose()->settings()->getValue(set::SatelliteMode, 0) != 0;
+        rose()->settings()->dataChangeTx.connect(mSettingsUpdateRx);
 
         mClassName = "MapProjection";
     }
@@ -162,7 +176,8 @@ namespace rose {
         drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
                      widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
 
-        drawMapItems(mCelestialIcons.begin(), mCelestialIcons.end(), renderer,
+        if (mCelestialMode)
+            drawMapItems(mCelestialIcons.begin(), mCelestialIcons.end(), renderer,
                      widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
     }
 

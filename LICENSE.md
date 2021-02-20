@@ -27,3 +27,7 @@ at [WikiMedia](https://commons.wikimedia.org/wiki/File:Sun.svg)
 ### Moon Image
 
 From [WikiMedia](https://openclipart.org/detail/170669/weather-icon-full-moon) open clipart project.
+
+or
+
+Static images from [Die.net](https://www.die.net/moon/) shrunken to 25 x 25 pixel.

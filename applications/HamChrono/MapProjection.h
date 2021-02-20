@@ -45,6 +45,9 @@ namespace rose {
         static constexpr double GrayLineCos = -0.258;   ///< Sets the width of the dawn/dusk period.
         static constexpr double GrayLinePow = .99;      ///< Sets the speed of transitions, smaller is sharper.
 
+        bool mSatelliteMode{};                    ///< True when map is in SatelliteMode
+        bool mCelestialMode{};                    ///< True when map is displaying Celestial objects.
+
         std::future<bool> mFutureAziProj{};       ///< A future for the map azimuthal projections.
         std::future<bool> mFutureSun{};           ///< A future for the map sun illumination.
         std::atomic_bool mNewSurfaces{};          ///< True when there are new Surfaces to render into Textures.
@@ -71,7 +74,7 @@ namespace rose {
         sdl::Texture mNightAz{};        ///< The Texture with the Night Azimuthal map.
         sdl::Texture mDayAz{};          ///< The Texture with the Day Azimuthal map.
 
-        std::shared_ptr<Slot<std::string>> settingsUpdateRx{};  ///< Slot to receive settings updates on.
+        std::shared_ptr<Slot<std::string>> mSettingsUpdateRx{};  ///< Slot to receive settings updates on.
 
         /**
          * @brief Compute Azimuthal map projections.

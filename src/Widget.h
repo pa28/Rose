@@ -138,7 +138,8 @@ namespace rose {
 
     /**
      * @class Id
-     * @brief A class derived from std::string that may be initialized by anything convertable to a std::string.
+     * @brief A class to tie a Widget identity (Button configuration for example) to the Settings database.
+     * @brief Derived from std::string that may be initialized by anything convertible to a std::string.
      */
     class Id : public std::string {
     public:
@@ -147,7 +148,7 @@ namespace rose {
         /**
          * @brief Constructor
          * @tparam String The type of initializer
-         * @param id The value of intializer
+         * @param id The value of initializer
          */
         template<typename String>
         explicit Id(String id) : std::string(id) {}
@@ -156,7 +157,31 @@ namespace rose {
          * @brief Get the value of the Id.
          * @return The value in a std::string.
          */
-        [[nodiscard]] auto value() const { return static_cast<std::string>(*this);}
+        [[nodiscard]] auto value() const { return static_cast<std::string>(*this); }
+    };
+
+    /**
+     * @class StateId
+     * @brief A class to tie a Widget state to the Settings database.
+     * @details Derived from std::string, may be initialized by anything convertible to a std:string.
+     */
+    class StateId : public std::string {
+    public:
+        StateId() = default;
+
+        /**
+         * @brief Constructor
+         * @tparam String The type of initializer
+         * @param id The value of initializer
+         */
+        template<typename String>
+        explicit StateId(String id) : std::string(id) {}
+
+        /**
+         * @brief Get the value of the StateId.
+         * @return The value in a std::string.
+         */
+        [[nodiscard]] auto value() const { return static_cast<std::string>(*this); }
     };
 
     /**
@@ -186,7 +211,8 @@ namespace rose {
 
         color::RGBA mBackgroundColor{};                 ///< The widget background color::RGBA
 
-        Id mId{};                     ///< An identifier string used to find the widget and for settings.
+        Id mId{};                       ///< An identifier string used to find the widget and for settings.
+        StateId mStateId{};             ///< An identifier string used to identify the widget with application state.
 
         std::string_view mClassName;    ///< The class name of the Widget.
 
@@ -213,16 +239,28 @@ namespace rose {
         virtual std::string_view getClassName() const { return mClassName; }
 
         /**
-         * @brief Set the Widget id
-         * @param id the Widget id string.
+         * @brief Set the Widget Id
+         * @param id the Widget Id string.
          */
         void setId(const Id& id) { mId = id; }
 
         /**
-         * @brief Get the Widget id
-         * @return The Widget id string.
+         * @brief Set the Widget StateId
+         * @param id the Widget StateId string.
+         */
+        virtual void setStateId(const StateId &id) { mStateId = id; }
+
+        /**
+         * @brief Get the Widget Id
+         * @return The Widget Id string.
          */
         const Id& getId() const { return mId; }
+
+        /**
+         * @brief Get the Widget StateId
+         * @return The Widget StateId string.
+         */
+        const StateId& getStateId() const { return mStateId; }
 
         /**
          * @brief Called immediately after construction of a Widget.

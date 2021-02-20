@@ -20,6 +20,7 @@ namespace rose {
         rxState->setCallback([&](uint32_t sn, std::pair<bool,SignalToken> state) {
             if (sn != mSignalSerialNumber && mInvert != state.first) {
                 setInvert(state.first);
+                updateStateSetting(state.first ? ButtonSetState::ButtonOn : ButtonSetState::ButtonOff);
                 txState.transmit(sn, state);
             }
         });
@@ -55,6 +56,20 @@ namespace rose {
         mAcceptsFocus = true;
         auto sRose = rose();
 
+        if (rose()->hasSettings()) {
+            mSettingsUpdateRx = std::make_shared<Slot<std::string>>();
+            mSettingsUpdateRx->setCallback([&](uint32_t,const std::string& name){
+                if (name == mStateId.value()) {
+                    setInvert(rose()->settings()->getValue(mStateId.value(), 0));
+                } else if (mId == name)
+                    setText(rose()->settings()->getValue(mId, std::string{}));
+            });
+        }
+
+        if (!mId.empty() && rose()->hasSettings()) {
+            rose()->settings()->dataChangeTx.connect(mSettingsUpdateRx);
+        }
+
         if (mLabelText.empty() && !getId().empty()) {
             mLabelText = sRose->settings()->getValue(getId().value(), getId().value());
         }
@@ -83,16 +98,6 @@ namespace rose {
 
             getWidget<Button>() << wdg<Label>(mLabelText, mBadge)
                     << FontSize(mLabelFontSize);
-        }
-
-        mSettingsUpdated = std::make_shared<Slot<std::string>>();
-        mSettingsUpdated->setCallback([&](uint32_t,const std::string& text){
-            if (mId == text)
-                setText(rose()->settings()->getValue(mId,std::string{}));
-        });
-
-        if (!mId.empty() && rose()->hasSettings()) {
-            rose()->settings()->dataChangeTx.connect(mSettingsUpdated);
         }
 
         mClassName = "Button";
@@ -130,7 +135,9 @@ namespace rose {
                             break;
                         case ToggleButton:
                             mButtonSelectState = mInvert ? ButtonSetState::ButtonOn : ButtonSetState::ButtonOff;
-                            txState.transmit(mSignalSerialNumber.serialNumber(), std::pair<bool,SignalToken>{mButtonSelectState,mSignalToken});
+                            txState.transmit(mSignalSerialNumber.serialNumber(),
+                                             std::pair<bool, SignalToken>{mButtonSelectState, mSignalToken});
+                            updateStateSetting(mButtonSelectState);
                             break;
                         case RadioButton:
                             break;
@@ -235,5 +242,12 @@ namespace rose {
         }
         throw RoseLogicError(
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
+    }
+
+    void Button::updateStateSetting(ButtonSetState state) {
+        if (mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton &&
+                                                       !mStateId.empty() && rose()->hasSettings()) {
+            rose()->settings()->setValue(mStateId.value(), state == ButtonSetState::ButtonOn);
+        }
     }
 }

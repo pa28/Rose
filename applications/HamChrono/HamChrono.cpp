@@ -269,12 +269,18 @@ void HamChrono::callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_pt
 }
 
 void HamChrono::switchBox(shared_ptr<rose::Grid> &grid) {
-    grid << wdg<Button>(RoseImageId::IconRocket, ButtonType::NormalButton) << Manip::Parent
-         << wdg<Button>(RoseImageId::IconGlobe, ButtonType::NormalButton) << Manip::Parent
-         << wdg<Button>( static_cast<RoseImageId>(set::AppImageId::Sun), ButtonType::NormalButton) << Manip::Parent
-         << wdg<Button>(RoseImageId::IconNetwork, ButtonType::NormalButton) << Manip::Parent
-         << wdg<Button>(RoseImageId::IconLocation, ButtonType::NormalButton) << Manip::Parent
-         << wdg<Button>(RoseImageId::IconCompass, ButtonType::NormalButton);
+    grid << wdg<Button>(RoseImageId::IconRocket, ButtonType::ToggleButton)
+            << StateId(set::SatelliteMode)
+            << Manip::Parent
+         << wdg<Button>(RoseImageId::IconGlobe, ButtonType::ToggleButton)
+            << StateId(set::AzimuthalMode)
+            << Manip::Parent
+         << wdg<Button>( static_cast<RoseImageId>(set::AppImageId::Sun), ButtonType::ToggleButton)
+             << StateId(set::CelestialMode)
+             << Manip::Parent
+         << wdg<Button>(RoseImageId::IconLocation, ButtonType::ToggleButton) << Manip::Parent
+         << wdg<Button>(RoseImageId::IconNetwork, ButtonType::ToggleButton) << Manip::Parent
+         << wdg<Button>(RoseImageId::IconCompass, ButtonType::ToggleButton);
 }
 
 int main(int argc, char **argv) {

@@ -121,6 +121,19 @@ inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget
 }
 
 /**
+ * @brief Set a StateId on a Widget.
+ * @tparam WidgetType The type of Widget.
+ * @param widget The Widget
+ * @param stateId The StateId.
+ * @return The Widget
+ */
+template<typename WidgetType>
+inline std::shared_ptr<WidgetType> operator<<(std::shared_ptr<WidgetType> widget, rose::StateId stateId) {
+    widget->setStateId(stateId);
+    return widget;
+}
+
+/**
  * @brief Set the Elastic state of a Widget.
  * @tparam WidgetType The type of Widget
  * @param widget The Widget.

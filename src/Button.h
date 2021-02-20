@@ -54,8 +54,13 @@ namespace rose {
         /// Handle a click transaction cancel event (default implementation: propagate to children)
         bool clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) override;
 
+        /// Update the button state in the Setting database.
+        void updateStateSetting(ButtonSetState state);
+
         /// Get the underlying Label Widget.
         std::shared_ptr<Label> getLabel();
+
+        std::shared_ptr<Slot<std::string>> mSettingsUpdateRx{};  ///< Slot to receive settings updates on.
 
     public:
         Button();
@@ -157,8 +162,6 @@ namespace rose {
          */
         Signal<SignalType> txState;
 
-        std::shared_ptr<Slot<std::string>> mSettingsUpdated{};   ///< A Slot to receive label updates on.
-
         /**
          * @brief Set the button select state
          * @param state The new select state.
@@ -243,6 +246,15 @@ namespace rose {
          * @param renderFlip
          */
         void setRenderFlip(sdl::RenderFlip renderFlip);
+
+        /// Set the Button StateId.
+        void setStateId(const StateId &stateId) override {
+            Widget::setStateId(stateId);
+            if (mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton &&
+                                                           !mStateId.empty() && rose()->hasSettings()) {
+                setInvert(rose()->settings()->getValue(mStateId.value(), 0) != 0);
+            }
+        }
     };
 }
 
