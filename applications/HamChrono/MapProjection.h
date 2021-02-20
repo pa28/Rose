@@ -120,8 +120,8 @@ namespace rose {
             mAntipode = antipode(mQthRad);
             mStationIcons[0].geo = mQthRad;
             mStationIcons[1].geo = mAntipode;
-            mStationIcons[0].imageId = IconTargetGreen;
-            mStationIcons[1].imageId = IconTargetRed;
+            mStationIcons[0].imageId = static_cast<ImageId>(set::AppImageId::RingGreen);
+            mStationIcons[1].imageId = static_cast<ImageId>(set::AppImageId::RingRed);
         }
 
         void setMoonPhase();

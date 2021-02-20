@@ -15,6 +15,18 @@ namespace set {
     enum class AppImageId : rose::ImageId {
         Sun = rose::ImageRepository::FirstApplicationImageId,
         Moon,
+        RingRed,
+        RingGreen,
+        RingBlue,
+        RingYellow,
+        RingPurple,
+        RingAqua,
+        DotRed,
+        DotGreen,
+        DotBlue,
+        DotYellow,
+        DotPurple,
+        DotAqua,
     };
 
     static constexpr std::string_view CALLSIGN = "CALLSIGN";

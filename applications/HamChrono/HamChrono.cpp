@@ -24,9 +24,21 @@
 
 using namespace rose;
 
-static constexpr std::array<Rose::IconFileItem,2> fileIcons = {
+static constexpr std::array<Rose::IconFileItem,14> fileIcons = {
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Sun), Size{0,0}, "35px-Sun.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "moon08.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingGreen), Size{0,0}, "RingGreen.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingRed), Size{0,0}, "RingRed.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingBlue), Size{0,0}, "RingBlue.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingYellow), Size{0,0}, "RingYellow.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingPurple), Size{0,0}, "RingPurple.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingAqua), Size{0,0}, "RingAqua.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotRed), Size{0,0}, "DotRed.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotRed), Size{0,0}, "DotRed.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotBlue), Size{0,0}, "DotBlue.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotYellow), Size{0,0}, "DotYellow.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotPurple), Size{0,0}, "DotPurple.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotAqua), Size{0,0}, "DotAqua.png"},
 };
 
 void HamChrono::build() {
