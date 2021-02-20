@@ -250,7 +250,7 @@ namespace rose {
         /// Set the Button StateId.
         void setStateId(const StateId &stateId) override {
             Widget::setStateId(stateId);
-            if (mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton &&
+            if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
                                                            !mStateId.empty() && rose()->hasSettings()) {
                 setInvert(rose()->settings()->getValue(mStateId.value(), 0) != 0);
             }

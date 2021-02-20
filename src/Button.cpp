@@ -59,10 +59,12 @@ namespace rose {
         if (rose()->hasSettings()) {
             mSettingsUpdateRx = std::make_shared<Slot<std::string>>();
             mSettingsUpdateRx->setCallback([&](uint32_t,const std::string& name){
-                if (name == mStateId.value()) {
-                    setInvert(rose()->settings()->getValue(mStateId.value(), 0));
-                } else if (mId == name)
-                    setText(rose()->settings()->getValue(mId, std::string{}));
+                if (!name.empty()) {
+                    if (name == mStateId.value()) {
+                        setInvert(rose()->settings()->getValue(mStateId.value(), 0));
+                    } else if (name == mId.value())
+                        setText(rose()->settings()->getValue(mId, std::string{}));
+                }
             });
         }
 
@@ -245,7 +247,7 @@ namespace rose {
     }
 
     void Button::updateStateSetting(ButtonSetState state) {
-        if (mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton &&
+        if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
                                                        !mStateId.empty() && rose()->hasSettings()) {
             rose()->settings()->setValue(mStateId.value(), state == ButtonSetState::ButtonOn);
         }
