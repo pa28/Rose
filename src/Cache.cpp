@@ -209,8 +209,7 @@ namespace rose {
                     if (auto status = fut.wait_for(span); status == std::future_status::ready) {
                         auto result = fut.get();
                         auto &cacheObject{find(result)->second};
-                        if (cacheObject.getStatusCode() == 200 ||
-                            (cacheObject.getStatusCode() == 304 && !cacheObject.getFirstProcess())) {
+                        if (cacheObject.getStatusCode() == 200 || cacheObject.getStatusCode() == 304) {
                             itemFetched.transmit(mSignalSerialNumber(), result);
                             cacheObject.setFirstProcess();
                         } else {
