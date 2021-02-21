@@ -247,11 +247,15 @@ namespace rose {
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
             dst.x() += mapRectangle.width();
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
-        } else if (h > 0 && w == 0 && !azimuthal) {
-            dst.y() = mapRectangle.y() - h;
-            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
-            dst.y() += mapRectangle.height();
-            rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+        } else if (h > 0 && w == 0) {
+            if (!azimuthal || h < iconSize.height() / 2) {
+                dst.y() = mapRectangle.y() - h;
+                rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            }
+            if (!azimuthal || h > iconSize.height() / 2) {
+                dst.y() += mapRectangle.height();
+                rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
+            }
         } else if (h > 0 && w > 0 && !azimuthal) {
             dst.x() = mapRectangle.x() - w;
             dst.y() = mapRectangle.y() - h;
