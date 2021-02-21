@@ -44,6 +44,13 @@ namespace rose {
 
         secondRx = std::make_shared<Slot<int>>();
         secondRx->setCallback([&](uint32_t, int second){
+            if (second % 5 == 1) {
+                DateTime now{true};
+                for (auto & satellite : mSatelliteList) {
+                    satellite.predict(now);
+                }
+                setNeedsDrawing();
+            }
             std::chrono::milliseconds span(1);      // The length of time to wait for a future.
 
             if (mFutureAziProj.valid()) {
@@ -183,9 +190,7 @@ namespace rose {
         drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
                      widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
 
-        DateTime now{true};
         for (auto satellite = mSatelliteList.begin(); satellite != mSatelliteList.end(); ++satellite) {
-            satellite->predict(now);
             GeoPosition geo{satellite->geo()};
             auto iconIdx = static_cast<std::size_t>(set::AppImageId::DotRed) + (satellite-mSatelliteList.begin());
             MapIcon mapItem{static_cast<ImageId>(iconIdx), geo};
