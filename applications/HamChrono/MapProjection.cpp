@@ -706,8 +706,8 @@ namespace rose {
                 Satellite satellite{esv.second};
                 auto [rise_ok, set_ok, rise_az, set_az, max_elevation, rise_time, set_time] =
                 findNextPass(satellite, mObserver);
-                if (rise_ok && set_ok && max_elevation > 30.) {
-                    satellite.setPassData(rise_time, set_time);
+                if (set_ok && max_elevation > mMinimumElevation) {
+                    satellite.setPassData(rise_ok, set_ok, rise_time, set_time);
                     satelliteList.emplace_back(satellite);
                 }
             }

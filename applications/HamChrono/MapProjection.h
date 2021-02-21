@@ -86,6 +86,7 @@ namespace rose {
         void updateEphemerisFile();                 ///< Update ephemeris and start tracking.
         Observer mObserver{};                       ///< The QTH Observer data.
         std::vector<Satellite> mSatelliteList{};    ///< The list of Satellites being tracked.
+        double mMinimumElevation{30.};              ///< The minimum pass elevation to track satellite.
 
         /// Find the next pass of Satellite over Observer.
         std::tuple<bool, bool, double, double, double, DateTime, DateTime>
