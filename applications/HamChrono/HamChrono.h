@@ -50,11 +50,12 @@ protected:
     std::shared_ptr<rose::MapProjection> mMapProjection{};
 
     std::unique_ptr<rose::WebFileCache> solarImageCache;
-    std::unique_ptr<rose::WebFileCache> celesTrackEphemeris;
-    std::unique_ptr<rose::WebFileCache> clearSkyEphemeris;
+    std::unique_ptr<rose::WebFileCache> mCelesTrackEphemeris;
+    std::unique_ptr<rose::WebFileCache> mClearSkyEphemeris;
     std::shared_ptr<rose::WebFileCache> clearSkyMaps;
 
     std::shared_ptr<rose::Slot<uint32_t>> mSolarImageCacheSlot;
+    std::shared_ptr<rose::Slot<uint32_t>> mEphemerisSlot;
 
     rose::GeoPosition mQthLocation{};
 

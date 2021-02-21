@@ -34,7 +34,7 @@ static constexpr std::array<Rose::IconFileItem,14> fileIcons = {
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingPurple), Size{0,0}, "RingPurple.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingAqua), Size{0,0}, "RingAqua.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotRed), Size{0,0}, "DotRed.png"},
-        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotRed), Size{0,0}, "DotRed.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotGreen), Size{0,0}, "DotGreen.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotBlue), Size{0,0}, "DotBlue.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotYellow), Size{0,0}, "DotYellow.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::DotPurple), Size{0,0}, "DotPurple.png"},
@@ -93,13 +93,13 @@ void HamChrono::build() {
                                                      mCacheHome, "NASASolarImages",
                                                      std::chrono::minutes{15});
 
-    celesTrackEphemeris = std::make_unique<WebFileCache>("https://www.celestrak.com/NORAD/elements/",
-                                                         mCacheHome, "CelesTrack",
-                                                         std::chrono::hours{24});
+    mCelesTrackEphemeris = std::make_unique<WebFileCache>("https://www.celestrak.com/NORAD/elements/",
+                                                          mCacheHome, "CelesTrack",
+                                                          std::chrono::hours{24});
 
-    clearSkyEphemeris = std::make_unique<WebFileCache>("http://clearskyinstitute.com/ham/HamClock/",
-                                                       mCacheHome, "ClearSky",
-                                                       std::chrono::hours{24});
+    mClearSkyEphemeris = std::make_unique<WebFileCache>("http://clearskyinstitute.com/ham/HamClock/",
+                                                        mCacheHome, "ClearSky",
+                                                        std::chrono::hours{24});
 
     clearSkyMaps = std::make_shared<WebFileCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
                                                   mCacheHome, "ClearSkyMaps",
@@ -108,7 +108,7 @@ void HamChrono::build() {
     mSecondTick = std::make_shared<SecondTick>();
 
     mSolarImageCacheSlot = std::make_shared<Slot<uint32_t>>();
-    mSolarImageCacheSlot->setCallback([=](uint32_t, uint32_t item) {
+    mSolarImageCacheSlot->setCallback([&](uint32_t, uint32_t item) {
         auto filePath = solarImageCache->cacheRootPath();
         filePath.append(solarImageCache->find(item)->second.objectSrcName());
         sdl::Surface surface{IMG_Load(filePath.string().c_str())};
@@ -120,6 +120,29 @@ void HamChrono::build() {
     });
 
     solarImageCache->itemFetched.connect(mSolarImageCacheSlot);
+
+    mEphemerisSlot = std::make_shared<Slot<uint32_t>>();
+    mEphemerisSlot->setCallback([&](uint32_t, uint32_t item){
+        auto source = static_cast<EphemerisFile>(item);
+        std::filesystem::path filePath{};
+        switch (source) {
+            case rose::EphemerisFile::ClearSkyMoon:
+            case rose::EphemerisFile::ClearSkyAll:
+                filePath = mClearSkyEphemeris->cacheRootPath();
+                filePath.append(mClearSkyEphemeris->find(item)->second.objectSrcName());
+                break;
+            case rose::EphemerisFile::CTAmateur:
+            case rose::EphemerisFile::CTCube:
+            case rose::EphemerisFile::CTVisual:
+                filePath = mCelesTrackEphemeris->cacheRootPath();
+                filePath.append(mCelesTrackEphemeris->find(item)->second.objectSrcName());
+                break;
+        }
+        mMapProjection->setMoonEphemerisFile(source, filePath);
+    });
+
+    mClearSkyEphemeris->itemFetched.connect(mEphemerisSlot);
+    mCelesTrackEphemeris->itemFetched.connect(mEphemerisSlot);
 
     createRoundCorners(mRenderer, 5, 10, 2,
                        Theme::dTopColor, Theme::dBotColor, Theme::dLeftColor, Theme::dRightColor);
@@ -136,12 +159,17 @@ void HamChrono::build() {
                                        CacheObject{"latest_512_0171.jpg", "AIA 171 Å"}});
     solarImageCache->emplace(std::pair{mImageRepository.getImageId(),
                                        CacheObject{"latest_512_HMIB.jpg", "HMIB"}});
-    celesTrackEphemeris->emplace(std::pair{1, CacheObject{"amateur.txt", "Amateur"}});
-    celesTrackEphemeris->emplace(std::pair{2, CacheObject{"cubesat.txt", "CubeSat"}});
-    celesTrackEphemeris->emplace(std::pair{3, CacheObject{"visual.txt", "Visual"}});
+    mCelesTrackEphemeris->emplace(std::pair{static_cast<uint>(EphemerisFile::CTAmateur),
+                                            CacheObject{"amateur.txt", "Amateur"}});
+    mCelesTrackEphemeris->emplace(std::pair{static_cast<uint>(EphemerisFile::CTCube),
+                                            CacheObject{"cubesat.txt", "CubeSat"}});
+    mCelesTrackEphemeris->emplace(std::pair{static_cast<uint>(EphemerisFile::CTVisual),
+                                            CacheObject{"visual.txt", "Visual"}});
 
-    clearSkyEphemeris->emplace(std::pair{1, CacheObject{"esats.pl?getall=", "Amateur"}});
-    clearSkyEphemeris->emplace(std::pair{2, CacheObject{"esats.pl?tlename=Moon", "Moon"}});
+    mClearSkyEphemeris->emplace(std::pair{static_cast<uint>(EphemerisFile::ClearSkyAll),
+                                          CacheObject{"esats.pl?getall=", "Amateur"}});
+    mClearSkyEphemeris->emplace(std::pair{static_cast<uint>(EphemerisFile::ClearSkyMoon),
+                                          CacheObject{"esats.pl?tlename=Moon", "Moon"}});
 
     auto mapScale = mWidth / 800;
     mMapWidth = (mWidth / mapScale - 140) * mapScale;
@@ -223,23 +251,17 @@ void HamChrono::build() {
                >> mMapProjection;
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
-    celesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
-    clearSkyEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
+    mCelesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
+    mClearSkyEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
     clearSkyMaps->connect(mSecondTick->txSecond, mSecondTick->txHour);
 
     mSecondTick->txSecond.connect(mMapProjection->secondRx);
     mSecondTick->txMinute.connect(mMapProjection->minuteRx);
 
     solarImageCache->fetchAll();
-    celesTrackEphemeris->fetchAll();
-    clearSkyEphemeris->fetchAll();
+    mCelesTrackEphemeris->fetchAll();
+    mClearSkyEphemeris->fetchAll();
     clearSkyMaps->fetchAll();
-
-
-    std::filesystem::path ephemerisFile{"/home/richard/.cache/HamChrono/ClearSky/esats.pl?tlename=Moon"};
-    Ephemeris ephemeris{ephemerisFile};
-
-    mMapProjection->setMoonEphemeris(ephemeris["Moon"]);
 }
 
 void HamChrono::callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_ptr<Column> &sideColumn) {

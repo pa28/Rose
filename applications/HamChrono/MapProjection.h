@@ -19,6 +19,14 @@ namespace rose {
     static constexpr double GRAYLINE_COS = -0.208;      ///< cos(90 + grayline angle), we use 12 degs
     static constexpr double GRAYLINE_POW =	0.75;       ///< cos power exponent, sqrt is too severe, 1 is too gradual
 
+    enum class EphemerisFile : size_t {
+        ClearSkyMoon,
+        ClearSkyAll,
+        CTAmateur,
+        CTCube,
+        CTVisual,
+    };
+
     enum class ProjectionType {
         Mercator,
         StationMercator,
@@ -71,6 +79,17 @@ namespace rose {
 
         std::array<sdl::Surface,static_cast<std::size_t>(MapDataType::MapCount)/2> mMercatorTemp;
         std::array<sdl::Surface,static_cast<std::size_t>(MapDataType::MapCount)/2> mAzimuthalTemp;
+
+        std::atomic_bool mUpdateEphemeris{false};
+        std::array<std::filesystem::path, 5> mEphemerisFilePath{};      ///< The set of cached ephemeris files.
+        EphemerisFile mEphemerisFile{EphemerisFile::ClearSkyAll};       ///< The index to the ephemeris in use.
+        void updateEphemerisFile();                 ///< Update ephemeris and start tracking.
+        Observer mObserver{};                       ///< The QTH Observer data.
+        std::vector<Satellite> mSatelliteList{};    ///< The list of Satellites being tracked.
+
+        /// Find the next pass of Satellite over Observer.
+        std::tuple<bool, bool, double, double, double, DateTime, DateTime>
+        findNextPass(const Satellite &satellite, const Observer &observer);
 
         std::array<sdl::Texture,2> mMercator{}; ///< The Mercator projection background and foreground maps.
         std::array<sdl::Texture,2> mAzimuthal{};    ///< The Azimuthal projection background and foreground maps.
@@ -227,12 +246,20 @@ namespace rose {
 
         /**
          * @brief Set the Moon ephemeris
-         * @param ephemeris The ephemeris.
+         * @param fileName The ephemeris.
          */
-        void setMoonEphemeris(const std::array<std::string_view,3> &ephemeris) {
-            mMoon.setEphemeris(ephemeris);
-            setMoonPhase();
-            setCelestialIcons();
+        void setMoonEphemerisFile(EphemerisFile item, const std::filesystem::path &filePath) {
+            mEphemerisFilePath[static_cast<std::size_t>(item)] = filePath;
+            if (item == EphemerisFile::ClearSkyMoon) {
+                // If the file is the Moon ephemeris set or update the Moon TLE.
+                Ephemeris ephemeris{filePath};
+                mMoon.setEphemeris(ephemeris["Moon"]);
+                setMoonPhase();
+                setCelestialIcons();
+            } else if (mEphemerisFile == item){
+                // If the ephemeris in use, update the the satellite ephemeris processor.
+                updateEphemerisFile();
+            }
         }
     };
 }

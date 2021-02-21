@@ -98,6 +98,8 @@ namespace rose {
             : std::array<double,2>({std::clamp(lat,-90.,90.),
                                     std::clamp(lon,-180.,180.)}) {}
 
+        constexpr explicit GeoPosition(std::tuple<double,double> geo) : GeoPosition(std::get<0>(geo), std::get<1>(geo)) {}
+
         constexpr double& lat() noexcept {
             return at(0);
         }

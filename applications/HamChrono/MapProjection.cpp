@@ -25,6 +25,8 @@ namespace rose {
         setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
         setCelestialIcons();
 
+        mObserver = Observer{mQth.lat(), mQth.lon(), 0.};
+
         mapFileRx->setCallback([&](uint32_t, uint32_t map){
             std::filesystem::path filePath(mMapCache->cacheRootPath());
             filePath.append(mMapCache->at(map).objectSrcName());
@@ -63,11 +65,16 @@ namespace rose {
                     }
                 }
             }
+
+            if (mUpdateEphemeris)
+                updateEphemerisFile();
+            mUpdateEphemeris = false;
         });
 
         minuteRx = std::make_shared<Slot<int>>();
         minuteRx->setCallback([&](uint32_t, int minute){
             setCelestialIcons();
+            mUpdateEphemeris = true;
             if (!mFutureSun.valid())
                 mFutureSun = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
         });
@@ -176,6 +183,15 @@ namespace rose {
         drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
                      widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
 
+        DateTime now{true};
+        for (auto satellite = mSatelliteList.begin(); satellite != mSatelliteList.end(); ++satellite) {
+            satellite->predict(now);
+            GeoPosition geo{satellite->geo()};
+            auto iconIdx = static_cast<std::size_t>(set::AppImageId::DotRed) + (satellite-mSatelliteList.begin());
+            MapIcon mapItem{static_cast<ImageId>(iconIdx), geo};
+            drawMapItem(mapItem, renderer, widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
+        }
+
         if (mCelestialMode)
             drawMapItems(mCelestialIcons.begin(), mCelestialIcons.end(), renderer,
                      widgetRect, mProjection == ProjectionType::StationAzmuthal, splitPixel);
@@ -226,12 +242,12 @@ namespace rose {
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
             dst.x() += mapRectangle.width();
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
-        } else if (h > 0 && w == 0) {
+        } else if (h > 0 && w == 0 && !azimuthal) {
             dst.y() = mapRectangle.y() - h;
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
             dst.y() += mapRectangle.height();
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
-        } else if (h > 0 && w > 0) {
+        } else if (h > 0 && w > 0 && !azimuthal) {
             dst.x() = mapRectangle.x() - w;
             dst.y() = mapRectangle.y() - h;
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
@@ -589,5 +605,108 @@ namespace rose {
             return Position{roundToInt(mMapSize.width() * (geo.lon() + M_PI) / (2. * M_PI)) % mMapSize.width(),
                             roundToInt(mMapSize.height() * (M_PI_2 - geo.lat()) / M_PI)};
         }
+    }
+
+    std::tuple<bool, bool, double, double, double, DateTime, DateTime>
+    MapProjection::findNextPass(const Satellite &satellite, const Observer &observer) {
+        static constexpr long COARSE_DT = 90L;
+        static constexpr long FINE_DT = (-2L);
+        static constexpr double SAT_MIN_EL = 1.;
+
+
+        DateTime t_now{}, set_time, rise_time;
+        Satellite localSat{satellite};
+        Observer localObs{observer};
+        double max_elevation = 0., set_az, rise_az;
+
+        t_now.userNow();
+
+        double prevElevation{0};
+        auto dt = COARSE_DT;
+        DateTime t_srch = t_now + -FINE_DT;    // search time, start beyond any previous solution
+
+        // init pel and make first step
+        localSat.predict(t_srch);
+        auto[tel, taz, trange, trate] = localSat.topo(observer);
+        t_srch += dt;
+        bool set_ok = false, rise_ok = false, ever_up = false, ever_down = false;
+
+        // search up to a few days ahead for next rise and set times (for example for moon)
+        while ((!set_ok || !rise_ok) && t_srch < t_now + 2.0F && t_srch > t_now) {
+            // find circumstances at time t_srch
+            localSat.predict(t_srch);
+            auto[tel, taz, trange, trate] = localSat.topo(observer);
+            max_elevation = std::max(max_elevation, tel);
+
+            // check for rising or setting events
+            if (tel >= SAT_MIN_EL) {
+                ever_up = true;
+                if (prevElevation < SAT_MIN_EL) {
+                    if (dt == FINE_DT) {
+                        // found a refined set event (recall we are going backwards),
+                        // record and resume forward time.
+                        set_time = t_srch;
+                        set_az = taz;
+                        set_ok = true;
+                        dt = COARSE_DT;
+                        prevElevation = tel;
+                    } else if (!rise_ok) {
+                        // found a coarse rise event, go back slower looking for better set
+                        dt = FINE_DT;
+                        prevElevation = tel;
+                    }
+                }
+            } else {
+                ever_down = true;
+                if (prevElevation > SAT_MIN_EL) {
+                    if (dt == FINE_DT) {
+                        // found a refined rise event (recall we are going backwards).
+                        // record and resume forward time but skip if set is within COARSE_DT because we
+                        // would jump over it and find the NEXT set.
+                        DateTime check_set = t_srch + COARSE_DT;
+                        localSat.predict(check_set);
+                        auto[check_tel, check_taz, check_trange, check_trate] = localSat.topo(observer);
+                        if (check_tel >= SAT_MIN_EL) {
+                            rise_time = t_srch;
+                            rise_az = taz;
+                            rise_ok = true;
+                        }
+                        // regardless, resume forward search
+                        dt = COARSE_DT;
+                        prevElevation = tel;
+                    } else if (!set_ok) {
+                        // found a coarse set event, go back slower looking for better rise
+                        dt = FINE_DT;
+                        prevElevation = tel;
+                    }
+                }
+            }
+            t_srch += dt;
+            prevElevation = tel;
+        }
+        return std::make_tuple(rise_ok, set_ok, rise_az, set_az, max_elevation, rise_time, set_time);
+    }
+
+    void MapProjection::updateEphemerisFile() {
+        Ephemeris ephemeris{mEphemerisFilePath[static_cast<size_t>(mEphemerisFile)]};
+        DateTime now{true};
+        std::vector<Satellite> satelliteList;
+        for (const auto &esv : ephemeris) {
+            if (esv.first != "Moon") {
+                Satellite satellite{esv.second};
+                auto [rise_ok, set_ok, rise_az, set_az, max_elevation, rise_time, set_time] =
+                findNextPass(satellite, mObserver);
+                if (rise_ok && set_ok && max_elevation > 30.) {
+                    satellite.setPassData(rise_time, set_time);
+                    satelliteList.emplace_back(satellite);
+                }
+            }
+        }
+
+        std::sort(satelliteList.begin(), satelliteList.end());
+        if (satelliteList.size() > 5)
+            satelliteList.erase(satelliteList.begin()+5,satelliteList.end());
+
+        mSatelliteList = satelliteList;
     }
 }

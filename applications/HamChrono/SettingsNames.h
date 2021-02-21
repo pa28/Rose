@@ -29,6 +29,10 @@ namespace set {
         DotAqua,
     };
 
+    enum class ClearSkyEphemeris : size_t {
+
+    };
+
     static constexpr std::string_view CALLSIGN = "CALLSIGN";
     static constexpr std::string_view CALLSIGN_OPT = "-callsign";
     static constexpr std::string_view QTH = "qth";

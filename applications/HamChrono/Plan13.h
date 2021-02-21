@@ -302,6 +302,10 @@ class Satellite {
     double QD{}, WD{}, DC{};
     double RS{};
 
+    bool passValid{};
+    DateTime riseTime{};
+    DateTime setTime{};
+
     /**
      * Initialize satellite data from two line ephemeris.
      * @param l1 line 1
@@ -315,6 +319,10 @@ public:
 
     Vec3 SAT{}, VEL{};        // celestial coordinates
     Vec3 S{}, V{};        // geocentric coordinates
+
+    bool operator<(const Satellite &other) const {
+        return riseTime < other.riseTime;
+    }
 
     DateTime mPrediction{};
 
@@ -406,5 +414,17 @@ public:
      * @return the DateTime of the epoch.
      */
     [[nodiscard]] DateTime epoch() const;
+
+    /**
+     * @brief Set the pass times for the Satellite.
+     * @param rise The rise time.
+     * @param set The set time.
+     */
+    void setPassData(DateTime rise, DateTime set) {
+        riseTime = rise;
+        setTime = set;
+    }
+
+    std::tuple<DateTime,DateTime> getPassData() const { return std::make_tuple(riseTime,setTime); }
 };
 
