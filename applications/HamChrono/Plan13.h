@@ -193,8 +193,10 @@ public:
      * Compute the calendar date and clock time
      * @return a tuple with year, month, day, hour, minute, seconds
      */
-    [[nodiscard]] std::tuple<int, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t>
+    [[nodiscard]] std::tuple<int, uint, uint, uint, uint, uint>
     gettime() const;
+
+    time_t mktime();
 
     bool operator<(const DateTime &rhs) const;
 
@@ -302,7 +304,8 @@ class Satellite {
     double QD{}, WD{}, DC{};
     double RS{};
 
-    bool passValid{};
+    bool passRiseOk{};
+    bool passSetOk{};
     DateTime riseTime{};
     DateTime setTime{};
 
@@ -321,7 +324,10 @@ public:
     Vec3 S{}, V{};        // geocentric coordinates
 
     bool operator<(const Satellite &other) const {
-        return riseTime < other.riseTime;
+        if (passRiseOk && other.passRiseOk)
+            return riseTime < other.riseTime;
+        else
+            return setTime < other.setTime;
     }
 
     DateTime mPrediction{};
@@ -338,7 +344,7 @@ public:
 
     ~Satellite() = default;
 
-    constexpr operator bool() const noexcept { return isValid; }
+    constexpr explicit operator bool() const noexcept { return isValid; }
 
     /**
      * Predict the satelite position at given DateTime.
@@ -420,11 +426,30 @@ public:
      * @param rise The rise time.
      * @param set The set time.
      */
-    void setPassData(DateTime rise, DateTime set) {
+    void setPassData(bool riseOk, bool setOk, DateTime rise, DateTime set) {
+        passRiseOk = riseOk;
+        passSetOk = setOk;
         riseTime = rise;
         setTime = set;
     }
 
-    std::tuple<DateTime,DateTime> getPassData() const { return std::make_tuple(riseTime,setTime); }
+    /**
+     * @brief Get the data relative to
+     * @return
+     */
+    [[nodiscard]] std::tuple<bool, bool, DateTime, DateTime> getPassData() const { return std::make_tuple(passRiseOk, passSetOk, riseTime, setTime); }
+
+    /**
+     * @brief Create a std::string that describes the pass.
+     * @details If relative == 0 then times that are converted are converted to absolute dates and times in GMT.
+     * If the rise time is valid and in the future it is entered into the string first followed by " - " and the
+     * set time. If relative is not 0 the set time is converted relative to the rise time. This provides the
+     * rise time followed by the pass duration.<p/>
+     * If the rise time is not valid only the set time is converted providing the set time if relative is 0 or
+     * the duration if relative is not 0.
+     * @param relative A time_t to make the strings relative to.
+     * @return a std::string with the formatted pass timing data.
+     */
+    [[nodiscard]] std::string passTimeString(time_t relative = 0) const;
 };
 

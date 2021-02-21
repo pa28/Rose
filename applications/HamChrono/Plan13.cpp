@@ -109,9 +109,9 @@ double DateTime::operator-(const DateTime &rhs) const {
 }
 
 
-[[maybe_unused]] std::tuple<int, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t>
+[[maybe_unused]] std::tuple<int, uint, uint, uint, uint, uint>
 DateTime::gettime() const {
-    uint8_t h, m, s;
+    uint h, m, s;
     auto[year, month, day] = fndate(DN);
     double t = TN;
     t *= 24;
@@ -126,6 +126,19 @@ DateTime::gettime() const {
         s = 59;
 
     return std::make_tuple(year, month, day, h, m, s);
+}
+
+time_t DateTime::mktime() {
+    auto[year, month, day, h, m, s] = gettime();
+    auto timer = time(nullptr);
+    auto timeInfo = gmtime(&timer);
+    timeInfo->tm_year = year - 1900;
+    timeInfo->tm_mon = month - 1;
+    timeInfo->tm_mday = day;
+    timeInfo->tm_hour = h;
+    timeInfo->tm_min = m;
+    timeInfo->tm_sec = s;
+    return ::mktime(timeInfo);
 }
 
 void
@@ -413,6 +426,51 @@ DateTime Satellite::epoch() const {
     dt.DN = DE;
     dt.TN = TE;
     return (dt);
+}
+
+std::string Satellite::passTimeString(time_t relative) const {
+    auto[riseOk, setOk, riseDateTime, setDateTime] = getPassData();
+
+    auto mkTimeStr = [](std::ostream &s, time_t t, time_t relative) {
+        static constexpr size_t bufferLength = 64;
+        static constexpr char fmtMinSec[] = "%M:%S";
+        static constexpr char fmtHourMin[] = "%Hh%M";
+        static constexpr char fmtDayHourMin[] = "%jd%Hh%M";
+        static constexpr char fmtDate[] = "%F";
+
+        time_t timer = t - relative;
+        auto lt = localtime(&timer);
+        timer += lt->tm_gmtoff;
+        auto tm = gmtime(&timer);
+        char buffer[bufferLength];
+        char *fmt = const_cast<char *>(fmtMinSec);
+        if (timer >= 172800)
+            fmt = const_cast<char *>(fmtDate);
+        if (timer >= 86400)
+            fmt = const_cast<char *>(fmtDayHourMin);
+        else if (timer >= 3600)
+            fmt = const_cast<char *>(fmtHourMin);
+        auto length = strftime(buffer, bufferLength, fmt, tm);
+        s << buffer;
+    };
+
+    DateTime now{true};
+    if (riseOk && riseDateTime > now) {
+        std::stringstream strm{};
+        auto rise = riseDateTime.mktime();
+        mkTimeStr(strm, rise, relative);
+        strm << " - ";
+        if (setOk) {
+            mkTimeStr(strm, setDateTime.mktime(), relative ? rise : 0);
+        }
+        return strm.str();
+    } else if (setOk && setDateTime > now) {
+        std::stringstream strm{};
+        mkTimeStr(strm, setDateTime.mktime(), relative);
+        return strm.str();
+    }
+
+    return "Has Set.";
 }
 
 //----------------------------------------------------------------------
