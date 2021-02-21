@@ -637,11 +637,12 @@ namespace rose {
         // init pel and make first step
         localSat.predict(t_srch);
         auto[tel, taz, trange, trate] = localSat.topo(observer);
-        t_srch += dt;
+        if (tel < SAT_MIN_EL)
+            t_srch += dt;
         bool set_ok = false, rise_ok = false, ever_up = false, ever_down = false;
 
         // search up to a few days ahead for next rise and set times (for example for moon)
-        while ((!set_ok || !rise_ok) && t_srch < t_now + 2.0F && t_srch > t_now) {
+        while ((!set_ok || !rise_ok) && t_srch < t_now + 2.0F && (t_srch > t_now || tel > -1.)) {
             // find circumstances at time t_srch
             localSat.predict(t_srch);
             auto[tel, taz, trange, trate] = localSat.topo(observer);
