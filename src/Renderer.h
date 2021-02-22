@@ -262,6 +262,28 @@ namespace rose::sdl {
          * @return The SDL2 API return status code.
          */
         int drawLine(int x0, int y0, int x1, int y1);
+
+        /**
+         * @brief Render lines.
+         * @details The container contains a list of Position objects.
+         * @tparam C The container type.
+         * @param pointsContainer The points container.
+         * @return The SDL2 API return status code.
+         */
+        template<class C>
+        int drawLines(C pointsContainer) {
+            auto *points = new SDL_Point[pointsContainer.size()];
+            auto first = pointsContainer.begin();
+            auto last = pointsContainer.end();
+            for (size_t idx = 0; idx < pointsContainer.size() && first != last; ++idx) {
+                points[idx].x = first->x();
+                points[idx].y = first->y();
+                ++first;
+            }
+            auto status = SDL_RenderDrawLines(get(), points, pointsContainer.size());
+            delete [] points;
+            return status;
+        }
     };
 
     /**
