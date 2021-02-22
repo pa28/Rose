@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <mutex>
+
 #include "Cache.h"
 #include "Math.h"
 #include "Rose.h"
@@ -43,6 +45,11 @@ namespace rose {
         CountriesDay = 0x2,
         CountriesNight = 0x3,
         MapCount,
+    };
+
+    struct TrackedSatellite {
+        set::AppImageId imageId;    ///< The ImageId to use as an icon.
+        Satellite satellite;        ///< The tracked Satellite.
     };
 
     /**
@@ -85,7 +92,8 @@ namespace rose {
         EphemerisFile mEphemerisFile{EphemerisFile::ClearSkyAll};       ///< The index to the ephemeris in use.
         void updateEphemerisFile();                 ///< Update ephemeris and start tracking.
         Observer mObserver{};                       ///< The QTH Observer data.
-        std::vector<Satellite> mSatelliteList{};    ///< The list of Satellites being tracked.
+        std::vector<TrackedSatellite> mSatelliteList{};    ///< The list of Satellites being tracked.
+        std::mutex mSatListMutex{};                 ///< A mutex to protect write access to mSatelliteList.
         double mMinimumElevation{30.};              ///< The minimum pass elevation to track satellite.
 
         /// Find the next pass of Satellite over Observer.

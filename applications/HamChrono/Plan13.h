@@ -282,7 +282,7 @@ public:
 class Satellite {
     bool isMoon{};
     bool isValid{};
-    std::string_view name;
+    std::string name;
     long N{};
     long YE{};
     double IN{};
