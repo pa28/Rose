@@ -19,6 +19,7 @@
 #include <uuid/uuid.h>
 #include <SDL2/SDL.h>
 #include "Constants.h"
+#include "Math.h"
 
 namespace rose {
 #ifdef DISPLAY800X480
@@ -99,6 +100,17 @@ namespace rose {
                                     std::clamp(lon,-180.,180.)}) {}
 
         constexpr explicit GeoPosition(std::tuple<double,double> geo) : GeoPosition(std::get<0>(geo), std::get<1>(geo)) {}
+
+        GeoPosition& operator=(const std::tuple<double,double>& geo) {
+            at(0) = std::get<0>(geo);
+            at(1) = std::get<1>(geo);
+            return *this;
+        }
+
+        [[nodiscard]] GeoPosition radians() const {
+            GeoPosition r{util::deg2rad(at(0)), util::deg2rad(at(1))};
+            return r;
+        }
 
         constexpr double& lat() noexcept {
             return at(0);

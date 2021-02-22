@@ -72,7 +72,7 @@ namespace rose {
         std::atomic_bool mNewSurfaces{};          ///< True when there are new Surfaces to render into Textures.
         std::atomic_bool mAbortFuture{};          ///< Set to true to abort a running std::future.
 
-        ProjectionType mProjection{ProjectionType::StationMercator};   ///< The desired projection display
+        ProjectionType mProjection{ProjectionType::Mercator};   ///< The desired projection display
         std::shared_ptr<WebFileCache> mMapCache{};
         ImageId mDayMapImage{};         ///< The base day Mercator map image.
         ImageId mNightMapImage{};       ///< The base night Mercator map image.
@@ -159,10 +159,10 @@ namespace rose {
          * @brief Render a single icon on the map.
          * @param mapItem The MapItem data.
          * @param renderer The Renderer.
-         * @param azimuthal True if the projection is Azimuthal.
+         * @param projection True if the projection is Azimuthal.
          * @param splitPixel The split location for Mercator station centric projections.
          */
-        void drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, bool azimuthal,
+        void drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, ProjectionType projection,
                          int splitPixel);
 
         /**
@@ -170,14 +170,14 @@ namespace rose {
          * @param first The first item in the container.
          * @param last One past the end of the container.
          * @param renderer The Renderer.
-         * @param azimuthal True if the projection is Azimuthal.
+         * @param projection True if the projection is Azimuthal.
          * @param splitPixel The split location for Mercator station centric projections.
          */
         template<typename InputIterator>
         void drawMapItems(InputIterator first, InputIterator last, sdl::Renderer &renderer, Rectangle mapRect,
-                          bool azimuthal, int splitPixel = 0) {
+                          ProjectionType projection, int splitPixel = 0) {
             while (first != last) {
-                drawMapItem(*first, renderer, mapRect, azimuthal, splitPixel);
+                drawMapItem(*first, renderer, mapRect, projection, splitPixel);
                 ++first;
             }
         }
@@ -248,10 +248,10 @@ namespace rose {
 
         /**
          * @brief Convert a GeoPosition in radians to a map Position in pixels.
-         * @param azimuthal True if the desired map is an Azimuthal projection.
+         * @param projection True if the desired map is an Azimuthal projection.
          * @return The map Position.
          */
-        Position geoToMap(GeoPosition geo, bool azimuthal);
+        Position geoToMap(GeoPosition geo, ProjectionType projection, int splitPixel);
 
         /**
          * @brief Set the Moon ephemeris
