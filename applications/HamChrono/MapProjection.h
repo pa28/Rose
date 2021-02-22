@@ -109,6 +109,12 @@ namespace rose {
         std::shared_ptr<Slot<std::string>> mSettingsUpdateRx{};  ///< Slot to receive settings updates on.
 
         /**
+         * @brief Draw a Satellite orbital path.
+         * @param satellite The Satellite
+         */
+        void drawOrbitalPath(sdl::Renderer &renderer, TrackedSatellite &satellite, Position mapPos, int splitPixel);
+
+        /**
          * @brief Compute Azimuthal map projections.
          * @details This should be called by creating the std::future mAzimuthalProjection which will be
          * completed when the projection is done, and return true if the projection was successful. This

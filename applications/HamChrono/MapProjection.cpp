@@ -771,4 +771,25 @@ namespace rose {
 //        }
 //        std::cout << '\n';
     }
+
+    void MapProjection::drawOrbitalPath(sdl::Renderer &renderer, TrackedSatellite &satellite, Position mapPos,
+                                        int splitPixel) {
+        auto period = satellite.satellite.period();
+        auto step = period / 40.;
+        DateTime now{true};
+
+        std::vector<Position> points{};
+
+        for (auto index = now + -(step); index < (now + (period / 2. + step)); index += step) {
+            satellite.satellite.predict(index);
+            GeoPosition geo{satellite.satellite.geo()};
+            auto pos = geoToMap(geo, mProjection, splitPixel) + mapPos;
+//            std::cout << pos << '\n';
+            points.emplace_back(pos);
+        }
+
+        sdl::DrawColorGuard drawColorGuard{renderer, color::RGBA{1.f, 0.f, 0.f, 1.f}};
+        renderer.drawLines(points);
+        satellite.satellite.predict(now);
+    }
 }
