@@ -242,7 +242,7 @@ namespace rose::sdl {
          * @return Stastus code returned by SDL_RenderCopyEx()
          */
         int renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
-                         std::optional<Position> point = std::nullopt);
+                         std::optional<Position> point = std::nullopt) const;
 
         /**
          * @brief Calls SDL_RenderFillRect after setting the RenderDrawColor to color.
@@ -262,6 +262,8 @@ namespace rose::sdl {
          * @return The SDL2 API return status code.
          */
         int drawLine(int x0, int y0, int x1, int y1);
+
+        int drawPoint(const Position& position, const color::RGBA &rgba);
 
         /**
          * @brief Render lines.

@@ -276,6 +276,8 @@ namespace rose {
                 updateEphemerisFile();
             }
         }
+
+        static void drawAntiAliasedLine(sdl::Renderer &renderer, Position start, Position end);
     };
 }
 

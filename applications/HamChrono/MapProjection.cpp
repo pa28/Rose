@@ -778,18 +778,95 @@ namespace rose {
         auto step = period / 40.;
         DateTime now{true};
 
-        std::vector<Position> points{};
-
+        Position p0{};
+        bool first = true;
         for (auto index = now + -(step); index < (now + (period / 2. + step)); index += step) {
             satellite.satellite.predict(index);
             GeoPosition geo{satellite.satellite.geo()};
-            auto pos = geoToMap(geo, mProjection, splitPixel) + mapPos;
-//            std::cout << pos << '\n';
-            points.emplace_back(pos);
+            auto p1 = geoToMap(geo, mProjection, splitPixel) + mapPos;
+            if (first) {
+                first = false;
+            } else {
+                drawAntiAliasedLine(renderer, p0, p1);
+            }
+            p0 = p1;
+        }
+        satellite.satellite.predict(now);
+    }
+
+    void
+    MapProjection::drawAntiAliasedLine(sdl::Renderer &renderer, Position start, Position end) {
+        auto plot = [&](double x, double y, double b) {
+            auto c = color::RGBA{ 1.f, 0.f, 0.f, std::clamp((float)b*1.5f,0.f,1.f)};
+            renderer.drawPoint(Position(roundToInt(x), roundToInt(y)), c);
+        };
+        auto ipart = [&](double x) { return floor(x); };
+        auto fpart = [&](double x) { return x - floor(x); };
+        auto rfpart = [&](double x) { return 1. - fpart(x); };
+        double x0 = start.x(), y0 = start.y(), x1 = end.x(), y1 = end.y();
+
+        auto steep = abs(y1-y0) > abs(x1-x0);
+
+        if (steep) {
+            std::swap(x0, y0);
+            std::swap(x1, y1);
         }
 
-        sdl::DrawColorGuard drawColorGuard{renderer, color::RGBA{1.f, 0.f, 0.f, 1.f}};
-        renderer.drawLines(points);
-        satellite.satellite.predict(now);
+        if (x0 > x1) {
+            std::swap(x0, x1);
+            std::swap(y0, y1);
+        }
+
+        auto dx = x1 - x0;
+        auto dy = y1 - y0;
+        auto gradient = dx == 0.0 ? 1. : dy / dx;
+
+        // Handle first endpoint
+        auto xEnd = round(x0);
+        auto yEnd = y0 + gradient * (xEnd - x0);
+        auto xGap = rfpart(x0 + 0.5);
+        auto xPxl1 = xEnd; // this will be used in the main loop
+        auto yPxl1 = ipart(yEnd);
+
+        if (steep) {
+            plot(yPxl1, xPxl1, rfpart(yEnd) * xGap);
+            plot(yPxl1+1, xPxl1, fpart(yEnd) * xGap);
+        } else {
+            plot(xPxl1, yPxl1, rfpart(yEnd) * xGap);
+            plot(xPxl1+1, yPxl1, rfpart(yEnd) * xGap);
+        }
+
+        auto intery = yEnd + gradient; // first y-intersection for the main loop
+
+        // Handle second endpoint.
+
+        xEnd = round(x1);
+        yEnd = y1 + gradient * (xEnd - x1);
+        xGap = fpart(x1 + 0.5);
+        auto xPxl2 = xEnd; // this will be used in the main loop
+        auto yPxl2 = ipart(yEnd);
+        if (steep) {
+            plot(yPxl2, xPxl2, rfpart(yEnd) * xGap);
+            plot(yPxl2+1, xPxl2, fpart(yEnd) * xGap);
+        } else {
+            plot(xPxl2, yPxl2, rfpart(yEnd) * xGap);
+            plot(xPxl2+1, yPxl2, fpart(yEnd) * xGap);
+        }
+
+        // main loop
+
+        if (steep) {
+            for (double x = xPxl1 + 1; x < xPxl2; x += 1.) {
+                plot(ipart(intery), x, rfpart(intery));
+                plot(ipart(intery)+1, x, fpart(intery));
+                intery += gradient;
+            }
+        } else {
+            for (double x = xPxl1 + 1; x < xPxl2; x += 1.) {
+                plot(x, ipart(intery), rfpart(intery));
+                plot(x+1, ipart(intery), fpart(intery));
+                intery += gradient;
+            }
+        }
     }
 }

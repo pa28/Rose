@@ -59,7 +59,7 @@ namespace rose::sdl {
     }
 
     int Renderer::renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
-                               std::optional<Position> point) {
+                               std::optional<Position> point) const {
         auto srcRect = src.toSdlRect();
         auto dstRect = dst.toSdlRect();
         if (point) {
@@ -70,6 +70,11 @@ namespace rose::sdl {
         } else {
             return SDL_RenderCopyEx(get(), texture.get(), &srcRect, &dstRect, angle, nullptr, renderFlip.mFlip);
         }
+    }
+
+    int Renderer::drawPoint(const Position &position, const color::RGBA &rgba) {
+        DrawColorGuard drawColorGuard{*this, rgba};
+        return SDL_RenderDrawPoint(get(), position.x(), position.y());
     }
 
     DrawColorGuard::DrawColorGuard(Renderer &renderer, SDL_Color color) : mRenderer(renderer) {
