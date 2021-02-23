@@ -8,6 +8,7 @@
 #include "sstream"
 #include <curlpp/cURLpp.hpp>
 #include <SDL2/SDL_image.h>
+#include "AntiAliasedDrawing.h"
 #include "ConfigDialog.h"
 #include "Container.h"
 #include "Frame.h"
@@ -45,6 +46,7 @@ void HamChrono::build() {
 #ifdef Debug
     std::cout << __PRETTY_FUNCTION__ << " Debug\n";
 #endif
+    AntiAliasedDrawing aad{mRenderer, 3, color::RGBA{ 255u, 0u, 0u, 255u}};
     createFileIcons(fileIcons, mSharedImages);
 
     TextField::Settings(mSettings, ConfigTextFieldSettings);

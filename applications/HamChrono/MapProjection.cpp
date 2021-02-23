@@ -189,13 +189,23 @@ namespace rose {
                      widgetRect, mProjection, splitPixel);
 
         if (mSatelliteMode) {
+            if (!mDrawingContext)
+                mDrawingContext = std::make_unique<AntiAliasedDrawing>(renderer, 2, color::RGBA{ 1.f, 0.f, 0.f, 1.f});
+//            Position p0 = widgetRect.getPosition();
+//            p0.y() += widgetRect.height()/2;
+//            Position p1 = p0;
+//            p1.x() += widgetRect.width();
+//            p1.y() += widgetRect.height()/2;
+//            mDrawingContext->renderLine(renderer, p0, p1);
             std::lock_guard<std::mutex> lockGuard{mSatListMutex};
             for (auto &satellite : mSatelliteList) {
                 GeoPosition geo{satellite.satellite.geo()};
                 MapIcon mapItem{static_cast<ImageId>(satellite.imageId), geo};
                 drawMapItem(mapItem, renderer, widgetRect, mProjection, splitPixel);
             }
+
             drawOrbitalPath(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
+            drawFootprint(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
         }
 
         if (mCelestialMode)
@@ -776,28 +786,78 @@ namespace rose {
                                         int splitPixel) {
         auto period = satellite.satellite.period();
         auto step = period / 40.;
+        auto useStep = step;
         DateTime now{true};
 
         Position p0{};
         bool first = true;
-        for (auto index = now + -(step); index < (now + (period / 2. + step)); index += step) {
+        for (auto index = now; index < (now + (period + step)); index += useStep) {
             satellite.satellite.predict(index);
             GeoPosition geo{satellite.satellite.geo()};
-            auto p1 = geoToMap(geo, mProjection, splitPixel) + mapPos;
+            if (mProjection != ProjectionType::StationAzmuthal) {
+                useStep = std::clamp(abs(sin(geo.lat())) * step, period / 90., period / 40.);
+            }
+            auto p1 = geoToMap(geo, mProjection, splitPixel);
             if (first) {
                 first = false;
+                p1 = p1;
             } else {
-                drawAntiAliasedLine(renderer, p0, p1);
+                bool discontinuity = false;
+                switch (mProjection) {
+                    case ProjectionType::Mercator:
+                    case ProjectionType::StationMercator:
+                        discontinuity = abs(p0.x() - p1.x()) > (mMapSize.width() / 2);
+                        break;
+                    case ProjectionType::StationAzmuthal:
+                        discontinuity = (p0.x() < mMapSize.width()/2 && p1.x() > mMapSize.width()/2) ||
+                                (p1.x() < mMapSize.width()/2 && p0.x() > mMapSize.width()/2);
+                        break;
+                }
+                if (!discontinuity)
+                    mDrawingContext->renderLine(renderer, p0 + mapPos, p1 + mapPos);
+//                    drawAntiAliasedLine(renderer, p0 + mapPos, p1 + mapPos);
             }
             p0 = p1;
         }
         satellite.satellite.predict(now);
     }
 
+    void MapProjection::drawFootprint(sdl::Renderer &renderer, TrackedSatellite &satellite, Position mapPos,
+                                      int splitPixel) {
+        DateTime now{true};
+        satellite.satellite.predict(now);
+        GeoPosition geo{satellite.satellite.geo()};
+        auto d = satellite.satellite.viewingRadius(0.);
+
+        auto loc_0 = projected(geo, d, 0.);
+        auto p0 = geoToMap(loc_0, mProjection, splitPixel);
+        auto pos_n = p0;
+
+        for (double bearing = deg2rad(5.); bearing < 2. * M_PI; bearing += deg2rad(5.)) {
+            auto loc = projected(geo, d, bearing);
+            auto p1 = geoToMap(loc, mProjection, splitPixel);
+            bool discontinuity = false;
+            switch (mProjection) {
+                case ProjectionType::Mercator:
+                case ProjectionType::StationMercator:
+                    discontinuity = abs(p0.x() - p1.x()) > mMapSize.width() / 2;
+                    break;
+                case ProjectionType::StationAzmuthal:
+                    discontinuity = (p0.x() < mMapSize.width()/2 && p1.x() > mMapSize.width()/2) ||
+                                    (p1.x() < mMapSize.width()/2 && p0.x() > mMapSize.width()/2);
+                    break;
+            }
+            if (!discontinuity)
+                mDrawingContext->renderLine(renderer, p0 + mapPos, p1 + mapPos);
+            p0 = p1;
+        }
+        mDrawingContext->renderLine(renderer, p0 + mapPos, pos_n + mapPos);
+    }
+
     void
     MapProjection::drawAntiAliasedLine(sdl::Renderer &renderer, Position start, Position end) {
         auto plot = [&](double x, double y, double b) {
-            auto c = color::RGBA{ 1.f, 0.f, 0.f, std::clamp((float)b*1.5f,0.f,1.f)};
+            auto c = color::RGBA{ 1.f, 0.f, 0.f, (float)std::clamp(b, .3, 1.)};
             renderer.drawPoint(Position(roundToInt(x), roundToInt(y)), c);
         };
         auto ipart = [&](double x) { return floor(x); };

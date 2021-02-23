@@ -9,6 +9,7 @@
 
 #include <mutex>
 
+#include "AntiAliasedDrawing.h"
 #include "Cache.h"
 #include "Math.h"
 #include "Rose.h"
@@ -97,7 +98,7 @@ namespace rose {
         double mMinimumElevation{30.};              ///< The minimum pass elevation to track satellite.
 
         /// Find the next pass of Satellite over Observer.
-        std::tuple<bool, bool, double, double, double, DateTime, DateTime>
+        static std::tuple<bool, bool, double, double, double, DateTime, DateTime>
         findNextPass(const Satellite &satellite, const Observer &observer);
 
         std::array<sdl::Texture,2> mMercator{}; ///< The Mercator projection background and foreground maps.
@@ -113,6 +114,10 @@ namespace rose {
          * @param satellite The Satellite
          */
         void drawOrbitalPath(sdl::Renderer &renderer, TrackedSatellite &satellite, Position mapPos, int splitPixel);
+
+        void drawFootprint(sdl::Renderer &renderer, TrackedSatellite &satellite, Position mapPos, int splitPixel);
+
+        std::unique_ptr<AntiAliasedDrawing> mDrawingContext{};
 
         /**
          * @brief Compute Azimuthal map projections.
