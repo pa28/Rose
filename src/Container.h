@@ -56,7 +56,8 @@ namespace rose {
 
         ContainerLayoutHints mContainerHints{};         ///< Hints to use in management of children.
 
-        std::vector<std::shared_ptr<Widget>> mChildren{};             ///< The children of this Container
+        using ChildVectorType = std::vector<std::shared_ptr<Widget>>;
+        ChildVectorType mChildren{};             ///< The children of this Container
 
 //        SizeInt limitSize(const std::shared_ptr<Widget>& child);             ///< Limit the size of a child to fit on the screen.
 
@@ -148,6 +149,13 @@ namespace rose {
          * @return
          */
         auto size() const { return mChildren.size(); }
+
+        /**
+         * @brief Access the child at index by calling the std::vector::at() method.
+         * @param index The desired child index.
+         * @return The child.
+         */
+        auto at(ChildVectorType::size_type index) { return mChildren.at(index); }
 
         /**
          * @brief Access to ContainerLayoutHints.
