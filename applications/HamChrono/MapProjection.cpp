@@ -736,7 +736,7 @@ namespace rose {
 
         std::vector<TrackedSatellite> tracked{mSatelliteList};
         tracked.erase(std::remove_if(tracked.begin(), tracked.end(), [&now](const TrackedSatellite &i) {
-            auto[riseOk, setOk, riseTime, setTime] = i.satellite.getPassData();
+            auto[riseOk, setOk, riseTime, setTime] = i.dataStub.getPassData();
             return setTime < now;
         }), tracked.end());
 
@@ -746,10 +746,11 @@ namespace rose {
                                                       set::AppImageId::DotPurple, set::AppImageId::DotAqua};
 
             for (const auto &satellite : tracked) {
-                imagePool.erase(std::find(imagePool.begin(), imagePool.end(), satellite.imageId));
+                imagePool.erase(std::find(imagePool.begin(), imagePool.end(), static_cast<set::AppImageId>(satellite.dataStub.imageId)));
             }
 
-            std::vector<Satellite> satelliteList;
+            using SatelliteListType = std::pair<SatelliteDataStub,Satellite>;
+            std::vector<SatelliteListType> satelliteList;
             Ephemeris ephemeris{mEphemerisFilePath[static_cast<size_t>(mEphemerisFile)]};
             for (const auto &esv : ephemeris) {
                 if (esv.first != "Moon") {
@@ -757,26 +758,34 @@ namespace rose {
                     auto[rise_ok, set_ok, rise_az, set_az, max_elevation, rise_time, set_time] =
                     findNextPass(satellite, mObserver);
                     if (set_ok && max_elevation > mMinimumElevation) {
-                        satellite.setPassData(rise_ok, set_ok, rise_time, set_time);
-                        satelliteList.emplace_back(satellite);
+                        SatelliteDataStub dataStub;
+                        dataStub.name = satellite.getName();
+                        dataStub.setPassData(rise_ok, set_ok, rise_time, set_time);
+                        satelliteList.emplace_back(dataStub,satellite);
                     }
                 }
             }
 
-            std::sort(satelliteList.begin(), satelliteList.end());
+            std::sort(satelliteList.begin(), satelliteList.end(),[](SatelliteListType &s0, SatelliteListType &s1){
+                return s0.first < s1.first;
+            });
 
             if (tracked.empty()) {
                 while (tracked.size() < 5 && !satelliteList.empty() && !imagePool.empty()) {
-                    tracked.push_back(TrackedSatellite{imagePool.front(), satelliteList.front()});
+                    auto satellitePair = satelliteList.front();
+                    satellitePair.first.imageId = static_cast<ImageId>(imagePool.front());
+                    tracked.push_back(TrackedSatellite{satellitePair.first, satellitePair.second});
                     imagePool.erase(imagePool.begin());
                     satelliteList.erase(satelliteList.begin());
                 }
             } else {
                 while (tracked.size() < 5 && !satelliteList.empty() && !imagePool.empty()) {
                     if (std::find_if(tracked.begin(), tracked.end(), [&satelliteList](const TrackedSatellite &ts) {
-                        return ts.satellite.getName() == satelliteList.begin()->getName();
+                        return ts.satellite.getName() == satelliteList.begin()->second.getName();
                     }) == tracked.end()) {
-                        tracked.push_back(TrackedSatellite{imagePool.front(), satelliteList.front()});
+                        auto satellitePair = satelliteList.front();
+                        satellitePair.first.imageId = static_cast<ImageId>(imagePool.front());
+                        tracked.push_back(TrackedSatellite{satellitePair.first, satellitePair.second});
                         imagePool.erase(imagePool.begin());
                     }
                     satelliteList.erase(satelliteList.begin());
@@ -864,7 +873,7 @@ namespace rose {
                 mDrawingContext->renderLine(renderer, p0 + mapPos, p1 + mapPos);
             p0 = p1;
         }
-        mDrawingContext->renderLine(renderer, p0 + mapPos, pos_n + mapPos);
+//        mDrawingContext->renderLine(renderer, p0 + mapPos, pos_n + mapPos);
     }
 
     void
@@ -941,5 +950,50 @@ namespace rose {
                 intery += gradient;
             }
         }
+    }
+
+    std::string SatelliteDataStub::passTimeString(time_t relative) const {
+        auto[riseOk, setOk, riseDateTime, setDateTime] = getPassData();
+
+        auto mkTimeStr = [](std::ostream &s, time_t t, time_t relative) {
+            static constexpr size_t bufferLength = 64;
+            static constexpr char fmtMinSec[] = "%M:%S";
+            static constexpr char fmtHourMin[] = "%Hh%M";
+            static constexpr char fmtDayHourMin[] = "%jd%Hh%M";
+            static constexpr char fmtDate[] = "%F";
+
+            time_t timer = t - relative;
+            auto lt = localtime(&timer);
+            timer += lt->tm_gmtoff;
+            auto tm = gmtime(&timer);
+            char buffer[bufferLength];
+            char *fmt = const_cast<char *>(fmtMinSec);
+            if (timer >= 172800)
+                fmt = const_cast<char *>(fmtDate);
+            if (timer >= 86400)
+                fmt = const_cast<char *>(fmtDayHourMin);
+            else if (timer >= 3600)
+                fmt = const_cast<char *>(fmtHourMin);
+            auto length = strftime(buffer, bufferLength, fmt, tm);
+            s << buffer;
+        };
+
+        DateTime now{true};
+        if (riseOk && riseDateTime > now) {
+            std::stringstream strm{};
+            auto rise = riseDateTime.mktime();
+            mkTimeStr(strm, rise, relative);
+            strm << " - ";
+            if (setOk) {
+                mkTimeStr(strm, setDateTime.mktime(), relative ? rise : 0);
+            }
+            return strm.str();
+        } else if (setOk && setDateTime > now) {
+            std::stringstream strm{};
+            mkTimeStr(strm, setDateTime.mktime(), relative);
+            return strm.str();
+        }
+
+        return "Has Set.";
     }
 }

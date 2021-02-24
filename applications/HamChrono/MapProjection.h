@@ -48,8 +48,54 @@ namespace rose {
         MapCount,
     };
 
+    struct SatelliteDataStub {
+        std::string name;
+        ImageId imageId;
+        bool passRiseOk{}, passSetOk{};
+        DateTime riseTime{};
+        DateTime setTime{};
+
+        bool operator<(const SatelliteDataStub &other) const {
+            if (passRiseOk && other.passRiseOk)
+                return riseTime < other.riseTime;
+            else
+                return setTime < other.setTime;
+        }
+
+        /**
+         * @brief Set the pass times for the Satellite.
+         * @param rise The rise time.
+         * @param set The set time.
+         */
+        void setPassData(bool riseOk, bool setOk, DateTime rise, DateTime set) {
+            passRiseOk = riseOk;
+            passSetOk = setOk;
+            riseTime = rise;
+            setTime = set;
+        }
+
+        /**
+         * @brief Get the data relative to
+         * @return
+         */
+        [[nodiscard]] std::tuple<bool, bool, DateTime, DateTime> getPassData() const { return std::make_tuple(passRiseOk, passSetOk, riseTime, setTime); }
+
+        /**
+         * @brief Create a std::string that describes the pass.
+         * @details If relative == 0 then times that are converted are converted to absolute dates and times in GMT.
+         * If the rise time is valid and in the future it is entered into the string first followed by " - " and the
+         * set time. If relative is not 0 the set time is converted relative to the rise time. This provides the
+         * rise time followed by the pass duration.<p/>
+         * If the rise time is not valid only the set time is converted providing the set time if relative is 0 or
+         * the duration if relative is not 0.
+         * @param relative A time_t to make the strings relative to.
+         * @return a std::string with the formatted pass timing data.
+         */
+        [[nodiscard]] std::string passTimeString(time_t relative = 0) const;
+    };
+
     struct TrackedSatellite {
-        set::AppImageId imageId;    ///< The ImageId to use as an icon.
+        SatelliteDataStub dataStub; ///< Minimal data for display of the satellite status.
         Satellite satellite;        ///< The tracked Satellite.
     };
 
@@ -65,8 +111,10 @@ namespace rose {
         static constexpr std::array<double,3> GrayLineCos = {-0.105, -0.208, -0.309};   ///< Sets the width of the dawn/dusk period.
         static constexpr double GrayLinePow = .80;      ///< Sets the speed of transitions, smaller is sharper. (.75)
 
-        bool mSatelliteMode{};                    ///< True when map is in SatelliteMode
+        bool mTerrestrialMode{};                  ///< True when map is in Terrestrial mode, excludes SatelliteMode
+        bool mSatelliteMode{};                    ///< True when map is in SatelliteMode, excludes TerrestrialMode
         bool mCelestialMode{};                    ///< True when map is displaying Celestial objects.
+        bool mAnnotationMode{};                   ///< True when map is displaying Annotations.
 
         std::future<bool> mFutureAziProj{};       ///< A future for the map azimuthal projections.
         std::future<bool> mFutureSun{};           ///< A future for the map sun illumination.

@@ -304,11 +304,6 @@ class Satellite {
     double QD{}, WD{}, DC{};
     double RS{};
 
-    bool passRiseOk{};
-    bool passSetOk{};
-    DateTime riseTime{};
-    DateTime setTime{};
-
     /**
      * Initialize satellite data from two line ephemeris.
      * @param l1 line 1
@@ -322,13 +317,6 @@ public:
 
     Vec3 SAT{}, VEL{};        // celestial coordinates
     Vec3 S{}, V{};        // geocentric coordinates
-
-    bool operator<(const Satellite &other) const {
-        if (passRiseOk && other.passRiseOk)
-            return riseTime < other.riseTime;
-        else
-            return setTime < other.setTime;
-    }
 
     DateTime mPrediction{};
 
@@ -364,7 +352,7 @@ public:
      * Determine if the sat epoch is known to be good.
      * @return true if good.
      */
-    [[nodiscard]] bool checkSatEpoch() {
+    [[nodiscard]] bool checkSatEpoch() const {
         DateTime t_now(true);
         DateTime t_epo = epoch();
         if (isMoon)
@@ -420,36 +408,5 @@ public:
      * @return the DateTime of the epoch.
      */
     [[nodiscard]] DateTime epoch() const;
-
-    /**
-     * @brief Set the pass times for the Satellite.
-     * @param rise The rise time.
-     * @param set The set time.
-     */
-    void setPassData(bool riseOk, bool setOk, DateTime rise, DateTime set) {
-        passRiseOk = riseOk;
-        passSetOk = setOk;
-        riseTime = rise;
-        setTime = set;
-    }
-
-    /**
-     * @brief Get the data relative to
-     * @return
-     */
-    [[nodiscard]] std::tuple<bool, bool, DateTime, DateTime> getPassData() const { return std::make_tuple(passRiseOk, passSetOk, riseTime, setTime); }
-
-    /**
-     * @brief Create a std::string that describes the pass.
-     * @details If relative == 0 then times that are converted are converted to absolute dates and times in GMT.
-     * If the rise time is valid and in the future it is entered into the string first followed by " - " and the
-     * set time. If relative is not 0 the set time is converted relative to the rise time. This provides the
-     * rise time followed by the pass duration.<p/>
-     * If the rise time is not valid only the set time is converted providing the set time if relative is 0 or
-     * the duration if relative is not 0.
-     * @param relative A time_t to make the strings relative to.
-     * @return a std::string with the formatted pass timing data.
-     */
-    [[nodiscard]] std::string passTimeString(time_t relative = 0) const;
 };
 

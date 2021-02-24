@@ -428,51 +428,6 @@ DateTime Satellite::epoch() const {
     return (dt);
 }
 
-std::string Satellite::passTimeString(time_t relative) const {
-    auto[riseOk, setOk, riseDateTime, setDateTime] = getPassData();
-
-    auto mkTimeStr = [](std::ostream &s, time_t t, time_t relative) {
-        static constexpr size_t bufferLength = 64;
-        static constexpr char fmtMinSec[] = "%M:%S";
-        static constexpr char fmtHourMin[] = "%Hh%M";
-        static constexpr char fmtDayHourMin[] = "%jd%Hh%M";
-        static constexpr char fmtDate[] = "%F";
-
-        time_t timer = t - relative;
-        auto lt = localtime(&timer);
-        timer += lt->tm_gmtoff;
-        auto tm = gmtime(&timer);
-        char buffer[bufferLength];
-        char *fmt = const_cast<char *>(fmtMinSec);
-        if (timer >= 172800)
-            fmt = const_cast<char *>(fmtDate);
-        if (timer >= 86400)
-            fmt = const_cast<char *>(fmtDayHourMin);
-        else if (timer >= 3600)
-            fmt = const_cast<char *>(fmtHourMin);
-        auto length = strftime(buffer, bufferLength, fmt, tm);
-        s << buffer;
-    };
-
-    DateTime now{true};
-    if (riseOk && riseDateTime > now) {
-        std::stringstream strm{};
-        auto rise = riseDateTime.mktime();
-        mkTimeStr(strm, rise, relative);
-        strm << " - ";
-        if (setOk) {
-            mkTimeStr(strm, setDateTime.mktime(), relative ? rise : 0);
-        }
-        return strm.str();
-    } else if (setOk && setDateTime > now) {
-        std::stringstream strm{};
-        mkTimeStr(strm, setDateTime.mktime(), relative);
-        return strm.str();
-    }
-
-    return "Has Set.";
-}
-
 //----------------------------------------------------------------------
 
 void
