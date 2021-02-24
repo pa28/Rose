@@ -233,6 +233,7 @@ namespace rose {
          */
         void setFontSize(int fontSize) override;
 
+        /// See Widget::setSize()
         void setSize(Size size) override;
 
         /**
@@ -253,6 +254,8 @@ namespace rose {
             if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
                                                            !mStateId.empty() && rose()->hasSettings()) {
                 setInvert(rose()->settings()->getValue(mStateId.value(), 0) != 0);
+                rose()->settings()->dataChangeTx.connect(mSettingsUpdateRx);
+
             }
         }
     };

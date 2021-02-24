@@ -68,7 +68,7 @@ namespace rose {
             });
         }
 
-        if (!mId.empty() && rose()->hasSettings()) {
+        if ((!mId.empty() || !mStateId.empty()) && rose()->hasSettings()) {
             rose()->settings()->dataChangeTx.connect(mSettingsUpdateRx);
         }
 
