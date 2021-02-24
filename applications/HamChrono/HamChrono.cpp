@@ -314,8 +314,12 @@ void HamChrono::switchBox(shared_ptr<rose::Grid> &grid) {
          << wdg<Button>( static_cast<RoseImageId>(set::AppImageId::Sun), ButtonType::ToggleButton)
              << StateId(set::CelestialMode)
              << Manip::Parent
-         << wdg<Button>(RoseImageId::IconLocation, ButtonType::ToggleButton) << Manip::Parent
-         << wdg<Button>(RoseImageId::IconNetwork, ButtonType::ToggleButton) << Manip::Parent
+         << wdg<Button>(RoseImageId::IconLocation, ButtonType::ToggleButton)
+             << StateId(set::TerrestrialMode)
+             << Manip::Parent
+         << wdg<Button>(RoseImageId::IconNetwork, ButtonType::ToggleButton)
+             << StateId(set::AnnotationMode)
+             << Manip::Parent
          << wdg<Button>(RoseImageId::IconCompass, ButtonType::ToggleButton);
 }
 

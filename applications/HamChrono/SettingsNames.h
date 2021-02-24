@@ -42,6 +42,8 @@ namespace set {
     static constexpr std::string_view QTH_Lon_Opt = "-lon";
 
     static constexpr std::string_view SatelliteMode = "SatelliteMode";
+    static constexpr std::string_view TerrestrialMode = "TerrestrialMode";
     static constexpr std::string_view AzimuthalMode = "AzimuthalMode";
     static constexpr std::string_view CelestialMode = "CelestialMode";
+    static constexpr std::string_view AnnotationMode = "AnnotationMode";
 }

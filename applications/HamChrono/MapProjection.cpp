@@ -107,6 +107,16 @@ namespace rose {
                 setNeedsDrawing();
             } else if (name == set::SatelliteMode) {
                 mSatelliteMode = rose()->settings()->getValue(set::SatelliteMode, 0) != 0;
+                if (mSatelliteMode)
+                    rose()->settings()->setValue(set::TerrestrialMode, 0);
+                setNeedsDrawing();
+            } else if (name == set::TerrestrialMode) {
+                mTerrestrialMode = rose()->settings()->getValue(set::TerrestrialMode, 0) != 0;
+                if (mTerrestrialMode)
+                    rose()->settings()->setValue(set::SatelliteMode, 0);
+                setNeedsDrawing();
+            } else if (name == set::AnnotationMode) {
+                mAnnotationMode = rose()->settings()->getValue(set::AnnotationMode, 0) != 0;
                 setNeedsDrawing();
             }
         });
@@ -115,6 +125,7 @@ namespace rose {
                       ProjectionType::StationMercator;
         mCelestialMode = rose()->settings()->getValue(set::CelestialMode, 0) != 0;
         mSatelliteMode = rose()->settings()->getValue(set::SatelliteMode, 0) != 0;
+        mAnnotationMode = rose()->settings()->getValue(set::AnnotationMode, 0) != 0;
         rose()->settings()->dataChangeTx.connect(mSettingsUpdateRx);
 
         mClassName = "MapProjection";
@@ -200,12 +211,14 @@ namespace rose {
             std::lock_guard<std::mutex> lockGuard{mSatListMutex};
             for (auto &satellite : mSatelliteList) {
                 GeoPosition geo{satellite.satellite.geo()};
-                MapIcon mapItem{static_cast<ImageId>(satellite.imageId), geo};
+                MapIcon mapItem{static_cast<ImageId>(satellite.dataStub.imageId), geo};
                 drawMapItem(mapItem, renderer, widgetRect, mProjection, splitPixel);
             }
 
-            drawOrbitalPath(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
-            drawFootprint(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
+            if (mAnnotationMode) {
+                drawOrbitalPath(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
+                drawFootprint(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
+            }
         }
 
         if (mCelestialMode)
