@@ -134,7 +134,8 @@ namespace rose {
          * @param slot The slot to add, comes from Slot<T>::connect()
          */
         void connect(std::shared_ptr<Slot<DataType>> slot) {
-            mSlots.emplace_back(slot);
+            if (std::find(mSlots.begin(), mSlots.end(), slot) == mSlots.end())
+                mSlots.emplace_back(slot);
         }
 
         /**

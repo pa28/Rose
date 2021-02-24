@@ -29,6 +29,7 @@ namespace rose {
         mLayoutHints.mPadding = padding;
     }
 
+    /// See Widget::initializeComposite()
     void Frame::initializeComposite() {
         mClassName = "Frame";
         SingleChild::initializeComposite();

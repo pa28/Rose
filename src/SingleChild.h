@@ -61,9 +61,12 @@ namespace rose {
         ~SingleChild() override = default;
 
         SingleChild(const SingleChild &) = delete;
-        SingleChild& operator=(const SingleChild &) = delete;
+
+        SingleChild &operator=(const SingleChild &) = delete;
+
         SingleChild(SingleChild &&) = delete;
-        SingleChild& operator=(SingleChild &&) = delete;
+
+        SingleChild &operator=(SingleChild &&) = delete;
 
         std::shared_ptr<Widget> getSingleChild() {
             if (mChildren.empty())
