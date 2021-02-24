@@ -201,13 +201,8 @@ namespace rose {
 
         if (mSatelliteMode) {
             if (!mDrawingContext)
-                mDrawingContext = std::make_unique<AntiAliasedDrawing>(renderer, 2, color::RGBA{ 1.f, 0.f, 0.f, 1.f});
-//            Position p0 = widgetRect.getPosition();
-//            p0.y() += widgetRect.height()/2;
-//            Position p1 = p0;
-//            p1.x() += widgetRect.width();
-//            p1.y() += widgetRect.height()/2;
-//            mDrawingContext->renderLine(renderer, p0, p1);
+                mDrawingContext = std::make_unique<AntiAliasedDrawing>(renderer, 2,
+                                                                       color::RGBA{1.f, 0.f, 0.f, 1.f});
             std::lock_guard<std::mutex> lockGuard{mSatListMutex};
             for (auto &satellite : mSatelliteList) {
                 GeoPosition geo{satellite.satellite.geo()};
@@ -851,29 +846,30 @@ namespace rose {
         GeoPosition geo{satellite.satellite.geo()};
         auto d = satellite.satellite.viewingRadius(0.);
 
-        auto loc_0 = projected(geo, d, 0.);
+        auto loc_0 = projected(geo, d, geo.lat() > 0. ? deg2rad(2.5) : M_PI - deg2rad(2.5));
         auto p0 = geoToMap(loc_0, mProjection, splitPixel);
         auto pos_n = p0;
 
-        for (double bearing = deg2rad(5.); bearing < 2. * M_PI; bearing += deg2rad(5.)) {
+        for (int b = 5; b <= 365; b += 5) {
+            double bearing = 2. * M_PI * (double) b / (360.);
+            if (geo.lat() < 0.)
+                bearing += M_PI;
             auto loc = projected(geo, d, bearing);
             auto p1 = geoToMap(loc, mProjection, splitPixel);
             bool discontinuity = false;
             switch (mProjection) {
                 case ProjectionType::Mercator:
                 case ProjectionType::StationMercator:
-                    discontinuity = abs(p0.x() - p1.x()) > mMapSize.width() / 2;
                     break;
                 case ProjectionType::StationAzmuthal:
-                    discontinuity = (p0.x() < mMapSize.width()/2 && p1.x() > mMapSize.width()/2) ||
-                                    (p1.x() < mMapSize.width()/2 && p0.x() > mMapSize.width()/2);
+                    discontinuity = (p0.x() < mMapSize.width() / 2 && p1.x() > mMapSize.width() / 2) ||
+                                    (p1.x() < mMapSize.width() / 2 && p0.x() > mMapSize.width() / 2);
                     break;
             }
             if (!discontinuity)
                 mDrawingContext->renderLine(renderer, p0 + mapPos, p1 + mapPos);
             p0 = p1;
         }
-//        mDrawingContext->renderLine(renderer, p0 + mapPos, pos_n + mapPos);
     }
 
     void
