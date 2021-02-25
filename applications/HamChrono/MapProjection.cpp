@@ -325,9 +325,20 @@ namespace rose {
     }
 
     GeoPosition projected(GeoPosition location, double angDist, double bearing) {
-        auto lat = asin( sin(location.lat()) * cos(angDist) + cos(location.lat()) * sin(angDist) * cos(bearing));
-        auto lon = location.lon() + atan2(sin(bearing) * sin(angDist) * cos(location.lat()), cos(angDist) - sin(location.lat()) * sin(lat));
-        return GeoPosition{lat,lon};
+        auto lat = asin(sin(location.lat()) * cos(angDist) + cos(location.lat()) * sin(angDist) * cos(bearing));
+        auto lon = location.lon() + atan2(sin(bearing) * sin(angDist) * cos(location.lat()),
+                                          cos(angDist) - sin(location.lat()) * sin(lat));
+        return GeoPosition{lat, lon};
+    }
+
+    double range(GeoPosition p0, GeoPosition p1) {
+        auto sinSqLat = sin((p1.lat() - p0.lat()) / 2.);
+        sinSqLat *= sinSqLat;
+        auto sinSqLon = sin((p1.lon() - p0.lon()) / 2.);
+        sinSqLon *= sinSqLon;
+        auto a = sinSqLat + cos(p0.lat()) * cos(p1.lat()) * sinSqLon;
+        auto c = 2. * atan2(sqrt(a), sqrt(1. - a));
+        return c;
     }
 
     /**
@@ -841,34 +852,75 @@ namespace rose {
 
     void MapProjection::drawFootprint(sdl::Renderer &renderer, TrackedSatellite &satellite, Position mapPos,
                                       int splitPixel) {
+        static constexpr int StepDeg = 10;
+        static constexpr size_t LineSegments = 360 / StepDeg;
+        static constexpr double BearingStep = deg2rad(2. * M_PI / StepDeg);
+
+        // Get the information needed to draw the foot print.
         DateTime now{true};
         satellite.satellite.predict(now);
         GeoPosition geo{satellite.satellite.geo()};
         auto d = satellite.satellite.viewingRadius(0.);
+//        geo.lat() = -M_PI_2 - d / 2.;
+        auto d0 = d;
+        if (geo.lat() > 0)
+            d0 = range(geo, GeoPosition{M_PI_2, geo.lon()});
+        else
+            d0 = range(geo, GeoPosition{-M_PI_2, geo.lon()});
 
-        auto loc_0 = projected(geo, d, geo.lat() > 0. ? deg2rad(2.5) : M_PI - deg2rad(2.5));
-        auto p0 = geoToMap(loc_0, mProjection, splitPixel);
-        auto pos_n = p0;
+        decltype(d) firstBearing = 0.;
+        bool discontinuity = false;
 
-        for (int b = 5; b <= 365; b += 5) {
-            double bearing = 2. * M_PI * (double) b / (360.);
-            if (geo.lat() < 0.)
-                bearing += M_PI;
-            auto loc = projected(geo, d, bearing);
-            auto p1 = geoToMap(loc, mProjection, splitPixel);
-            bool discontinuity = false;
-            switch (mProjection) {
-                case ProjectionType::Mercator:
-                case ProjectionType::StationMercator:
-                    break;
-                case ProjectionType::StationAzmuthal:
-                    discontinuity = (p0.x() < mMapSize.width() / 2 && p1.x() > mMapSize.width() / 2) ||
-                                    (p1.x() < mMapSize.width() / 2 && p0.x() > mMapSize.width() / 2);
-                    break;
+        auto point0 = geoToMap(projected(geo, d, firstBearing), mProjection, splitPixel);
+        point0.x() = (point0.x() + mMapSize.width()) % mMapSize.width();
+        auto pointN_1 = point0;
+        decltype(point0) pointN;
+
+        auto lastBearing = firstBearing + 2. * M_PI;
+        std::vector<std::pair<Position, Position>> points{LineSegments};
+
+        firstBearing += BearingStep;
+        bool residualPointN_1 = false;
+        while (firstBearing < lastBearing) {
+            pointN = geoToMap(projected(geo, d, firstBearing), mProjection, splitPixel);
+            if (pointN.x() < 0 || pointN.x() > mMapSize.width())
+                pointN.x() = (pointN.x() + mMapSize.width()) % mMapSize.width();
+//            std::cout << __PRETTY_FUNCTION__ << pointN_1 << pointN << ' ' << firstBearing << '\n';
+            if (d0 < d) {
+                auto dx = pointN_1.x() - pointN.x();
+                if (abs(dx) > mMapSize.width() / 2) {
+                    if (dx < 0) {
+                        points.emplace_back(pointN_1, Position{0, pointN.y()});
+                        pointN_1 = Position{mMapSize.width(), pointN.y()};
+                    } else {
+                        points.emplace_back(pointN_1, Position{mMapSize.width(), pointN.y()});
+                        pointN_1 = Position{0, pointN.y()};
+                    }
+                    residualPointN_1 = true;
+                } else {
+                    points.emplace_back(pointN_1, pointN);
+                    pointN_1 = pointN;
+                    residualPointN_1 = false;
+                }
+            } else {
+                points.emplace_back(pointN_1, pointN);
+                pointN_1 = pointN;
+                residualPointN_1 = false;
             }
-            if (!discontinuity)
-                mDrawingContext->renderLine(renderer, p0 + mapPos, p1 + mapPos);
-            p0 = p1;
+            firstBearing += BearingStep;
+        }
+
+        if (d0 < d) {
+            if (residualPointN_1) {
+                points.front().first = pointN_1;
+            }
+        }
+
+        points.emplace_back(pointN, point0);
+
+        for (const auto &point : points) {
+//            std::cout << __PRETTY_FUNCTION__ << point.first << point.second << '\n';
+            mDrawingContext->renderLine(renderer, point.first + mapPos, point.second + mapPos);
         }
     }
 

@@ -14,12 +14,12 @@
 namespace rose::util {
 
     template<typename T>
-    T deg2rad(T deg) {
+    constexpr T deg2rad(T deg) {
         return M_PI * (deg / 180.);
     }
 
     template<typename T>
-    T rad2deg(T rad) {
+    constexpr T rad2deg(T rad) {
         return 180. * (rad / M_PI);
     }
 
