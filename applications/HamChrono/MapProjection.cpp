@@ -827,8 +827,9 @@ namespace rose {
             index += step;
         }
 
-        std::array<std::vector<Position>::iterator,2> partition{mapPoints.end(), mapPoints.end()};
-        size_t idx = 0;
+        std::array<std::vector<Position>::iterator, 4> partition{mapPoints.begin(), mapPoints.end(), mapPoints.end(),
+                                                                 mapPoints.end()};
+        size_t idx = 1;
         switch (mProjection) {
             case ProjectionType::Mercator:
             case ProjectionType::StationMercator:
@@ -849,29 +850,12 @@ namespace rose {
                 break;
         }
 
-        auto mapPoint0 = mapPoints.front();
-        std::for_each(mapPoints.begin() + 1, idx ? partition[0] : mapPoints.end(), [&](Position &position) {
-            if (mapPoint0 != position)
+        for (size_t i = 0; i < idx; ++i) {
+            auto mapPoint0 = *partition[i];
+            std::for_each(partition[i] + 1, partition[i+1], [&](Position &position){
                 mDrawingContext->renderLine(renderer, mapPoint0 + mapPos, position + mapPos);
-            mapPoint0 = position;
-        });
-
-        if (idx > 0 && partition[0] != mapPoints.end()) {
-            mapPoint0 = (*partition[0]);
-            std::for_each(partition[0] + 1, partition[1], [&](Position &position) {
-                if (mapPoint0 != position)
-                    mDrawingContext->renderLine(renderer, mapPoint0 + mapPos, position + mapPos);
                 mapPoint0 = position;
             });
-
-            if (idx > 1 && partition[1] != mapPoints.end()) {
-                mapPoint0 = (*partition[1]);
-                std::for_each(partition[1] + 1, mapPoints.end(), [&](Position &position) {
-                    if (mapPoint0 != position)
-                        mDrawingContext->renderLine(renderer, mapPoint0 + mapPos, position + mapPos);
-                    mapPoint0 = position;
-                });
-            }
         }
     }
 
