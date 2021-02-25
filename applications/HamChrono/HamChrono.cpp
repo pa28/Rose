@@ -27,7 +27,7 @@ using namespace rose;
 
 static constexpr std::array<Rose::IconFileItem,14> fileIcons = {
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Sun), Size{0,0}, "35px-Sun.png"},
-        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "moon12.png"},
+        Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "moon13.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingGreen), Size{0,0}, "RingGreen.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingRed), Size{0,0}, "RingRed.png"},
         Rose::IconFileItem{ static_cast<ImageId>(set::AppImageId::RingBlue), Size{0,0}, "RingBlue.png"},
