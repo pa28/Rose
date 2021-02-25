@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(Rose VERSION 0.1.39.39)
+project(Rose VERSION 0.1.40.40)
 set(PACKAGE_CONTACT "Richard Buckley <richard.buckley>@ieee.org>")
 include(GNUInstallDirs)
 
