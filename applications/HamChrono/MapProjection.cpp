@@ -904,7 +904,9 @@ namespace rose {
             firstBearing += BearingStep;
         }
 
-        auto partition = mapPoints.end();
+        std::array<std::vector<Position>::iterator, 4> partition{mapPoints.begin(), mapPoints.end(), mapPoints.end(),
+                                                                 mapPoints.end()};
+        size_t idx = 1;
         switch (mProjection) {
             case ProjectionType::Mercator:
             case ProjectionType::StationMercator:
@@ -918,24 +920,20 @@ namespace rose {
                 }
                 break;
             case ProjectionType::StationAzmuthal:
-                if ((d0 + d > M_PI_2 && d0 < M_PI_2) || (d1 + d > M_PI_2 && d1 < M_PI_2)) {
-                    partition = std::stable_partition(mapPoints.begin(), mapPoints.end(),[&](Position &position){
-                        return position.x() > mMapSize.width()/2;
-                    });
+                auto antipode = mapPoints.front().x() < mMapSize.width()/2;
+                for (auto it = mapPoints.begin(); it != mapPoints.end(); ++it) {
+                    auto a = it->x() < mMapSize.width()/2;
+                    if (a != antipode) {
+                        antipode = a;
+                        partition[idx++] = it;
+                    }
                 }
                 break;
         }
 
-        auto mapPoint0 = mapPoints.front();
-        std::for_each(mapPoints.begin() + 1, partition, [&](Position &position) {
-            if (mapPoint0 != position)
-                mDrawingContext->renderLine(renderer, mapPoint0 + mapPos, position + mapPos);
-            mapPoint0 = position;
-        });
-
-        if (partition != mapPoints.end()) {
-            mapPoint0 = (*partition);
-            std::for_each(partition+1, mapPoints.end(), [&](Position &position){
+        for (size_t i = 0; i < idx; ++i) {
+            auto mapPoint0 = *partition[i];
+            std::for_each(partition[i] + 1, partition[i+1], [&](Position &position){
                 mDrawingContext->renderLine(renderer, mapPoint0 + mapPos, position + mapPos);
                 mapPoint0 = position;
             });
