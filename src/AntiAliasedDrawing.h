@@ -23,6 +23,10 @@ namespace rose {
     class AntiAliasedDrawing {
     protected:
         static constexpr int Scale = 10;
+        static constexpr int NubWidth = 1;
+        static constexpr int NubHeight = 3;
+        static constexpr int NubColorSize = 1;
+
         color::RGBA mColor{};
         int mWidth{};
         int mScaledWidth{};
@@ -36,9 +40,11 @@ namespace rose {
 
         void setWidthColor(sdl::Renderer& renderer, int width, color::RGBA rgba);
 
-        void drawLine(sdl::Renderer& renderer, Position p0, Position p1);
+        void setColor(sdl::Renderer& renderer, color::RGBA rgba) {
+            setWidthColor(renderer, mWidth, rgba);
+        }
 
-        void renderLine(sdl::Renderer& renderer, Position p0, Position p1);
+        bool renderLine(sdl::Renderer& renderer, Position p0, Position p1);
     };
 }
 
