@@ -216,7 +216,7 @@ namespace rose {
         Observer mObserver{};                       ///< The QTH Observer data.
         std::vector<TrackedSatellite> mSatelliteList{};    ///< The list of Satellites being tracked.
         std::mutex mSatListMutex{};                 ///< A mutex to protect write access to mSatelliteList.
-        double mMinimumElevation{30.};              ///< The minimum pass elevation to track satellite.
+        double mMinimumElevation{15.};              ///< The minimum pass elevation to track satellite.
 
         /// Find the next pass of Satellite over Observer.
         static std::tuple<bool, bool, double, double, double, DateTime, DateTime>

@@ -773,73 +773,81 @@ namespace rose {
         static constexpr size_t LineSegments = 360 / StepDeg;
         static constexpr ComputeType BearingStep = 2. * M_PI / LineSegments;
 
+        std::array<std::pair<double,color::RGBA>,2> viewElevation{
+                {
+                        {0., {255u, 69u, 0u, 255u}},
+                        {deg2rad(mMinimumElevation), {50u,205u,50u, 255u}},
+                }};
         // Get the information needed to draw the foot print.
         DateTime now{true};
         satellite.satellite.predict(now);
         GeoPosition geo{satellite.satellite.geo()};
-        auto d = satellite.satellite.viewingRadius(0.);
+
+        for (const auto view : viewElevation) {
+            auto d = satellite.satellite.viewingRadius(view.first);
 //        geo.lat() = -M_PI_2 - d / 2.;
 
-        // Distance from the nearest pole.
-        auto d0 = d;
-        auto d1 = d;
+            // Distance from the nearest pole.
+            auto d0 = d;
+            auto d1 = d;
 
-        switch (mProjection) {
-            case ProjectionType::Mercator:
-            case ProjectionType::StationMercator:
-                if (geo.lat() > 0)
-                    d0 = range(geo, GeoPosition{M_PI_2, geo.lon()});
-                else
-                    d0 = range(geo, GeoPosition{-M_PI_2, geo.lon()});
-                break;
-            case ProjectionType::StationAzmuthal:
-                d0 = range(geo, mQthRad);
-                d1 = range(geo, mAntipode);
-                break;
-        }
+            switch (mProjection) {
+                case ProjectionType::Mercator:
+                case ProjectionType::StationMercator:
+                    if (geo.lat() > 0)
+                        d0 = range(geo, GeoPosition{M_PI_2, geo.lon()});
+                    else
+                        d0 = range(geo, GeoPosition{-M_PI_2, geo.lon()});
+                    break;
+                case ProjectionType::StationAzmuthal:
+                    d0 = range(geo, mQthRad);
+                    d1 = range(geo, mAntipode);
+                    break;
+            }
 
-        ComputeType firstBearing = 0.;
-        auto lastBearing = firstBearing + 2. * M_PI;
-        PartitionedLine mapPoints{};
-        while (firstBearing < lastBearing) {
-            auto p = geoToMap(projected(geo, d, firstBearing), mProjection, splitPixel);
-            if (p.x() < 0)
-                p.x() += mMapSize.width();
-            if (p.x() > mMapSize.width())
-                p.x() -= mMapSize.width();
-            mapPoints.emplace_back(p);
-            firstBearing += BearingStep;
-        }
+            ComputeType firstBearing = 0.;
+            auto lastBearing = firstBearing + 2. * M_PI;
+            PartitionedLine mapPoints{};
+            while (firstBearing < lastBearing) {
+                auto p = geoToMap(projected(geo, d, firstBearing), mProjection, splitPixel);
+                if (p.x() < 0)
+                    p.x() += mMapSize.width();
+                if (p.x() > mMapSize.width())
+                    p.x() -= mMapSize.width();
+                mapPoints.emplace_back(p);
+                firstBearing += BearingStep;
+            }
 
-        switch (mProjection) {
-            case ProjectionType::Mercator:
-            case ProjectionType::StationMercator:
-                if (d0 < d) {
-                    std::sort(mapPoints.begin(), mapPoints.end(), [](Position &p0, Position &p1) {
-                        return p0.x() < p1.x();
-                    });
+            switch (mProjection) {
+                case ProjectionType::Mercator:
+                case ProjectionType::StationMercator:
+                    if (d0 < d) {
+                        std::sort(mapPoints.begin(), mapPoints.end(), [](Position &p0, Position &p1) {
+                            return p0.x() < p1.x();
+                        });
 
-                    mapPoints.front().x() = 0;
-                    mapPoints.back().x() = mMapSize.width() - 1;
-                    mapPoints.partition();
-                } else {
+                        mapPoints.front().x() = 0;
+                        mapPoints.back().x() = mMapSize.width() - 1;
+                        mapPoints.partition();
+                    } else {
+                        mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
+                            return (abs(p0.x() - p1.x()) < mMapSize.width() / 2);
+                        });
+                    }
+                    break;
+                case ProjectionType::StationAzmuthal:
                     mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
-                        return (abs(p0.x() - p1.x()) < mMapSize.width()/2);
+                        return (p0.x() < mMapSize.width() / 2 && p1.x() < mMapSize.width() / 2) ||
+                               (p0.x() > mMapSize.width() / 2 && p1.x() > mMapSize.width() / 2);
                     });
-                }
-                break;
-            case ProjectionType::StationAzmuthal:
-                mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
-                    return (p0.x() < mMapSize.width()/2 && p1.x() < mMapSize.width()/2) ||
-                           (p0.x() > mMapSize.width()/2 && p1.x() > mMapSize.width()/2);
-                });
-                break;
-        }
+                    break;
+            }
 
-        mDrawingContext->setColor(renderer, color::RGBA{255u,69u,0u, 255u});
-        mapPoints.draw([&](const Position &p0, const Position &p1) -> bool {
-            return mDrawingContext->renderLine(renderer, p0+mapPos, p1+mapPos);
-        });
+            mDrawingContext->setColor(renderer, view.second);
+            mapPoints.draw([&](const Position &p0, const Position &p1) -> bool {
+                return mDrawingContext->renderLine(renderer, p0 + mapPos, p1 + mapPos);
+            });
+        }
     }
 
     std::string SatelliteDataStub::passTimeString(time_t relative) const {
