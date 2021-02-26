@@ -100,15 +100,88 @@ namespace rose {
     };
 
     /**
-     * @class MapProjections
+     * @class PartitionedLine
+     * @brief Partition lines across discontinuities introduced by the current map projection.
+     */
+    class PartitionedLine : public std::vector<Position> {
+    protected:
+        /// The type of a line segment.
+        using LineSegment = std::vector<Position>;
+
+        /// The type of a partitioned line.
+        using LineParts = std::vector<LineSegment>;
+
+        /// The partitioned line segments
+        LineParts mLineParts{};
+
+    public:
+        PartitionedLine() : std::vector<Position>() {}
+
+        ~PartitionedLine() = default;
+
+        /**
+         * @brief A predicate which returns true if two Positions belong in the same partition.
+         */
+        using Predicate = std::function<bool(Position &, Position &)>;
+
+        void partition() {
+            LineSegment segment{};
+            std::copy(begin(), end(), std::back_inserter(segment));
+            mLineParts.emplace_back(segment);
+            clear();
+        }
+
+        void partition(Predicate p) {
+            mLineParts.clear();
+            if (!empty()) {
+                auto first = begin();
+                auto last = end();
+                LineSegment work{};
+                work.emplace_back(*first);
+                ++first;
+                while (first != last) {
+                    if (p(work.back(), *first)) {
+                        work.emplace_back(*first);
+                    } else {
+                        if (work.size() > 1)
+                            mLineParts.emplace_back(work);
+                        work.clear();
+                        work.emplace_back(*first);
+                    }
+                    ++first;
+                }
+                if (work.size() > 1)
+                    mLineParts.emplace_back(work);
+                work.clear();
+            }
+            clear();
+        }
+
+        bool draw(std::function<bool(const Position &, const Position &)> p) {
+            for (const auto &segment : mLineParts) {
+                Position p0 = segment.front();
+                std::for_each(segment.begin()+1, segment.end(), [&p,&p0](const Position &p1){
+                    if (!p(p0,p1))
+                        return false;
+                    p0 = p1;
+                    return true;
+                });
+            }
+            return true;
+        }
+    };
+
+    /**
+     * @class MapProjection
      * @brief
      */
     class MapProjection : public Widget {
     protected:
-        Rose::IconFileItem mMoonIconSpec{ static_cast<ImageId>(set::AppImageId::Moon), Size{0,0}, "full_moon.png"};
+        Rose::IconFileItem mMoonIconSpec{static_cast<ImageId>(set::AppImageId::Moon), Size{0, 0}, "full_moon.png"};
 
         /// Twilight specs: civil, nautical, astronomical.
-        static constexpr std::array<double,3> GrayLineCos = {-0.105, -0.208, -0.309};   ///< Sets the width of the dawn/dusk period.
+        static constexpr std::array<double, 3> GrayLineCos = {-0.105, -0.208,
+                                                              -0.309};   ///< Sets the width of the dawn/dusk period.
         static constexpr double GrayLinePow = .80;      ///< Sets the speed of transitions, smaller is sharper. (.75)
 
         bool mTerrestrialMode{};                  ///< True when map is in Terrestrial mode, excludes SatelliteMode

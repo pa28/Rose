@@ -818,7 +818,7 @@ namespace rose {
         auto useStep = step;
         DateTime now{true};
 
-        std::vector<Position> mapPoints{};
+        PartitionedLine mapPoints{};
         auto index = now;
         while (index < (now + (period + step))) {
             satellite.satellite.predict(index);
@@ -827,36 +827,25 @@ namespace rose {
             index += step;
         }
 
-        std::array<std::vector<Position>::iterator, 4> partition{mapPoints.begin(), mapPoints.end(), mapPoints.end(),
-                                                                 mapPoints.end()};
-        size_t idx = 1;
         switch (mProjection) {
             case ProjectionType::Mercator:
             case ProjectionType::StationMercator:
-                for (auto it = mapPoints.begin() + 1; it != mapPoints.end(); ++it) {
-                    if (abs((it-1)->x() - it->x()) > mMapSize.width()/2)
-                        partition[idx++] = it;
-                }
+                mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
+                    return (abs(p0.x() - p1.x()) < mMapSize.width()/2);
+                });
                 break;
             case ProjectionType::StationAzmuthal:
-                auto antipode = mapPoints.front().x() < mMapSize.width()/2;
-                for (auto it = mapPoints.begin(); it != mapPoints.end(); ++it) {
-                    auto a = it->x() < mMapSize.width()/2;
-                    if (a != antipode) {
-                        antipode = a;
-                        partition[idx++] = it;
-                    }
-                }
+                mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
+                    return (p0.x() < mMapSize.width()/2 && p1.x() < mMapSize.width()/2) ||
+                            (p0.x() > mMapSize.width()/2 && p1.x() > mMapSize.width()/2);
+                });
                 break;
         }
 
-        for (size_t i = 0; i < idx; ++i) {
-            auto mapPoint0 = *partition[i];
-            std::for_each(partition[i] + 1, partition[i+1], [&](Position &position){
-                mDrawingContext->renderLine(renderer, mapPoint0 + mapPos, position + mapPos);
-                mapPoint0 = position;
-            });
-        }
+        mDrawingContext->setColor(renderer, color::RGBA{218u,165u,32u, 255u});
+        mapPoints.draw([&](const Position &p0, const Position &p1) -> bool {
+            return mDrawingContext->renderLine(renderer, p0+mapPos, p1+mapPos);
+        });
     }
 
     void MapProjection::drawFootprint(sdl::Renderer &renderer, TrackedSatellite &satellite, Position mapPos,
@@ -893,7 +882,7 @@ namespace rose {
 
         ComputeType firstBearing = 0.;
         auto lastBearing = firstBearing + 2. * M_PI;
-        std::vector<Position> mapPoints{};
+        PartitionedLine mapPoints{};
         while (firstBearing < lastBearing) {
             auto p = geoToMap(projected(geo, d, firstBearing), mProjection, splitPixel);
             if (p.x() < 0)
@@ -904,9 +893,6 @@ namespace rose {
             firstBearing += BearingStep;
         }
 
-        std::array<std::vector<Position>::iterator, 4> partition{mapPoints.begin(), mapPoints.end(), mapPoints.end(),
-                                                                 mapPoints.end()};
-        size_t idx = 1;
         switch (mProjection) {
             case ProjectionType::Mercator:
             case ProjectionType::StationMercator:
@@ -917,27 +903,25 @@ namespace rose {
 
                     mapPoints.front().x() = 0;
                     mapPoints.back().x() = mMapSize.width() - 1;
+                    mapPoints.partition();
+                } else {
+                    mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
+                        return (abs(p0.x() - p1.x()) < mMapSize.width()/2);
+                    });
                 }
                 break;
             case ProjectionType::StationAzmuthal:
-                auto antipode = mapPoints.front().x() < mMapSize.width()/2;
-                for (auto it = mapPoints.begin(); it != mapPoints.end(); ++it) {
-                    auto a = it->x() < mMapSize.width()/2;
-                    if (a != antipode) {
-                        antipode = a;
-                        partition[idx++] = it;
-                    }
-                }
+                mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
+                    return (p0.x() < mMapSize.width()/2 && p1.x() < mMapSize.width()/2) ||
+                           (p0.x() > mMapSize.width()/2 && p1.x() > mMapSize.width()/2);
+                });
                 break;
         }
 
-        for (size_t i = 0; i < idx; ++i) {
-            auto mapPoint0 = *partition[i];
-            std::for_each(partition[i] + 1, partition[i+1], [&](Position &position){
-                mDrawingContext->renderLine(renderer, mapPoint0 + mapPos, position + mapPos);
-                mapPoint0 = position;
-            });
-        }
+        mDrawingContext->setColor(renderer, color::RGBA{255u,69u,0u, 255u});
+        mapPoints.draw([&](const Position &p0, const Position &p1) -> bool {
+            return mDrawingContext->renderLine(renderer, p0+mapPos, p1+mapPos);
+        });
     }
 
     void
