@@ -407,7 +407,7 @@ Satellite::period() const {
     return ((2 * M_PI) / MM);
 }
 
-// return great-circle radius from subsat point to viewing circle at given altitude
+// return great-circle radius from sub-satellite point to viewing circle at given altitude
 double
 Satellite::viewingRadius(double alt) {
     double h = sqrt(S[0] * S[0] + S[1] * S[1] + S[2] * S[2]);
