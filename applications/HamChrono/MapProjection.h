@@ -403,7 +403,6 @@ namespace rose {
             }
         }
 
-        static void drawAntiAliasedLine(sdl::Renderer &renderer, Position start, Position end);
     };
 }
 

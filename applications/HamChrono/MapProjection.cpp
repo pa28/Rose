@@ -220,6 +220,9 @@ namespace rose {
         if (mCelestialMode)
             drawMapItems(mCelestialIcons.begin(), mCelestialIcons.end(), renderer,
                          widgetRect, mProjection, splitPixel);
+
+//        MapIcon testIcon{static_cast<ImageId>(set::AppImageId::RingYellow), mAntipode}; //GeoPosition{deg2rad(-45.),deg2rad(-75.)}};
+//        drawMapItem(testIcon, renderer, widgetRect, mProjection, splitPixel);
     }
 
     void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, ProjectionType projection,
@@ -266,11 +269,11 @@ namespace rose {
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
         } else if (h > 0 && w == 0) {
             if (projection != ProjectionType::StationAzmuthal || h < iconSize.height() / 2) {
-                dst.y() = mapRectangle.y() - h;
+//                dst.y() = mapRectangle.y() - h;
                 rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
             }
             if (projection != ProjectionType::StationAzmuthal || h >= iconSize.height() / 2) {
-                dst.y() += mapRectangle.height();
+//                dst.y() += mapRectangle.height();
                 rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
             }
         } else if (h > 0 && w > 0 && projection != ProjectionType::StationAzmuthal) {
@@ -513,91 +516,6 @@ namespace rose {
     }
 
     void MapProjection::setMoonPhase() {
-//        auto[sLat, sLon] = subSolar();
-//
-//        if (mMoon) {
-//            DateTime predictTime{true};
-//            mMoon.predict(predictTime);
-//            auto[mLat, mLon] = mMoon.geo();
-//
-//            auto s2lat = sin((sLat - mLat) / 2.);
-//            s2lat *= s2lat;
-//            auto s2lon = sin((sLon - mLon) / 2.);
-//            s2lon *= s2lon;
-//            auto a = s2lat + cos(sLat) * cos(mLat) * s2lon;
-//            auto sC = 2 * atan2(sqrt(a), sqrt(1. - a));
-//            // A simple Moon phase calculation. Not astronomically accurate but should vie pleasing results.
-//            // 0 deg == New ... waxing 180 == full ... waning ... 0
-//
-//            // Unit vector from the Earth to the Sun.
-//            auto sx = sin(sLon);
-//            auto sy = cos(sLon);
-//            auto sz = sin(0);
-//
-//            // Unit vector from the Moon to the Earth
-//            auto mx0 = -sin(mLon);
-//            auto my0 = -cos(mLon);
-//            auto mz0 = -sin(0);
-//
-//            auto dot0 = sx * mx0 + sy * my0 + sz * mz0;
-//
-////            std::cout << __PRETTY_FUNCTION__ << " Sun-Moon angle: " << sC << " rad, " << rad2deg(sC) << " deg\n"
-////                      << sx << ' ' << sy << ' ' << sz << '\n'
-////                      << mx0 << ' ' << my0 << ' ' << mz0 << '\n'
-////                      << dot0 << '\n';
-//            auto imagePath = rose()->getSharedImages();
-//            imagePath.append("full_moon.png");
-//            sdl::Surface moon{imagePath};
-//            if (moon) {
-//                for (int y = 0; y < moon->h; ++y) {
-//                    // Convert y to pseudo-Latitude.
-//                    auto mpLat = M_PI_2 - M_PI * (double) y / (double) moon->h;
-//                    auto countX = 0;
-//                    for (int x = 0; x < moon->w; ++x) {
-//                        auto color = moon.color(x, y);
-//                        if (color.a() > 0.)
-//                            countX++;
-//                    }
-//                    if (countX == 0)
-//                        continue;
-//                    auto dLon = M_PI / (double) countX;
-//                    double mpLon = -M_PI_2;
-//                    for (int x = 0; x < moon->w; ++x) {
-//                        auto color = moon.color(x, y);
-//                        if (color.a() > 0.) {
-//                            auto mx = sin(mpLon + M_PI_2);
-//                            auto my = cos(mpLon + M_PI_2);
-//                            auto mz = sin(0);
-//
-//                            auto dot = sx * mx + sy * my + sz * mz;
-////                            std::cout << std::setw(4) << (int) (dot * 100);
-//                            if (dot < 30.) {
-//                                float mult = 0.95;
-//                                if (dot < -10.)
-//                                    mult = 0.5;
-//                                else if (dot < 0.)
-//                                    mult = 0.7;
-//                                else if (dot < 10.)
-//                                    mult = 0.9;
-//                                color.r() *= mult;
-//                                color.g() *= mult;
-//                                color.b() *= mult;
-//                                moon.setColor(x, y, color);
-//                            }
-//                            mpLon += dLon;
-//                        } //else
-////                            std::cout << "    ";
-//                    }
-////                    std::cout << '\n';
-//                }
-//                sdl::TextureData moonData{moon.toTexture(rose()->getRenderer())};
-//                moonData.setBlendMOde(SDL_BLENDMODE_BLEND);
-//                rose()->imageRepository().setImage(static_cast<ImageId>(set::AppImageId::Moon), std::move(moonData));
-//                mCelestialIcons[1].imageId = static_cast<ImageId>(set::AppImageId::Moon);
-//                mCelestialIcons[1].geo = GeoPosition{mLat, mLon};
-//                setNeedsDrawing();
-//            }
-//        }
     }
 
     void MapProjection::setCelestialIcons() {
@@ -922,82 +840,6 @@ namespace rose {
         mapPoints.draw([&](const Position &p0, const Position &p1) -> bool {
             return mDrawingContext->renderLine(renderer, p0+mapPos, p1+mapPos);
         });
-    }
-
-    void
-    MapProjection::drawAntiAliasedLine(sdl::Renderer &renderer, Position start, Position end) {
-        auto plot = [&](double x, double y, double b) {
-            auto c = color::RGBA{ 1.f, 0.f, 0.f, (float)std::clamp(b, .3, 1.)};
-            renderer.drawPoint(Position(roundToInt(x), roundToInt(y)), c);
-        };
-        auto ipart = [&](double x) { return floor(x); };
-        auto fpart = [&](double x) { return x - floor(x); };
-        auto rfpart = [&](double x) { return 1. - fpart(x); };
-        double x0 = start.x(), y0 = start.y(), x1 = end.x(), y1 = end.y();
-
-        auto steep = abs(y1-y0) > abs(x1-x0);
-
-        if (steep) {
-            std::swap(x0, y0);
-            std::swap(x1, y1);
-        }
-
-        if (x0 > x1) {
-            std::swap(x0, x1);
-            std::swap(y0, y1);
-        }
-
-        auto dx = x1 - x0;
-        auto dy = y1 - y0;
-        auto gradient = dx == 0.0 ? 1. : dy / dx;
-
-        // Handle first endpoint
-        auto xEnd = round(x0);
-        auto yEnd = y0 + gradient * (xEnd - x0);
-        auto xGap = rfpart(x0 + 0.5);
-        auto xPxl1 = xEnd; // this will be used in the main loop
-        auto yPxl1 = ipart(yEnd);
-
-        if (steep) {
-            plot(yPxl1, xPxl1, rfpart(yEnd) * xGap);
-            plot(yPxl1+1, xPxl1, fpart(yEnd) * xGap);
-        } else {
-            plot(xPxl1, yPxl1, rfpart(yEnd) * xGap);
-            plot(xPxl1+1, yPxl1, rfpart(yEnd) * xGap);
-        }
-
-        auto intery = yEnd + gradient; // first y-intersection for the main loop
-
-        // Handle second endpoint.
-
-        xEnd = round(x1);
-        yEnd = y1 + gradient * (xEnd - x1);
-        xGap = fpart(x1 + 0.5);
-        auto xPxl2 = xEnd; // this will be used in the main loop
-        auto yPxl2 = ipart(yEnd);
-        if (steep) {
-            plot(yPxl2, xPxl2, rfpart(yEnd) * xGap);
-            plot(yPxl2+1, xPxl2, fpart(yEnd) * xGap);
-        } else {
-            plot(xPxl2, yPxl2, rfpart(yEnd) * xGap);
-            plot(xPxl2+1, yPxl2, fpart(yEnd) * xGap);
-        }
-
-        // main loop
-
-        if (steep) {
-            for (double x = xPxl1 + 1; x < xPxl2; x += 1.) {
-                plot(ipart(intery), x, rfpart(intery));
-                plot(ipart(intery)+1, x, fpart(intery));
-                intery += gradient;
-            }
-        } else {
-            for (double x = xPxl1 + 1; x < xPxl2; x += 1.) {
-                plot(x, ipart(intery), rfpart(intery));
-                plot(x+1, ipart(intery), fpart(intery));
-                intery += gradient;
-            }
-        }
     }
 
     std::string SatelliteDataStub::passTimeString(time_t relative) const {
