@@ -17,7 +17,7 @@ namespace rose {
 
 /**
  * @class ConfigDialog
- * @brief
+ * @brief Present a dialog to allow the user to configure the program.
  */
     class ConfigDialog : public Dialog {
     protected:
