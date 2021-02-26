@@ -24,6 +24,11 @@ template<std::size_t... Is>
 struct gen_seq<0, Is...> : seq<Is...> {
 };
 
+/**
+ * @namespace math
+ * @brief Math constructs.
+ * @details This namespace provides constexpr trig functions.
+ */
 namespace math {
     template<typename T> constexpr T pi = 3.14159265358979323846264338327L;
     template<typename T> constexpr T two_pi = 6.28318530717958647692528676656L;
@@ -97,6 +102,10 @@ namespace math {
         }
     }
 
+    /**
+     * @namespace detail
+     * @brief Details of implementation.
+     */
     namespace detail {
         template<class T>
         struct _sin {

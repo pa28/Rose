@@ -58,6 +58,10 @@ constexpr T DEGREES(T rad) {
     return rad * 180. / M_PI;
 }
 
+/**
+ * @class P13
+ * @brief Plan13 general functions and constants.
+ */
 struct P13 {
     constexpr static double RE = 6378.137;
     constexpr static double FL = 1. / 298.257224;
@@ -130,6 +134,10 @@ typedef Vec3Base<double> Vec3;
 
 //----------------------------------------------------------------------
 
+/**
+ * @class DateTime
+ * @brief Encapsulate the day-in-space for orbital mechanics computations.
+ */
 class DateTime {
 public:
     long DN;
@@ -239,6 +247,10 @@ inline std::ostream &operator<<(std::ostream &os, const DateTime &dateTime) { re
 
 //----------------------------------------------------------------------
 
+/**
+ * @class Observer
+ * @brief Data specifying an observer for computing relative visibility data.
+ */
 class Observer {
 public:
     double LA;
@@ -265,7 +277,10 @@ public:
 
 //----------------------------------------------------------------------
 
-
+/**
+ * @class Sun
+ * @brief Sun position in the sky.
+ */
 class Sun {
 public:
     Vec3 SUN, H;
@@ -279,6 +294,10 @@ public:
 
 //----------------------------------------------------------------------
 
+/**
+ * @class Satellite
+ * @brief Satellite orbital mechanics.
+ */
 class Satellite {
     bool isMoon{};
     bool isValid{};
