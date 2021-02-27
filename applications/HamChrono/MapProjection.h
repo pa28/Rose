@@ -48,14 +48,15 @@ namespace rose {
         MapCount,
     };
 
-    struct SatelliteDataStub {
+    struct SatelliteMetaData {
         std::string name;
         ImageId imageId;
         bool passRiseOk{}, passSetOk{};
         DateTime riseTime{};
         DateTime setTime{};
+        double elevation{}, azimuth{}, range{}, rangeRate{};
 
-        bool operator<(const SatelliteDataStub &other) const {
+        bool operator<(const SatelliteMetaData &other) const {
             if (passRiseOk && other.passRiseOk)
                 return riseTime < other.riseTime;
             else
@@ -95,8 +96,20 @@ namespace rose {
     };
 
     struct TrackedSatellite {
-        SatelliteDataStub dataStub; ///< Minimal data for display of the satellite status.
+        SatelliteMetaData metaData; ///< Minimal data for display of the satellite status.
         Satellite satellite;        ///< The tracked Satellite.
+
+        void predict(DateTime dateTime) {
+            satellite.predict(dateTime);
+        }
+
+        void updateMetaData(Observer observer) {
+            auto [elevation, azimuth, range, range_rate] = satellite.topo(observer);
+            metaData.elevation = elevation;
+            metaData.azimuth = azimuth;
+            metaData.range = range;
+            metaData.rangeRate = range_rate;
+        }
     };
 
     /**
@@ -184,6 +197,14 @@ namespace rose {
                                                               -0.309};   ///< Sets the width of the dawn/dusk period.
         static constexpr double GrayLinePow = .80;      ///< Sets the speed of transitions, smaller is sharper. (.75)
 
+        /// A list of satellite icons to initialize a stack that will be used to manage the icons.
+        static constexpr std::array<set::AppImageId,5> mSatelliteIconArray{
+                set::AppImageId::DotPurple, set::AppImageId::DotYellow, set::AppImageId::DotGreen,
+                set::AppImageId::DotBlue, set::AppImageId::DotRed, };
+
+        /// A stack for managing the satellite icons.
+        std::stack<set::AppImageId> mSatelliteIconStack{};
+
         bool mTerrestrialMode{};                  ///< True when map is in Terrestrial mode, excludes SatelliteMode
         bool mSatelliteMode{};                    ///< True when map is in SatelliteMode, excludes TerrestrialMode
         bool mCelestialMode{};                    ///< True when map is displaying Celestial objects.
@@ -214,6 +235,7 @@ namespace rose {
         EphemerisFile mEphemerisFile{EphemerisFile::ClearSkyAll};       ///< The index to the ephemeris in use.
         void updateEphemerisFile();                 ///< Update ephemeris and start tracking.
         Observer mObserver{};                       ///< The QTH Observer data.
+
         std::vector<TrackedSatellite> mSatelliteList{};    ///< The list of Satellites being tracked.
         std::mutex mSatListMutex{};                 ///< A mutex to protect write access to mSatelliteList.
         double mMinimumElevation{15.};              ///< The minimum pass elevation to track satellite.

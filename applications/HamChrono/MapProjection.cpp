@@ -19,6 +19,9 @@ namespace rose {
     MapProjection::MapProjection(std::shared_ptr<WebFileCache> mapCache, Size mapSize) {
         mMapCache = std::move(mapCache);
         mMapSize = mapSize;
+
+        for (auto &icon : mSatelliteIconArray)
+            mSatelliteIconStack.push(icon);
     }
 
     void MapProjection::initializeComposite() {
@@ -45,15 +48,27 @@ namespace rose {
 
         secondRx = std::make_shared<Slot<int>>();
         secondRx->setCallback([&](uint32_t, int second){
-            updateEphemerisFile();
             setNeedsDrawing();
 
             if (second % 5 == 1) {
                 DateTime now{true};
                 for (auto & satellite : mSatelliteList) {
-                    satellite.satellite.predict(now);
+                    satellite.predict(now);
+                    satellite.updateMetaData(mObserver);
                 }
+
+                mSatelliteList.erase(std::remove_if(mSatelliteList.begin(), mSatelliteList.end(),[&](TrackedSatellite satellite) -> bool {
+                    if (satellite.metaData.setTime < now) {
+                        mSatelliteIconStack.push(static_cast<const set::AppImageId>(satellite.metaData.imageId));
+                        return true;
+                    }
+                    return false;
+                }), mSatelliteList.end());
+
+                if (mSatelliteList.size() < 5)
+                    updateEphemerisFile();
             }
+
             std::chrono::milliseconds span(1);      // The length of time to wait for a future.
 
             if (mFutureAziProj.valid()) {
@@ -80,7 +95,7 @@ namespace rose {
         minuteRx = std::make_shared<Slot<int>>();
         minuteRx->setCallback([&](uint32_t, int minute){
             setCelestialIcons();
-            mUpdateEphemeris = true;
+//            updateEphemerisFile();
             if (!mFutureSun.valid())
                 mFutureSun = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
         });
@@ -207,7 +222,7 @@ namespace rose {
             std::lock_guard<std::mutex> lockGuard{mSatListMutex};
             for (auto &satellite : mSatelliteList) {
                 GeoPosition geo{satellite.satellite.geo()};
-                MapIcon mapItem{static_cast<ImageId>(satellite.dataStub.imageId), geo};
+                MapIcon mapItem{static_cast<ImageId>(satellite.metaData.imageId), geo};
                 drawMapItem(mapItem, renderer, widgetRect, mProjection, splitPixel);
             }
 
@@ -659,23 +674,8 @@ namespace rose {
     void MapProjection::updateEphemerisFile() {
         DateTime now{true};
 
-        std::vector<TrackedSatellite> tracked{mSatelliteList};
-        tracked.erase(std::remove_if(tracked.begin(), tracked.end(), [&now](const TrackedSatellite &i) {
-            auto[riseOk, setOk, riseTime, setTime] = i.dataStub.getPassData();
-            return setTime < now;
-        }), tracked.end());
-
-        if (tracked.size() < 5) {
-            std::vector<set::AppImageId> imagePool = {set::AppImageId::DotRed, set::AppImageId::DotGreen,
-                                                      set::AppImageId::DotBlue, set::AppImageId::DotYellow,
-                                                      set::AppImageId::DotPurple, set::AppImageId::DotAqua};
-
-            for (const auto &satellite : tracked) {
-                imagePool.erase(std::find(imagePool.begin(), imagePool.end(), static_cast<set::AppImageId>(satellite.dataStub.imageId)));
-            }
-
-            using SatelliteListType = std::pair<SatelliteDataStub,Satellite>;
-            std::vector<SatelliteListType> satelliteList;
+        if (mSatelliteList.size() < 5) {
+            std::vector<TrackedSatellite> satelliteList;
             Ephemeris ephemeris{mEphemerisFilePath[static_cast<size_t>(mEphemerisFile)]};
             for (const auto &esv : ephemeris) {
                 if (esv.first != "Moon") {
@@ -683,42 +683,44 @@ namespace rose {
                     auto[rise_ok, set_ok, rise_az, set_az, max_elevation, rise_time, set_time] =
                     findNextPass(satellite, mObserver);
                     if (set_ok && max_elevation > mMinimumElevation) {
-                        SatelliteDataStub dataStub;
-                        dataStub.name = satellite.getName();
-                        dataStub.setPassData(rise_ok, set_ok, rise_time, set_time);
-                        satelliteList.emplace_back(dataStub,satellite);
+                        SatelliteMetaData metaData;
+                        metaData.name = satellite.getName();
+                        metaData.setPassData(rise_ok, set_ok, rise_time, set_time);
+                        satelliteList.emplace_back(TrackedSatellite{metaData, satellite});
                     }
                 }
             }
 
-            std::sort(satelliteList.begin(), satelliteList.end(),[](SatelliteListType &s0, SatelliteListType &s1){
-                return s0.first < s1.first;
+            std::sort(satelliteList.begin(), satelliteList.end(),[](TrackedSatellite &s0, TrackedSatellite &s1){
+                return s1.metaData < s0.metaData;
             });
 
-            if (tracked.empty()) {
-                while (tracked.size() < 5 && !satelliteList.empty() && !imagePool.empty()) {
-                    auto satellitePair = satelliteList.front();
-                    satellitePair.first.imageId = static_cast<ImageId>(imagePool.front());
-                    tracked.push_back(TrackedSatellite{satellitePair.first, satellitePair.second});
-                    imagePool.erase(imagePool.begin());
-                    satelliteList.erase(satelliteList.begin());
-                }
-            } else {
-                while (tracked.size() < 5 && !satelliteList.empty() && !imagePool.empty()) {
-                    if (std::find_if(tracked.begin(), tracked.end(), [&satelliteList](const TrackedSatellite &ts) {
-                        return ts.satellite.getName() == satelliteList.begin()->second.getName();
-                    }) == tracked.end()) {
-                        auto satellitePair = satelliteList.front();
-                        satellitePair.first.imageId = static_cast<ImageId>(imagePool.front());
-                        tracked.push_back(TrackedSatellite{satellitePair.first, satellitePair.second});
-                        imagePool.erase(imagePool.begin());
-                    }
-                    satelliteList.erase(satelliteList.begin());
-                }
-            }
+            std::stack<TrackedSatellite,std::vector<TrackedSatellite>> satelliteStack{satelliteList};
 
             std::lock_guard<std::mutex> lockGuard{mSatListMutex};
-            mSatelliteList = tracked;
+
+            time_t timer = time(nullptr);
+            if (mSatelliteList.empty()) {
+                while (mSatelliteList.size() < 5 && !satelliteStack.empty() && !mSatelliteIconStack.empty()) {
+                    satelliteStack.top().metaData.imageId = static_cast<ImageId>(mSatelliteIconStack.top());
+                    mSatelliteIconStack.pop();
+                    mSatelliteList.emplace_back(satelliteStack.top());
+                    satelliteStack.pop();
+                }
+            } else {
+                while (mSatelliteList.size() < 5 && !satelliteStack.empty() && !mSatelliteIconStack.empty()) {
+                    auto it = std::find_if(mSatelliteList.begin(), mSatelliteList.end(), [&](const TrackedSatellite &ts){
+                        return ts.satellite.getName() == satelliteStack.top().satellite.getName();
+                    });
+
+                    if (it  == mSatelliteList.end()) {
+                        satelliteStack.top().metaData.imageId = static_cast<ImageId>(mSatelliteIconStack.top());
+                        mSatelliteIconStack.pop();
+                        mSatelliteList.emplace_back(satelliteStack.top());
+                    }
+                    satelliteStack.pop();
+                }
+            }
         }
 
 //        auto timer = time(nullptr);
@@ -850,7 +852,7 @@ namespace rose {
         }
     }
 
-    std::string SatelliteDataStub::passTimeString(time_t relative) const {
+    std::string SatelliteMetaData::passTimeString(time_t relative) const {
         auto[riseOk, setOk, riseDateTime, setDateTime] = getPassData();
 
         auto mkTimeStr = [](std::ostream &s, time_t t, time_t relative) {
