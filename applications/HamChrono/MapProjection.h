@@ -426,7 +426,8 @@ namespace rose {
             }
         }
 
-        Signal<std::vector<TrackedSatellite>&> trackedSatelliteTx{};
+        using SignalType = std::vector<TrackedSatellite>&;
+        Signal<SignalType> trackedSatelliteTx{};
     };
 }
 

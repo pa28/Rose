@@ -21,7 +21,7 @@ namespace rose {
     protected:
         RoseImageId mImageId{RoseImageInvalid};
         std::string mName{};
-        std::optional<SatelliteMetaData> mDataStub{};
+        std::optional<SatelliteMetaData> mMetaData{};
 
     public:
         ~SatelliteDataDisplay() override = default;
@@ -46,7 +46,7 @@ namespace rose {
                 : SatelliteDataDisplay() {
             mImageId = static_cast<RoseImageId>(imageId);
             mName = name;
-            mDataStub = dataStub;
+            mMetaData = dataStub;
         }
 
         /// See Widget::initializeComposite()
@@ -62,9 +62,11 @@ namespace rose {
          * @brief Set the display data.
          * @param imageId The ImageId of the satellite display icon.
          * @param name The Satellite name.
-         * @param dataStub The last pas data stub.
+         * @param satellite The last pas data stub.
          */
-        void setData(ImageId imageId, const std::string &name, const SatelliteMetaData &dataStub);
+        void setData(const TrackedSatellite &satellite);
+
+        void timeUpdate(time_t timer);
     };
 
     /**
@@ -92,6 +94,13 @@ namespace rose {
         SatelliteDataSet() : Column() {
             mClassName = "SatelliteDataSet";
         }
+
+        /// See Widget::initializeComposite()
+        void initializeComposite() override;
+
+        std::shared_ptr<Slot<MapProjection::SignalType>> trackedSatelliteRx{};
+
+        std::shared_ptr<Slot<int>> secondRx{};
     };
 }
 

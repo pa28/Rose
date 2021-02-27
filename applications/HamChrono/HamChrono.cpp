@@ -18,6 +18,7 @@
 #include "Manipulators.h"
 #include "MapProjection.h"
 #include "Menu.h"
+#include "SatelliteDataDisplay.h"
 #include "SettingsNames.h"
 #include "TimeBox.h"
 #include "Ephemeris.h"
@@ -57,16 +58,6 @@ void HamChrono::build() {
             color::RGBA{255u, 255u, 0u, 255u}, mTheme.mYellow,
             color::RGBA{0u, 255u, 0u, 255u}, mTheme.mGreen, mTheme.mWhite
     };
-
-    mTrackedSatelliteRx = std::make_shared<Slot<std::vector<TrackedSatellite>&>>();
-    mTrackedSatelliteRx->setCallback([&](uint32_t, std::vector<TrackedSatellite>& satellites){
-//        auto timer = time(nullptr);
-//        for (const auto &satellite : satellites) {
-//            std::cout << satellite.satellite.getName() << ' '
-//            << satellite.metaData.passTimeString(timer) << '\n';
-//        }
-//        std::cout << "\n";
-    });
 
     mConfigButtonRx = std::make_shared<Slot<Button::SignalType>>();
     mConfigButtonRx->setCallback([&](uint32_t, Button::SignalType button){
@@ -247,12 +238,18 @@ void HamChrono::build() {
 
     auto sideColumn = mainWindow << wdg<Container>() << Size{mLeftMap, mHeight - mAboveMap} << Position{0, mAboveMap}
                                  << wdg<Column>();
+    sideColumn << InternalSpace{4} << FillToEnd{true};
 
     callsignBlock(topRow, sideColumn);
 
     for (auto &solar : *solarImageCache) {
         topRow << wdg<Frame>() << BorderStyle::BevelIn << wdg<ImageView>(solar.first);
     }
+
+    auto satelliteDataSet = sideColumn << wdg<Frame>(3)
+                                       << BorderStyle::Notch
+                                       << Elastic{Orientation::Horizontal}
+                                       << wdg<SatelliteDataSet>();
 
     auto switchBoxWdg = topRow << wdg<Grid>(3, Size{50, 50}, Orientation::Vertical);
     switchBox(switchBoxWdg);
@@ -262,7 +259,7 @@ void HamChrono::build() {
                << wdg<MapProjection>(clearSkyMaps, Size{mMapWidth, mMapHeight})
                >> mMapProjection;
 
-    mMapProjection->trackedSatelliteTx.connect(mTrackedSatelliteRx);
+    mMapProjection->trackedSatelliteTx.connect(satelliteDataSet->trackedSatelliteRx);
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     mCelesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);
@@ -271,6 +268,7 @@ void HamChrono::build() {
 
     mSecondTick->txSecond.connect(mMapProjection->secondRx);
     mSecondTick->txMinute.connect(mMapProjection->minuteRx);
+    mSecondTick->txSecond.connect(satelliteDataSet->secondRx);
 
     solarImageCache->fetchAll();
     mCelesTrackEphemeris->fetchAll();

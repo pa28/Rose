@@ -896,6 +896,6 @@ namespace rose {
             return strm.str();
         }
 
-        return "Has Set.";
+        return "Set.";
     }
 }
