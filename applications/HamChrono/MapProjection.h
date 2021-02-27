@@ -200,8 +200,8 @@ namespace rose {
 
         /// A list of satellite icons to initialize a stack that will be used to manage the icons.
         static constexpr std::array<set::AppImageId,5> mSatelliteIconArray{
-                set::AppImageId::DotPurple, set::AppImageId::DotYellow, set::AppImageId::DotGreen,
-                set::AppImageId::DotBlue, set::AppImageId::DotRed, };
+                set::AppImageId::DotPurple, set::AppImageId::DotYellow,
+                set::AppImageId::DotGreen, set::AppImageId::DotBlue, set::AppImageId::DotRed, };
 
         /// A stack for managing the satellite icons.
         std::stack<set::AppImageId> mSatelliteIconStack{};
@@ -210,6 +210,8 @@ namespace rose {
         bool mSatelliteMode{};                    ///< True when map is in SatelliteMode, excludes TerrestrialMode
         bool mCelestialMode{};                    ///< True when map is displaying Celestial objects.
         bool mAnnotationMode{};                   ///< True when map is displaying Annotations.
+
+        std::string mSatelliteFavorite{};         ///< User selected favorite Satellite.
 
         std::future<bool> mFutureAziProj{};       ///< A future for the map azimuthal projections.
         std::future<bool> mFutureSun{};           ///< A future for the map sun illumination.

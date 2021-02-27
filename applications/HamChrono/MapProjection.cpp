@@ -29,6 +29,8 @@ namespace rose {
         setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
         setCelestialIcons();
 
+        mSatelliteFavorite = rose()->settings()->getValue(set::SatelliteFavorite, std::string{"ISS"});
+
         mObserver = Observer{mQth.lat(), mQth.lon(), 0.};
 
         mapFileRx->setCallback([&](uint32_t, uint32_t map){
@@ -58,14 +60,14 @@ namespace rose {
                 }
 
                 mSatelliteList.erase(std::remove_if(mSatelliteList.begin(), mSatelliteList.end(),[&](TrackedSatellite satellite) -> bool {
-                    if (satellite.metaData.setTime < now) {
+                    if (satellite.satellite.getName() != mSatelliteFavorite && satellite.metaData.setTime < now) {
                         mSatelliteIconStack.push(static_cast<const set::AppImageId>(satellite.metaData.imageId));
                         return true;
                     }
                     return false;
                 }), mSatelliteList.end());
 
-                if (mSatelliteList.size() < 5)
+                if (mSatelliteList.size() < (mSatelliteFavorite.empty() ? 5 : 6))
                     updateEphemerisFile();
             }
 
@@ -674,9 +676,14 @@ namespace rose {
     void MapProjection::updateEphemerisFile() {
         DateTime now{true};
 
-        if (mSatelliteList.size() < 5) {
+        if (mSatelliteList.size() < (mSatelliteFavorite.empty() ? 5 : 6)) {
             std::vector<TrackedSatellite> satelliteList;
+            TrackedSatellite favoriteSatellite{};
             Ephemeris ephemeris{mEphemerisFilePath[static_cast<size_t>(mEphemerisFile)]};
+            if (!mSatelliteList.empty() && mSatelliteList.back().satellite.getName() == mSatelliteFavorite) {
+                std::lock_guard<std::mutex> lockGuard{mSatListMutex};
+                mSatelliteList.pop_back();
+            }
             for (const auto &esv : ephemeris) {
                 if (esv.first != "Moon") {
                     Satellite satellite{esv.second};
@@ -687,6 +694,15 @@ namespace rose {
                         metaData.name = satellite.getName();
                         metaData.setPassData(rise_ok, set_ok, rise_time, set_time);
                         satelliteList.emplace_back(TrackedSatellite{metaData, satellite});
+                    }
+
+                    if (!mSatelliteFavorite.empty()) {
+                        if (satellite.getName() == mSatelliteFavorite) {
+                            SatelliteMetaData metaData;
+                            metaData.name = satellite.getName();
+                            metaData.setPassData(rise_ok, set_ok, rise_time, set_time);
+                            favoriteSatellite = TrackedSatellite{metaData, satellite};
+                        }
                     }
                 }
             }
@@ -702,9 +718,11 @@ namespace rose {
             time_t timer = time(nullptr);
             if (mSatelliteList.empty()) {
                 while (mSatelliteList.size() < 5 && !satelliteStack.empty() && !mSatelliteIconStack.empty()) {
-                    satelliteStack.top().metaData.imageId = static_cast<ImageId>(mSatelliteIconStack.top());
-                    mSatelliteIconStack.pop();
-                    mSatelliteList.emplace_back(satelliteStack.top());
+                    if (satelliteStack.top().satellite.getName() != mSatelliteFavorite) {
+                        satelliteStack.top().metaData.imageId = static_cast<ImageId>(mSatelliteIconStack.top());
+                        mSatelliteIconStack.pop();
+                        mSatelliteList.emplace_back(satelliteStack.top());
+                    }
                     satelliteStack.pop();
                 }
             } else {
@@ -713,13 +731,18 @@ namespace rose {
                         return ts.satellite.getName() == satelliteStack.top().satellite.getName();
                     });
 
-                    if (it  == mSatelliteList.end()) {
+                    if (it == mSatelliteList.end() && satelliteStack.top().satellite.getName() != mSatelliteFavorite) {
                         satelliteStack.top().metaData.imageId = static_cast<ImageId>(mSatelliteIconStack.top());
                         mSatelliteIconStack.pop();
                         mSatelliteList.emplace_back(satelliteStack.top());
                     }
                     satelliteStack.pop();
                 }
+            }
+
+            if (!mSatelliteFavorite.empty()) {
+                favoriteSatellite.metaData.imageId = static_cast<ImageId>(set::AppImageId::DotAqua);
+                mSatelliteList.emplace_back(favoriteSatellite);
             }
 
             trackedSatelliteTx.transmit(mSignalSerialNumber.serialNumber(), mSatelliteList);

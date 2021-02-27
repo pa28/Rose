@@ -89,7 +89,7 @@ namespace rose {
             }
         });
 
-        for (auto i = 0; i < 5; ++i) {
+        for (auto i = 0; i < 6; ++i) {
             getWidget<Column>() << wdg<SatelliteDataDisplay>();
         }
     }

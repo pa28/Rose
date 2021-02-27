@@ -238,7 +238,7 @@ void HamChrono::build() {
 
     auto sideColumn = mainWindow << wdg<Container>() << Size{mLeftMap, mHeight - mAboveMap} << Position{0, mAboveMap}
                                  << wdg<Column>();
-    sideColumn << InternalSpace{4} << FillToEnd{true};
+    sideColumn << InternalSpace{2} << FillToEnd{true};
 
     callsignBlock(topRow, sideColumn);
 
