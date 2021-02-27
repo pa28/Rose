@@ -17,8 +17,8 @@
 namespace rose {
 
     /**
-     * @class Button
-     * @brief A configurable button class
+     * @class ButtonFrame
+     * @brief A base class to give Button semantics to anything which may be parented to a Frame.
      * @details A member of the ButtonType enumeration is used to specify the action type of the button. The
      * execution of the button function is handled by a set of signals and slots.
      *
@@ -31,7 +31,7 @@ namespace rose {
      *     value is transmitted on the Button::txState signal.
      *     * On receipt of a signal on Button::rxPushed a signal is transmitted on Button::txPushed.
      */
-    class Button : public Frame {
+    class ButtonFrame : public Frame {
     protected:
 
         SignalSerialNumber mSignalSerialNumber{};   ///< The button serial number
@@ -63,56 +63,56 @@ namespace rose {
         std::shared_ptr<Slot<std::string>> mSettingsUpdateRx{};  ///< Slot to receive settings updates on.
 
     public:
-        Button();
+        ButtonFrame();
 
-        ~Button() override = default;
+        ~ButtonFrame() override = default;
 
-        Button(Button &&) = delete;
+        ButtonFrame(ButtonFrame &&) = delete;
 
-        Button(const Button &) = delete;
+        ButtonFrame(const ButtonFrame &) = delete;
 
-        Button &operator=(Button &&) = delete;
+        ButtonFrame &operator=(ButtonFrame &&) = delete;
 
-        Button &operator=(const Button &) = delete;
+        ButtonFrame &operator=(const ButtonFrame &) = delete;
 
         /**
          * @brief Constructor
          * @param labelString the text label of the button
          */
-        explicit Button(const std::string &labelString);
+        explicit ButtonFrame(const std::string &labelString);
 
         /**
          * @brief Constructor
          * @param id Widget id string.
          */
-        explicit Button(const Id &id);
+        explicit ButtonFrame(const Id &id);
 
         /**
          * @brief Constructor
          * @param labelString the text label of the button
          */
-        explicit Button(std::string_view &labelString) : Button(std::string{labelString}) {}
+        explicit ButtonFrame(std::string_view &labelString) : ButtonFrame(std::string{labelString}) {}
 
         /**
          * @brief Constructor
          * @param labelString The text label of the button
          */
-        explicit Button(const char *labelString) : Button(std::string{labelString}) {}
+        explicit ButtonFrame(const char *labelString) : ButtonFrame(std::string{labelString}) {}
 
         /**
-         * @brief Construct a Button
+         * @brief Construct a ButtonFrame
          * @param labelString the button label
          * @param type the button type
          * @param fontSize the font size to use with the label
          */
-        Button(const std::string &labelString, ButtonType type, int fontSize = 0);
+        ButtonFrame(const std::string &labelString, ButtonType type, int fontSize = 0);
 
         /**
-         * @brief Construct an Icon Button
+         * @brief Construct an Icon ButtonFrame
          * @param imageId The icon to use
-         * @param type The Button type
+         * @param type The ButtonFrame type
          */
-        Button(RoseImageId imageId, ButtonType type);
+        ButtonFrame(RoseImageId imageId, ButtonType type);
 
         /**
          * Constructor
@@ -120,7 +120,7 @@ namespace rose {
          * @param type the button type
          * @param fontSize the font size to use with the label
          */
-        Button(const Id &id, ButtonType type, int fontSize = 0);
+        ButtonFrame(const Id &id, ButtonType type, int fontSize = 0);
 
         /**
          * @brief Constructor
@@ -128,15 +128,15 @@ namespace rose {
          * @param type the button type
          * @param fontSize the font size to use with the label
          */
-        Button(const char *labelString, ButtonType type, int fontSize = 0)
-                : Button(std::string{labelString}, type, fontSize) {}
+        ButtonFrame(const char *labelString, ButtonType type, int fontSize = 0)
+                : ButtonFrame(std::string{labelString}, type, fontSize) {}
 
         /**
          * @brief See Widget::initializeComposite
          */
         void initializeComposite() override;
 
-        using SignalType = std::pair<bool, SignalToken>;   ///< The content type of Button signals and slots
+        using SignalType = std::pair<bool, SignalToken>;   ///< The content type of ButtonFrame signals and slots
 
         /**
          * @brief A Slot to receive Pushed signals on.
@@ -146,7 +146,7 @@ namespace rose {
 
         /**
          * @brief A Signal to transmit Pusehd signals on.
-         * @details A Pushed signal is sent when the button is pushed by the user, or when the Button receives
+         * @details A Pushed signal is sent when the button is pushed by the user, or when the ButtonFrame receives
          * a Pushed event.
          */
         Signal<SignalType> txPushed;
@@ -237,18 +237,18 @@ namespace rose {
         void setSize(Size size) override;
 
         /**
-         * @brief Set the ImageId for the Button (Label).
+         * @brief Set the ImageId for the ButtonFrame (Label).
          * @param imageId an ImageId.
          */
         void setImageId(ImageId imageId) override;
 
         /**
-         * @brief Set RenderFlip for the Button (Label).
+         * @brief Set RenderFlip for the ButtonFrame (Label).
          * @param renderFlip
          */
         void setRenderFlip(sdl::RenderFlip renderFlip);
 
-        /// Set the Button StateId.
+        /// Set the ButtonFrame StateId.
         void setStateId(const StateId &stateId) override {
             Widget::setStateId(stateId);
             if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
@@ -258,6 +258,25 @@ namespace rose {
 
             }
         }
+    };
+
+    /**
+     * @class Button
+     * @brief A configurable button class
+     * @details A member of the ButtonType enumeration is used to specify the action type of the button. The
+     * execution of the button function is handled by a set of signals and slots.
+     *
+     * Not all signals and slots are active for each type of button.
+     *
+     *   * rose::NormalButton
+     *     * A button which is depressed when a left button pressed event or finger touch event occurs and released
+     *     when the corresponding button or finger release event occurs.
+     *     * On release a signal is transmitted from Button::txPushed, Frame::mInvert is inverted and the new
+     *     value is transmitted on the Button::txState signal.
+     *     * On receipt of a signal on Button::rxPushed a signal is transmitted on Button::txPushed.
+     */
+    class Button : public ButtonFrame {
+
     };
 }
 

@@ -8,7 +8,7 @@
 
 namespace rose {
 
-    Button::Button() : Frame() {
+    ButtonFrame::ButtonFrame() : Frame() {
         rxPushed = std::make_shared<Slot<std::pair<bool,SignalToken>>>();
         rxPushed->setCallback([&](uint32_t sn, std::pair<bool,SignalToken> pushed) {
             if (txPushed && sn != mSignalSerialNumber && mButtonType == NormalButton) {
@@ -26,32 +26,32 @@ namespace rose {
         });
     }
 
-    Button::Button(const Id& id) : Button() {
+    ButtonFrame::ButtonFrame(const Id& id) : ButtonFrame() {
         setId(id);
     }
 
-    Button::Button(const Id& id, ButtonType type, int fontSize) : Button(id) {
+    ButtonFrame::ButtonFrame(const Id& id, ButtonType type, int fontSize) : ButtonFrame(id) {
         mLabelFontSize = fontSize;
         mButtonType = type;
     }
 
-    Button::Button(const std::string &labelString) : Button() {
+    ButtonFrame::ButtonFrame(const std::string &labelString) : ButtonFrame() {
         mLabelText = labelString;
     }
 
-    Button::Button(const std::string &labelString, ButtonType type, int fontSize)
-            : Button(labelString) {
+    ButtonFrame::ButtonFrame(const std::string &labelString, ButtonType type, int fontSize)
+            : ButtonFrame(labelString) {
         mLabelFontSize = fontSize;
         mButtonType = type;
     }
 
-    Button::Button(RoseImageId imageId, ButtonType type) : Button() {
+    ButtonFrame::ButtonFrame(RoseImageId imageId, ButtonType type) : ButtonFrame() {
         mLabelFontSize = 0;
         mButtonType = type;
         mBadge = imageId;
     }
 
-    void Button::initializeComposite() {
+    void ButtonFrame::initializeComposite() {
         Frame::initializeComposite();
         mAcceptsFocus = true;
         auto sRose = rose();
@@ -98,14 +98,14 @@ namespace rose {
 
             setPadding(sRose->theme().mButtonPadding);
 
-            getWidget<Button>() << wdg<Label>(mLabelText, mBadge)
+            getWidget<ButtonFrame>() << wdg<Label>(mLabelText, mBadge)
                     << FontSize(mLabelFontSize);
         }
 
-        mClassName = "Button";
+        mClassName = "ButtonFrame";
     }
 
-    bool Button::mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers) {
+    bool ButtonFrame::mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers) {
         if (button == SDL_BUTTON_LEFT) {
             if (down) {
                 mSelectProgress = true;
@@ -160,7 +160,7 @@ namespace rose {
         return false;
     }
 
-    bool Button::clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) {
+    bool ButtonFrame::clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) {
         if (mSelectProgress) {
             switch (mButtonType) {
                 case NormalButton:
@@ -181,7 +181,7 @@ namespace rose {
         return true;
     }
 
-    void Button::setImageId(ImageId imageId) {
+    void ButtonFrame::setImageId(ImageId imageId) {
         if (auto label = getLabel(); label) {
             label->setImageId(imageId);
             return;
@@ -190,7 +190,7 @@ namespace rose {
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
-    std::shared_ptr<Label> Button::getLabel() {
+    std::shared_ptr<Label> ButtonFrame::getLabel() {
         if (!mChildren.empty()) {
             if (auto label = front()->as<Label>(); label) {
                 return label;
@@ -199,7 +199,7 @@ namespace rose {
         return nullptr;
     }
 
-    void Button::setText(const string &text) {
+    void ButtonFrame::setText(const string &text) {
         if (auto label = getLabel(); label) {
             label->setText(text);
             return;
@@ -208,7 +208,7 @@ namespace rose {
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
-    void Button::setFontName(string &fontName) {
+    void ButtonFrame::setFontName(string &fontName) {
         if (auto label = getLabel(); label) {
             label->setFontName(fontName);
             return;
@@ -217,7 +217,7 @@ namespace rose {
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
-    void Button::setFontSize(int fontSize) {
+    void ButtonFrame::setFontSize(int fontSize) {
         if (auto label = getLabel(); label) {
             label->setFontSize(fontSize);
             return;
@@ -226,7 +226,7 @@ namespace rose {
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
-    void Button::setSize(Size size) {
+    void ButtonFrame::setSize(Size size) {
         if (auto label = getLabel(); label) {
             mSize = size;
             auto labelSize = size;
@@ -237,7 +237,7 @@ namespace rose {
         }
     }
 
-    void Button::setRenderFlip(sdl::RenderFlip renderFlip) {
+    void ButtonFrame::setRenderFlip(sdl::RenderFlip renderFlip) {
         if (auto label = getLabel(); label) {
             label->setRenderFlip(renderFlip);
             return;
@@ -246,7 +246,7 @@ namespace rose {
                 StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
-    void Button::updateStateSetting(ButtonSetState state) {
+    void ButtonFrame::updateStateSetting(ButtonSetState state) {
         if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
                                                        !mStateId.empty() && rose()->hasSettings()) {
             rose()->settings()->setValue(mStateId.value(), state == ButtonSetState::ButtonOn);
