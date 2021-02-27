@@ -721,6 +721,8 @@ namespace rose {
                     satelliteStack.pop();
                 }
             }
+
+            trackedSatelliteTx.transmit(mSignalSerialNumber.serialNumber(), mSatelliteList);
         }
 
 //        auto timer = time(nullptr);

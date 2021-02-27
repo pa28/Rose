@@ -190,6 +190,7 @@ namespace rose {
      */
     class MapProjection : public Widget {
     protected:
+        SignalSerialNumber mSignalSerialNumber{};
         Rose::IconFileItem mMoonIconSpec{static_cast<ImageId>(set::AppImageId::Moon), Size{0, 0}, "full_moon.png"};
 
         /// Twilight specs: civil, nautical, astronomical.
@@ -425,6 +426,7 @@ namespace rose {
             }
         }
 
+        Signal<std::vector<TrackedSatellite>&> trackedSatelliteTx{};
     };
 }
 
