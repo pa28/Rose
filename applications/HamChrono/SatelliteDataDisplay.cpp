@@ -28,7 +28,7 @@ namespace rose {
         Frame::draw(renderer, parentRect);
     }
 
-    void SatelliteDataDisplay::setData(ImageId imageId, const string &name, const SatelliteDataStub &dataStub) {
+    void SatelliteDataDisplay::setData(ImageId imageId, const string &name, const SatelliteMetaData &dataStub) {
         mImageId = static_cast<RoseImageId>(imageId);
         mName = name;
         mDataStub = dataStub;

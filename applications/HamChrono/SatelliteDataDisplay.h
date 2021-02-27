@@ -21,7 +21,7 @@ namespace rose {
     protected:
         RoseImageId mImageId{RoseImageInvalid};
         std::string mName{};
-        std::optional<SatelliteDataStub> mDataStub{};
+        std::optional<SatelliteMetaData> mDataStub{};
 
     public:
         ~SatelliteDataDisplay() override = default;
@@ -42,7 +42,7 @@ namespace rose {
          * @param name The Satellite name.
          * @param dataStub The last pas data stub.
          */
-        SatelliteDataDisplay(ImageId imageId, const std::string &name, const SatelliteDataStub &dataStub)
+        SatelliteDataDisplay(ImageId imageId, const std::string &name, const SatelliteMetaData &dataStub)
                 : SatelliteDataDisplay() {
             mImageId = static_cast<RoseImageId>(imageId);
             mName = name;
@@ -64,7 +64,7 @@ namespace rose {
          * @param name The Satellite name.
          * @param dataStub The last pas data stub.
          */
-        void setData(ImageId imageId, const std::string &name, const SatelliteDataStub &dataStub);
+        void setData(ImageId imageId, const std::string &name, const SatelliteMetaData &dataStub);
     };
 
     /**
