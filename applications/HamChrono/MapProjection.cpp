@@ -25,7 +25,6 @@ namespace rose {
     }
 
     void MapProjection::initializeComposite() {
-        mapFileRx = std::make_shared<Slot<uint32_t>>();
         setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
         setCelestialIcons();
 
@@ -33,6 +32,20 @@ namespace rose {
 
         mObserver = Observer{mQth.lat(), mQth.lon(), 0.};
 
+        satelliteSelectRx = std::make_shared<Slot<RadioBehavior::SignalType>>();
+        satelliteSelectRx->setCallback([&](uint32_t, RadioBehavior::SignalType signal){
+            switch (std::get<0>(signal)) {
+                case RadioBehavior::State::None:
+                case RadioBehavior::State::SetClear:
+                    mSelectedSatellite = 0;
+                    break;
+                case RadioBehavior::State::Set:
+                    mSelectedSatellite = std::get<1>(signal);
+                    break;
+            }
+        });
+
+        mapFileRx = std::make_shared<Slot<uint32_t>>();
         mapFileRx->setCallback([&](uint32_t, uint32_t map){
             std::filesystem::path filePath(mMapCache->cacheRootPath());
             filePath.append(mMapCache->at(map).objectSrcName());
@@ -217,29 +230,31 @@ namespace rose {
         drawMapItems(mStationIcons.begin(), mStationIcons.end(), renderer,
                      widgetRect, mProjection, splitPixel);
 
+        if (mCelestialMode)
+            drawMapItems(mCelestialIcons.begin(), mCelestialIcons.end(), renderer,
+                         widgetRect, mProjection, splitPixel);
+
         if (mSatelliteMode) {
             if (!mDrawingContext)
                 mDrawingContext = std::make_unique<AntiAliasedDrawing>(renderer, 2,
                                                                        color::RGBA{1.f, 0.f, 0.f, 1.f});
+
             std::lock_guard<std::mutex> lockGuard{mSatListMutex};
+
+            if (mAnnotationMode && !mSatelliteList.empty()) {
+                auto satellite = mSatelliteList.front();
+                if (mSelectedSatellite < mSatelliteList.size())
+                    satellite = mSatelliteList.at(mSelectedSatellite);
+                drawOrbitalPath(renderer, satellite, widgetRect.getPosition(), splitPixel);
+                drawFootprint(renderer, satellite, widgetRect.getPosition(), splitPixel);
+            }
+
             for (auto &satellite : mSatelliteList) {
                 GeoPosition geo{satellite.satellite.geo()};
                 MapIcon mapItem{static_cast<ImageId>(satellite.metaData.imageId), geo};
                 drawMapItem(mapItem, renderer, widgetRect, mProjection, splitPixel);
             }
-
-            if (mAnnotationMode) {
-                drawOrbitalPath(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
-                drawFootprint(renderer, mSatelliteList.front(), widgetRect.getPosition(), splitPixel);
-            }
         }
-
-        if (mCelestialMode)
-            drawMapItems(mCelestialIcons.begin(), mCelestialIcons.end(), renderer,
-                         widgetRect, mProjection, splitPixel);
-
-//        MapIcon testIcon{static_cast<ImageId>(set::AppImageId::RingYellow), mAntipode}; //GeoPosition{deg2rad(-45.),deg2rad(-75.)}};
-//        drawMapItem(testIcon, renderer, widgetRect, mProjection, splitPixel);
     }
 
     void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, ProjectionType projection,

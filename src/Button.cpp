@@ -227,6 +227,9 @@ namespace rose {
         stateTx.transmit(mSignalSerialNumber.serialNumber(),
                          std::make_tuple(mState, mSelected,
                                          mButtons.empty() ? SignalTokenValues::RadioUndetermined : mButtons.front().first));
+        for (auto &button : mButtons) {
+            button.second->setSelectState(ButtonOn);
+        }
     }
 
     void RadioBehavior::setState(RadioBehavior::State state, int selected) {
@@ -235,6 +238,10 @@ namespace rose {
             mSelected = selected;
             stateTx.transmit(mSignalSerialNumber.serialNumber(),
                              std::make_tuple(mState, mSelected, mButtons.front().first));
+            for (auto &button : mButtons) {
+                button.second->setSelectState(ButtonOn);
+            }
+            mButtons.at(selected).second->as<ButtonFrame>()->setSelectState(ButtonOff);
         } else {
             clearState();
         }

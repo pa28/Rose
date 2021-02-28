@@ -91,7 +91,16 @@ namespace rose {
 
         trackedSatelliteRx = std::make_shared<Slot<MapProjection::SignalType>>();
         trackedSatelliteRx->setCallback([&](uint32_t, MapProjection::SignalType satellites) {
+            auto radioState = radioBehavior.getState();
+            std::string satelliteName{};
             if (auto column = getSingleChild<Column>(); column) {
+                if (radioState.second < column->size()) {
+                    satelliteName = column->at(radioState.second)->as<SatelliteDataDisplay>()->getName();
+                } else {
+                    radioState.first = RadioBehavior::State::None;
+                    radioState.second = 0;
+                }
+
                 auto timer = time(nullptr);
                 auto dataDisplay = column->begin();
                 for (const auto &satellite : satellites) {
@@ -100,9 +109,16 @@ namespace rose {
                     if (auto disp = (*dataDisplay)->as<SatelliteDataDisplay>(); disp) {
                         disp->setData(satellite);
                     }
+
+                    if (!satelliteName.empty() && satellite.satellite.getName() == satelliteName) {
+                        radioState.first = RadioBehavior::State::Set;
+                        radioState.second = dataDisplay - column->begin();
+                    }
+
                     ++dataDisplay;
                 }
             }
+            radioBehavior.setState(radioState);
         });
 
         secondRx = std::make_shared<Slot<int>>();

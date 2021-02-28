@@ -257,6 +257,7 @@ void HamChrono::build() {
                >> mMapProjection;
 
     mMapProjection->trackedSatelliteTx.connect(satelliteDataSet->trackedSatelliteRx);
+    satelliteDataSet->radioBehavior.stateTx.connect(mMapProjection->satelliteSelectRx);
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     mCelesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);

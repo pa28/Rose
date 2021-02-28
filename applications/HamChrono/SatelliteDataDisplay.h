@@ -64,6 +64,8 @@ namespace rose {
         void setData(const TrackedSatellite &satellite);
 
         void timeUpdate(time_t timer);
+
+        const std::string& getName() const { return mName; }
     };
 
     /**
