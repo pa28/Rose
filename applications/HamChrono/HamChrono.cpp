@@ -246,10 +246,7 @@ void HamChrono::build() {
         topRow << wdg<Frame>() << BorderStyle::BevelIn << wdg<ImageView>(solar.first);
     }
 
-    auto satelliteDataSet = sideColumn << wdg<Frame>(3)
-                                       << BorderStyle::Notch
-                                       << Elastic{Orientation::Horizontal}
-                                       << wdg<SatelliteDataSet>();
+    auto satelliteDataSet = sideColumn << wdg<SatelliteDataSet>();
 
     auto switchBoxWdg = topRow << wdg<Grid>(3, Size{50, 50}, Orientation::Vertical);
     switchBox(switchBoxWdg);
@@ -260,6 +257,7 @@ void HamChrono::build() {
                >> mMapProjection;
 
     mMapProjection->trackedSatelliteTx.connect(satelliteDataSet->trackedSatelliteRx);
+    satelliteDataSet->radioBehavior.stateTx.connect(mMapProjection->satelliteSelectRx);
 
     solarImageCache->connect(mSecondTick->txSecond, mSecondTick->txMinute);
     mCelesTrackEphemeris->connect(mSecondTick->txSecond, mSecondTick->txHour);

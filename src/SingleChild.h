@@ -117,5 +117,18 @@ namespace rose {
                 return mChildren.front()->as<WidgetType>();
             return nullptr;
         }
+
+        /**
+         * @brief A convenience operation to get the child of a SingleChild Container.
+         * @details If the child is set, an attempt is made to cast it to WidgetType.
+         * @tparam WidgetType The desired return Widget type.
+         * @return std::shared_prt<WidgetType> if child is sent and derived from WidgetType, empty otherwise.
+         */
+        template<class WidgetType>
+        std::shared_ptr<WidgetType> getSingleChild() const {
+            if (!mChildren.empty())
+                return mChildren.front()->as<WidgetType>();
+            return nullptr;
+        }
     };
 }

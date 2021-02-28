@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Frame.h"
+#include "Button.h"
 #include "Container.h"
 #include "MapProjection.h"
 
@@ -17,7 +17,7 @@ namespace rose {
      * @class SatelliteDataDisplay
      * @brief Display satellite orbital data.
      */
-    class SatelliteDataDisplay : public Frame {
+    class SatelliteDataDisplay : public ButtonFrame {
     protected:
         RoseImageId mImageId{RoseImageInvalid};
         std::string mName{};
@@ -26,7 +26,7 @@ namespace rose {
     public:
         ~SatelliteDataDisplay() override = default;
 
-        SatelliteDataDisplay() = default;
+        SatelliteDataDisplay() = delete;
 
         SatelliteDataDisplay(SatelliteDataDisplay &&) = delete;
 
@@ -36,18 +36,15 @@ namespace rose {
 
         SatelliteDataDisplay &operator=(const SatelliteDataDisplay &) = delete;
 
+        explicit SatelliteDataDisplay(int padding) : ButtonFrame(padding) {}
+
         /**
          * @brief Set the display data.
          * @param imageId The ImageId of the satellite display icon.
          * @param name The Satellite name.
          * @param dataStub The last pas data stub.
          */
-        SatelliteDataDisplay(ImageId imageId, const std::string &name, const SatelliteMetaData &dataStub)
-                : SatelliteDataDisplay() {
-            mImageId = static_cast<RoseImageId>(imageId);
-            mName = name;
-            mMetaData = dataStub;
-        }
+        SatelliteDataDisplay(ImageId imageId, const std::string &name, const SatelliteMetaData &dataStub);
 
         /// See Widget::initializeComposite()
         void initializeComposite() override;
@@ -67,14 +64,18 @@ namespace rose {
         void setData(const TrackedSatellite &satellite);
 
         void timeUpdate(time_t timer);
+
+        const std::string& getName() const { return mName; }
     };
 
     /**
      * @class SatelliteDataSet
      * @brief A class to manage a number of SatelliteDataDisplay objects.
      */
-    class SatelliteDataSet : public Column {
+    class SatelliteDataSet : public Frame {
     protected:
+        /// Receive settings updates from the settings database.
+        std::shared_ptr<Slot<std::string>> mSettingsUpdateRx{};
 
     public:
         ~SatelliteDataSet() override = default;
@@ -91,16 +92,21 @@ namespace rose {
          * @brief Constructor see: Widget constructor.
          * @param parent
          */
-        SatelliteDataSet() : Column() {
+        SatelliteDataSet() : Frame(3) {
             mClassName = "SatelliteDataSet";
         }
 
         /// See Widget::initializeComposite()
         void initializeComposite() override;
 
+        /// Slot to receive tracked satellite data.
         std::shared_ptr<Slot<MapProjection::SignalType>> trackedSatelliteRx{};
 
+        /// Slot to receive timing pulses to update the display.
         std::shared_ptr<Slot<int>> secondRx{};
+
+        /// The RadioBehavior object.
+        RadioBehavior radioBehavior{true};
     };
 }
 

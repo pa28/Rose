@@ -8,6 +8,7 @@
 #pragma once
 
 #include <mutex>
+#include <Button.h>
 
 #include "AntiAliasedDrawing.h"
 #include "Cache.h"
@@ -226,6 +227,7 @@ namespace rose {
         GeoPosition mQthRad{};          ///< The station location in radians.
         GeoPosition mAntipode{};        ///< The station antipode in radians.
         Size mMapSize{};                ///< The size of the base maps in pixels.
+        int mSelectedSatellite{};       ///< The Satellite to display tracking for.
 
         std::array<sdl::Surface,static_cast<std::size_t>(MapDataType::MapCount)> mMapSurface{};
         std::array<sdl::Surface,static_cast<std::size_t>(MapDataType::MapCount)> mAzSurface{};
@@ -429,7 +431,12 @@ namespace rose {
         }
 
         using SignalType = std::vector<TrackedSatellite>&;
+
+        /// Transmit satellite tracking data.
         Signal<SignalType> trackedSatelliteTx{};
+
+        /// Receive satellite tracking selection.
+        std::shared_ptr<Slot<RadioBehavior::SignalType>> satelliteSelectRx{};
     };
 }
 
