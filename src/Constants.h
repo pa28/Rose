@@ -57,6 +57,7 @@ namespace rose {
         DialogClose,                    ///< Close the dialog.
         ExitDialogOk,                   ///< ExitDialog Ok ActionButton
         ExitDialogCancel,               ///< ExitDialog Cancel ActionButton
+        RadioUndetermined,              ///< RadioBehavior state is undetermined.
         FirstUserSignalToken            ///< The value that can be used for the first SignalToken of a user application.
     };
 

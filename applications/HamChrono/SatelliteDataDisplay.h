@@ -72,6 +72,7 @@ namespace rose {
      */
     class SatelliteDataSet : public Frame {
     protected:
+        /// Receive settings updates from the settings database.
         std::shared_ptr<Slot<std::string>> mSettingsUpdateRx{};
 
     public:
@@ -96,9 +97,14 @@ namespace rose {
         /// See Widget::initializeComposite()
         void initializeComposite() override;
 
+        /// Slot to receive tracked satellite data.
         std::shared_ptr<Slot<MapProjection::SignalType>> trackedSatelliteRx{};
 
+        /// Slot to receive timing pulses to update the display.
         std::shared_ptr<Slot<int>> secondRx{};
+
+        /// The RadioBehavior object.
+        RadioBehavior radioBehavior{true};
     };
 }
 

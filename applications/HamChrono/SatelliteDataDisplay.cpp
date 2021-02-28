@@ -122,8 +122,10 @@ namespace rose {
                 << wdg<Column>();
 
         for (auto i = 0; i < 6; ++i) {
-            column << wdg<SatelliteDataDisplay>(0)
+            auto display = column << wdg<SatelliteDataDisplay>(0)
                    << Elastic{Orientation::Horizontal};
+            auto frame = display->as<ButtonFrame>();
+            radioBehavior.emplace_back(frame);
         }
     }
 }

@@ -32,6 +32,8 @@ namespace rose {
      *     * On receipt of a signal on Button::rxPushed a signal is transmitted on Button::txPushed.
      */
     class ButtonFrame : public Frame {
+        friend class RadioBehavior;
+
     protected:
 
         SignalSerialNumber mSignalSerialNumber{};   ///< The button serial number
@@ -278,6 +280,85 @@ namespace rose {
         /// See Widget::setSize()
         void setSize(Size size) override;
 
+    };
+
+    class RadioBehavior {
+    public:
+        enum class State {
+            None,
+            SetClear,
+            Set,
+        };
+
+    protected:
+        State mState{None};         ///< The current state.
+        int mSelected{0};           ///< The current selected ButtonFrame if any.
+        bool mNoneIsValid{};        ///< True if all off is a valid state.
+
+        using ButtonListType = std::pair<SignalToken,shared_ptr<ButtonFrame>>;
+        std::vector<ButtonListType> mButtons{};    ///< The list of Radio Buttons
+
+        SignalSerialNumber mSignalSerialNumber{};   ///< The object signal serial number
+
+        std::shared_ptr<Slot<ButtonFrame::SignalType>> buttonStateRx{};     ///< Receive managed button state.
+
+    public:
+        using SignalType = std::tuple<State,int,SignalToken>;
+
+        RadioBehavior();
+
+        ~RadioBehavior() = default;
+
+        Signal<SignalType> stateTx{};
+
+        /**
+         * @brief Constructor
+         * @param noneIsValid Set whether the all buttons off is a valid state.
+         */
+        explicit RadioBehavior(bool noneIsValid) : RadioBehavior() { mNoneIsValid = noneIsValid; }
+
+        /**
+         * @brief Add a ButtonFrame to the set.
+         * @param button The ButtonFrame to add.
+         */
+        void emplace_back(std::shared_ptr<ButtonFrame> &button);
+
+        /**
+         * @brief Remove all ButtonFrames from the set.
+         * @details The resulting state (cleared to none) is transmitted.
+         */
+        void clear();
+
+        /**
+         * @brief Clear the state.
+         * @details A clear state is all buttons off, if that is valid, or the first ButtonFrame on.
+         * The resulting state is transmitted.
+         */
+        void clearState();
+
+        /**
+         * @brief Get the current state of the RadioBehavior
+         * @return A std::pair with the State and Selected button.
+         */
+        [[nodiscard]] std::pair<State,int> getState() const {
+            return std::make_pair(mState, mSelected);
+        }
+
+        /**
+         * @brief Set the state, see setState(State,int).
+         * @param state A std::pair with the new state.
+         */
+        void setState(std::pair<State,int> state) {
+            setState(state.first, state.second);
+        }
+
+        /**
+         * @brief Set the state.
+         * @details If the requested state is invalid, the state is cleared. The new state is transmitted.
+         * @param state The selection State.
+         * @param selected The selected ButtonFrame.
+         */
+        void setState(State state, int selected);
     };
 }
 

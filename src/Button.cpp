@@ -180,4 +180,63 @@ namespace rose {
             label->setSize(labelSize);
         }
     }
+
+    RadioBehavior::RadioBehavior() {
+        buttonStateRx = std::make_shared<Slot<ButtonFrame::SignalType>>();
+        buttonStateRx->setCallback([&](uint32_t, ButtonFrame::SignalType signal) {
+            auto selected = signal.second - SignalTokenValues::FirstUserSignalToken;
+
+            std::for_each(mButtons.begin(), mButtons.end(), [&selected](ButtonListType &button) {
+                button.second->setSelectState(ButtonSetState::ButtonOn);
+            });
+
+            if (signal.first) {
+                if (selected != mSelected || mState == State::None) {
+                    mButtons.at(selected).second->setSelectState(ButtonSetState::ButtonOff);
+                    mState = State::Set;
+                    mSelected = selected;
+                    stateTx.transmit(mSignalSerialNumber.serialNumber(), std::make_tuple(mState, mSelected,
+                                                                                         mButtons.at(selected).first));
+                }
+            } else {
+                clearState();
+                mState = State::None;
+                mSelected = 0;
+                stateTx.transmit(mSignalSerialNumber.serialNumber(), std::make_tuple(mState, mSelected,
+                                                                                     mButtons.front().first));
+            }
+        });
+    }
+
+    void RadioBehavior::emplace_back(std::shared_ptr<ButtonFrame> &button) {
+        ButtonListType buttonListItem = std::make_pair(button->getSignalToken(), button);
+        button->setSignalToken(SignalTokenValues::FirstUserSignalToken + mButtons.size());
+        button->mButtonType = ButtonType::ToggleButton;
+        button->txState.connect(buttonStateRx);
+        mButtons.emplace_back(buttonListItem);
+    }
+
+    void RadioBehavior::clear() {
+        mButtons.clear();
+        clearState();
+    }
+
+    void RadioBehavior::clearState() {
+        mState = mNoneIsValid ? State::None : State::SetClear;
+        mSelected = 0;
+        stateTx.transmit(mSignalSerialNumber.serialNumber(),
+                         std::make_tuple(mState, mSelected,
+                                         mButtons.empty() ? SignalTokenValues::RadioUndetermined : mButtons.front().first));
+    }
+
+    void RadioBehavior::setState(RadioBehavior::State state, int selected) {
+        if (selected >= 0 && selected < mButtons.size()) {
+            mState = state;
+            mSelected = selected;
+            stateTx.transmit(mSignalSerialNumber.serialNumber(),
+                             std::make_tuple(mState, mSelected, mButtons.front().first));
+        } else {
+            clearState();
+        }
+    }
 }
