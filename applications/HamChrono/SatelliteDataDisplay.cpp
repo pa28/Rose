@@ -114,7 +114,12 @@ namespace rose {
                         radioState.first = RadioBehavior::State::Set;
                         radioState.second = dataDisplay - column->begin();
                     }
+                    (*dataDisplay)->setVisible(true);
+                    ++dataDisplay;
+                }
 
+                while (dataDisplay != column->end()) {
+                    (*dataDisplay)->setVisible(false);
                     ++dataDisplay;
                 }
             }

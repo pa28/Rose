@@ -72,13 +72,22 @@ namespace rose {
                     satellite.updateMetaData(mObserver);
                 }
 
-                mSatelliteList.erase(std::remove_if(mSatelliteList.begin(), mSatelliteList.end(),[&](TrackedSatellite satellite) -> bool {
+                std::vector<TrackedSatellite> tempList{};
+                std::copy(mSatelliteList.begin(), mSatelliteList.end(), std::back_inserter(tempList));
+
+                tempList.erase(std::remove_if(tempList.begin(), tempList.end(),[&](TrackedSatellite satellite) -> bool {
                     if (satellite.satellite.getName() != mSatelliteFavorite && satellite.metaData.setTime < now) {
                         mSatelliteIconStack.push(static_cast<const set::AppImageId>(satellite.metaData.imageId));
                         return true;
                     }
                     return false;
-                }), mSatelliteList.end());
+                }), tempList.end());
+
+                if (tempList.size() < mSatelliteList.size()) {
+                    std::lock_guard lockGuard{mSatListMutex};
+                    mSatelliteList.clear();
+                    std::copy(tempList.begin(), tempList.end(), std::back_inserter(mSatelliteList));
+                }
 
                 if (mSatelliteList.size() < (mSatelliteFavorite.empty() ? 5 : 6))
                     updateEphemerisFile();
