@@ -8,16 +8,16 @@
 
 namespace rose {
 
-    ButtonFrame::ButtonFrame() : Frame() {
-        rxPushed = std::make_shared<Slot<std::pair<bool,SignalToken>>>();
-        rxPushed->setCallback([&](uint32_t sn, std::pair<bool,SignalToken> pushed) {
+    ButtonFrame::ButtonFrame(Padding padding) : Frame(padding) {
+        rxPushed = std::make_shared<Slot<std::pair<bool, SignalToken>>>();
+        rxPushed->setCallback([&](uint32_t sn, std::pair<bool, SignalToken> pushed) {
             if (txPushed && sn != mSignalSerialNumber && mButtonType == NormalButton) {
                 txPushed.transmit(sn, pushed);
             }
         });
 
-        rxState = std::make_shared<Slot<std::pair<bool,SignalToken>>>();
-        rxState->setCallback([&](uint32_t sn, std::pair<bool,SignalToken> state) {
+        rxState = std::make_shared<Slot<std::pair<bool, SignalToken>>>();
+        rxState->setCallback([&](uint32_t sn, std::pair<bool, SignalToken> state) {
             if (sn != mSignalSerialNumber && mInvert != state.first) {
                 setInvert(state.first);
                 updateStateSetting(state.first ? ButtonSetState::ButtonOn : ButtonSetState::ButtonOff);
@@ -26,80 +26,23 @@ namespace rose {
         });
     }
 
-    ButtonFrame::ButtonFrame(const Id& id) : ButtonFrame() {
-        setId(id);
-    }
-
-    ButtonFrame::ButtonFrame(const Id& id, ButtonType type, int fontSize) : ButtonFrame(id) {
-        mLabelFontSize = fontSize;
-        mButtonType = type;
-    }
-
-    ButtonFrame::ButtonFrame(const std::string &labelString) : ButtonFrame() {
-        mLabelText = labelString;
-    }
-
-    ButtonFrame::ButtonFrame(const std::string &labelString, ButtonType type, int fontSize)
-            : ButtonFrame(labelString) {
-        mLabelFontSize = fontSize;
-        mButtonType = type;
-    }
-
-    ButtonFrame::ButtonFrame(RoseImageId imageId, ButtonType type) : ButtonFrame() {
-        mLabelFontSize = 0;
-        mButtonType = type;
-        mBadge = imageId;
-    }
-
     void ButtonFrame::initializeComposite() {
         Frame::initializeComposite();
         mAcceptsFocus = true;
         auto sRose = rose();
 
-        if (rose()->hasSettings()) {
+        if (sRose->hasSettings()) {
             mSettingsUpdateRx = std::make_shared<Slot<std::string>>();
-            mSettingsUpdateRx->setCallback([&](uint32_t,const std::string& name){
+            mSettingsUpdateRx->setCallback([&](uint32_t, const std::string &name) {
                 if (!name.empty()) {
-                    if (name == mStateId.value()) {
+                    if (name == mStateId.value())
                         setInvert(rose()->settings()->getValue(mStateId.value(), 0));
-                    } else if (name == mId.value())
-                        setText(rose()->settings()->getValue(mId, std::string{}));
                 }
             });
         }
 
-        if ((!mId.empty() || !mStateId.empty()) && rose()->hasSettings()) {
-            rose()->settings()->dataChangeTx.connect(mSettingsUpdateRx);
-        }
-
-        if (mLabelText.empty() && !getId().empty()) {
-            mLabelText = sRose->settings()->getValue(getId().value(), getId().value());
-        }
-
-        auto theme = sRose->theme();
-        if (mLabelFontSize == 0)
-            mLabelFontSize = theme.mFontPointSize;
-
-        if (unset(mBorder))
-            mBorder = BorderStyle::Bevel;
-
-        if (mChildren.empty()) {
-            if (mBadge == RoseImageInvalid)
-                switch (mButtonType) {
-                    case CancelButton:
-                        mBadge = IconCancel;
-                        break;
-                    case OkButton:
-                        mBadge = IconCheck;
-                        break;
-                    default:
-                        break;
-                }
-
-            setPadding(sRose->theme().mButtonPadding);
-
-            getWidget<ButtonFrame>() << wdg<Label>(mLabelText, mBadge)
-                    << FontSize(mLabelFontSize);
+        if (!mStateId.empty() && sRose->hasSettings()) {
+            sRose->settings()->dataChangeTx.connect(mSettingsUpdateRx);
         }
 
         mClassName = "ButtonFrame";
@@ -181,75 +124,60 @@ namespace rose {
         return true;
     }
 
-    void ButtonFrame::setImageId(ImageId imageId) {
-        if (auto label = getLabel(); label) {
-            label->setImageId(imageId);
-            return;
+    void ButtonFrame::updateStateSetting(ButtonSetState state) {
+        if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
+            !mStateId.empty() && rose()->hasSettings()) {
+            rose()->settings()->setValue(mStateId.value(), state == ButtonSetState::ButtonOn);
         }
-        throw RoseLogicError(
-                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
     }
 
-    std::shared_ptr<Label> ButtonFrame::getLabel() {
-        if (!mChildren.empty()) {
-            if (auto label = front()->as<Label>(); label) {
-                return label;
-            }
-        }
-        return nullptr;
+    Button::Button(const string &labelString, ButtonType type, int fontSize) : ButtonFrame(0) {
+        mLabelText = labelString;
+        mButtonType = type;
+        mLabelFontSize = fontSize;
     }
 
-    void ButtonFrame::setText(const string &text) {
-        if (auto label = getLabel(); label) {
-            label->setText(text);
-            return;
-        }
-        throw RoseLogicError(
-                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
+    Button::Button(const Id &id, ButtonType type, int fontSize) : ButtonFrame(0) {
+        mId = id;
+        mButtonType = type;
+        mLabelFontSize = fontSize;
     }
 
-    void ButtonFrame::setFontName(string &fontName) {
-        if (auto label = getLabel(); label) {
-            label->setFontName(fontName);
-            return;
-        }
-        throw RoseLogicError(
-                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
+    Button::Button(RoseImageId imageId, ButtonType type) : ButtonFrame(0) {
+        mImageId = imageId;
+        mButtonType = type;
     }
 
-    void ButtonFrame::setFontSize(int fontSize) {
-        if (auto label = getLabel(); label) {
-            label->setFontSize(fontSize);
-            return;
+    void Button::initializeComposite() {
+        ButtonFrame::initializeComposite();
+        setPadding(rose()->theme().mButtonPadding);
+
+        if (!mId.empty() && rose()->hasSettings()) {
+            mLabelText = rose()->settings()->getValue(mId.value(), mId.value());
         }
-        throw RoseLogicError(
-                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
+
+        auto label = getWidget<ButtonFrame>() << wdg<Label>(mLabelText, RoseImageId{mImageId});
+
+        auto theme = rose()->theme();
+        if (mLabelFontSize == 0)
+            mLabelFontSize = theme.mFontPointSize;
+
+        label->setFontSize(mLabelFontSize);
+
+        if (unset(mBorder))
+            mBorder = BorderStyle::Bevel;
+
+        mClassName = "Button";
     }
 
-    void ButtonFrame::setSize(Size size) {
-        if (auto label = getLabel(); label) {
+    void Button::setSize(Size size) {
+        if (auto label = getSingleChild<Label>(); label) {
             mSize = size;
             auto labelSize = size;
             auto borderSize = mLayoutHints.totalBorderSize();
             labelSize.width() -= borderSize.width();
             labelSize.height() -= borderSize.height();
             label->setSize(labelSize);
-        }
-    }
-
-    void ButtonFrame::setRenderFlip(sdl::RenderFlip renderFlip) {
-        if (auto label = getLabel(); label) {
-            label->setRenderFlip(renderFlip);
-            return;
-        }
-        throw RoseLogicError(
-                StringCompositor("Program logic error ", __PRETTY_FUNCTION__, ' ', __FILE__, __LINE__));
-    }
-
-    void ButtonFrame::updateStateSetting(ButtonSetState state) {
-        if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
-                                                       !mStateId.empty() && rose()->hasSettings()) {
-            rose()->settings()->setValue(mStateId.value(), state == ButtonSetState::ButtonOn);
         }
     }
 }

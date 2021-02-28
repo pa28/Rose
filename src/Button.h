@@ -38,11 +38,6 @@ namespace rose {
 
         ButtonType mButtonType{};                   ///< The button type
 
-        std::string mLabelText{};                   ///< The text of the label
-
-        int mLabelFontSize{};                       ///< The font size of the label
-        RoseImageId mBadge{RoseImageInvalid};       ///< The button badge
-
         bool mSelectProgress{};                     ///< True when button selection is in progress.
         ButtonSetState mButtonSelectState{};        ///< The current selected state of the button.
 
@@ -57,13 +52,10 @@ namespace rose {
         /// Update the button state in the Setting database.
         void updateStateSetting(ButtonSetState state);
 
-        /// Get the underlying Label Widget.
-        std::shared_ptr<Label> getLabel();
-
         std::shared_ptr<Slot<std::string>> mSettingsUpdateRx{};  ///< Slot to receive settings updates on.
 
     public:
-        ButtonFrame();
+        ButtonFrame() = delete;
 
         ~ButtonFrame() override = default;
 
@@ -75,61 +67,9 @@ namespace rose {
 
         ButtonFrame &operator=(const ButtonFrame &) = delete;
 
-        /**
-         * @brief Constructor
-         * @param labelString the text label of the button
-         */
-        explicit ButtonFrame(const std::string &labelString);
+        explicit ButtonFrame(int padding = 0) : ButtonFrame(Padding{padding}) {}
 
-        /**
-         * @brief Constructor
-         * @param id Widget id string.
-         */
-        explicit ButtonFrame(const Id &id);
-
-        /**
-         * @brief Constructor
-         * @param labelString the text label of the button
-         */
-        explicit ButtonFrame(std::string_view &labelString) : ButtonFrame(std::string{labelString}) {}
-
-        /**
-         * @brief Constructor
-         * @param labelString The text label of the button
-         */
-        explicit ButtonFrame(const char *labelString) : ButtonFrame(std::string{labelString}) {}
-
-        /**
-         * @brief Construct a ButtonFrame
-         * @param labelString the button label
-         * @param type the button type
-         * @param fontSize the font size to use with the label
-         */
-        ButtonFrame(const std::string &labelString, ButtonType type, int fontSize = 0);
-
-        /**
-         * @brief Construct an Icon ButtonFrame
-         * @param imageId The icon to use
-         * @param type The ButtonFrame type
-         */
-        ButtonFrame(RoseImageId imageId, ButtonType type);
-
-        /**
-         * Constructor
-         * @param id Widget id string.
-         * @param type the button type
-         * @param fontSize the font size to use with the label
-         */
-        ButtonFrame(const Id &id, ButtonType type, int fontSize = 0);
-
-        /**
-         * @brief Constructor
-         * @param labelString the button label
-         * @param type the button type
-         * @param fontSize the font size to use with the label
-         */
-        ButtonFrame(const char *labelString, ButtonType type, int fontSize = 0)
-                : ButtonFrame(std::string{labelString}, type, fontSize) {}
+        explicit ButtonFrame(Padding padding);
 
         /**
          * @brief See Widget::initializeComposite
@@ -189,65 +129,6 @@ namespace rose {
          */
         ButtonSetState getSelectState() const { return mButtonSelectState; }
 
-        /**
-         * @brief Set the horizontal alignment of the text within the label.
-         * @param alignment The kind of horizontal alignment.
-         */
-        void setHorizontalAlignment(HorizontalAlignment alignment) override {
-            if (!mChildren.empty())
-                mChildren.front()->setHorizontalAlignment(alignment);
-        }
-
-        /**
-         * @brief Set the horizontal alignment of the text within the label.
-         * @param alignment The kind of horizontal alignment.
-         */
-        void setVerticalAlignment(VerticalAlignment alignment) override {
-            if (!mChildren.empty())
-                mChildren.front()->setVerticalAlignment(alignment);
-        }
-
-        /**
-         * @brief Set the text of the label
-         * @param text The text
-         */
-        void setText(const std::string &text) override;
-
-        /**
-         * @brief Get the text of the label
-         * @return the text.
-         */
-        const std::string &getText() const {
-            return mChildren.front()->as<Label>()->getText();
-        }
-
-        /**
-         * @brief Set the font name.
-         * @param fontName The font name.
-         */
-        void setFontName(std::string &fontName);
-
-        /**
-         * @brief Set the font size.
-         * @param fontSize The point size of the font in pixels.
-         */
-        void setFontSize(int fontSize) override;
-
-        /// See Widget::setSize()
-        void setSize(Size size) override;
-
-        /**
-         * @brief Set the ImageId for the ButtonFrame (Label).
-         * @param imageId an ImageId.
-         */
-        void setImageId(ImageId imageId) override;
-
-        /**
-         * @brief Set RenderFlip for the ButtonFrame (Label).
-         * @param renderFlip
-         */
-        void setRenderFlip(sdl::RenderFlip renderFlip);
-
         /// Set the ButtonFrame StateId.
         void setStateId(const StateId &stateId) override {
             Widget::setStateId(stateId);
@@ -276,6 +157,126 @@ namespace rose {
      *     * On receipt of a signal on Button::rxPushed a signal is transmitted on Button::txPushed.
      */
     class Button : public ButtonFrame {
+    protected:
+        std::string mLabelText{};                   ///< The text of the label
+        ImageId mImageId{RoseImageInvalid};         ///< ImageId of the badge
+        int mLabelFontSize{};                       ///< The font size of the label
+        RoseImageId mBadge{RoseImageInvalid};       ///< The button badge
+
+    public:
+        Button() : ButtonFrame(0) {}
+
+        ~Button() override = default;
+
+        Button(Button &&) = delete;
+
+        Button(const Button &) = delete;
+
+        Button &operator=(Button &&) = delete;
+
+        Button &operator=(const Button &) = delete;
+
+        /**
+         * @brief Constructor
+         * @param labelString the text label of the button
+         */
+        explicit Button(const std::string &labelString, ButtonType type = ButtonType::NormalButton, int fontSize = 0);
+
+        /**
+         * @brief Constructor
+         * @param id Widget id string.
+         */
+        explicit Button(const Id &id, ButtonType type = ButtonType::NormalButton, int fontSize = 0);
+
+        template<typename String>
+        explicit Button(String labelString, ButtonType type = ButtonType::NormalButton)
+                : Button(std::string{labelString}, type) {}
+
+        /**
+         * @brief Construct an Icon Button
+         * @param imageId The icon to use
+         * @param type The Button type
+         */
+        explicit Button(RoseImageId imageId, ButtonType type = ButtonType::NormalButton);
+
+        /// See Widget::initializeComposite()
+        void initializeComposite() override;
+
+        /**
+         * @brief Set the horizontal alignment of the text within the label.
+         * @param alignment The kind of horizontal alignment.
+         */
+        void setHorizontalAlignment(HorizontalAlignment alignment) override {
+            if (auto label = getSingleChild<Label>(); label)
+                label->setHorizontalAlignment(alignment);
+        }
+
+        /**
+         * @brief Set the horizontal alignment of the text within the label.
+         * @param alignment The kind of horizontal alignment.
+         */
+        void setVerticalAlignment(VerticalAlignment alignment) override {
+            if (auto label = getSingleChild<Label>(); label)
+                label->setVerticalAlignment(alignment);
+        }
+
+        /**
+         * @brief Set the text of the label
+         * @param text The text
+         */
+        void setText(const std::string &text) override {
+            if (auto label = getSingleChild<Label>(); label)
+                label->setText(text);
+        }
+
+        /**
+         * @brief Get the text of the label
+         * @return the text.
+         */
+        std::string getText() const {
+            if (auto label = getSingleChild<Label>(); label)
+                return label->getText();
+            return std::string{""};
+        }
+
+        /**
+         * @brief Set the font name.
+         * @param fontName The font name.
+         */
+        void setFontName(std::string &fontName) {
+            if (auto label = getSingleChild<Label>(); label)
+                label->setFontName(fontName);
+        }
+
+        /**
+         * @brief Set the font size.
+         * @param fontSize The point size of the font in pixels.
+         */
+        void setFontSize(int fontSize) override {
+            if (auto label = getSingleChild<Label>(); label)
+                label->setFontSize(fontSize);
+        }
+
+        /**
+         * @brief Set the ImageId for the ButtonFrame (Label).
+         * @param imageId an ImageId.
+         */
+        void setImageId(ImageId imageId) override {
+            if (auto label = getSingleChild<Label>(); label)
+                label->setImageId(imageId);
+        }
+
+        /**
+         * @brief Set RenderFlip for the ButtonFrame (Label).
+         * @param renderFlip
+         */
+        void setRenderFlip(sdl::RenderFlip renderFlip) {
+            if (auto label = getSingleChild<Label>(); label)
+                label->setRenderFlip(renderFlip);
+        }
+
+        /// See Widget::setSize()
+        void setSize(Size size) override;
 
     };
 }
