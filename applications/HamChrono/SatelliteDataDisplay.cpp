@@ -19,7 +19,7 @@ namespace rose {
         time_t now = time(nullptr);
         getWidget<ButtonFrame>() << wdg<Column>()
                            << wdg<Label>(mName, mImageId)
-                                   << FontSize{20}
+                                   << FontSize{18}
                                    << Manip::Parent
                            << wdg<Label>(mMetaData ? mMetaData->passTimeString(now) : "")
                                    << FontSize{15};

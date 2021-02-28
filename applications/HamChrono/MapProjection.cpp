@@ -85,6 +85,8 @@ namespace rose {
 
                 if (tempList.size() < mSatelliteList.size()) {
                     std::lock_guard lockGuard{mSatListMutex};
+                    // Temporarily suppress track annotation if a satellite is removed.
+                    mSelectedSatellite = -1;
                     mSatelliteList.clear();
                     std::copy(tempList.begin(), tempList.end(), std::back_inserter(mSatelliteList));
                 }
@@ -250,7 +252,7 @@ namespace rose {
 
             std::lock_guard<std::mutex> lockGuard{mSatListMutex};
 
-            if (mAnnotationMode && !mSatelliteList.empty()) {
+            if (mSelectedSatellite >= 0 && mAnnotationMode && !mSatelliteList.empty()) {
                 auto satellite = mSatelliteList.front();
                 if (mSelectedSatellite < mSatelliteList.size())
                     satellite = mSatelliteList.at(mSelectedSatellite);
