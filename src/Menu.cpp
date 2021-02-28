@@ -69,7 +69,7 @@ namespace rose {
 
     void CascadeButton::initializeComposite() {
         Button::initializeComposite();
-        if (auto label = getLabel(); label) {
+        if (auto label = getSingleChild<Label>(); label) {
             label->setBadgeRight(true);
             if (mCascadeButtonType == CascadeButtonType::CascadeDown)
                 label->setBadge(RoseImageId::IconDownDir);
