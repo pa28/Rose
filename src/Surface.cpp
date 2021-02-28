@@ -16,14 +16,26 @@ namespace rose::sdl {
 
     Surface::Surface(std::filesystem::path &path) : Surface() {
         reset(IMG_Load(path.c_str()));
+        if (!operator bool()) {
+            throw RoseRuntimeError(util::StringCompositor("IMG_Load from: ", path.string(), " -- ", IMG_GetError()));
+        }
     }
 
     Surface::Surface(int width, int height, int depth, SDL_PixelFormatEnum format) : Surface() {
         reset(SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format));
+        if (!operator bool()) {
+            throw RoseRuntimeError(
+                    util::StringCompositor("SDL_CreateRGBSurfaceWithFormat: (", width, 'x', height, ") -- ",
+                                           SDL_GetError()));
+        }
     }
 
     Surface::Surface(int width, int height, int depth, uint32_t rmask, uint32_t gmask, uint32_t bmask, uint32_t amask) : Surface() {
         reset(SDL_CreateRGBSurface(0, width, height, depth, rmask, gmask, bmask, amask));
+        if (!operator bool()) {
+            throw RoseRuntimeError(
+                    util::StringCompositor("SDL_CreateRGBSurface: (", width, 'x', height, ") -- ", SDL_GetError()));
+        }
     }
 
     uint32_t &Surface::pixel(int x, int y) {
@@ -45,6 +57,11 @@ namespace rose::sdl {
 
     bool Surface::createWithFormat(int width, int height, int depth, SDL_PixelFormatEnum format) {
         reset(SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format));
+        if (!operator bool()) {
+            throw RoseRuntimeError(
+                    util::StringCompositor("SDL_CreateRGBSurfaceWithFormat: (", width, 'x', height, ") -- ",
+                                           SDL_GetError()));
+        }
         return operator bool();
     }
 
@@ -61,6 +78,8 @@ namespace rose::sdl {
 
     bool Surface::textureFromSurface(Renderer &renderer, Texture &texture) {
         texture.reset(SDL_CreateTextureFromSurface(renderer.get(), get()));
+        if (!texture.operator bool())
+            throw RoseRuntimeError(util::StringCompositor("SDL_CreateTextureFromSurface: ", SDL_GetError()));
         return texture.operator bool();
     }
 

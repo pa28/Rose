@@ -14,10 +14,19 @@ namespace rose::sdl {
     Texture::Texture(Renderer &renderer, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height)
             : Texture() {
         reset(SDL_CreateTexture(renderer.get(), format, access, width, height));
+        if (!operator bool()) {
+            throw RoseRuntimeError(
+                    util::StringCompositor("SDL_CreateTexture: (", width, 'x', height, ") -- ", SDL_GetError()));
+        }
     }
 
     Texture::Texture(Renderer &renderer, Size size) : Texture() {
-        reset(SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.width(), size.height()));
+        reset(SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.width(),
+                                size.height()));
+        if (!operator bool())
+            throw RoseRuntimeError(
+                    util::StringCompositor("SDL_CreateTexture: ", size.width(), 'x', size.height(), ") -- ",
+                                           SDL_GetError()));
     }
 
     GradientTexture::GradientTexture(Renderer &renderer, const color::RGBA &topLeft, const color::RGBA &topRight,
