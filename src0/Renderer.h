@@ -322,9 +322,6 @@ namespace rose::sdl {
         ~RenderTargetGuard() noexcept(false) {
             if (!popped) {
                 status = mRenderer.popRenderTarget();
-                if (status)
-                    throw RenderTargetGuardException(util::StringCompositor("Call to SDL_SetRenderTarget failed:",
-                                                                            SDL_GetError()));
             }
         }
 

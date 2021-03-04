@@ -92,46 +92,14 @@ include_directories(${SDL2TTF_INCLUDE_DIR})
 include_directories(${SDL2_IMAGE_INCLUDE_DIR})
 include_directories(${CURLPP_INCLUDE_DIR})
 include_directories(${SOCI_INCLUDE_DIRS})
-include_directories(src)
+include_directories(src0)
 include_directories(include)
 
 list(APPEND EXTRA_LIBS GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 sqlite3 pthread dl rt m stdc++fs uuid)
 
 list(APPEND ROSE_SRC
-        src/AntiAliasedDrawing.cpp
-        src/Border.cpp
-        src/Button.cpp
-        src/Cache.cpp
-        src/Color.cpp
-        src/Container.cpp
-        src/EventSemantics.cpp
-        src/Frame.cpp
-        src/Gauge.cpp
-        src/ImageRepository.cpp
-        src/ImageView.cpp
-        src/Keyboard.cpp
-        src/Label.cpp
-        src/LinearScale.cpp
-        src/Menu.cpp
-        src/PopupWindow.cpp
-        src/Renderer.cpp
-        src/Rose.cpp
-        src/Settings.cpp
-        src/ScreenMetrics.cpp
-        src/ScrollArea.cpp
-        src/SingleChild.cpp
-        src/Surface.cpp
-        src/Tab.cpp
-        src/Texture.cpp
-        src/TextField.cpp
-        src/Theme.cpp
-        src/TimeBox.cpp
-        src/Timer.cpp
-        src/Utilities.cpp
-        src/Slider.cpp
-        src/SystemMonitor.cpp
-        src/Widget.cpp
-        src/XDGFilePaths.cpp
+        src/StructuredTypes.cpp
+        src/Visual.cpp
         )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -148,9 +116,6 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     add_library(rose SHARED ${ROSE_SRC})
 else()
     add_library(rose STATIC ${ROSE_SRC})
-    add_executable(Test tests/WidgetTest.cpp)
-    target_link_libraries(Test ${RoseLibraries})
-    add_dependencies(Test rose)
 endif()
 
 
@@ -158,7 +123,7 @@ add_executable(Rose main.cpp)
 target_link_libraries(Rose ${RoseLibraries})
 add_dependencies(Rose rose)
 
-add_executable(HamChrono applications/HamChrono/HamChrono.cpp applications/HamChrono/MapProjection.cpp applications/HamChrono/MapProjection.h applications/HamChrono/ConfigDialog.cpp applications/HamChrono/ConfigDialog.h applications/HamChrono/SettingsNames.h applications/HamChrono/Plan13.cpp applications/HamChrono/Plan13.h applications/HamChrono/Ephemeris.cpp applications/HamChrono/Ephemeris.h applications/HamChrono/SatelliteDataDisplay.cpp applications/HamChrono/SatelliteDataDisplay.h)
+add_executable(HamChrono applications/HamChrono/HamChrono.cpp applications/HamChrono/MapProjection.cpp applications/HamChrono/MapProjection.h applications/HamChrono/ConfigDialog.cpp applications/HamChrono/ConfigDialog.h applications/HamChrono/SettingsNames.h applications/HamChrono/Plan13.cpp applications/HamChrono/Plan13.h applications/HamChrono/Ephemeris.cpp applications/HamChrono/Ephemeris.h applications/HamChrono/SatelliteDataDisplay.cpp applications/HamChrono/SatelliteDataDisplay.h src/StructuredTypes.cpp src/StructuredTypes.h)
 target_link_libraries(HamChrono ${RoseLibraries})
 add_dependencies(HamChrono rose)
 
@@ -166,7 +131,7 @@ add_executable(Life applications/ConwayLife.cpp)
 target_link_libraries(Life ${RoseLibraries})
 add_dependencies(Life rose)
 
-add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
+add_executable(RoseExec applications/RoseExec.cpp src0/Command.cpp)
 target_link_libraries(RoseExec stdc++fs)
 
 add_executable(RoseShell applications/RoseShell.cpp)
@@ -216,7 +181,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts"
         COMPONENT ROSE_RUNTIME
         )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src0/"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
         COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL
         FILES_MATCHING PATTERN "*.h")

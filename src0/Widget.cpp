@@ -2,6 +2,8 @@
 // Created by richard on 2020-10-20.
 //
 
+#include <src/Visual.h>
+
 #include "Container.h"
 #include "Widget.h"
 #include "Rose.h"
