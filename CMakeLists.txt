@@ -98,6 +98,7 @@ include_directories(include)
 list(APPEND EXTRA_LIBS GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 sqlite3 pthread dl rt m stdc++fs uuid)
 
 list(APPEND ROSE_SRC
+        src/GraphicsModel.cpp
         src/StructuredTypes.cpp
         src/Visual.cpp
         )

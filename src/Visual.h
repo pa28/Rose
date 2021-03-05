@@ -135,6 +135,49 @@ namespace rose {
             return std::make_tuple(tl,tr,bl,br);
         }
 
+        /// Determine if a Rectangle contains a Position.
+        [[nodiscard]] constexpr bool contains(Position pos) const noexcept {
+            return pos.x >= x && pos.x < x + w && pos.y >= y && pos.y < y + h;
+        }
+
+        /**
+         * @brief Determine if there is no overlap between two Rectangle objects.
+         * @param o The other Rectangle.
+         * @return True if there is no overlap of this Rectangle and the other Rectangle.
+         */
+        [[nodiscard]] constexpr bool noOverlap(const Rectangle& o) const noexcept {
+            return x > o.x + o.w || o.x > x + w || y > o.y + o.h || o.y > y + h;
+        }
+
+        /**
+         * @brief Determine if there is overlap between to Rectangle objects by inverting noOverlap().
+         * @param o The other Rectangle.
+         * @return True if there is overlap of this Rectangle and the other Rectangle.
+         */
+        [[nodiscard]] constexpr bool overlap(const Rectangle& o) const noexcept {
+            return !noOverlap(o);
+        }
+
+        [[nodiscard]] Rectangle intersection(const Rectangle &o) const {
+            // gives bottom-left point
+            // of intersection rectangle
+
+            auto x5 = std::max(x, o.x);
+            auto y5 = std::max(y, o.y);
+
+            // gives top-right point
+            // of intersection rectangle
+            auto x6 = std::min(x+w, o.x+o.w);
+            auto y6 = std::min(y+h, o.y+o.h);
+
+            // no intersection
+            if (x5 > x6 || y5 > y6) {
+                return Rectangle{0,0,0,0};
+            }
+
+            return Rectangle{x5, y5, x6 - x5, y6 - y5};
+        }
+
         static Rectangle Zero;
     };
 
