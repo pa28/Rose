@@ -8,11 +8,47 @@
 
 #pragma once
 
+#include "Configuration.h"
+#include "EventSemantics.h"
+
+#if GRAPHICS_MODEL_SDL2
 #include <SDL.h>
+#endif
+
 #include <memory>
 #include "Visual.h"
 
 namespace rose::gm {
+#if GRAPHICS_MODEL_SDL2
+
+    /**
+     * @brief A functor to destroy an SDL_Window in a std::unique_ptr (rose::sdl::Window).
+     */
+    class SdlWindowDestroy {
+    public:
+        /**
+         * @brief Call the SDL API to destroy an SDL_Window.
+         * @param sdlWindow A pointer to the SDL_Window to destroy.
+         */
+        void operator()(SDL_Window *sdlWindow) {
+            SDL_DestroyWindow(sdlWindow);
+        }
+    };
+
+    using SdlWindow = std::unique_ptr<SDL_Window, SdlWindowDestroy>;   //!< An SDL_Window unique pointer
+
+#endif
+
+    /**
+     * @brief Rose object error codes.
+     */
+    enum class RoseErrorCode {
+        OK,                         ///< No error
+        ROSE_EXCEPTION,             ///< Exception thrown and caught in main().
+        SDL_WINDOW_CREATE,          ///< Error while creating the SDL_Window
+        SDL_RENDERER_CREATE,        ///< Error while creating the SDL_Renderer
+        XDG_PATH_FAIL,              ///< Insufficient information to generate standard XDG Base Directories.
+    };
 
     /**
      * @struct RenderFlip
@@ -39,6 +75,7 @@ namespace rose::gm {
         friend class RenderTargetGuard;
 
     protected:
+#if GRAPHICS_MODEL_SDL2
         /**
          * @brief A functor to destroy an SDL_Renderer
          */
@@ -57,6 +94,7 @@ namespace rose::gm {
         RendererPtr mRenderer{};    ///< The Renderer.
 
         SDL_Texture *mCurrentRenderTarget{nullptr};
+#endif
 
     public:
 
@@ -69,6 +107,11 @@ namespace rose::gm {
         Context &operator=(const Context &context) = delete;
 
         Context &operator=(Context &&context) = default;
+
+#if GRAPHICS_MODEL_SDL2
+        explicit Context(SdlWindow &window, int index, Uint32 flags) : Context()
+        { mRenderer.reset(SDL_CreateRenderer(window.get(), index, flags)); }
+#endif
 
         /// Test for a valid Context
         explicit operator bool() const noexcept { return mRenderer.operator bool(); }
@@ -437,6 +480,33 @@ namespace rose::gm {
             }
             return *this;
         }
+    };
+
+    class GraphicsModel {
+    protected:
+#if GRAPHICS_MODEL_SDL2
+        SdlWindow mSdlWindow{};         /// The SDL_Window which provides the application "Screen"
+#endif
+
+        EventSemantics mEventSemantics{};
+
+        Context mContext{};             /// The graphics context used by the application graphics model.
+
+        bool mRunEventLoop{true};       /// Event loop continues while this is true.
+
+    public:
+        GraphicsModel();
+
+        ~GraphicsModel() = default;
+
+        RoseErrorCode ErrorCode{RoseErrorCode::OK};
+
+        bool initialize(std::string &title, Size initialSize);
+
+        void eventLoop();
+
+        void drawAll();
+
     };
 }
 

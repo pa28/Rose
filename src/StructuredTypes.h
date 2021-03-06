@@ -150,10 +150,6 @@ namespace rose {
         }
     };
 
-    Node::Node(const std::shared_ptr<Container> &container) {
-        mContainer = container;
-    }
-
     inline std::shared_ptr<Node> Node::remove() {
         auto node = shared_from_this();
         if (auto container = mContainer.lock(); container) {

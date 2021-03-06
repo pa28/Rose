@@ -92,12 +92,13 @@ include_directories(${SDL2TTF_INCLUDE_DIR})
 include_directories(${SDL2_IMAGE_INCLUDE_DIR})
 include_directories(${CURLPP_INCLUDE_DIR})
 include_directories(${SOCI_INCLUDE_DIRS})
-include_directories(src0)
+include_directories(src)
 include_directories(include)
 
 list(APPEND EXTRA_LIBS GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 sqlite3 pthread dl rt m stdc++fs uuid)
 
 list(APPEND ROSE_SRC
+        src/EventSemantics.cpp
         src/GraphicsModel.cpp
         src/StructuredTypes.cpp
         src/Visual.cpp
@@ -119,6 +120,10 @@ else()
     add_library(rose STATIC ${ROSE_SRC})
 endif()
 
+if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
+    add_executable(Test0 tests/test0.cpp)
+    target_link_libraries(Test0 ${RoseLibraries})
+endif()
 
 add_executable(Rose main.cpp)
 target_link_libraries(Rose ${RoseLibraries})

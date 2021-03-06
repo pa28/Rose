@@ -9,4 +9,8 @@
 
 namespace rose {
 
+    Node::Node(const std::shared_ptr<Container> &container) {
+        mContainer = container;
+    }
+
 }

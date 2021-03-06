@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <utility>
 #include "StructuredTypes.h"
 
@@ -323,3 +324,12 @@ namespace rose {
     };
 }
 
+inline std::ostream& operator<<(std::ostream& strm, const rose::Size &size) {
+    strm << '(' << size.w << ',' << size.h << ')';
+    return strm;
+}
+
+inline std::ostream& operator<<(std::ostream& strm, const rose::Position &pos) {
+    strm << '(' << pos.x << ',' << pos.y << ')';
+    return strm;
+}
