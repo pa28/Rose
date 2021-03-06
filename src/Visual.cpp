@@ -13,6 +13,10 @@ namespace rose {
     Size Size::Zero{};
     Rectangle Rectangle::Zero{};
 
+    SemanticGesture SemanticGesture::None{0x0};
+    SemanticGesture SemanticGesture::Click{0x1};
+    SemanticGesture SemanticGesture::Scroll{0x2};
+    SemanticGesture SemanticGesture::Multi{0x4};
 
     void rose::Screen::draw(const Position &containerPosition) {
         setScreenRectangle(containerPosition);
@@ -30,6 +34,24 @@ namespace rose {
             }
         }
         return screenRect;
+    }
+
+    std::optional<FocusTree> Window::focusTree(Position mousePosition) {
+        for (auto &content : *this) {
+            if (auto visual = std::dynamic_pointer_cast<Visual>(content); visual) {
+                auto rect = visual->getScreenRectangle(mPos);
+                if (rect.contains(mousePosition)) {
+                    FocusTree result{};
+                    if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
+                        manager->focusTree(Position::Zero, mousePosition, result);
+                    } else {
+                        result.second = std::dynamic_pointer_cast<Widget>(content);
+                        return result;
+                    }
+                }
+            }
+        }
+        return std::nullopt;
     }
 
     void Window::draw(const Position &containerPosition) {
@@ -77,6 +99,22 @@ namespace rose {
         return rect;
     }
 
+    void Manager::focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result) {
+        for (auto &content : *this) {
+            if (auto visual = std::dynamic_pointer_cast<Visual>(content); visual) {
+                auto rect = visual->getScreenRectangle(mPos);
+                if (rect.contains(mousePosition)) {
+                    if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
+                        result.first.push_back(manager);
+                        manager->focusTree(rect.position(), mousePosition, result);
+                    } else {
+                        result.second = std::dynamic_pointer_cast<Widget>(content);
+                    }
+                }
+            }
+        }
+    }
+
     Rectangle
     SimpleLayout::layoutContent(const Rectangle &screenRect, LayoutManager::Itr first, LayoutManager::Itr last) {
         while (first != last) {
@@ -87,5 +125,9 @@ namespace rose {
             }
         }
         return screenRect;
+    }
+
+    void Widget::draw(const Position &containerPosition) {
+
     }
 }

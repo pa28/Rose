@@ -19,6 +19,24 @@ namespace rose {
     class Manager;
     class Widget;
 
+    using FocusTree = std::pair<std::vector<std::shared_ptr<Manager>>,std::shared_ptr<Widget>>;
+
+    /**
+     * @struct SemanticGesture
+     * @brief The type of semantic gesture supported by a Widget.
+     */
+    struct SemanticGesture {
+        uint32_t value;
+        static SemanticGesture None;
+        static SemanticGesture Click;
+        static SemanticGesture Scroll;
+        static SemanticGesture Multi;
+
+        [[nodiscard]] bool supports(SemanticGesture semanticGesture) const {
+            return (value & semanticGesture.value) == semanticGesture.value;
+        }
+    };
+
     /**
      * @struct Position
      * @brief A position in integer (x, y) co-ordinates.
@@ -202,7 +220,11 @@ namespace rose {
          * @param containerPosition The Container screen Position.
          */
         void setScreenRectangle(const Position &containerPosition) {
-            mScreenRect = Rectangle{containerPosition + mPos, mSize};
+            mScreenRect = getScreenRectangle(containerPosition);
+        }
+
+        [[nodiscard]] Rectangle getScreenRectangle(const Position &containerPosition) const {
+            return Rectangle{containerPosition + mPos, mSize};
         }
 
         /// Draw the visual.
@@ -216,7 +238,7 @@ namespace rose {
      * @class Screen
      * @brief An abstraction of the available display screen.
      */
-    class Screen : public Visual, Container {
+    class Screen : public Visual, public Container {
     public:
         Screen() = default;
         ~Screen() override = default;
@@ -243,10 +265,14 @@ namespace rose {
      * @class Window
      * @brief A Window is a visual abstraction of a number of related user interface objects.
      */
-    class Window : public Visual, Container {
+    class Window : public Visual, public Container {
+        bool mModalWindow{};
+
     public:
         Window() = default;
         ~Window() override = default;
+
+        bool isModal() const { return mModalWindow; }
 
         /**
          * @brief Add a Manager to the Window.
@@ -265,6 +291,8 @@ namespace rose {
 
         /// Layout the contents of teh Window
         Rectangle layout(const Rectangle &screenRect) override;
+
+        std::optional<FocusTree> focusTree(Position mousePosition);
     };
 
     /**
@@ -309,9 +337,14 @@ namespace rose {
         void draw(const Position &containerPosition) override;
 
         Rectangle layout(const Rectangle &screenRect) override;
+
+        void focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result);
     };
 
     class Widget : public Visual, Node {
+    protected:
+        SemanticGesture mSemanticGesture{};
+
     public:
         Widget() = default;
         ~Widget() override = default;
@@ -321,6 +354,10 @@ namespace rose {
             mSize = mPreferredSize;
             return Rectangle{mPos, mSize};
         }
+
+        void draw(const Position &containerPosition) override;
+
+        SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
     };
 }
 

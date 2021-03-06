@@ -9,7 +9,6 @@
 #pragma once
 
 #include "Configuration.h"
-#include "EventSemantics.h"
 
 #if GRAPHICS_MODEL_SDL2
 #include <SDL.h>
@@ -482,17 +481,97 @@ namespace rose::gm {
         }
     };
 
+    class GraphicsModel;
+
+    /**
+     * @class EventSemantics
+     * @brief
+     */
+    class EventSemantics {
+    public:
+        enum WindowEventType {
+            Shown, Hidden, Exposed, SizeChanged, Minimized, Maximized, Restored, Enter, Leave, Focus, UnFocus,
+            Close, Moved, Resized,
+        };
+
+        using WindowStateChangeCallback = std::function<void(GraphicsModel&, WindowEventType)>;
+        using WindowPositionChangeCallback = std::function<void(GraphicsModel&, WindowEventType, Position)>;
+        using WindowSizeChangeCallback = std::function<void(GraphicsModel&, WindowEventType, Size)>;
+
+    protected:
+        GraphicsModel& mModel;
+        WindowSizeChangeCallback windowSizeChangeCallback;
+        WindowPositionChangeCallback windowPositionChangeCallback;
+        WindowStateChangeCallback windowStateChangeCallback;
+
+        void windowStateChange(WindowEventType type) {
+            if (windowStateChangeCallback)
+                windowStateChangeCallback(mModel, type);
+        }
+
+        void windowSizeChange(WindowEventType type, Size size) {
+            if (windowSizeChangeCallback)
+                windowSizeChangeCallback(mModel, type,size);
+        }
+
+        void windowPositionChange(WindowEventType type, Position position) {
+            if (windowPositionChangeCallback)
+                windowPositionChangeCallback(mModel, type,position);
+        }
+
+    public:
+        EventSemantics() = delete;
+
+        ~EventSemantics() = default;
+
+        explicit EventSemantics(GraphicsModel& model) : mModel(model) {}
+
+#if GRAPHICS_MODEL_SDL2
+        void onEvent(SDL_Event &e);
+
+        void windowEvent(SDL_WindowEvent &e);
+
+        void keyboardEvent(SDL_KeyboardEvent &e);
+
+        void mouseMotionEvent(SDL_MouseMotionEvent &e);
+
+        void mouseButtonEvent(SDL_MouseButtonEvent &e);
+
+        void mouseWheelEvent(SDL_MouseWheelEvent &e);
+#endif
+
+        void setWindowStateChangeCallback(WindowStateChangeCallback callback) {
+            windowStateChangeCallback = std::move(callback);
+        }
+
+        void setWindowPositionChangeCallback(WindowPositionChangeCallback callback) {
+            windowPositionChangeCallback = std::move(callback);
+        }
+
+        void setWindowSizeChangeCallback(WindowSizeChangeCallback callback) {
+            windowSizeChangeCallback = std::move(callback);
+        }
+    };
+
     class GraphicsModel {
     protected:
 #if GRAPHICS_MODEL_SDL2
         SdlWindow mSdlWindow{};         /// The SDL_Window which provides the application "Screen"
 #endif
 
-        EventSemantics mEventSemantics{};
+        Screen mScreen{};
+
+        EventSemantics mEventSemantics;
 
         Context mContext{};             /// The graphics context used by the application graphics model.
 
         bool mRunEventLoop{true};       /// Event loop continues while this is true.
+
+        void windowStateChange(EventSemantics::WindowEventType type);
+
+        void windowSizeChange(EventSemantics::WindowEventType type, Size size);
+
+        void windowPositionChange(EventSemantics::WindowEventType type, Position position);
 
     public:
         GraphicsModel();
@@ -507,6 +586,7 @@ namespace rose::gm {
 
         void drawAll();
 
+        std::optional<FocusTree> focusTree(Position mousePosition);
     };
 }
 
