@@ -13,6 +13,7 @@
 #include <sqlite3/soci-sqlite3.h>
 #include "Color.h"
 #include "Signals.h"
+#include "Types.h"
 
 namespace rose {
     using namespace std;
@@ -90,6 +91,20 @@ namespace rose {
                     return T{r.get<int>(0), r.get<int>(1)};
                 }
                 return nullopt;
+            } else if constexpr (is_base_of_v<Size, T>) {
+                soci::row r;
+                sql << "SELECT a,b FROM " << int_pair_table << " WHERE name = \"" << name << '"', soci::into(r);
+                if (sql.got_data() && r.get_indicator(0) == soci::i_ok && r.get_indicator(1) == soci::i_ok) {
+                    return T{r.get<int>(0), r.get<int>(1)};
+                }
+                return nullopt;
+            } else if constexpr (is_base_of_v<Position, T>) {
+                soci::row r;
+                sql << "SELECT a,b FROM " << int_pair_table << " WHERE name = \"" << name << '"', soci::into(r);
+                if (sql.got_data() && r.get_indicator(0) == soci::i_ok && r.get_indicator(1) == soci::i_ok) {
+                    return T{r.get<int>(0), r.get<int>(1)};
+                }
+                return nullopt;
             } else if constexpr (is_base_of_v<std::array<double,2>, T>) {
                 soci::row r;
                 sql << "SELECT a,b FROM " << real_pair_table << " WHERE name = \"" << name << '"', soci::into(r);
@@ -153,7 +168,14 @@ namespace rose {
             } else if constexpr (is_floating_point_v<T>) {
                 sql << "INSERT OR REPLACE INTO " << real_table << " (name,value) VALUES (\"" << name << "\"," << value << ')';
             } else if constexpr (is_base_of_v<std::array<int,2>,T>) {
-                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\"," << value.at(0) << ',' << value.at(1) << ')';
+                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
+                    << value.at(0) << ',' << value.at(1) << ')';
+            } else if constexpr (is_base_of_v<Size,T>) {
+                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
+                    << value.w << ',' << value.h << ')';
+            } else if constexpr (is_base_of_v<Position,T>) {
+                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
+                    << value.x << ',' << value.y << ')';
             } else if constexpr (is_base_of_v<std::array<double,2>,T>) {
                 sql << "INSERT OR REPLACE INTO " << real_pair_table << " (name,a,b) VALUES (\"" << name << "\"," << value.at(0) << ',' << value.at(1) << ')';
             } else if constexpr (is_same_v<T,string> || is_same_v<T,const string> ||

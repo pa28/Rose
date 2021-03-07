@@ -102,6 +102,7 @@ list(APPEND ROSE_SRC
         src/GraphicsModel.cpp
         src/Settings.cpp
         src/StructuredTypes.cpp
+        src/Types.cpp
         src/Utilities.cpp
         src/Visual.cpp
         src/XDGFilePaths.cpp

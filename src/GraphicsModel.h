@@ -516,7 +516,7 @@ namespace rose::gm {
      */
     class EventSemantics {
     public:
-        enum WindowEventType {
+        enum WindowEventType : int {
             Shown, Hidden, Exposed, SizeChanged, Minimized, Maximized, Restored, Enter, Leave, Focus, UnFocus,
             Close, Moved, Resized,
         };
@@ -600,6 +600,8 @@ namespace rose::gm {
 
         void windowPositionChange(EventSemantics::WindowEventType type, Position position);
 
+        EventSemantics::WindowEventType mAppState;
+
     public:
         GraphicsModel();
 
@@ -607,7 +609,7 @@ namespace rose::gm {
 
         RoseErrorCode ErrorCode{RoseErrorCode::OK};
 
-        bool initialize(const std::string &title, Size initialSize);
+        bool initialize(const std::string &title, Size initialSize, Position initialPosition);
 
         void eventLoop();
 

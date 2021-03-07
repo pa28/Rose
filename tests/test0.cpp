@@ -6,12 +6,19 @@
 #include "Font.h"
 #include "GraphicsModel.h"
 #include "Settings.h"
+#include "Types.h"
 #include "Visual.h"
 
+using namespace rose;
+
 int main(int argc, char **argv) {
-    rose::Environment& environment{rose::Environment::getEnvironment()};
-    rose::gm::GraphicsModel graphicsModel{};
-    rose::Settings::getSettings();
-    graphicsModel.initialize(environment.appName(), rose::Size{800,480});
+    Environment& environment{Environment::getEnvironment()};
+    gm::GraphicsModel graphicsModel{};
+    Settings& settings{Settings::getSettings()};
+
+    auto appSize = settings.getValue(set::SetAppSize, Size{800,400});
+    auto appPos = settings.getValue(set::SetAppPosition, Position::Undefined);
+
+    graphicsModel.initialize(environment.appName(), appSize, appPos);
     graphicsModel.eventLoop();
 }

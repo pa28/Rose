@@ -9,10 +9,6 @@
 
 namespace rose {
 
-    Position Position::Zero{};
-    Size Size::Zero{};
-    Rectangle Rectangle::Zero{};
-
     SemanticGesture SemanticGesture::None{0x0};
     SemanticGesture SemanticGesture::Click{0x1};
     SemanticGesture SemanticGesture::Scroll{0x2};

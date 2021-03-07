@@ -9,6 +9,7 @@
 #include "Font.h"
 #include "GraphicsModel.h"
 #include "Utilities.h"
+#include "Settings.h"
 
 #if GRAPHICS_MODEL_SDL2
 
@@ -141,8 +142,9 @@ namespace rose::gm {
         status = SDL_SetRenderTarget(mContext.get(), mContext.mCurrentRenderTarget);
     }
 
-    bool GraphicsModel::initialize(const std::string &title, Size initialSize) {
+    bool GraphicsModel::initialize(const std::string &title, Size initialSize, Position initialPosition) {
 #if GRAPHICS_MODEL_SDL2
+        Settings &settings{Settings::getSettings()};
         SDL_RendererInfo info;
 
         // Set image scaling quality to the highest value available
@@ -154,6 +156,20 @@ namespace rose::gm {
         atexit(SDL_Quit);
 
         SDL_Window *window;        // Declare a pointer to an SDL_Window
+        uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+        mAppState = static_cast<EventSemantics::WindowEventType>(settings.getValue(set::SetAppState,
+                                                                                    static_cast<int>(EventSemantics::WindowEventType::Restored)));
+        switch (mAppState) {
+            case EventSemantics::Minimized:
+                flags |= SDL_WINDOW_MINIMIZED;
+                break;
+            case EventSemantics::Maximized:
+                flags |= SDL_WINDOW_MAXIMIZED;
+                break;
+            case EventSemantics::Restored:
+            default:
+                break;
+        }
 
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -166,11 +182,11 @@ namespace rose::gm {
         // Create an application window with the following settings:
         mSdlWindow.reset(SDL_CreateWindow(
                 (title.empty() ? "SDL2 window" : std::string{title}.c_str()),         //    const char* title
-                SDL_WINDOWPOS_UNDEFINED,  //    int x: initial x position
-                SDL_WINDOWPOS_UNDEFINED,  //    int y: initial y position
+                initialPosition.x,        //    int x: initial x position
+                initialPosition.y,        //    int y: initial y position
                 initialSize.w,            //    int w: width, in pixels
                 initialSize.h,            //    int h: height, in pixels
-                SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE           //    Uint32 flags: window options, see docs
+                flags
         ));
 
         if (mSdlWindow) {
@@ -234,15 +250,42 @@ namespace rose::gm {
     }
 
     void GraphicsModel::windowStateChange(EventSemantics::WindowEventType type) {
-        std::cout << __PRETTY_FUNCTION__ << '\n';
+        std::cout << __PRETTY_FUNCTION__ << ' ';
+        Settings &settings{Settings::getSettings()};
+        switch (type) {
+            case EventSemantics::Maximized:
+                std::cout << "Maximized";
+                settings.setValue(set::SetAppState, static_cast<int>(type));
+                mAppState = type;
+                break;
+            case EventSemantics::Minimized:
+                std::cout << "Minimized";
+                settings.setValue(set::SetAppState, static_cast<int>(type));
+                mAppState = type;
+                break;
+            case EventSemantics::Restored:
+                std::cout << "Restored";
+                settings.setValue(set::SetAppState, static_cast<int>(type));
+                mAppState = type;
+                break;
+            default:
+                break;
+        }
+        std::cout << '\n';
     }
 
     void GraphicsModel::windowSizeChange(EventSemantics::WindowEventType type, Size size) {
-        std::cout << __PRETTY_FUNCTION__ << size << '\n';
+        if (mAppState == EventSemantics::Restored) {
+            Settings &settings{Settings::getSettings()};
+            settings.setValue(set::SetAppSize, size);
+        }
     }
 
     void GraphicsModel::windowPositionChange(EventSemantics::WindowEventType type, Position position) {
-        std::cout << __PRETTY_FUNCTION__ << position << '\n';
+        if (mAppState == EventSemantics::Restored) {
+            Settings &settings{Settings::getSettings()};
+            settings.setValue(set::SetAppPosition, position);
+        }
     }
 
     std::optional<FocusTree> GraphicsModel::focusTree(Position mousePosition) {
