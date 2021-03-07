@@ -257,6 +257,23 @@ namespace rose::gm {
 
 #if GRAPHICS_MODEL_SDL2
 
+    DrawColorGuard::DrawColorGuard(Context &context, SDL_Color color) : mContext(context) {
+        mStatus = 0;
+        if (int status = SDL_GetRenderDrawColor( mContext.get(), &mOldColor.r, &mOldColor.g,
+                                                 &mOldColor.b, &mOldColor.a); status == 0 ) {
+            mStatus = SDL_SetRenderDrawColor( mContext.get(), color.r, color.g, color.b, color.a);
+        } else {
+            mStatus = status;
+        }
+    }
+
+    DrawColorGuard::DrawColorGuard(Context &context, color::RGBA color) : DrawColorGuard(context,
+                                                                                           color.toSdlColor()) {}
+
+    int DrawColorGuard::setDrawColor(SDL_Color color) {
+        return SDL_SetRenderDrawColor(mContext.get(), color.r, color.g, color.b, color.a);
+    }
+
     void EventSemantics::onEvent(SDL_Event &e) {
         switch (e.type) {
             case SDL_WINDOWEVENT:

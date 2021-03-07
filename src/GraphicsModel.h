@@ -15,7 +15,9 @@
 #endif
 
 #include <memory>
+#include <src0/Utilities.h>
 #include "Visual.h"
+#include "Color.h"
 
 namespace rose::gm {
 #if GRAPHICS_MODEL_SDL2
@@ -194,7 +196,19 @@ namespace rose::gm {
          * @param what_arg An indication of what went wrong.
          */
         explicit RenderTargetGuardException(const std::string &what_arg) : std::runtime_error(what_arg) {}
-        explicit RenderTargetGuardException(const char* what_arg) : std::runtime_error(what_arg) {}
+
+        explicit RenderTargetGuardException(const char *what_arg) : std::runtime_error(what_arg) {}
+    };
+
+    /**
+     * @class DrawColorGuardException
+     * @brief Thrown by DrawColorGuard on errors.
+     */
+    class DrawColorGuardException : public std::runtime_error {
+    public:
+        explicit DrawColorGuardException(const std::string &what_arg) : std::runtime_error(what_arg) {}
+
+        explicit DrawColorGuardException(const char *what_arg) : std::runtime_error(what_arg) {}
     };
 
     /**
@@ -308,7 +322,6 @@ namespace rose::gm {
         }
     };
 
-#ifdef COLOR
     /**
      * @class DrawColorGuard
      * @brief Store the current draw color replacing it with a new draw color. When the object is
@@ -373,7 +386,6 @@ namespace rose::gm {
             return setDrawColor(color.toSdlColor());
         }
     };
-#endif
 
     /**
      * @class ClipRectangleGuard
