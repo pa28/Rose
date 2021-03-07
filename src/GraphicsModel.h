@@ -600,7 +600,7 @@ namespace rose::gm {
 
         void windowPositionChange(EventSemantics::WindowEventType type, Position position);
 
-        EventSemantics::WindowEventType mAppState;
+        EventSemantics::WindowEventType mAppState{EventSemantics::Restored};
 
     public:
         GraphicsModel();
