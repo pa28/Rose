@@ -253,6 +253,10 @@ namespace rose::gm {
         std::cout << __PRETTY_FUNCTION__ << ' ';
         Settings &settings{Settings::getSettings()};
         switch (type) {
+            case EventSemantics::Shown:
+            case EventSemantics::Hidden:
+            case EventSemantics::Exposed:
+                break;
             case EventSemantics::Maximized:
                 std::cout << "Maximized";
                 settings.setValue(set::SetAppState, static_cast<int>(type));
@@ -268,6 +272,13 @@ namespace rose::gm {
                 settings.setValue(set::SetAppState, static_cast<int>(type));
                 mAppState = type;
                 break;
+            case EventSemantics::Enter:
+            case EventSemantics::Leave:
+            case EventSemantics::Focus:
+            case EventSemantics::UnFocus:
+            case EventSemantics::Close:
+            case EventSemantics::Moved:
+            case EventSemantics::Resized:
             default:
                 break;
         }
