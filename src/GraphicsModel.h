@@ -178,11 +178,26 @@ namespace rose::gm {
          * @param angle Rotation Angle.
          * @param renderFlip Flip
          * @param point Rotation Position if specified.
-         * @return Stastus code returned by SDL_RenderCopyEx()
+         * @return Status code returned by SDL_RenderCopyEx()
          */
         int renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
                          std::optional<Position> point = std::nullopt) const;
 
+        /**
+         * @brief Set the drawing color used for drawing Rectangles, lines and clearing.
+         * @param color The new drawing Color.
+         * @return Status code returned by the API.
+         */
+        int setDrawColor(color::RGBA color);
+
+        /**
+         * @brief Set the drawing color used for drawing Rectangles, lines and clearing.
+         * @param color The new drawing Color.
+         * @return Status code returned by the API.
+         */
+        int setDrawColor(color::HSVA color) {
+            return setDrawColor(color.toRGBA());
+        }
     };
 
     /**

@@ -3,10 +3,12 @@
 //
 
 #include "StructuredTypes.h"
-#include "Visual.h"
+#include "Font.h"
 #include "GraphicsModel.h"
+#include "Visual.h"
 
 int main(int argc, char **argv) {
+    rose::Environment& environment{rose::Environment::getEnvironment()};
     rose::gm::GraphicsModel graphicsModel{};
     std::string title{"Test0"};
     graphicsModel.initialize(title, rose::Size{800,480});

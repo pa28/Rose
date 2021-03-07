@@ -6,7 +6,34 @@
  */
 
 #include "Utilities.h"
+#include <filesystem>
+#include <iostream>
 
 namespace rose {
 
+    std::filesystem::path Environment::getenv_path(XDGFilePaths::XDG_Name name, const std::string &appName, bool create) {
+        auto [found,path] = mFilePaths.findFilePath(name, appName);
+        if (!found && create) {
+            std::filesystem::create_directories(path);
+        }
+        return path;
+    }
+
+    Environment::Environment() {
+        mHomeDirectory = std::string{getenv("HOME")};
+        std::filesystem::path procExec{"/proc"};
+        procExec.append("self").append("exe");
+
+        if (std::filesystem::is_symlink(procExec)) {
+            auto appName = std::filesystem::read_symlink(procExec).filename().string();
+
+            mDataHome = getenv_path(XDGFilePaths::XDG_DATA_HOME, appName, true);
+            mConfigHome = getenv_path(XDGFilePaths::XDG_CONFIG_HOME, appName, true);
+            mCacheHome = getenv_path(XDGFilePaths::XDG_CACHE_HOME, appName, true);
+            mSharedImages = getenv_path( XDGFilePaths::XDG_DATA_DIRS, appName + "/images", false);
+        } else {
+            std::cerr << StringCompositor('"', procExec, '"', " is not a symbolic link to application.\n");
+            return;
+        }
+    }
 }

@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include "Font.h"
 #include "GraphicsModel.h"
 #include "Utilities.h"
 
@@ -98,6 +99,11 @@ namespace rose::gm {
         } else {
             return SDL_RenderCopyEx(get(), texture.get(), &srcRect, &dstRect, angle, nullptr, renderFlip.mFlip);
         }
+    }
+
+    int Context::setDrawColor(color::RGBA color) {
+        auto c = color.toSdlColor();
+        return SDL_SetRenderDrawColor(get(), c.r, c.g, c.b, c.a);
     }
 
 
@@ -214,10 +220,7 @@ namespace rose::gm {
     }
 
     void GraphicsModel::drawAll() {
-#if GRAPHICS_MODEL_SDL2
-        // ToDo: Change once colour model is implemented.
-        SDL_SetRenderDrawColor(mContext.get(), 0x0, 0x0, 0x0, 0xff);
-#endif
+        mContext.setDrawColor(color::RGBA::TransparentBlack);
         mContext.renderClear();
         mContext.renderPresent();
     }

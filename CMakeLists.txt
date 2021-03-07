@@ -100,8 +100,11 @@ list(APPEND EXTRA_LIBS GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 sqlite3 pthread
 list(APPEND ROSE_SRC
         src/Color.cpp
         src/GraphicsModel.cpp
+        src/Settings.cpp
         src/StructuredTypes.cpp
+        src/Utilities.cpp
         src/Visual.cpp
+        src/XDGFilePaths.cpp
         )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
