@@ -25,12 +25,12 @@ namespace rose {
         procExec.append("self").append("exe");
 
         if (std::filesystem::is_symlink(procExec)) {
-            auto appName = std::filesystem::read_symlink(procExec).filename().string();
+            mAppName = std::filesystem::read_symlink(procExec).filename().string();
 
-            mDataHome = getenv_path(XDGFilePaths::XDG_DATA_HOME, appName, true);
-            mConfigHome = getenv_path(XDGFilePaths::XDG_CONFIG_HOME, appName, true);
-            mCacheHome = getenv_path(XDGFilePaths::XDG_CACHE_HOME, appName, true);
-            mSharedImages = getenv_path( XDGFilePaths::XDG_DATA_DIRS, appName + "/images", false);
+            mDataHome = getenv_path(XDGFilePaths::XDG_DATA_HOME, mAppName, true);
+            mConfigHome = getenv_path(XDGFilePaths::XDG_CONFIG_HOME, mAppName, true);
+            mCacheHome = getenv_path(XDGFilePaths::XDG_CACHE_HOME, mAppName, true);
+            mSharedImages = getenv_path(XDGFilePaths::XDG_DATA_DIRS, mAppName + "/images", false);
         } else {
             std::cerr << StringCompositor('"', procExec, '"', " is not a symbolic link to application.\n");
             return;

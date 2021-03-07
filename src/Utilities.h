@@ -81,6 +81,7 @@ namespace rose {
         std::filesystem::path mSharedImages;        ///< Image resources installed with the application.
         XDGFilePaths mFilePaths{};                  ///< XDG Spec file paths.
 
+        std::string mAppName;                       ///< Application name as provided by the system.
 
     public:
         ~Environment() = default;
@@ -97,6 +98,10 @@ namespace rose {
             static Environment instance{};
             return instance;
         }
+
+        [[nodiscard]] const std::string& appName() const { return mAppName; }
+
+        std::filesystem::path configHome() { return mConfigHome; }
 
         /**
          * @brief Find the XDG directory for a specified application name.

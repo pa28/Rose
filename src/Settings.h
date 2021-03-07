@@ -40,25 +40,14 @@ namespace rose {
          */
         void transmitDataUpdate(const std::string& dataName);
 
+        Settings();
+
     public:
-        Settings() = delete;
 
-        /**
-         * @brief Create or open a settings database.
-         * @details The database is created or opened from the directory specified in configPath with the name
-         * "settings".
-         * @param configPath The application configuration path.
-         */
-        explicit Settings(const std::filesystem::path& configPath);
-
-        /**
-         * @brief Create or open a settings database.
-         * @details The database is created or opened from the directory specified in configPath with the name
-         * contained in name.
-         * @param configPath The application configuration path.
-         * @param name The database file name.
-         */
-        Settings(const std::filesystem::path& configPath, const std::string &name);
+        static Settings& getSettings() {
+            static Settings instance{};
+            return instance;
+        }
 
         /**
          * @brief Initialize the database, creating the required tables if they have not been created.

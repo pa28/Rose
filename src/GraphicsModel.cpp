@@ -141,7 +141,7 @@ namespace rose::gm {
         status = SDL_SetRenderTarget(mContext.get(), mContext.mCurrentRenderTarget);
     }
 
-    bool GraphicsModel::initialize(std::string &title, Size initialSize) {
+    bool GraphicsModel::initialize(const std::string &title, Size initialSize) {
 #if GRAPHICS_MODEL_SDL2
         SDL_RendererInfo info;
 

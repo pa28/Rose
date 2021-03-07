@@ -2,21 +2,18 @@
 // Created by richard on 2020-12-05.
 //
 
-#include <iostream>
 #include "Settings.h"
+#include "Utilities.h"
+#include <iostream>
 
 namespace rose {
 
-    Settings::Settings(const std::filesystem::path &configPath) {
-        mDbPath = configPath;
-        mDbPath.append("settings");
-        std::filesystem::create_directories(configPath);
-    }
-
-    Settings::Settings(const std::filesystem::path &configPath, const std::string &name) {
-        mDbPath = configPath;
-        mDbPath.append(name);
-        std::filesystem::create_directories(configPath);
+    Settings::Settings() {
+        Environment& environment{Environment::getEnvironment()};
+        mDbPath = environment.configHome();
+        std::filesystem::create_directories(mDbPath);
+        mDbPath.append("settings.db");
+        initializeDatabase();
     }
 
     void Settings::initializeDatabase() {

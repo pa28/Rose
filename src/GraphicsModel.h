@@ -607,7 +607,7 @@ namespace rose::gm {
 
         RoseErrorCode ErrorCode{RoseErrorCode::OK};
 
-        bool initialize(std::string &title, Size initialSize);
+        bool initialize(const std::string &title, Size initialSize);
 
         void eventLoop();
 
