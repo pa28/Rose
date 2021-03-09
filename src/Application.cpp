@@ -12,7 +12,7 @@ using namespace rose::gm;
 
 namespace rose {
 
-    Application::Application() : mEventSemantics(*this) {
+    Application::Application(int argc, char **argv) : mEventSemantics(*this), mInputParser(argc, argv) {
     }
 
     void Application::windowStateChange(EventSemantics::WindowEventType type) {

@@ -10,7 +10,7 @@ using namespace rose;
 
 int main(int argc, char **argv) {
     Environment& environment{Environment::getEnvironment()};
-    Application application{};
+    Application application{argc, argv};
 
     application.initialize(environment.appName(), Size{800, 480});
     application.run();
