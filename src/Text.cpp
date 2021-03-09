@@ -49,4 +49,22 @@ namespace rose {
         mTextSize = Size::Zero;
         return mStatus;
     }
+
+    TextLabel::TextLabel(const std::string &text, const std::string& fontName, int pointSize) : Widget() {
+        mText = text;
+        mFontName = fontName;
+        mPointSize = pointSize;
+        mTextBgColor = color::DarkBaseColor;
+        mTextFgColor = color::DarkTextColour;
+    }
+
+    void TextLabel::draw(gm::Context &context, const Position &containerPosition) {
+        if (!mTexture)
+            createTextureBlended(context);
+        if (mTexture) {
+            Rectangle dst{containerPosition, mTextSize};
+            context.renderCopy(mTexture, dst);
+        }
+        Widget::draw(context, containerPosition);
+    }
 }

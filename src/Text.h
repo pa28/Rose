@@ -65,5 +65,29 @@ namespace rose {
          */
         Status createTextureBlended(gm::Context &context);
     };
+
+    class TextLabel : public Widget, protected Text {
+    protected:
+
+    public:
+        TextLabel() = default;
+        ~TextLabel() override = default;
+
+        TextLabel(const TextLabel&) = delete;
+        TextLabel(TextLabel &&) = delete;
+        TextLabel& operator=(const TextLabel&) = delete;
+        TextLabel& operator=(TextLabel &&) = delete;
+
+        TextLabel(const std::string& text, const std::string& fontName, int pointSize);
+
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
+            createTextureBlended(context);
+            mPos = mPreferredPos;
+            mSize = mPreferredSize;
+            return Rectangle{mPos, mSize};
+        }
+
+        void draw(gm::Context &context, const Position &containerPosition) override;
+    };
 }
 

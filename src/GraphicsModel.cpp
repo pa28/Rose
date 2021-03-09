@@ -142,7 +142,8 @@ namespace rose::gm {
         status = SDL_SetRenderTarget(mContext.get(), mContext.mCurrentRenderTarget);
     }
 
-    bool GraphicsModel::initialize(const std::string &title, Size initialSize, Position initialPosition) {
+    bool GraphicsModel::initialize(const std::string &title, Size initialSize, Position initialPosition,
+                                   uint32_t extraFlags) {
 #if GRAPHICS_MODEL_SDL2
         Settings &settings{Settings::getSettings()};
         SDL_RendererInfo info;
@@ -157,19 +158,6 @@ namespace rose::gm {
 
         SDL_Window *window;        // Declare a pointer to an SDL_Window
         uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-        mAppState = static_cast<EventSemantics::WindowEventType>(settings.getValue(set::SetAppState,
-                                                                                    static_cast<int>(EventSemantics::WindowEventType::Restored)));
-        switch (mAppState) {
-            case EventSemantics::Minimized:
-                flags |= SDL_WINDOW_MINIMIZED;
-                break;
-            case EventSemantics::Maximized:
-                flags |= SDL_WINDOW_MAXIMIZED;
-                break;
-            case EventSemantics::Restored:
-            default:
-                break;
-        }
 
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -186,7 +174,7 @@ namespace rose::gm {
                 initialPosition.y,        //    int y: initial y position
                 initialSize.w,            //    int w: width, in pixels
                 initialSize.h,            //    int h: height, in pixels
-                flags
+                flags | extraFlags
         ));
 
         if (mSdlWindow) {
@@ -225,7 +213,8 @@ namespace rose::gm {
                     mRunEventLoop = false;
                     continue;
                 }
-                mEventSemantics.onEvent(e);
+                if (eventCallback)
+                    eventCallback(e);
             }
 
             drawAll();
@@ -241,76 +230,19 @@ namespace rose::gm {
         mContext.renderPresent();
     }
 
-    GraphicsModel::GraphicsModel() : mEventSemantics(*this) {
-        mEventSemantics.setWindowPositionChangeCallback(&GraphicsModel::windowPositionChange);
-
-        mEventSemantics.setWindowSizeChangeCallback(&GraphicsModel::windowSizeChange);
-
-        mEventSemantics.setWindowStateChangeCallback(&GraphicsModel::windowStateChange);
-    }
-
-    void GraphicsModel::windowStateChange(EventSemantics::WindowEventType type) {
-        std::cout << __PRETTY_FUNCTION__ << ' ';
-        Settings &settings{Settings::getSettings()};
-        switch (type) {
-            case EventSemantics::Shown:
-            case EventSemantics::Hidden:
-            case EventSemantics::Exposed:
-                break;
-            case EventSemantics::Maximized:
-                std::cout << "Maximized";
-                settings.setValue(set::SetAppState, static_cast<int>(type));
-                mAppState = type;
-                break;
-            case EventSemantics::Minimized:
-                std::cout << "Minimized";
-                settings.setValue(set::SetAppState, static_cast<int>(type));
-                mAppState = type;
-                break;
-            case EventSemantics::Restored:
-                std::cout << "Restored";
-                settings.setValue(set::SetAppState, static_cast<int>(type));
-                mAppState = type;
-                break;
-            case EventSemantics::Enter:
-            case EventSemantics::Leave:
-            case EventSemantics::Focus:
-            case EventSemantics::UnFocus:
-            case EventSemantics::Close:
-            case EventSemantics::Moved:
-            case EventSemantics::Resized:
-            default:
-                break;
-        }
-        std::cout << '\n';
-    }
-
-    void GraphicsModel::windowSizeChange(EventSemantics::WindowEventType type, Size size) {
-        if (mAppState == EventSemantics::Restored) {
-            Settings &settings{Settings::getSettings()};
-            settings.setValue(set::SetAppSize, size);
-        }
-    }
-
-    void GraphicsModel::windowPositionChange(EventSemantics::WindowEventType type, Position position) {
-        if (mAppState == EventSemantics::Restored) {
-            Settings &settings{Settings::getSettings()};
-            settings.setValue(set::SetAppPosition, position);
-        }
-    }
-
-    std::optional<FocusTree> GraphicsModel::focusTree(Position mousePosition) {
-        for (auto &content : ReverseContainerView(mScreen)) {
-            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                auto windowRect = window->getScreenRectangle(Position::Zero);
-                if (windowRect.contains(mousePosition)) {
-                    return window->focusTree(mousePosition);
-                } else if (window->isModal())
-                    return std::nullopt;
-            }
-        }
-        return std::nullopt;
-    }
+//    std::optional<FocusTree> GraphicsModel::focusTree(Screen &screen, Position mousePosition) {
+//        auto it = screen.
+//        for (auto &content : ReverseContainerView(screen)) {
+//            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
+//                auto windowRect = window->getScreenRectangle(Position::Zero);
+//                if (windowRect.contains(mousePosition)) {
+//                    return window->focusTree(mousePosition);
+//                } else if (window->isModal())
+//                    return std::nullopt;
+//            }
+//        }
+//        return std::nullopt;
+//    }
 
 #if GRAPHICS_MODEL_SDL2
 
@@ -331,115 +263,6 @@ namespace rose::gm {
         return SDL_SetRenderDrawColor(mContext.get(), color.r, color.g, color.b, color.a);
     }
 
-    void EventSemantics::onEvent(SDL_Event &e) {
-        switch (e.type) {
-            case SDL_WINDOWEVENT:
-                windowEvent(e.window);
-                break;
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
-                keyboardEvent(e.key);
-                break;
-            case SDL_TEXTINPUT:
-                std::cout << "TextInputEvent\n";
-                break;
-            case SDL_TEXTEDITING:
-                std::cout << "TextEditingEvent\n";
-                break;
-            case SDL_MOUSEMOTION:
-                mouseMotionEvent(e.motion);
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-                mouseButtonEvent(e.button);
-                break;
-            case SDL_MOUSEWHEEL:
-                mouseWheelEvent(e.wheel);
-                break;
-            case SDL_FINGERMOTION:
-            case SDL_FINGERDOWN:
-            case SDL_FINGERUP:
-                break;
-            case SDL_MULTIGESTURE:
-                break;
-            case SDL_KEYMAPCHANGED:
-                break;
-            default:
-                std::cout << "Unhandled event: 0x" << std::hex << e.type << std::dec << '\n';
-        }
-    }
-
-    void EventSemantics::windowEvent(SDL_WindowEvent &e) {
-        switch (e.event) {
-            case SDL_WINDOWEVENT_SHOWN:
-                windowStateChange(Shown);
-                break;
-            case SDL_WINDOWEVENT_HIDDEN:
-                windowStateChange(Hidden);
-                break;
-            case SDL_WINDOWEVENT_EXPOSED:
-                windowStateChange(Exposed);
-                break;
-            case SDL_WINDOWEVENT_MOVED:
-                windowPositionChange(Moved,Position{e.data1,e.data2});
-                break;
-            case SDL_WINDOWEVENT_RESIZED:
-                windowSizeChange(Resized,Size{e.data1,e.data2});
-                break;
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                windowStateChange(SizeChanged);
-                break;
-            case SDL_WINDOWEVENT_MINIMIZED:
-                windowStateChange(Minimized);
-                break;
-            case SDL_WINDOWEVENT_MAXIMIZED:
-                windowStateChange(Maximized);
-                break;
-            case SDL_WINDOWEVENT_RESTORED:
-                windowStateChange(Restored);
-                break;
-            case SDL_WINDOWEVENT_ENTER:
-                windowStateChange(Enter);
-                break;
-            case SDL_WINDOWEVENT_LEAVE:
-                windowStateChange(Leave);
-                break;
-            case SDL_WINDOWEVENT_FOCUS_GAINED:
-                windowStateChange(Focus);
-                break;
-            case SDL_WINDOWEVENT_FOCUS_LOST:
-                windowStateChange(UnFocus);
-                break;
-            case SDL_WINDOWEVENT_CLOSE:
-                windowStateChange(Close);
-                break;
-            case SDL_WINDOWEVENT_TAKE_FOCUS:
-            case SDL_WINDOWEVENT_HIT_TEST:
-                break;
-        }
-    }
-
-    void EventSemantics::keyboardEvent(SDL_KeyboardEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID
-                  << ", state: " << (uint32_t) e.state << ", repeat: " << (uint32_t) e.repeat << '\n';
-    }
-
-    void EventSemantics::mouseMotionEvent(SDL_MouseMotionEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID << ", which: " << e.which
-                  << ", state: " << (uint32_t) e.state
-                  << ", pos: " << Position{e.x, e.y} << " rel: " << Position{e.xrel, e.yrel} << '\n';
-    }
-
-    void EventSemantics::mouseButtonEvent(SDL_MouseButtonEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID << ", which: " << e.which
-                  << ", state: " << (uint32_t) e.state
-                  << ", pos: " << Position{e.x, e.y} << '\n';
-    }
-
-    void EventSemantics::mouseWheelEvent(SDL_MouseWheelEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID << ", which: " << e.which
-                  << ", direction: " << e.direction << ", pos: " << Position{e.x, e.y} << '\n';
-    }
 
 #endif
 }

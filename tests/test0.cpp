@@ -4,7 +4,7 @@
 
 #include "StructuredTypes.h"
 #include "Font.h"
-#include "GraphicsModel.h"
+#include "Application.h"
 #include "Settings.h"
 #include "Types.h"
 #include "Visual.h"
@@ -13,12 +13,8 @@ using namespace rose;
 
 int main(int argc, char **argv) {
     Environment& environment{Environment::getEnvironment()};
-    gm::GraphicsModel graphicsModel{};
-    Settings& settings{Settings::getSettings()};
+    Application application{};
 
-    auto appSize = settings.getValue(set::SetAppSize, Size{800,400});
-    auto appPos = settings.getValue(set::SetAppPosition, Position::Undefined);
-
-    graphicsModel.initialize(environment.appName(), appSize, appPos);
-    graphicsModel.eventLoop();
+    application.initialize(environment.appName(), Size{800, 480});
+    application.run();
 }

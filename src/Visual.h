@@ -15,6 +15,10 @@
 
 namespace rose {
 
+    namespace gm {
+        class Context;
+    }
+
     class Widget;
     class Window;
     class Manager;
@@ -66,10 +70,10 @@ namespace rose {
         }
 
         /// Draw the visual.
-        virtual void draw(const Position &containerPosition) = 0;
+        virtual void draw(gm::Context &context, const Position &containerPosition) = 0;
 
         /// Layout the visual.
-        virtual Rectangle layout(const Rectangle &screenRect) = 0;
+        virtual Rectangle layout(rose::gm::Context &context, const Rectangle &screenRect) = 0;
     };
 
     /**
@@ -93,10 +97,10 @@ namespace rose {
         }
 
         /// Draw the screen contents.
-        void draw(const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position &containerPosition) override;
 
         /// Layout the screen contents.
-        Rectangle layout(const Rectangle &screenRect) override;
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
     };
 
     /**
@@ -125,10 +129,10 @@ namespace rose {
         }
 
         /// Draw the contents of the Window
-        void draw(const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position &containerPosition) override;
 
         /// Layout the contents of teh Window
-        Rectangle layout(const Rectangle &screenRect) override;
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         std::optional<FocusTree> focusTree(Position mousePosition);
     };
@@ -146,7 +150,8 @@ namespace rose {
         using Itr = Container::iterator;
 
         /// Layout the contents of the associated manager.
-        virtual Rectangle layoutContent(const Rectangle &screenRect, Itr first, Itr last) = 0;
+        virtual Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                        LayoutManager::Itr last) = 0;
     };
 
     class SimpleLayout : public LayoutManager {
@@ -154,7 +159,8 @@ namespace rose {
         SimpleLayout() = default;
         ~SimpleLayout() override = default;
 
-        Rectangle layoutContent(const Rectangle &screenRect, Itr first, Itr last) override;
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                LayoutManager::Itr last) override;
     };
 
     class Manager : public Visual, Container {
@@ -172,9 +178,9 @@ namespace rose {
                 throw NodeTypeError("A Manager may only contain Manager or Widget objects.");
         }
 
-        void draw(const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position &containerPosition) override;
 
-        Rectangle layout(const Rectangle &screenRect) override;
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         void focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result);
     };
@@ -187,13 +193,18 @@ namespace rose {
         Widget() = default;
         ~Widget() override = default;
 
-        Rectangle layout(const Rectangle &screenRect) override {
+        Widget(const Widget&) = delete;
+        Widget(Widget &&) = delete;
+        Widget& operator=(const Widget&) = delete;
+        Widget& operator=(Widget &&) = delete;
+
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
             mPos = mPreferredPos;
             mSize = mPreferredSize;
             return Rectangle{mPos, mSize};
         }
 
-        void draw(const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position &containerPosition) override;
 
         SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
     };

@@ -436,4 +436,13 @@ namespace rose::color {
             return iterator;
         }
     };
+
+    static constexpr color::HSVA DarkBaseColorHSVA{{200.f, .00, .15, 1.0}};
+    static constexpr color::RGBA DarkBaseColor{DarkBaseColorHSVA};
+    static constexpr color::RGBA DarkTopColor{DarkBaseColorHSVA.modValue(0.2)};
+    static constexpr color::RGBA DarkBotColor{DarkBaseColorHSVA.modValue(-0.15)};
+    static constexpr color::RGBA DarkLeftColor{DarkBaseColorHSVA.modValue(0.1)};
+    static constexpr color::RGBA DarkRightColor{DarkBaseColorHSVA.modValue(-0.15)};
+    static constexpr color::RGBA DarkInvertColor{DarkBaseColorHSVA.modValue(-0.075)};
+    static constexpr color::RGBA DarkTextColour{DarkBaseColorHSVA.contrasting()};
 }
