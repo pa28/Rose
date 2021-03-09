@@ -13,9 +13,6 @@ using namespace rose::gm;
 namespace rose {
 
     Application::Application() : mEventSemantics(*this) {
-        mEventSemantics.setWindowStateChangeCallback(&Application::windowStateChange);
-        mEventSemantics.setWindowSizeChangeCallback(&Application::windowSizeChange);
-        mEventSemantics.setWindowPositionChangeCallback(&Application::windowPositionChange);
     }
 
     void Application::windowStateChange(EventSemantics::WindowEventType type) {
@@ -69,6 +66,10 @@ namespace rose {
     }
 
     void Application::initialize(const std::string &title, Size defaultSize) {
+        mEventSemantics.setWindowStateChangeCallback(&Application::windowStateChange);
+        mEventSemantics.setWindowSizeChangeCallback(&Application::windowSizeChange);
+        mEventSemantics.setWindowPositionChangeCallback(&Application::windowPositionChange);
+
         mGraphicsModel.eventCallback = [&](SDL_Event e) {
             mEventSemantics.onEvent(e);
         };
