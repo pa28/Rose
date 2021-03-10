@@ -13,6 +13,7 @@ using namespace rose::gm;
 namespace rose {
 
     Application::Application(int argc, char **argv) : mEventSemantics(*this), mInputParser(argc, argv) {
+        mScreen = std::make_shared<Screen>();
     }
 
     void Application::windowStateChange(EventSemantics::WindowEventType type) {
@@ -97,7 +98,12 @@ namespace rose {
     }
 
     void Application::run() {
+        layout();
         mGraphicsModel.eventLoop();
+    }
+
+    void Application::layout() {
+
     }
 
     void EventSemantics::onEvent(SDL_Event &e) {

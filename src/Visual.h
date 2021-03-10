@@ -54,7 +54,7 @@ namespace rose {
         Size mSize{};               ///< The size on screen, arrived at by layout.
         Position mPreferredPos{};   ///< The preferred position.
         Size mPreferredSize{};      ///< The preferred size.
-        Rectangle mScreenRect{};    ///< The screen Rectangle computed at drawomg time.
+        Rectangle mScreenRect{};    ///< The screen Rectangle computed at drawing time.
 
     public:
         /**
@@ -208,4 +208,14 @@ namespace rose {
 
         SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
     };
+}
+
+template<class ContainerClass, class WidgetClass>
+inline std::shared_ptr<ContainerClass> operator<<(std::shared_ptr<ContainerClass> container, std::shared_ptr<WidgetClass> widget) {
+    static_assert(std::is_base_of_v<rose::Visual, ContainerClass> && std::is_base_of_v<rose::Container, ContainerClass>,
+                  "ContainerClass must be derived from both rose::Visual and rose::Container.");
+    static_assert(std::is_base_of_v<rose::Visual, WidgetClass> && std::is_base_of_v<rose::Node, WidgetClass>,
+                  "WidgetClass must be derived from bot rose::visual and rose::Node.");
+    container->add(widget);
+    return widget;
 }

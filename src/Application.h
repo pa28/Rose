@@ -126,7 +126,7 @@ namespace rose {
     class Application {
     protected:
 
-        Screen mScreen;
+        std::shared_ptr<Screen> mScreen{};
         EventSemantics mEventSemantics;
         gm::Context mContext{};
         gm::GraphicsModel mGraphicsModel{};
@@ -146,6 +146,10 @@ namespace rose {
         virtual void windowSizeChange(EventSemantics::WindowEventType type, Size size);
 
         virtual void windowPositionChange(EventSemantics::WindowEventType type, Position position);
+
+        std::shared_ptr<Screen>& screen() { return mScreen; }
+
+        void layout();
 
         virtual void run();
     };
