@@ -160,12 +160,12 @@ namespace rose::gm {
 
         std::cout << "    Number of screens: " << SDL_GetNumVideoDisplays() << '\n';
         for (int i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
-            SDL_DisplayMode displayMode;
-            if (SDL_GetCurrentDisplayMode(i, &displayMode)) {
-                std::cout << "    Could not get mode of display " << i << '\n';
+            SDL_Rect displayBounds{0,0,0,0};
+
+            if (SDL_GetDisplayBounds(i, &displayBounds)) {
+                mDisplayBounds.emplace_back(Rectangle{});
             } else {
-                std::cout << "    Display: " << i << Size{displayMode.w, displayMode.h}
-                          << " Refresh rate: " << displayMode.refresh_rate << " Hz.\n";
+                mDisplayBounds.emplace_back(Rectangle{displayBounds.x, displayBounds.y, displayBounds.w, displayBounds.h});
             }
         }
 
@@ -189,8 +189,6 @@ namespace rose::gm {
                 initialSize.h,            //    int h: height, in pixels
                 flags | extraFlags
         ));
-
-        std::cout << "    Current display: " << SDL_GetWindowDisplayIndex(mSdlWindow.get()) << '\n';
 
         if (mSdlWindow) {
             mContext = Context{mSdlWindow, -1, SDL_RENDERER_ACCELERATED

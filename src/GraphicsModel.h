@@ -516,18 +516,20 @@ namespace rose::gm {
     class GraphicsModel {
     protected:
 #if GRAPHICS_MODEL_SDL2
-        SdlWindow mSdlWindow{};         /// The SDL_Window which provides the application "Screen"
+        SdlWindow mSdlWindow{};         ///< The SDL_Window which provides the application "Screen"
 #endif
 
-        Context mContext{};             /// The graphics context used by the application graphics model.
+        Context mContext{};             ///< The graphics context used by the application graphics model.
 
-        bool mRunEventLoop{true};       /// Event loop continues while this is true.
+        bool mRunEventLoop{true};       ///< Event loop continues while this is true.
 
-        bool mRedrawBackground{true};   /// When true the background Texture needs to be redrawn.
+        bool mRedrawBackground{true};   ///< When true the background Texture needs to be redrawn.
 
-        bool mAnimation{false};         /// When true there are animations to draw over the background.
+        bool mAnimation{false};         ///< When true there are animations to draw over the background.
 
-        Texture mBackground{};          /// The background Texture.
+        Texture mBackground{};          ///< The background Texture.
+
+        std::vector<Rectangle> mDisplayBounds{};
 
     public:
         GraphicsModel() = default;
@@ -557,11 +559,25 @@ namespace rose::gm {
 
         Context& context() { return mContext; }
 
+        [[nodiscard]] int currentDisplayIndex() const { return SDL_GetWindowDisplayIndex(mSdlWindow.get()); }
+
+        Rectangle displayBounds(int displayIndex = -1) {
+            if (displayIndex < 0)
+                displayIndex = currentDisplayIndex();
+
+            if (displayIndex < 0 || displayIndex >= mDisplayBounds.size())
+                displayIndex = 0;
+
+            return mDisplayBounds.at(displayIndex);
+        }
+
         Rectangle screenRectangle() {
             Rectangle screenRectangle{};
             SDL_GetWindowSize(mSdlWindow.get(), &screenRectangle.w, &screenRectangle.h);
             return screenRectangle;
         }
+
+        void redrawBackground() { mRedrawBackground = true; }
     };
 }
 

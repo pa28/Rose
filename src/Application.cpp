@@ -22,8 +22,13 @@ namespace rose {
         Settings &settings{Settings::getSettings()};
         switch (type) {
             case EventSemantics::Shown:
+                std::cout << "Shown";
+                break;
             case EventSemantics::Hidden:
+                std::cout << "Hidden";
+                break;
             case EventSemantics::Exposed:
+                std::cout << "Exposed";
                 break;
             case EventSemantics::Maximized:
                 std::cout << "Maximized";
@@ -45,9 +50,19 @@ namespace rose {
             case EventSemantics::Focus:
             case EventSemantics::UnFocus:
             case EventSemantics::Close:
+                break;
             case EventSemantics::Moved:
+                std::cout << "Moved";
+                break;
             case EventSemantics::Resized:
+                std::cout << "Resized";
+                break;
+            case EventSemantics::SizeChanged:
+                std::cout << "SizeChanged";
+                layout();
+                break;
             default:
+                std::cout << "Unknown";
                 break;
         }
         std::cout << '\n';
@@ -106,9 +121,11 @@ namespace rose {
     void Application::layout() {
         for (auto &content : ReverseContainerView(*mScreen)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                window->layout(mGraphicsModel.context(), mGraphicsModel.screenRectangle());
+                window->layout(mGraphicsModel.context(),
+                               mGraphicsModel.displayBounds(mGraphicsModel.currentDisplayIndex()));
             }
         }
+        mGraphicsModel.redrawBackground();
     }
 
     void EventSemantics::onEvent(SDL_Event &e) {
