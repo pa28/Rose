@@ -15,8 +15,12 @@ int main(int argc, char **argv) {
 
     application.initialize(environment.appName(), Size{800, 480});
 
-    application.screen() << std::make_shared<Window>()
-                         << std::make_shared<TextLabel>("Hello World", "FreeSans", 20);
+    std::shared_ptr<Manager> manager{};
+    std::shared_ptr<Widget> widget{};
+    application.screen() << wdg<Window>()
+                         << wdg<Manager>() >> manager
+                         << wdg<TextLabel>("Hello World", "FreeSansBold", 30) >> widget
+                         << Parent{};
 
     application.run();
 }

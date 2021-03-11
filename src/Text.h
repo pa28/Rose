@@ -78,15 +78,35 @@ namespace rose {
         TextLabel& operator=(const TextLabel&) = delete;
         TextLabel& operator=(TextLabel &&) = delete;
 
+        /**
+         * @brief Constructor
+         * @param text The text label.
+         * @param fontName The name of the Font to use.
+         * @param pointSize The point size (in pixels) of the font.
+         */
         TextLabel(const std::string& text, const std::string& fontName, int pointSize);
 
+        /**
+         * @brief Layout the label.
+         * @param context The graphics Context to use.
+         * @param screenRect The available screen Rectangle.
+         * @return The requested screen Rectangle.
+         */
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
             createTextureBlended(context);
             mPos = mPreferredPos;
-            mSize = mPreferredSize;
+            mSize = mTextSize;
+            if (mPreferredSize)
+                mSize = mPreferredSize;
             return Rectangle{mPos, mSize};
         }
 
+        /**
+         * @brief Draw the label.
+         * @details The text is rendered relative the the parent Container.
+         * @param context The graphics context to use.
+         * @param containerPosition The position of the parent Container.
+         */
         void draw(gm::Context &context, const Position &containerPosition) override;
     };
 }

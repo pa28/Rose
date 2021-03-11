@@ -522,6 +522,10 @@ namespace rose::gm {
 
         bool mRunEventLoop{true};       /// Event loop continues while this is true.
 
+        bool mRedrawBackground{true};   /// When true the background Texture needs to be redrawn.
+
+        Texture mBackground{};          /// The background Texture.
+
     public:
         GraphicsModel() = default;
 
@@ -531,12 +535,19 @@ namespace rose::gm {
 
         bool initialize(const std::string &title, Size initialSize, Position initialPosition, uint32_t extraFlags);
 
-        void eventLoop();
+        void eventLoop(std::shared_ptr<Screen> &screen);
 
-        void drawAll();
+        void drawAll(std::shared_ptr<Screen> &screen);
 
         std::function<void(SDL_Event)> eventCallback{};
 
+        Context& context() { return mContext; }
+
+        Rectangle screenRectangle() {
+            Rectangle screenRectangle{};
+            SDL_GetWindowSize(mSdlWindow.get(), &screenRectangle.w, &screenRectangle.h);
+            return screenRectangle;
+        }
     };
 }
 

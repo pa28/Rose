@@ -122,7 +122,7 @@ namespace rose {
          * @param node The manager.
          */
         void add(const std::shared_ptr<Node> &node) override {
-            if (std::dynamic_pointer_cast<Widget>(node))
+            if (std::dynamic_pointer_cast<Manager>(node))
                 Container::add(node);
             else
                 throw NodeTypeError("A Window may only contain Manager objects.");
@@ -163,7 +163,7 @@ namespace rose {
                                 LayoutManager::Itr last) override;
     };
 
-    class Manager : public Visual, Container {
+    class Manager : public Visual, public Container {
     protected:
         std::unique_ptr<LayoutManager> mLayoutManager{};
 
@@ -172,7 +172,7 @@ namespace rose {
         ~Manager() override = default;
 
         void add(const std::shared_ptr<Node> &node) override {
-            if (std::dynamic_pointer_cast<Manager>(node) || std::dynamic_pointer_cast<Manager>(node))
+            if (std::dynamic_pointer_cast<Widget>(node) || std::dynamic_pointer_cast<Manager>(node))
                 Container::add(node);
             else
                 throw NodeTypeError("A Manager may only contain Manager or Widget objects.");
@@ -185,7 +185,7 @@ namespace rose {
         void focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result);
     };
 
-    class Widget : public Visual, Node {
+    class Widget : public Visual, public Node {
     protected:
         SemanticGesture mSemanticGesture{};
 
@@ -207,15 +207,47 @@ namespace rose {
         void draw(gm::Context &context, const Position &containerPosition) override;
 
         SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
+
+        auto container() { return mContainer.lock(); }
+
+        auto container() const { return mContainer.lock(); }
     };
+
+    struct Parent {};
+
+    template<class WidgetClass, typename ... Args>
+    inline std::shared_ptr<WidgetClass> wdg(Args ... args) {
+        return std::make_shared<WidgetClass>(args ...);
+    }
 }
 
 template<class ContainerClass, class WidgetClass>
-inline std::shared_ptr<ContainerClass> operator<<(std::shared_ptr<ContainerClass> container, std::shared_ptr<WidgetClass> widget) {
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<ContainerClass> container, std::shared_ptr<WidgetClass> widget) {
     static_assert(std::is_base_of_v<rose::Visual, ContainerClass> && std::is_base_of_v<rose::Container, ContainerClass>,
                   "ContainerClass must be derived from both rose::Visual and rose::Container.");
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass> && std::is_base_of_v<rose::Node, WidgetClass>,
-                  "WidgetClass must be derived from bot rose::visual and rose::Node.");
+                  "WidgetClass must be derived from both rose::visual and rose::Node.");
     container->add(widget);
     return widget;
+}
+
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator >>(std::shared_ptr<WidgetClass> widget, std::shared_ptr<rose::Widget> &store) {
+    static_assert(std::is_base_of_v<rose::Widget,WidgetClass>, "WidgetClass must be derived from rose::Widget." );
+    store = widget;
+    return widget;
+}
+
+template<class ManagerClass>
+inline std::shared_ptr<ManagerClass> operator >>(std::shared_ptr<ManagerClass> manager, std::shared_ptr<rose::Manager> &store) {
+    static_assert(std::is_base_of_v<rose::Manager,ManagerClass>, "ManagerClass must be derived from rose::Manager." );
+    store = manager;
+    return manager;
+}
+
+template<class WidgetClass>
+inline std::shared_ptr<rose::Container> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Parent &) {
+    static_assert(std::is_base_of_v<rose::Widget, WidgetClass>,
+                  "WidgetClass must be derived from both rose::Widget");
+    return widget->container();
 }

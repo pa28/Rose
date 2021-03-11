@@ -62,7 +62,7 @@ namespace rose {
 
     Rectangle Window::layout(gm::Context &context, const Rectangle &screenRect) {
         for (auto &content : (*this)) {
-            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
+            if (auto window = std::dynamic_pointer_cast<Widget>(content); window) {
                 window->layout(context, screenRect);
             }
         }

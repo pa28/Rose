@@ -200,7 +200,7 @@ namespace rose::gm {
     /**
  * @brief The Rose version of the SDL event loop.
  */
-    void GraphicsModel::eventLoop() {
+    void GraphicsModel::eventLoop(std::shared_ptr<Screen> &screen) {
 #if GRAPHICS_MODEL_SDL2
         SDL_Event e;
         Fps fps;
@@ -217,16 +217,39 @@ namespace rose::gm {
                     eventCallback(e);
             }
 
-            drawAll();
+            drawAll(screen);
 
             fps.next();
         }
 #endif
     }
 
-    void GraphicsModel::drawAll() {
+    void GraphicsModel::drawAll(std::shared_ptr<Screen> &screen) {
+        if (!mBackground || (Size{mBackground.getSize()} != screenRectangle().size())) {
+            mBackground = Texture(mContext, screenRectangle().size());
+            mRedrawBackground = true;
+        }
+
+        if (mRedrawBackground) {
+            std::cout << __PRETTY_FUNCTION__ << " Redraw\n";
+            RenderTargetGuard renderTargetGuard{mContext, mBackground};
+
+            mContext.setDrawColor(color::RGBA::TransparentBlack);
+            mContext.renderClear();
+
+            for (auto &content : *screen) {
+                if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
+                    window->draw(mContext, Position::Zero);
+                }
+            }
+
+            mContext.renderPresent();
+            mRedrawBackground = false;
+        }
+
         mContext.setDrawColor(color::RGBA::TransparentBlack);
         mContext.renderClear();
+        mContext.renderCopy(mBackground);
         mContext.renderPresent();
     }
 

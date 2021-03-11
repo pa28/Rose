@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
     app->initialLayout(app->getRenderer());
 
     if (app) {
-        app->eventLoop();
+        app->eventLoop(<#initializer#>);
     }
 
     return static_cast<int>(app->getErrorCode());

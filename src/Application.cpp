@@ -7,6 +7,7 @@
 
 #include "Application.h"
 #include "Settings.h"
+#include "Utilities.h"
 
 using namespace rose::gm;
 
@@ -99,11 +100,15 @@ namespace rose {
 
     void Application::run() {
         layout();
-        mGraphicsModel.eventLoop();
+        mGraphicsModel.eventLoop(mScreen);
     }
 
     void Application::layout() {
-
+        for (auto &content : ReverseContainerView(*mScreen)) {
+            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
+                window->layout(mGraphicsModel.context(), mGraphicsModel.screenRectangle());
+            }
+        }
     }
 
     void EventSemantics::onEvent(SDL_Event &e) {

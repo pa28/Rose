@@ -67,13 +67,15 @@ namespace rose {
         constexpr Size& operator=(const Size &p) = default;
         constexpr Size& operator=(Size &&p) = default;
 
-        constexpr Size(const std::tuple<int,int> &size) noexcept : Size(std::get<0>(size), std::get<1>(size)) {}
+        constexpr explicit Size(const std::tuple<int,int> &size) noexcept : Size(std::get<0>(size), std::get<1>(size)) {}
 
         constexpr Size& operator=(std::tuple<int,int> &size) noexcept {
             w = std::get<0>(size);
             h = std::get<0>(size);
             return *this;
         }
+
+        explicit operator bool() { return w > 0 && h > 0; }
 
         bool operator!=(const Size &other) const noexcept {
             return w != other.w || h != other.h;

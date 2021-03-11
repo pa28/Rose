@@ -139,10 +139,10 @@ namespace rose {
         ~Container() override = default;
 
         virtual void add(const std::shared_ptr<Node> &node) {
-            if (auto container = mContainer.lock(); container)
-                container->remove(node);
-            emplace_back(node);
-            node->mContainer = getNode<Container>();
+            if (auto container = getNode<Container>(); container) {
+                container->push_back(node);
+                node->mContainer = container;
+            }
         }
 
         void remove(const std::shared_ptr<Node>& node) {
@@ -159,4 +159,3 @@ namespace rose {
     }
 
 }
-
