@@ -525,6 +525,8 @@ namespace rose::gm {
 
         bool mRedrawBackground{true};   /// When true the background Texture needs to be redrawn.
 
+        bool mAnimation{false};         /// When true there are animations to draw over the background.
+
         Texture mBackground{};          /// The background Texture.
 
     public:
@@ -538,6 +540,17 @@ namespace rose::gm {
 
         void eventLoop(std::shared_ptr<Screen> &screen);
 
+        /**
+         * @brief Draw the screen.
+         * @details Screen drawing is accomplished in two steps. If/when the background needs to be redrawn
+         * (mRedrawBackground is true) the background widgets (the majority of them) are rendered to the
+         * mBackground Texture which is then rendered to the frame buffer.<p/>
+         * If mRedrawBackground is false, but mAnimation is true mBackground is rendered to the screen, then
+         * animated Widgets, those that change at sub-second rates, are rendered to the screen on top of the
+         * background.<p/>
+         * If neither mRedrawBackground nor mAnimation are true no rendering of the screen is required.
+         * @param screen The Screen object to draw.
+         */
         void drawAll(std::shared_ptr<Screen> &screen);
 
         std::function<void(SDL_Event)> eventCallback{};

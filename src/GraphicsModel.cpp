@@ -145,6 +145,8 @@ namespace rose::gm {
     bool GraphicsModel::initialize(const std::string &title, Size initialSize, Position initialPosition,
                                    uint32_t extraFlags) {
 #if GRAPHICS_MODEL_SDL2
+        std::cout << __PRETTY_FUNCTION__ << '\n';
+
         Settings &settings{Settings::getSettings()};
         SDL_RendererInfo info;
 
@@ -155,6 +157,17 @@ namespace rose::gm {
         TTF_Init();
 
         atexit(SDL_Quit);
+
+        std::cout << "    Number of screens: " << SDL_GetNumVideoDisplays() << '\n';
+        for (int i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
+            SDL_DisplayMode displayMode;
+            if (SDL_GetCurrentDisplayMode(i, &displayMode)) {
+                std::cout << "    Could not get mode of display " << i << '\n';
+            } else {
+                std::cout << "    Display: " << i << Size{displayMode.w, displayMode.h}
+                          << " Refresh rate: " << displayMode.refresh_rate << " Hz.\n";
+            }
+        }
 
         SDL_Window *window;        // Declare a pointer to an SDL_Window
         uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
@@ -176,6 +189,8 @@ namespace rose::gm {
                 initialSize.h,            //    int h: height, in pixels
                 flags | extraFlags
         ));
+
+        std::cout << "    Current display: " << SDL_GetWindowDisplayIndex(mSdlWindow.get()) << '\n';
 
         if (mSdlWindow) {
             mContext = Context{mSdlWindow, -1, SDL_RENDERER_ACCELERATED
@@ -231,7 +246,6 @@ namespace rose::gm {
         }
 
         if (mRedrawBackground) {
-            std::cout << __PRETTY_FUNCTION__ << " Redraw\n";
             RenderTargetGuard renderTargetGuard{mContext, mBackground};
 
             mContext.setDrawColor(color::RGBA::TransparentBlack);
@@ -244,13 +258,19 @@ namespace rose::gm {
             }
 
             mContext.renderPresent();
-            mRedrawBackground = false;
         }
 
-        mContext.setDrawColor(color::RGBA::TransparentBlack);
-        mContext.renderClear();
-        mContext.renderCopy(mBackground);
-        mContext.renderPresent();
+        if (mAnimation || mRedrawBackground) {
+            mContext.setDrawColor(color::RGBA::TransparentBlack);
+            mContext.renderClear();
+            mContext.renderCopy(mBackground);
+            if (mAnimation) {
+                // Render animated widgets.
+            }
+            mContext.renderPresent();
+        }
+
+        mRedrawBackground = false;
     }
 
 //    std::optional<FocusTree> GraphicsModel::focusTree(Screen &screen, Position mousePosition) {
