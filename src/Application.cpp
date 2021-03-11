@@ -28,6 +28,7 @@ namespace rose {
                 std::cout << "Hidden";
                 break;
             case EventSemantics::Exposed:
+                layout();
                 std::cout << "Exposed";
                 break;
             case EventSemantics::Maximized:
