@@ -15,6 +15,7 @@
 #endif
 
 #include <memory>
+#include <functional>
 #include <src0/Utilities.h>
 #include "Visual.h"
 #include "Color.h"
