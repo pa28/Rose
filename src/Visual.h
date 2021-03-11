@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <utility>
+#include <optional>
 #include "StructuredTypes.h"
 #include "Types.h"
 
