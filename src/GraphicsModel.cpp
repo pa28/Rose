@@ -135,7 +135,7 @@ namespace rose::gm {
 
         atexit(SDL_Quit);
 
-        std::cout << "    Number of screens: " << SDL_GetNumVideoDisplays() << '\n';
+        std::cout << "    Number of displays: " << SDL_GetNumVideoDisplays() << '\n';
         for (int i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
             SDL_Rect displayBounds{0,0,0,0};
 
@@ -143,6 +143,7 @@ namespace rose::gm {
                 mDisplayBounds.emplace_back(Rectangle{});
             } else {
                 mDisplayBounds.emplace_back(Rectangle{displayBounds.x, displayBounds.y, displayBounds.w, displayBounds.h});
+                std::cout << "    Display " << i << ": " << mDisplayBounds.back() << '\n';
             }
         }
 

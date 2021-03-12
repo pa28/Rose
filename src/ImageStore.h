@@ -22,6 +22,7 @@ namespace rose {
         Compass,
         Heart,
         HeartEmpty,
+        // ImageIds for Frames
         // Following value must be last.
         DynamicIdStart,
     };
