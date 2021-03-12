@@ -128,7 +128,6 @@ namespace rose {
 
         std::shared_ptr<Screen> mScreen{};
         EventSemantics mEventSemantics;
-        gm::Context mContext{};
         gm::GraphicsModel mGraphicsModel{};
         EventSemantics::WindowEventType mAppState{EventSemantics::Restored};
         InputParser mInputParser;
@@ -146,6 +145,8 @@ namespace rose {
         virtual void windowSizeChange(EventSemantics::WindowEventType type, Size size);
 
         virtual void windowPositionChange(EventSemantics::WindowEventType type, Position position);
+
+        gm::Context& context() { return mGraphicsModel.context(); }
 
         std::shared_ptr<Screen>& screen() { return mScreen; }
 
