@@ -22,6 +22,8 @@ namespace rose {
         Compass,
         Heart,
         HeartEmpty,
+        // Following value must be last.
+        DynamicIdStart,
     };
 
     struct IconImage {
@@ -37,6 +39,8 @@ namespace rose {
     class ImageStore {
     protected:
         bool mInitialized{false};
+
+        int mNextImageId{static_cast<int>(ImageId::DynamicIdStart)};
 
         std::map<ImageId,gm::Texture> mImageMap{};
 
@@ -57,6 +61,12 @@ namespace rose {
             static ImageStore imageStore{};
             return imageStore;
         }
+
+        ImageId nextImageId() {
+            return static_cast<ImageId>(mNextImageId++);
+        }
+
+        void setImage(ImageId imageId, gm::Texture &&texture);
 
         static ImageStore& getStore(gm::Context &context) {
             ImageStore& store{getStore()};

@@ -69,21 +69,7 @@ namespace rose {
         mInitialized = true;
     }
 
-#if 0
-    Size ImageStore::size(ImageId imageId) {
-        Size size{};
-        if (auto image = mImageMap.find(imageId); image != mImageMap.end()) {
-            size = TextureGetSize(image->second);
-        }
-
-        return size;
+    void ImageStore::setImage(ImageId imageId, gm::Texture &&texture) {
+        mImageMap[imageId] = std::move(texture);
     }
-
-    int ImageStore::renderCopy(gm::Context &context, ImageId imageId, Rectangle dst) {
-        if (auto image = mImageMap.find(imageId); image != mImageMap.end()) {
-            return context.renderCopy(image->second, dst);
-        }
-        return 0;
-    }
-#endif
 }
