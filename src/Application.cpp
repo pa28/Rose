@@ -79,6 +79,9 @@ namespace rose {
     void Application::windowPositionChange(EventSemantics::WindowEventType type, Position position) {
         if (mAppState == EventSemantics::Restored) {
             Settings &settings{Settings::getSettings()};
+            auto borders = windowBorders();
+            position.x = std::max(position.x - borders.l, 0);
+            position.y = std::max(position.y - borders.t, 0);
             settings.setValue(set::SetAppPosition, position);
         }
     }
