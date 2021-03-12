@@ -521,5 +521,15 @@ namespace rose::gm {
             return p;
         }
     };
+
+    /**
+     * @brief Map a color::RGBA to a uint32_t.
+     * @param format A pointer to an SDL_PixelFormat (from a Surface object for example).
+     * @param color The color::RGBA to map.
+     * @return The color::RGBA mapped to a uint32_t
+     */
+    uint32_t mapRGBA(SDL_PixelFormat *format, const color::RGBA &color);
+
+    color::RGBA getRGBA(SDL_PixelFormat *format, uint32_t pixel);
 }
 
