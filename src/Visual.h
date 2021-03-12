@@ -187,7 +187,7 @@ namespace rose {
         std::unique_ptr<LayoutManager> mLayoutManager{};
 
     public:
-        Manager() = default;
+        Manager();
         ~Manager() override = default;
 
         void add(const std::shared_ptr<Node> &node) override {

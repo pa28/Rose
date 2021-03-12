@@ -62,8 +62,8 @@ namespace rose {
 
     Rectangle Window::layout(gm::Context &context, const Rectangle &screenRect) {
         for (auto &content : (*this)) {
-            if (auto window = std::dynamic_pointer_cast<Widget>(content); window) {
-                window->layout(context, screenRect);
+            if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
+                manager->layout(context, screenRect);
             }
         }
         return screenRect;
@@ -112,6 +112,10 @@ namespace rose {
         }
     }
 
+    Manager::Manager() {
+        mLayoutManager = std::make_unique<SimpleLayout>();
+    }
+
     Rectangle
     SimpleLayout::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                 LayoutManager::Itr last) {
@@ -121,6 +125,7 @@ namespace rose {
             } else if (auto widget = std::dynamic_pointer_cast<Widget>(*first); widget) {
                 widget->layout(context, screenRect);
             }
+            first++;
         }
         return screenRect;
     }
