@@ -22,14 +22,14 @@ namespace rose {
         Settings &settings{Settings::getSettings()};
         switch (type) {
             case EventSemantics::Shown:
-                std::cout << "Shown";
+                std::cout << "Shown" << mGraphicsModel.windowBorders();
                 break;
             case EventSemantics::Hidden:
                 std::cout << "Hidden";
                 break;
             case EventSemantics::Exposed:
                 layout();
-                std::cout << "Exposed " << mGraphicsModel.windowBorders() << '\n';
+                std::cout << "Exposed";
                 break;
             case EventSemantics::Maximized:
                 std::cout << "Maximized";
