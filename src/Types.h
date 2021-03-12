@@ -222,3 +222,8 @@ inline std::ostream& operator<<(std::ostream& strm, const rose::Rectangle &rec) 
     strm << '(' << rec.x << ',' << rec.y << ',' << rec.w << ',' << rec.h << ')';
     return strm;
 }
+
+inline std::ostream& operator<<(std::ostream& strm, const rose::Padding &pad) {
+    strm << '[' << pad.t << ',' << pad.l << ',' << pad.b << ',' << pad.r << ']';
+    return strm;
+}

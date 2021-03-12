@@ -29,7 +29,7 @@ namespace rose {
                 break;
             case EventSemantics::Exposed:
                 layout();
-                std::cout << "Exposed";
+                std::cout << "Exposed " << mGraphicsModel.windowBorders() << '\n';
                 break;
             case EventSemantics::Maximized:
                 std::cout << "Maximized";
