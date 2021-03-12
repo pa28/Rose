@@ -445,4 +445,5 @@ namespace rose::color {
     static constexpr color::RGBA DarkRightColor{DarkBaseColorHSVA.modValue(-0.15)};
     static constexpr color::RGBA DarkInvertColor{DarkBaseColorHSVA.modValue(-0.075)};
     static constexpr color::RGBA DarkTextColour{DarkBaseColorHSVA.contrasting()};
+    static constexpr color::RGBA DarKRed{ 1.f, 0.f, 0.f, 1.f};
 }
