@@ -193,6 +193,19 @@ namespace rose {
         static Rectangle Zero;
     };
 
+    /**
+     * @struct Padding
+     * @brief Abstraction of space consumed around an object for space, borders, etc.
+     */
+    struct Padding {
+        int t{0}, b{0}, l{0}, r{0};
+
+        constexpr Padding() noexcept = default;
+        constexpr Padding(int top, int bot, int left, int right) noexcept : t(top), b(bot), l(left), r(right) {}
+
+    };
+
+    std::array<char, 8> utf8(int c);
 }
 
 inline std::ostream& operator<<(std::ostream& strm, const rose::Size &size) {

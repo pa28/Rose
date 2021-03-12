@@ -151,6 +151,10 @@ namespace rose {
 
         void layout();
 
+        [[nodiscard]] Padding windowBorders() const noexcept {
+            return mGraphicsModel.windowBorders();
+        }
+
         virtual void run();
     };
 }

@@ -514,6 +514,12 @@ namespace rose::gm {
         }
 
         void redrawBackground() { mRedrawBackground = true; }
+
+        [[nodiscard]] Padding windowBorders() const noexcept {
+            Padding p{};
+            SDL_GetWindowBordersSize(mSdlWindow.get(), &p.t, &p.l, &p.b, &p.r);
+            return p;
+        }
     };
 }
 
