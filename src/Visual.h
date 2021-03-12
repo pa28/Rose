@@ -25,6 +25,14 @@ namespace rose {
     class Manager;
     class Widget;
 
+    struct Id {
+        std::string_view idString;
+    };
+
+    struct State {
+        std::string_view stateString;
+    };
+
     using FocusTree = std::pair<std::vector<std::shared_ptr<Manager>>,std::shared_ptr<Widget>>;
 
     /**
@@ -56,6 +64,8 @@ namespace rose {
         Position mPreferredPos{};   ///< The preferred position.
         Size mPreferredSize{};      ///< The preferred size.
         Rectangle mScreenRect{};    ///< The screen Rectangle computed at drawing time.
+        Id mId{};                   ///< The object Id string.
+        State mState{};             ///< The object state Id string.
 
     public:
         /**
@@ -75,6 +85,14 @@ namespace rose {
 
         /// Layout the visual.
         virtual Rectangle layout(rose::gm::Context &context, const Rectangle &screenRect) = 0;
+
+        /// Set preferred size.
+        void set(const Size& size) { mPreferredSize = size; }
+
+        /// Set preferred position.
+        void set(const Position& position) {
+            mPreferredPos = position;
+        }
     };
 
     /**
@@ -184,6 +202,8 @@ namespace rose {
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         void focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result);
+
+        auto container() const { return mContainer.lock(); }
     };
 
     class Widget : public Visual, public Node {
@@ -247,8 +267,24 @@ inline std::shared_ptr<ManagerClass> operator >>(std::shared_ptr<ManagerClass> m
 }
 
 template<class WidgetClass>
-inline std::shared_ptr<rose::Container> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Parent &) {
-    static_assert(std::is_base_of_v<rose::Widget, WidgetClass>,
-                  "WidgetClass must be derived from both rose::Widget");
-    return widget->container();
+inline std::shared_ptr<rose::Manager> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Parent &) {
+    static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
+                  "WidgetClass must be derived from rose::Widget or rose::Manager.");
+    return std::dynamic_pointer_cast<rose::Manager>(widget->container());
+}
+
+template<typename WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Size& size) {
+    static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
+            "WidgetClass must be derived from rose::Widget or rose::Manager.");
+    widget->set(size);
+    return widget;
+}
+
+template<typename WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Position& position) {
+    static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
+                  "WidgetClass must be derived from rose::Widget or rose::Manager.");
+    widget->set(position);
+    return widget;
 }
