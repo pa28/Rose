@@ -8,15 +8,12 @@
 #include <iostream>
 #include "Font.h"
 #include "GraphicsModel.h"
+#include "Texture.h"
 #include "Utilities.h"
 #include "Settings.h"
 
-#if GRAPHICS_MODEL_SDL2
-
 #include <SDL.h>
 #include <SDL_ttf.h>
-
-#endif
 
 namespace rose::gm {
 
@@ -61,8 +58,7 @@ namespace rose::gm {
 #endif //GRAPHICS_MODEL_SDL2
 
     Texture Context::createTexture(Size size) {
-        Texture texture{*this, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-                        size.w, size.h};
+        auto texture = CreateTexture(*this, size);
         return std::move(texture);
     }
 
@@ -85,7 +81,7 @@ namespace rose::gm {
     void Context::copyFullTexture(Texture &source, Texture &destination) {
         RenderTargetGuard renderTargetGuard(*this, destination);
         renderCopy(source);
-        destination.setBlendMOde(SDL_BLENDMODE_BLEND);
+        TextureSetBlendMode(destination, SDL_BLENDMODE_BLEND);
     }
 
     int Context::renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
@@ -105,25 +101,6 @@ namespace rose::gm {
     int Context::setDrawColor(color::RGBA color) {
         auto c = color.toSdlColor();
         return SDL_SetRenderDrawColor(get(), c.r, c.g, c.b, c.a);
-    }
-
-
-    Texture::Texture(Context &context, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height)
-            : Texture() {
-        reset(SDL_CreateTexture(context.get(), format, access, width, height));
-//        if (!operator bool()) {
-//            throw RoseRuntimeError(
-//                    util::StringCompositor("SDL_CreateTexture: (", width, 'x', height, ") -- ", SDL_GetError()));
-//        }
-    }
-
-    Texture::Texture(Context &context, Size size) : Texture() {
-        reset(SDL_CreateTexture(context.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.w,
-                                size.h));
-//        if (!operator bool())
-//            throw RoseRuntimeError(
-//                    util::StringCompositor("SDL_CreateTexture: ", size.w, 'x', size.h, ") -- ",
-//                                           SDL_GetError()));
     }
 
     RenderTargetGuard::RenderTargetGuard(Context &context, Texture &texture) : mContext(context) {
@@ -238,8 +215,8 @@ namespace rose::gm {
     }
 
     void GraphicsModel::drawAll(std::shared_ptr<Screen> &screen) {
-        if (!mBackground || (Size{mBackground.getSize()} != screenRectangle().size())) {
-            mBackground = Texture(mContext, screenRectangle().size());
+        if (!mBackground || (TextureGetSize(mBackground) != screenRectangle().size())) {
+            mBackground = CreateTexture(mContext, screenRectangle().size());
             mRedrawBackground = true;
         }
 
@@ -285,8 +262,6 @@ namespace rose::gm {
 //        return std::nullopt;
 //    }
 
-#if GRAPHICS_MODEL_SDL2
-
     DrawColorGuard::DrawColorGuard(Context &context, SDL_Color color) : mContext(context) {
         mStatus = 0;
         if (int status = SDL_GetRenderDrawColor( mContext.get(), &mOldColor.r, &mOldColor.g,
@@ -304,6 +279,14 @@ namespace rose::gm {
         return SDL_SetRenderDrawColor(mContext.get(), color.r, color.g, color.b, color.a);
     }
 
+    color::RGBA getRGBA(SDL_PixelFormat *format, uint32_t pixel) {
+        uint8_t r, g, b, a;
+        SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
+        return color::RGBA{(uint)r, (uint)g, (uint)b, (uint)a};
+    }
 
-#endif
+    uint32_t mapRGBA(SDL_PixelFormat *format, const color::RGBA &color) {
+        auto c = color.toSdlColor();
+        return SDL_MapRGBA(format, c.r, c.g, c.b, c.a);
+    }
 }

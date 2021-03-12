@@ -86,6 +86,8 @@ namespace rose {
          */
         TextLabel(const std::string& text, const std::string& fontName, int pointSize);
 
+        TextLabel(const Id &id, const std::string &fontName, int pointSize);
+
         /**
          * @brief Layout the label.
          * @param context The graphics Context to use.

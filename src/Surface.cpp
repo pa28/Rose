@@ -84,7 +84,11 @@ namespace rose::gm {
     }
 
     Texture Surface::toTexture(Context &context) {
-        return std::move(Texture{SDL_CreateTextureFromSurface(context.get(), get())});
+        Texture texture{SDL_CreateTextureFromSurface(context.get(), get())};
+        if (!texture) {
+            std::cerr << __PRETTY_FUNCTION__ << " Error: " << SDL_GetError() << '\n';
+        }
+        return std::move(texture);
     }
 
     int Surface::setBlendMode(SDL_BlendMode blendMode) noexcept {

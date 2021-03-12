@@ -105,6 +105,7 @@ list(APPEND ROSE_SRC
         src/StructuredTypes.cpp
         src/Surface.cpp
         src/Text.cpp
+        src/Texture.cpp
         src/Types.cpp
         src/Utilities.cpp
         src/Visual.cpp

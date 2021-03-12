@@ -5,6 +5,7 @@
  * @date 2021-03-09
  */
 
+#include "Settings.h"
 #include "Surface.h"
 #include "Text.h"
 #include <SDL.h>
@@ -58,11 +59,23 @@ namespace rose {
         mTextFgColor = color::DarkTextColour;
     }
 
+    TextLabel::TextLabel(const Id &id, const std::string &fontName, int pointSize) {
+        mId = id;
+        mFontName = fontName;
+        mPointSize = pointSize;
+        mTextBgColor = color::DarkBaseColor;
+        mTextFgColor = color::DarkTextColour;
+        Settings &settings{Settings::getSettings()};
+        mText = settings.getValue(id.idString, std::string{id.idString});
+    }
+
     void TextLabel::draw(gm::Context &context, const Position &containerPosition) {
-        if (!mTexture)
+        if (!mTexture) {
             createTextureBlended(context);
+        }
+
         if (mTexture) {
-            Rectangle dst{containerPosition, mTextSize};
+            Rectangle dst{containerPosition + mPos, mTextSize};
             context.renderCopy(mTexture, dst);
         }
         Widget::draw(context, containerPosition);

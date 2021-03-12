@@ -19,6 +19,8 @@
 #include <src0/Utilities.h>
 #include "Visual.h"
 #include "Color.h"
+#include "Texture.h"
+
 
 namespace rose {
     class Application;
@@ -70,8 +72,6 @@ namespace rose::gm {
         /// Constructor -- user specified flipping.
         constexpr explicit RenderFlip(SDL_RendererFlip flip) noexcept: mFlip(flip) {}
     };
-
-    class Texture;
 
     /**
      * @classs Context
@@ -276,70 +276,6 @@ namespace rose::gm {
          * @return
          */
         int setRenderTarget(Texture &texture);
-    };
-
-    /**
-     * @brief A functor to destroy an SDL_Texture in a std::unique_ptr (rose::sdl::Texture)
-     */
-    class TextureDestroy {
-    public:
-        /**
-         * @brief Call the SDL API to destroy an SDL_Texture.
-         * @param sdlTexture A pointer to the SDL_Texture to destroy.
-         */
-        void operator()(SDL_Texture *sdlTexture) {
-            SDL_DestroyTexture(sdlTexture);
-        }
-    };
-
-    /**
-     * @class Texture
-     * @brief An encapsulation of the SDL_Texture structure.
-     */
-    class Texture : public std::unique_ptr<SDL_Texture, TextureDestroy> {
-    public:
-        Texture() = default;
-
-        ~Texture() = default;
-
-        Texture(const Texture &) = delete;
-
-        Texture(Texture &&) = default;
-
-        Texture &operator=(const Texture &) = delete;
-
-        Texture &operator=(Texture &&texture) = default;
-
-        explicit Texture(SDL_Texture *texture) : Texture() { reset(texture); }
-
-        /**
-         * @breif Constructor
-         * @param context The Context to use.
-         * @param format The pixel format from SDL_PixelFormatEnum.
-         * @param access The Texture access from SDL_TextureAccess.
-         * @param width The width of the texture.
-         * @param height The height of the texture.
-         */
-        Texture(Context &context, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height);
-
-        /**
-         * @brief Constructor
-         * @details Builds a Texture compatible with building up textures within Rose . The pixel format is
-         * SDL_PIXELFORMAT_RGBA8888, the texture access is SDL_TEXTUREACCESS_TARGET.
-         * @param context The renderer to use.
-         * @param size The size of the texture.
-         */
-        Texture(Context &context, Size size);
-
-        int setBlendMOde(SDL_BlendMode blendMode) {
-            return SDL_SetTextureBlendMode(get(), blendMode);
-        }
-
-        [[nodiscard]] std::tuple<int, int> getSize() const noexcept {
-            int w, h;
-            SDL_QueryTexture(get(), nullptr, nullptr, &w, &h);
-            return std::make_tuple(w, h);
-        }
     };
 
     /**

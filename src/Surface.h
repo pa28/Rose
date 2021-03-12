@@ -12,13 +12,12 @@
 #include <memory>
 #include <SDL.h>
 #include "Color.h"
+#include "Texture.h"
 #include "Types.h"
 
 namespace rose::gm {
 
     class Context;
-
-    class Texture;
 
     class SurfaceRuntimeError : public std::runtime_error {
     public:
