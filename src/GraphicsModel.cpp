@@ -103,6 +103,12 @@ namespace rose::gm {
         return SDL_SetRenderDrawColor(get(), c.r, c.g, c.b, c.a);
     }
 
+    int Context::fillRect(Rectangle rect, color::RGBA color) {
+        DrawColorGuard drawColorGuard{*this, color};
+        SDL_Rect r{rect.x, rect.y, rect.w, rect.h};
+        return SDL_RenderFillRect(get(), &r);
+    }
+
     RenderTargetGuard::RenderTargetGuard(Context &context, Texture &texture) : mContext(context) {
         mLastTexture = context.mCurrentRenderTarget;
         context.mCurrentRenderTarget = texture.get();

@@ -194,6 +194,20 @@ namespace rose {
                 return context.renderCopy(image->second, dst);
             return 0;
         }
+
+        /**
+         * @brief Render the Texture associated with an Image Id.
+         * @param context The Context to use.
+         * @param imageId The ImageId.
+         * @param src The source Rectangel.
+         * @param dst The destination Rectangle.
+         * @return The return status code from the SDL API.
+         */
+        int renderCopy(gm::Context& context, ImageId imageId, Rectangle src, Rectangle dst) {
+            if (auto image = mImageMap.find(imageId); image != mImageMap.end())
+                return context.renderCopy(image->second, src, dst);
+            return 0;
+        }
     };
 }
 

@@ -1,0 +1,180 @@
+/**
+ * @file Frame.h
+ * @author Richard Buckley <richard.buckley@ieee.org>
+ * @version 1.0
+ * @date 2021-03-12
+ */
+
+#pragma once
+
+#include <cstdint>
+#include "Color.h"
+#include "ImageStore.h"
+
+namespace rose {
+
+    /**
+     * @enum BorderStyle
+     * @brief The types of border supported.
+     */
+    enum class BorderStyle {
+        Unset,      ///< Not set to a valid value.
+        None,       ///< No border
+        Bevel,      ///< A beveled out border
+        BevelIn,    ///< A beveled in border
+        Notch,      ///< A notch border
+        TabTop,     ///< TabButton border, tabs on top
+        TabLeft,    ///< TabButton border, tabs on left
+        TabPage,    ///< TabPage border.
+    };
+
+    /**
+     * @enum CornerStyle
+     * @brief Types of corners supported.
+     */
+    enum class CornerStyle {
+        Unset,      ///< Not set to a valid value.
+        Square,     ///< Square corners
+        Round,      ///< Round corners.
+    };
+
+    /**
+     * @class Frame
+     * @brief
+     */
+    class Frame {
+    protected:
+        color::RGBA mBaseColor{color::DarkBaseColor};
+        color::RGBA mInvertColor{color::DarkInvertColor};
+        color::RGBA mTopColor{color::DarkTopColor};
+        color::RGBA mBotColor{color::DarkBotColor};
+        color::RGBA mLeftColor{color::DarkLeftColor};
+        color::RGBA mRightColor{color::DarkRightColor};
+        int mFrameWidth{2};
+        BorderStyle mBorderStyle{};
+        CornerStyle mCornerStyle{};
+        bool mInvert{};
+        gm::Texture mTexture{};
+
+        /**
+         * @enum SelectedCorners
+         * @brief Specify corners selected for some process, usually drawing.
+         */
+        enum SelectedCorners : uint32_t {
+            NoCorners = 0,
+            TopLeftCorner = 0x8,
+            TopRightCorner = 0x4,
+            TopCorners = TopLeftCorner | TopRightCorner,
+            BottomLeftCorner = 0x2,
+            BottomRightCorner = 0x1,
+            BottomCorners = BottomLeftCorner | BottomRightCorner,
+            LeftCorners = TopLeftCorner | BottomLeftCorner,
+            RightCorners = TopRightCorner | BottomRightCorner,
+            AllCorners = 0xf,
+        };
+
+        /**
+         * @enum SelectedSides
+         * @brief Specify sides selected for some process, usually drawing.
+         */
+        enum SelectedSides : uint32_t {
+            NoSides = 0,
+            TopSide = 1,
+            BotSide = 2,
+            LeftSide = 4,
+            RightSide = 8,
+            AllSides = TopSide | BotSide | LeftSide | RightSide,
+            TabTopSides = TopSide | LeftSide | RightSide,
+        };
+
+        /**
+         * @brief Trim corners on a background surface to allow for rounded corners.
+         * @param surface The surface to trim
+         * @param color The background fill color.
+         * @param selectedCorners Which corners should be trimmed, others are left square.
+         * @param cornerSize The size of the corner in piexels
+         * @param frameSize The size of the frame.
+         */
+        static void
+        trimCorners(gm::Surface &surface, color::RGBA color, Frame::SelectedCorners selectedCorners, Size cornerSize,
+                    Size frameSize);
+
+        /**
+         * @brief Render corner images as part of a border around the frame.
+         * @param renderer The Renderer to use
+         * @param selectedCorners The corners to render, others are left undecorated.
+         * @param corner The RoseImageId of the corner Texture sheet
+         * @param size The destination rectangle for the complete frame.
+         */
+        static void
+        renderSelectedCorners(gm::Context &context, SelectedCorners selectedCorners, ImageId corner,
+                              const Size &size);
+
+        /**
+         * @brief Render sides as part of a border around the frame.
+         * @param renderer The Renderer to use
+         * @param selectedSides The sides to render, others are left undecorated.
+         * @param useBorder The border style used.
+         * @param corner The RoseImageId of the corner Texture sheet, to get the size of corner images.
+         * @param size The destination rectangle for the complete frame.
+         * @param extend If true, extend the side(s) in the direction of increasing Y or X (down or right).
+         */
+        void
+        renderSelectedSides(gm::Context &context, Frame::SelectedSides selectedSides, UseBorder useBorder,
+                            ImageId corner, const Size &size, int extend = 0);
+
+        /**
+         * @brief Draw the background for the Frame.
+         * @details The Frame background is the background color and the border.
+         * @param renderer The renderer to use.
+         * @param src The source rectangle.
+         * @param dst The destination rectangle.
+         */
+        void drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst);
+
+        /**
+         * @brief Draw the Frame and background.
+         * @param renderer The Renderer used to draw the Frame.
+         * @param widgetRect The Rectangle available to draw in.
+         */
+        void drawFrame(gm::Context &context, Rectangle widgetRect);
+
+    public:
+        Frame() = default;
+        virtual ~Frame() = default;
+
+        /// Set the BorderStyle
+        void set(const BorderStyle borderStyle) {
+            mBorderStyle = borderStyle;
+            mTexture.reset();
+        }
+
+        /// Set the CornerStyle
+        void set(const CornerStyle cornerStyle) {
+            mCornerStyle = cornerStyle;
+            mTexture.reset();
+        }
+
+        /// Set the state, true = inverted.
+        void setState(bool state) {
+            mInvert = state;
+            mTexture.reset();
+        }
+
+        [[nodiscard]] bool getState() const { return mInvert; }
+    };
+}
+
+template<typename ManagerClass>
+inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::BorderStyle borderStyle) {
+    static_assert(std::is_base_of_v<rose::Frame,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
+    manager->set(borderStyle);
+    return manager;
+}
+
+template<typename ManagerClass>
+inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::CornerStyle cornerStyle) {
+    static_assert(std::is_base_of_v<rose::Frame,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
+    manager->set(cornerStyle);
+    return manager;
+}

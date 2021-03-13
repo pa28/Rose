@@ -203,6 +203,14 @@ namespace rose::gm {
         int setDrawColor(color::HSVA color) {
             return setDrawColor(color.toRGBA());
         }
+
+        /**
+         * @brief Render a filled Rectangle.
+         * @param rect The Rectangle
+         * @param color The fill color.
+         * @return The status return from the SDL API.
+         */
+        int fillRect(Rectangle rect, color::RGBA color);
     };
 
     /**
