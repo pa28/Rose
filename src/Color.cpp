@@ -11,7 +11,7 @@ namespace rose::color {
 
     const RGBA RGBA::TransparentBlack{RGBA{0.f,0.f,0.f,0.f}};
 
-    constexpr HSVA RGBA::toHSVA() {
+    HSVA RGBA::toHSVA() const {
         auto cMax = std::max(r(), std::max(g(), b()));
         auto cMin = std::min(r(), std::min(g(), b()));
         auto delta = cMax - cMin;
@@ -36,5 +36,4 @@ namespace rose::color {
 
         return HSVA{hue, saturation, value, a()};
     }
-
 }

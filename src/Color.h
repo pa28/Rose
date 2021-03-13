@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <array>
 #include <SDL.h>
+#include "Configuration.h"
 
 /**
  * @namespace rose::color
@@ -131,7 +132,9 @@ namespace rose::color {
             return RGBA{r() + color.r(), g() + color.g(), b() + color.b(), a() + color.a()};
         }
 
-        constexpr HSVA toHSVA();
+        /// Set the Alpha channel
+
+        HSVA toHSVA() const;
     };
 
     template<typename T>
@@ -251,6 +254,15 @@ namespace rose::color {
 
     constexpr RGBA::RGBA(const HSVA &hsva) noexcept : RGBA(hsva.toRGBA()) {
     }
+
+    /**
+     * @brief Set the Alpha value in a pixel color.
+     * @param pixel The pixel color
+     * @param a The alpha value
+     * @return The modified pixel color.
+     */
+    static constexpr uint32_t set_a_value(uint32_t pixel, uint32_t a) { return (pixel & cmask) | a << ashift; }
+
 
     /**
      * @class Interpolator

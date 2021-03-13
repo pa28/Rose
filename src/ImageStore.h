@@ -17,12 +17,60 @@
 
 namespace rose {
 
-    enum class ImageId : int  {
+    enum class ImageId : int {
         NoImage,
         Compass,
         Heart,
         HeartEmpty,
+        Cancel,
+        Help,
+        Info,
+        Check,
+        Alert,
+        Lock,
+        UpBold,
+        UpOpenBig,
+        Left,
+        Right,
+        ToEnd,
+        Back,
+        LevelDown,
+        OneDot,
+        TwoDots,
+        ThreeDots,
+        UpDir,
+        DownDir,
+        LeftDir,
+        RightDir,
+        Keyboard,
+        Globe,
+        Network,
+        Rocket,
+        Location,
+        Camera,
+        ScaleNeedleUp,
+        ScaleNeedleDown,
+        ScaleNeedleLeft,
+        ScaleNeedleRight,
+        IconTarget,
         // ImageIds for Frames
+        BevelOutSquareCorners,
+        BevelInSquareCorners,
+        NotchOutSquareCorners,
+        NotchInSquareCorners,
+        BevelOutRoundCorners,
+        BevelInRoundCorners,
+        NotchOutRoundCorners,
+        NotchInRoundCorners,
+        // ImageIds for Centres
+        CenterRoundBaseColor,
+        CenterRoundInvertColor,
+        CenterRoundRedColor,
+        CenterRoundGreenColor,
+        CenterRoundBlueColor,
+        CenterRoundYellowColor,
+        CenterSquareBaseColor,
+        CenterSquareInvertColor,
         // Following value must be last.
         DynamicIdStart,
     };
@@ -67,13 +115,23 @@ namespace rose {
         /// Initialize the ImageStore
         void initialize(gm::Context &context);
 
+        void createSquareCorners(gm::Context &context, int radius, int borderWidth,
+                                 color::RGBA top, color::RGBA bot,
+                                 color::RGBA left, color::RGBA right);
+
+        void createRoundCorners(gm::Context &context, int scale, int radius, int borderWidth,
+                                color::RGBA top, color::RGBA bot,
+                                color::RGBA left, color::RGBA right);
+
+        void createCenters(gm::Context &context, int scale, int radius);
+
     public:
 
         /**
          * @brief Get access to the Singleton ImageStore.
          * @return A reference to the ImageStore.
          */
-        static ImageStore& getStore() {
+        static ImageStore &getStore() {
             static ImageStore imageStore{};
             return imageStore;
         }
