@@ -129,8 +129,4 @@ namespace rose {
         }
         return screenRect;
     }
-
-    void Widget::draw(gm::Context &context, const Position &containerPosition) {
-
-    }
 }

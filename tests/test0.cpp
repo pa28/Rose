@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     std::shared_ptr<Widget> widget{};
     application.screen() << wdg<Window>()
                          << wdg<Manager>() >> manager
-                         << wdg<ImageLabel>(ImageId::Heart) << Position{5,5} << Parent{}
+                         << wdg<ImageLabel>(ImageId::Heart) << Padding{5,5} << Parent{}
                          << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
                          << Position{30, 0}
                          << Parent{};

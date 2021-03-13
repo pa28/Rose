@@ -85,6 +85,10 @@ namespace rose {
             return w == other.w && h == other.h;
         }
 
+        Size operator+(const Size &other) const noexcept {
+            return Size{w + other.w, h + other.h};
+        }
+
         static Size Zero;
     };
 
@@ -201,8 +205,20 @@ namespace rose {
         int t{0}, b{0}, l{0}, r{0};
 
         constexpr Padding() noexcept = default;
+
+        constexpr explicit Padding(int p) noexcept : t(p), b(p), l(p), r(p) {}
+
+        constexpr Padding(int h, int v) noexcept : t(v), b(v), l(h), r(h) {}
+
         constexpr Padding(int top, int bot, int left, int right) noexcept : t(top), b(bot), l(left), r(right) {}
 
+        [[nodiscard]] constexpr int vertical() const noexcept { return t + b; }
+
+        [[nodiscard]] constexpr int horizontal() const noexcept { return l + r; }
+
+        [[nodiscard]] constexpr Position position() const noexcept { return Position{l, t}; }
+
+        [[nodiscard]] constexpr Size size() const noexcept { return Size{horizontal(), vertical()}; }
     };
 
     std::array<char, 8> utf8(int c);

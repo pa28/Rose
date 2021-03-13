@@ -12,7 +12,7 @@ namespace rose {
     void ImageLabel::draw(gm::Context &context, const Position &containerPosition) {
         ImageStore& imageStore{ImageStore::getStore()};
         if (imageStore.exists(mImageKey)) {
-            Rectangle dst{containerPosition + mPos, imageStore.size(mImageKey)};
+            Rectangle dst{drawPadding(containerPosition + mPos), imageStore.size(mImageKey)};
             imageStore.renderCopy(context, mImageKey, dst);
         }
     }

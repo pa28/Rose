@@ -54,7 +54,7 @@ namespace rose {
             if (mPreferredSize)
                 mSize = mPreferredSize;
             mPos = mPreferredPos;
-            return Rectangle{mPos, mSize};
+            return layoutPadding(Rectangle{mPos, mSize});
         }
 
         /**

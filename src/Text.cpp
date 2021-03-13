@@ -78,6 +78,5 @@ namespace rose {
             Rectangle dst{containerPosition + mPos, mTextSize};
             context.renderCopy(mTexture, dst);
         }
-        Widget::draw(context, containerPosition);
     }
 }

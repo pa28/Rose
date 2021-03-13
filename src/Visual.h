@@ -65,6 +65,7 @@ namespace rose {
         Position mPreferredPos{};   ///< The preferred position.
         Size mPreferredSize{};      ///< The preferred size.
         Rectangle mScreenRect{};    ///< The screen Rectangle computed at drawing time.
+        Padding mPadding{};         ///< Immediately around the Visual, used for separation and alignment.
         Id mId{};                   ///< The object Id string.
         State mState{};             ///< The object state Id string.
 
@@ -87,12 +88,29 @@ namespace rose {
         /// Layout the visual.
         virtual Rectangle layout(rose::gm::Context &context, const Rectangle &screenRect) = 0;
 
-        /// Set preferred size.
-        void set(const Size& size) { mPreferredSize = size; }
+        /// Pad the drawing location.
+        Position drawPadding(const Position &containerPosition) {
+            return containerPosition + mPadding.position();
+        }
 
-        /// Set preferred position.
+        /// Pad the layout.
+        Rectangle layoutPadding(const Rectangle &screenRect) {
+            return Rectangle{screenRect.position(), screenRect.size() + mPadding.size()};
+        }
+
+        /// Set preferred Size.
+        void set(const Size& size) {
+            mPreferredSize = size;
+        }
+
+        /// Set preferred Position.
         void set(const Position& position) {
             mPreferredPos = position;
+        }
+
+        /// Set Padding.
+        void set(const Padding &padding) {
+            mPadding = padding;
         }
     };
 
@@ -229,14 +247,6 @@ namespace rose {
         Widget& operator=(const Widget&) = delete;
         Widget& operator=(Widget &&) = delete;
 
-        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
-            mPos = mPreferredPos;
-            mSize = mPreferredSize;
-            return Rectangle{mPos, mSize};
-        }
-
-        void draw(gm::Context &context, const Position &containerPosition) override;
-
         SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
 
         auto container() { return mContainer.lock(); }
@@ -283,7 +293,7 @@ inline std::shared_ptr<rose::Manager> operator<<(std::shared_ptr<WidgetClass> wi
     return std::dynamic_pointer_cast<rose::Manager>(widget->container());
 }
 
-template<typename WidgetClass>
+template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Size& size) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
             "WidgetClass must be derived from rose::Widget or rose::Manager.");
@@ -291,10 +301,18 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     return widget;
 }
 
-template<typename WidgetClass>
+template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Position& position) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
                   "WidgetClass must be derived from rose::Widget or rose::Manager.");
     widget->set(position);
     return widget;
 }
+
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Padding& padding) {
+    static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
+    widget->set(padding);
+    return widget;
+}
+
