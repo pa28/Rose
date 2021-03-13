@@ -73,9 +73,9 @@ namespace rose {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {
             if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
-                manager->draw(context, mScreenRect.position());
+                manager->draw(context, drawPadding(mScreenRect.position()));
             } else if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                widget->draw(context, mScreenRect.position());
+                widget->draw(context, drawPadding(mScreenRect.position()));
             }
         }
     }
@@ -93,7 +93,7 @@ namespace rose {
         auto rect = mLayoutManager->layoutContent(context, managerRect, begin(), end());
         mPos = rect.position();
         mSize = rect.size();
-        return rect;
+        return layoutPadding(rect);
     }
 
     void Manager::focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result) {
@@ -121,9 +121,12 @@ namespace rose {
                                 LayoutManager::Itr last) {
         while (first != last) {
             if (auto manager = std::dynamic_pointer_cast<Manager>(*first); manager) {
-                manager->layout(context, screenRect);
+                auto contentRect = manager->layout(context, screenRect);
+                contentRect = manager->getPosition();
+                manager->setScreenRectangle(contentRect);
             } else if (auto widget = std::dynamic_pointer_cast<Widget>(*first); widget) {
-                widget->layout(context, screenRect);
+                auto contentRect = widget->layout(context, screenRect);
+                widget->setScreenRectangle(contentRect + widget->getPosition());
             }
             first++;
         }

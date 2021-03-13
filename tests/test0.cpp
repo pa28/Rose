@@ -3,8 +3,9 @@
 //
 
 #include "GraphicsModel.h"
-#include "Font.h"
 #include "Application.h"
+#include "Font.h"
+#include "Frame.h"
 #include "Image.h"
 #include "ImageStore.h"
 #include "Text.h"
@@ -23,11 +24,13 @@ int main(int argc, char **argv) {
     std::shared_ptr<Manager> manager{};
     std::shared_ptr<Widget> widget{};
     application.screen() << wdg<Window>()
-                         << wdg<Manager>() >> manager
-                         << wdg<ImageLabel>(ImageId::Heart) << Padding{5,5} << Parent{}
-                         << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
-                         << Position{30, 0}
-                         << Parent{};
+                            << wdg<Manager>()
+                                 << wdg<Frame>(7) << Position{10, 10}
+                                    << wdg<ImageLabel>(ImageId::Heart)
+                                    << Parent{} << Parent{}
+                                 << wdg<Frame>(5) << Position{53, 10}
+                                    << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
+                                    << Parent{} << Parent{};
 
     application.run();
 }

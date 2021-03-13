@@ -9,9 +9,9 @@
 #include "Utilities.h"
 
 namespace rose {
-    void Frame::trimCorners(gm::Surface &surface, color::RGBA color, Frame::SelectedCorners selectedCorners,
-                            Size cornerSize,
-                            Size frameSize) {
+    void FrameElements::trimCorners(gm::Surface &surface, color::RGBA color, FrameElements::SelectedCorners selectedCorners,
+                                    Size cornerSize,
+                                    Size frameSize) {
         auto trimColor = color;
         trimColor.a() = 0.f;
         auto trimCorner = [&surface, &trimColor](int x0, int y0, int xw, int yh, int R2) {
@@ -41,8 +41,8 @@ namespace rose {
                        R2);
     }
 
-    void Frame::renderSelectedCorners(gm::Context& context, SelectedCorners selectedCorners, ImageId corner,
-                                      const Size &size) {
+    void FrameElements::renderSelectedCorners(gm::Context& context, SelectedCorners selectedCorners, ImageId corner,
+                                              const Size &size) {
         auto cornerSize = ImageStore::getStore().size(corner);
 
         auto w = cornerSize.w / 2;
@@ -75,8 +75,8 @@ namespace rose {
     }
 
     void
-    Frame::renderSelectedSides(gm::Context& context, Frame::SelectedSides selectedSides, UseBorder useBorder,
-                               ImageId corner, const Size &size, int extend) {
+    FrameElements::renderSelectedSides(gm::Context& context, FrameElements::SelectedSides selectedSides, UseBorder useBorder,
+                                       ImageId corner, const Size &size, int extend) {
         auto cornerSize = ImageStore::getStore().size(corner);
         Rectangle fill0, fill1;
         color::RGBA color0, color1;
@@ -187,7 +187,7 @@ namespace rose {
         }
     }
 
-    void Frame::drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst) {
+    void FrameElements::drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst) {
         SelectedCorners selectedCorners = NoCorners;
         UseBorder useBorder;
         switch (mBorderStyle) {
@@ -224,7 +224,7 @@ namespace rose {
 
         gm::Surface surface{dst.w, dst.h, 32, SDL_PIXELFORMAT_RGBA8888};
         if (!surface)
-            throw gm::SurfaceRuntimeError(StringCompositor(__PRETTY_FUNCTION__ , ' ', dst.size(), ' ', SDL_GetError()));
+            throw gm::SurfaceRuntimeError(StringCompositor(__PRETTY_FUNCTION__ , " (", dst.w, ',', ") :", SDL_GetError()));
 
         color::RGBA color;
         if (mBorderStyle == BorderStyle::Notch)
@@ -303,7 +303,7 @@ namespace rose {
         }
     }
 
-    void Frame::drawFrame(gm::Context &context, Rectangle widgetRect) {
+    void FrameElements::drawFrame(gm::Context &context, Rectangle widgetRect) {
         Rectangle src{0, 0, widgetRect.w, widgetRect.h};
         Rectangle dst{widgetRect};
 
@@ -312,5 +312,28 @@ namespace rose {
 
         gm::TextureSetBlendMode(mTexture, SDL_BLENDMODE_BLEND);
         context.renderCopy(mTexture, dst);
+    }
+
+    Rectangle
+    FrameLayoutManager::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                      LayoutManager::Itr last) {
+        Rectangle layoutRect{};
+        if (auto manager = std::dynamic_pointer_cast<Manager>(*first); manager) {
+            layoutRect = manager->layout(context, screenRect);
+        } else if (auto widget = std::dynamic_pointer_cast<Widget>(*first); widget) {
+            layoutRect = widget->layout(context, screenRect);
+        }
+        return layoutRect;
+    }
+
+    void Frame::draw(gm::Context &context, const Position &containerPosition) {
+        drawFrame(context, Rectangle{containerPosition + mPos, mSize});
+        Manager::draw(context, containerPosition + mFramePadding.position() + Position{mFrameWidth});
+    }
+
+    Rectangle Frame::layout(gm::Context &context, const Rectangle &screenRect) {
+        auto contentRect = Manager::layout(context, screenRect - mFramePadding.size() - Size{mFrameWidth*2});
+        contentRect = contentRect + mFramePadding.size() + Size(mFrameWidth*2);
+        return contentRect;
     }
 }

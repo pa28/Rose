@@ -230,7 +230,12 @@ namespace rose::gm {
         if (mRedrawBackground) {
             RenderTargetGuard renderTargetGuard{mContext, mBackground};
 
-            mContext.setDrawColor(color::RGBA::TransparentBlack);
+            std::cout << color::DarkBaseColorHSVA << '\n'
+                      << color::DarkBaseColor << '\n'
+                      << color::DarkInvertColor << '\n';
+
+            mContext.setDrawColor(color::DarkBaseColor);
+//            mContext.setDrawColor(color::RGBA{0.f, 0.5f, 0.f, 1.0f});
             mContext.renderClear();
 
             for (auto &content : *screen) {

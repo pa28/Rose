@@ -243,7 +243,7 @@ void HamChrono::build() {
     callsignBlock(topRow, sideColumn);
 
     for (auto &solar : *solarImageCache) {
-        topRow << wdg<Frame>() << BorderStyle::BevelIn << wdg<ImageView>(solar.first);
+        topRow << wdg<FrameElements>() << BorderStyle::BevelIn << wdg<ImageView>(solar.first);
     }
 
     auto satelliteDataSet = sideColumn << wdg<SatelliteDataSet>();
@@ -279,21 +279,21 @@ void HamChrono::callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_pt
     std::shared_ptr<Column> column;
     column = topRow << wdg<Column>();
 
-    column << wdg<Frame>(6) << BorderStyle::Notch << CornerStyle::Round
+    column << wdg<FrameElements>(6) << BorderStyle::Notch << CornerStyle::Round
                 << wdg<Column>() << InternalSpace{4}
                     << wdg<CascadeButton>(Id{"CALLSIGN"}, CascadeButtonType::CascadeDown)
                         << ConfigMenu
-                        << mConfigButtonRx
-                        << CornerStyle::Square
-                        << HorizontalAlignment::Center
-                        << VerticalAlignment::Center
-                        << Elastic(Orientation::Horizontal)
-                        << Manip::Parent
+           << mConfigButtonRx
+           << CornerStyle::Square
+           << HorizontalAlignment::Center
+           << VerticalAlignment::Center
+           << Elastic(Orientation::Horizontal)
+           << Manip::Parent
 
-                    << wdg<TimeBox>(mSecondTick) << Manip::Parent
-                    << wdg<DateBox>(mSecondTick) << Manip::Parent
-                    << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> scale
-                        << Parent<Frame>();
+           << wdg<TimeBox>(mSecondTick) << Manip::Parent
+           << wdg<DateBox>(mSecondTick) << Manip::Parent
+           << wdg<LinearScale>(LinearScaleIndicator::DualChannel) >> scale
+           << Parent<FrameElements>();
 
     mSystemData.txTemperature.connect(scale->rxScaledValue0);
     mSystemData.txSystem.connect(scale->rxScaledValue1);
@@ -305,7 +305,7 @@ void HamChrono::callsignBlock(std::shared_ptr<rose::Row> &topRow, std::shared_pt
         framPadding = 3;
     }
 
-    qthBlockColumn << wdg<Frame>(framPadding) << BorderStyle::Notch << CornerStyle::Round
+    qthBlockColumn << wdg<FrameElements>(framPadding) << BorderStyle::Notch << CornerStyle::Round
                    << Elastic(Orientation::Horizontal)
                    << wdg<Column>() << InternalSpace{4}
                    << wdg<TimeBox>(mSecondTick, true, true) << Manip::Parent

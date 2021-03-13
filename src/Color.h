@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <array>
 #include <SDL.h>
+#include <iostream>
 #include "Configuration.h"
 
 /**
@@ -449,7 +450,7 @@ namespace rose::color {
         }
     };
 
-    static constexpr color::HSVA DarkBaseColorHSVA{{200.f, .00, .15, 1.0}};
+    static constexpr color::HSVA DarkBaseColorHSVA{{200.f, .00, .25, 1.0}};
     static constexpr color::RGBA DarkBaseColor{DarkBaseColorHSVA};
     static constexpr color::RGBA DarkTopColor{DarkBaseColorHSVA.modValue(0.2)};
     static constexpr color::RGBA DarkBotColor{DarkBaseColorHSVA.modValue(-0.15)};
@@ -458,4 +459,14 @@ namespace rose::color {
     static constexpr color::RGBA DarkInvertColor{DarkBaseColorHSVA.modValue(-0.075)};
     static constexpr color::RGBA DarkTextColour{DarkBaseColorHSVA.contrasting()};
     static constexpr color::RGBA DarKRed{ 1.f, 0.f, 0.f, 1.f};
+}
+
+inline std::ostream& operator<<(std::ostream& strm, const rose::color::RGBA& rgba) {
+    strm << "[RGBA " << rgba.r() << ',' << rgba.g() << ',' << rgba.b() << ',' << rgba.a() << "] ";
+    return strm;
+}
+
+inline std::ostream& operator<<(std::ostream& strm, const rose::color::HSVA& hsva) {
+    strm << "[HSVA " << hsva.hue() << ',' << hsva.saturation() << ',' << hsva.value() << ',' << hsva.alpha() << "] ";
+    return strm;
 }

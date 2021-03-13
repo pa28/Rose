@@ -99,18 +99,32 @@ namespace rose {
         }
 
         /// Set preferred Size.
-        void set(const Size& size) {
+        void setSize(const Size& size) {
             mPreferredSize = size;
         }
 
+        [[nodiscard]] Size getSize() const {
+            return mPreferredSize;
+        }
+
         /// Set preferred Position.
-        void set(const Position& position) {
+        void setPosition(const Position& position) {
             mPreferredPos = position;
         }
 
+        [[nodiscard]] Position getPosition() const {
+            return mPreferredPos;
+        }
+
         /// Set Padding.
-        void set(const Padding &padding) {
+        void setPadding(const Padding &padding) {
             mPadding = padding;
+        }
+
+        /// Set Screen Rectangle
+        void setScreenRectangle(const Rectangle &screenRect) {
+            mPos = screenRect.position();
+            mSize = screenRect.size();
         }
     };
 
@@ -185,6 +199,7 @@ namespace rose {
      */
     class LayoutManager {
     protected:
+        size_t mMaxContent{0};
 
     public:
         LayoutManager() = default;
@@ -194,6 +209,8 @@ namespace rose {
         /// Layout the contents of the associated manager.
         virtual Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                         LayoutManager::Itr last) = 0;
+
+        [[nodiscard]] size_t maximumContent() const { return mMaxContent; }
     };
 
     class SimpleLayout : public LayoutManager {
@@ -205,23 +222,36 @@ namespace rose {
                                 LayoutManager::Itr last) override;
     };
 
+    class LayoutManagerError : public std::runtime_error {
+    public:
+        LayoutManagerError() = delete;
+        explicit LayoutManagerError(const std::string &what) : std::runtime_error(what) {}
+        explicit LayoutManagerError(const char *what) : std::runtime_error(what) {}
+        LayoutManagerError(const LayoutManagerError& other) = default;
+    };
+
     class Manager : public Visual, public Container {
     protected:
         std::unique_ptr<LayoutManager> mLayoutManager{};
-        size_t mMaxContent{0};
 
     public:
         Manager();
+
         ~Manager() override = default;
 
         void add(const std::shared_ptr<Node> &node) override {
-            if (mMaxContent == 0 || size() < mMaxContent) {
-                if (std::dynamic_pointer_cast<Widget>(node) || std::dynamic_pointer_cast<Manager>(node))
-                    Container::add(node);
-                else
-                    throw NodeTypeError("A Manager may only contain Manager or Widget objects.");
+            if (mLayoutManager) {
+                if (mLayoutManager->maximumContent() == 0 || size() < mLayoutManager->maximumContent()) {
+                    if (std::dynamic_pointer_cast<Widget>(node) || std::dynamic_pointer_cast<Manager>(node))
+                        Container::add(node);
+                    else
+                        throw NodeTypeError("A Manager may only contain Manager or Widget objects.");
+                } else {
+                    throw NodeRangeError(StringCompositor("Contents exceed maximum limit: ",
+                                                          mLayoutManager->maximumContent()));
+                }
             } else {
-                throw NodeRangeError(StringCompositor("Contents exceed maximum limit: ", mMaxContent));
+                throw LayoutManagerError("Can not add content without a LayoutManager.");
             }
         }
 
@@ -297,7 +327,7 @@ template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Size& size) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
             "WidgetClass must be derived from rose::Widget or rose::Manager.");
-    widget->set(size);
+    widget->setSize(size);
     return widget;
 }
 
@@ -305,14 +335,14 @@ template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Position& position) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
                   "WidgetClass must be derived from rose::Widget or rose::Manager.");
-    widget->set(position);
+    widget->setPosition(position);
     return widget;
 }
 
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Padding& padding) {
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
-    widget->set(padding);
+    widget->setPadding(padding);
     return widget;
 }
 

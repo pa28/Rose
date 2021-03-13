@@ -16,7 +16,7 @@
 
 #include <memory>
 #include <functional>
-#include <src0/Utilities.h>
+#include <Utilities.h>
 #include "Visual.h"
 #include "Color.h"
 #include "Texture.h"
@@ -309,7 +309,7 @@ namespace rose::gm {
          */
         ~DrawColorGuard() noexcept(false) {
             if (SDL_SetRenderDrawColor(mContext.get(), mOldColor.r, mOldColor.g, mOldColor.b, mOldColor.a)) {
-                throw DrawColorGuardException(util::StringCompositor("Call to SDL_XxxRenderDrawColor failed:",
+                throw DrawColorGuardException(StringCompositor("Call to SDL_XxxRenderDrawColor failed:",
                                                                      SDL_GetError()));
             }
         }

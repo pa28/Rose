@@ -10,6 +10,7 @@
 #include <cstdint>
 #include "Color.h"
 #include "ImageStore.h"
+#include "Visual.h"
 
 namespace rose {
 
@@ -39,10 +40,22 @@ namespace rose {
     };
 
     /**
+     * @enum UseBorder
+     * @brief The type of border to draw
+     */
+    enum UseBorder {
+        None,       ///< No border
+        BevelOut,   ///< A beveled border that gives the illusion the frame stands up from the display.
+        BevelIn,    ///< A beveled border that gives the illusion the frame is sunk into the display.
+        NotchOut,   ///< A notched border that looks like a ridge surrounding the frame.
+        NotchIn,    ///< A notched border that looks like a trench surrounding the frame.
+    };
+
+    /**
      * @class Frame
      * @brief
      */
-    class Frame {
+    class FrameElements {
     protected:
         color::RGBA mBaseColor{color::DarkBaseColor};
         color::RGBA mInvertColor{color::DarkInvertColor};
@@ -51,8 +64,9 @@ namespace rose {
         color::RGBA mLeftColor{color::DarkLeftColor};
         color::RGBA mRightColor{color::DarkRightColor};
         int mFrameWidth{2};
-        BorderStyle mBorderStyle{};
-        CornerStyle mCornerStyle{};
+        Padding mFramePadding{};
+        BorderStyle mBorderStyle{BorderStyle::Notch};
+        CornerStyle mCornerStyle{CornerStyle::Round};
         bool mInvert{};
         gm::Texture mTexture{};
 
@@ -96,7 +110,7 @@ namespace rose {
          * @param frameSize The size of the frame.
          */
         static void
-        trimCorners(gm::Surface &surface, color::RGBA color, Frame::SelectedCorners selectedCorners, Size cornerSize,
+        trimCorners(gm::Surface &surface, color::RGBA color, FrameElements::SelectedCorners selectedCorners, Size cornerSize,
                     Size frameSize);
 
         /**
@@ -120,7 +134,7 @@ namespace rose {
          * @param extend If true, extend the side(s) in the direction of increasing Y or X (down or right).
          */
         void
-        renderSelectedSides(gm::Context &context, Frame::SelectedSides selectedSides, UseBorder useBorder,
+        renderSelectedSides(gm::Context &context, FrameElements::SelectedSides selectedSides, UseBorder useBorder,
                             ImageId corner, const Size &size, int extend = 0);
 
         /**
@@ -140,8 +154,10 @@ namespace rose {
         void drawFrame(gm::Context &context, Rectangle widgetRect);
 
     public:
-        Frame() = default;
-        virtual ~Frame() = default;
+        FrameElements() = default;
+        virtual ~FrameElements() = default;
+
+        explicit FrameElements(int padding) : mFramePadding(padding) {}
 
         /// Set the BorderStyle
         void set(const BorderStyle borderStyle) {
@@ -163,18 +179,52 @@ namespace rose {
 
         [[nodiscard]] bool getState() const { return mInvert; }
     };
+
+    class FrameLayoutManager : public LayoutManager {
+    public:
+        FrameLayoutManager() {
+            mMaxContent = 1;
+        }
+
+        ~FrameLayoutManager() override = default;
+
+        /// Layout the contents of the associated manager.
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                        LayoutManager::Itr last) override;
+
+    };
+
+    class Frame : public Manager, public FrameElements {
+    protected:
+
+    public:
+        Frame() noexcept : Manager(), FrameElements() {
+            mLayoutManager = std::make_unique<FrameLayoutManager>();
+        }
+
+        ~Frame() override = default;
+
+        explicit Frame(int padding) noexcept : Frame() {
+            mPadding = Padding{padding};
+        }
+
+        void draw(gm::Context &context, const Position &containerPosition) override;
+
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
+
+    };
 }
 
 template<typename ManagerClass>
 inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::BorderStyle borderStyle) {
-    static_assert(std::is_base_of_v<rose::Frame,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
+    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
     manager->set(borderStyle);
     return manager;
 }
 
 template<typename ManagerClass>
 inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::CornerStyle cornerStyle) {
-    static_assert(std::is_base_of_v<rose::Frame,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
+    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
     manager->set(cornerStyle);
     return manager;
 }

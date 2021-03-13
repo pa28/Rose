@@ -17,7 +17,7 @@ namespace rose::gm {
     Surface::Surface(std::filesystem::path &path) : Surface() {
         reset(IMG_Load(path.c_str()));
         if (!operator bool()) {
-            throw SurfaceRuntimeError(util::StringCompositor("IMG_Load from: ", path.string(), " -- ", IMG_GetError()));
+            throw SurfaceRuntimeError(StringCompositor("IMG_Load from: ", path.string(), " -- ", IMG_GetError()));
         }
     }
 
@@ -25,7 +25,7 @@ namespace rose::gm {
         reset(SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format));
         if (!operator bool()) {
             throw SurfaceRuntimeError(
-                    util::StringCompositor("SDL_CreateRGBSurfaceWithFormat: (", width, 'x', height, ") -- ",
+                    StringCompositor("SDL_CreateRGBSurfaceWithFormat: (", width, 'x', height, ") -- ",
                                            SDL_GetError()));
         }
     }
@@ -34,7 +34,7 @@ namespace rose::gm {
         reset(SDL_CreateRGBSurface(0, width, height, depth, rmask, gmask, bmask, amask));
         if (!operator bool()) {
             throw SurfaceRuntimeError(
-                    util::StringCompositor("SDL_CreateRGBSurface: (", width, 'x', height, ") -- ", SDL_GetError()));
+                    StringCompositor("SDL_CreateRGBSurface: (", width, 'x', height, ") -- ", SDL_GetError()));
         }
     }
 
@@ -59,7 +59,7 @@ namespace rose::gm {
         reset(SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format));
         if (!operator bool()) {
             throw SurfaceRuntimeError(
-                    util::StringCompositor("SDL_CreateRGBSurfaceWithFormat: (", width, 'x', height, ") -- ",
+                    StringCompositor("SDL_CreateRGBSurfaceWithFormat: (", width, 'x', height, ") -- ",
                                            SDL_GetError()));
         }
         return operator bool();
@@ -79,7 +79,7 @@ namespace rose::gm {
     bool Surface::textureFromSurface(Context &context, Texture &texture) {
         texture.reset(SDL_CreateTextureFromSurface(context.get(), get()));
         if (!texture.operator bool())
-            throw SurfaceRuntimeError(util::StringCompositor("SDL_CreateTextureFromSurface: ", SDL_GetError()));
+            throw SurfaceRuntimeError(StringCompositor("SDL_CreateTextureFromSurface: ", SDL_GetError()));
         return texture.operator bool();
     }
 

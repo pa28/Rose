@@ -35,6 +35,8 @@ namespace rose {
         constexpr Position& operator=(const Position &p) = default;
         constexpr Position& operator=(Position &&p) = default;
 
+        constexpr Position(int p) noexcept : x(p), y(p) {}
+
         /// Add two positions together.
         constexpr Position operator+(const Position &p) const noexcept {
             return Position{x + p.x, y + p.y};
@@ -67,6 +69,8 @@ namespace rose {
         constexpr Size& operator=(const Size &p) = default;
         constexpr Size& operator=(Size &&p) = default;
 
+        constexpr explicit Size(int size) noexcept : w(size), h(size) {}
+
         constexpr explicit Size(const std::tuple<int,int> &size) noexcept : Size(std::get<0>(size), std::get<1>(size)) {}
 
         constexpr Size& operator=(std::tuple<int,int> &size) noexcept {
@@ -75,7 +79,7 @@ namespace rose {
             return *this;
         }
 
-        explicit operator bool() { return w > 0 && h > 0; }
+        explicit operator bool() const { return w > 0 && h > 0; }
 
         bool operator!=(const Size &other) const noexcept {
             return w != other.w || h != other.h;
@@ -122,6 +126,16 @@ namespace rose {
         /// Add a Position to a Rectangle.
         constexpr Rectangle operator + (const Position &p) const noexcept {
             return Rectangle{x+p.x, y+p.y, w, h};
+        }
+
+        /// Add a Size to a Rectangle.
+        constexpr Rectangle operator + (const Size &s) const noexcept {
+            return Rectangle{ x, y, w + s.w, h + s.h};
+        }
+
+        /// Subtract a Size from a Rectangle.
+        constexpr Rectangle operator - (const Size &s) const noexcept {
+            return Rectangle{ x, y, w - s.w, h - s.h};
         }
 
         /// Get a Position from a Rectangle.
