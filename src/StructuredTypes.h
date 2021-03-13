@@ -22,6 +22,13 @@ namespace rose {
         NodeTypeError(const NodeTypeError &other) noexcept = default;
     };
 
+    class NodeRangeError : std::out_of_range {
+    public:
+        explicit NodeRangeError(const char *what) : std::out_of_range(what) {}
+        explicit NodeRangeError(const std::string &what) : std::out_of_range(what) {}
+        NodeRangeError(const NodeRangeError &other) noexcept = default;
+    };
+
     class Container;
 
     /**

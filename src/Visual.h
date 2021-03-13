@@ -13,6 +13,7 @@
 #include <optional>
 #include "StructuredTypes.h"
 #include "Types.h"
+#include "Utilities.h"
 
 namespace rose {
 
@@ -141,10 +142,14 @@ namespace rose {
          * @param node The manager.
          */
         void add(const std::shared_ptr<Node> &node) override {
-            if (std::dynamic_pointer_cast<Manager>(node))
-                Container::add(node);
-            else
-                throw NodeTypeError("A Window may only contain Manager objects.");
+            if (empty()) {
+                if (std::dynamic_pointer_cast<Manager>(node))
+                    Container::add(node);
+                else
+                    throw NodeTypeError("A Window may only contain one Manager object.");
+            } else {
+                throw NodeRangeError("A Window may only contain one Manager object.");
+            }
         }
 
         /// Draw the contents of the Window
@@ -185,16 +190,21 @@ namespace rose {
     class Manager : public Visual, public Container {
     protected:
         std::unique_ptr<LayoutManager> mLayoutManager{};
+        size_t mMaxContent{0};
 
     public:
         Manager();
         ~Manager() override = default;
 
         void add(const std::shared_ptr<Node> &node) override {
-            if (std::dynamic_pointer_cast<Widget>(node) || std::dynamic_pointer_cast<Manager>(node))
-                Container::add(node);
-            else
-                throw NodeTypeError("A Manager may only contain Manager or Widget objects.");
+            if (mMaxContent == 0 || size() < mMaxContent) {
+                if (std::dynamic_pointer_cast<Widget>(node) || std::dynamic_pointer_cast<Manager>(node))
+                    Container::add(node);
+                else
+                    throw NodeTypeError("A Manager may only contain Manager or Widget objects.");
+            } else {
+                throw NodeRangeError(StringCompositor("Contents exceed maximum limit: ", mMaxContent));
+            }
         }
 
         void draw(gm::Context &context, const Position &containerPosition) override;
