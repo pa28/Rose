@@ -25,10 +25,10 @@ int main(int argc, char **argv) {
     std::shared_ptr<Widget> widget{};
     application.screen() << wdg<Window>()
                             << wdg<Manager>()
-                                 << wdg<Frame>(7) << Position{10, 10}
-                                    << wdg<ImageLabel>(ImageId::Heart)
+                                 << wdg<Frame>(0) << Position{10, 10}
+                                    << wdg<ImageLabel>(ImageId::Location, 40)
                                     << Parent{} << Parent{}
-                                 << wdg<Frame>(5) << Position{53, 10}
+                                 << wdg<Frame>(5) << Position{54, 10}
                                     << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
                                     << Parent{} << Parent{};
 

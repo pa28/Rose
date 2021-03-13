@@ -17,13 +17,13 @@ namespace rose {
      */
     class Image {
     protected:
-        ImageId mImageKey{ImageId::NoImage};
+        ImageId mImageId{ImageId::NoImage};
 
     public:
         Image() = default;
         virtual ~Image() = default;
 
-        explicit Image(ImageId id) : mImageKey(id) {
+        explicit Image(ImageId id) : mImageId(id) {
             std::cout << __PRETTY_FUNCTION__ << '\n';
         }
 
@@ -31,6 +31,7 @@ namespace rose {
 
     class ImageLabel : public Widget, protected Image {
     protected:
+        Size mRequestedSize{};
 
     public:
         ImageLabel() = default;
@@ -43,6 +44,10 @@ namespace rose {
 
         explicit ImageLabel(ImageId imageId) : Image(imageId) {}
 
+        ImageLabel(ImageId imageId, Size size);
+
+        ImageLabel(ImageId imageId, int size) : ImageLabel(imageId, Size{size}) {}
+
         /**
          * @brief Layout the label.
          * @param context The graphics Context to use.
@@ -50,10 +55,19 @@ namespace rose {
          * @return The requested screen Rectangle.
          */
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
-            mSize = ImageStore::getStore().size(mImageKey);
+            mSize = ImageStore::getStore().size(mImageId);
             if (mPreferredSize)
                 mSize = mPreferredSize;
             mPos = mPreferredPos;
+
+            if (mSize < mRequestedSize) {
+                auto space = mRequestedSize - mSize;
+                mPadding.l = space.w / 2;
+                mPadding.r = space.w - mPadding.l;
+                mPadding.t = space.h / 2;
+                mPadding.b = space.h - mPadding.t;
+            }
+
             return layoutPadding(Rectangle{mPos, mSize});
         }
 
