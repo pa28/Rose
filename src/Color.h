@@ -65,6 +65,10 @@ namespace rose::color {
 
         static const RGBA TransparentBlack;
 
+        static const RGBA OpaqueBlack;
+
+        static const RGBA OpaqueWhite;
+
         constexpr RGBA() noexcept = default;
 
         /// Construct RGBA from a std::array of floats in range [0.0 ... 1.0]
@@ -176,8 +180,8 @@ namespace rose::color {
         }
 
         /**
-         * @brief Get a new colour from this HSL colour by modifying the hue value.
-         * @param hue The new hue value
+         * @brief Get a new colour from this HSL colour by modifying the hue.
+         * @param hue The new hue.
          * @return The new HSL colour.
          */
         [[nodiscard]] constexpr HSVA withHue(uint32_t hue) const {
@@ -185,8 +189,30 @@ namespace rose::color {
         }
 
         /**
-         * @brief Get a new colour from this HSL colour by modifying the hue value.
-         * @param hue The new hue value
+         * @brief Get a new colour from this HSL colour by modifying the saturation.
+         * @param sat The new saturation.
+         * @return The new HSL colour.
+         */
+        [[nodiscard]] constexpr HSVA withSaturation(float sat) const {
+            HSVA result{*this};
+            result[1] = std::clamp(sat, 0.f, 1.f);
+            return result;
+        }
+
+        /**
+         * @brief Get a new colour from this HSL colour by modifying the value.
+         * @param val The new value.
+         * @return The new HSL colour.
+         */
+        [[nodiscard]] constexpr HSVA withValue(float val) const {
+            HSVA result{*this};
+            result[2] = std::clamp(val, 0.f, 1.f);
+            return result;
+        }
+
+        /**
+         * @brief Get a new colour from this HSL colour by modifying the saturation value.
+         * @param sat The new saturation value
          * @return The new HSL colour.
          */
         [[nodiscard]] constexpr HSVA withMinSaturation(float sat) const {

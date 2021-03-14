@@ -11,6 +11,10 @@ namespace rose::color {
 
     const RGBA RGBA::TransparentBlack{RGBA{0.f,0.f,0.f,0.f}};
 
+    const RGBA RGBA::OpaqueBlack{RGBA{0.f,0.f,0.f,1.f}};
+
+    const RGBA RGBA::OpaqueWhite{RGBA{1.f,1.f,1.f,1.f}};
+
     HSVA RGBA::toHSVA() const {
         auto cMax = std::max(r(), std::max(g(), b()));
         auto cMin = std::min(r(), std::min(g(), b()));
