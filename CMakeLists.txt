@@ -105,6 +105,7 @@ list(APPEND ROSE_SRC
         src/GraphicsModel.cpp
         src/Image.cpp
         src/ImageStore.cpp
+        src/Layout.cpp
         src/Settings.cpp
         src/StructuredTypes.cpp
         src/Surface.cpp

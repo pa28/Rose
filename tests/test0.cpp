@@ -8,6 +8,7 @@
 #include "Frame.h"
 #include "Image.h"
 #include "ImageStore.h"
+#include "Layout.h"
 #include "Text.h"
 #include "Types.h"
 
@@ -24,11 +25,11 @@ int main(int argc, char **argv) {
     std::shared_ptr<Manager> manager{};
     std::shared_ptr<Widget> widget{};
     application.screen() << wdg<Window>()
-                            << wdg<Manager>()
-                                 << wdg<Frame>(0) << Position{10, 10}
-                                    << wdg<ImageLabel>(ImageId::Heart, 40)
+                            << wdg<Manager>() << std::make_unique<LinearLayout>() << Position{10,10}
+                                 << wdg<Frame>(0)
+                                    << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                                     << Parent{} << Parent{}
-                                 << wdg<Frame>(5) << Position{54, 10}
+                                 << wdg<Frame>(5)
                                     << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
                                     << Parent{} << Parent{};
 

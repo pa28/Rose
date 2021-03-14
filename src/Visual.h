@@ -68,6 +68,7 @@ namespace rose {
         Padding mPadding{};         ///< Immediately around the Visual, used for separation and alignment.
         Id mId{};                   ///< The object Id string.
         State mState{};             ///< The object state Id string.
+        bool mVisible{true};        ///< If true the object is visible.
 
     public:
         /**
@@ -125,6 +126,16 @@ namespace rose {
         void setScreenRectangle(const Rectangle &screenRect) {
             mPos = screenRect.position();
             mSize = screenRect.size();
+        }
+
+        /// Check visibility.
+        constexpr bool isVisible() const noexcept {
+            return mVisible;
+        }
+
+        /// Set visibility.
+        void setVisible(bool visible) noexcept {
+            mVisible = visible;
         }
     };
 
@@ -262,6 +273,10 @@ namespace rose {
         void focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result);
 
         auto container() const { return mContainer.lock(); }
+
+        void setLayoutManager(std::unique_ptr<LayoutManager> &&layoutManager) {
+            mLayoutManager = std::move(layoutManager);
+        }
     };
 
     class Widget : public Visual, public Node {
@@ -336,6 +351,13 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
                   "WidgetClass must be derived from rose::Widget or rose::Manager.");
     widget->setPosition(position);
+    return widget;
+}
+
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, std::unique_ptr<rose::LayoutManager>&& layout) {
+    static_assert(std::is_base_of_v<rose::Manager,WidgetClass>, "WidgetClass must be derived from rose::Manager.");
+    widget->setLayoutManager(std::move(layout));
     return widget;
 }
 

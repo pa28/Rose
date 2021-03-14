@@ -257,6 +257,38 @@ namespace rose {
             return Rectangle{x5, y5, x6 - x5, y6 - y5};
         }
 
+        int& sizePri(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? w : h;
+        }
+
+        int& sizeSec(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? h : w;
+        }
+
+        int& posPri(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? x : y;
+        }
+
+        int& posSec(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? y : x;
+        }
+
+        [[nodiscard]] constexpr int sizePri(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? w : h;
+        }
+
+        [[nodiscard]] constexpr int sizeSec(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? h : w;
+        }
+
+        [[nodiscard]] constexpr int posPri(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? x : y;
+        }
+
+        [[nodiscard]] constexpr int posSec(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? y : x;
+        }
+
         static Rectangle Zero;
     };
 
