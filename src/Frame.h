@@ -217,8 +217,8 @@ namespace rose {
         Frame() noexcept : Manager(), FrameElements() {
             mLayoutManager = std::make_unique<FrameLayoutManager>();
             animationCallback([&](gm::Context& context, const Position &position, uint32_t frame){
-                auto idx = frame % ActionCurves::PositiveSine.size();
-                mColorValue = ActionCurves::PositiveSine[idx];
+                auto idx = frame % ActionCurves::HeartBeat.size();
+                mColorValue = ActionCurves::HeartBeat[idx];
                 mBackground.reset();
                 drawAnimate(context, position);
             });

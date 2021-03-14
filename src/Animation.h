@@ -31,6 +31,18 @@ namespace rose {
                 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
                 0.f, 0.f,
         };
+
+        static constexpr std::array<float, 38> HeartBeat{
+                ac_sin(0), ac_sin(4), ac_sin(8), ac_sin(12),
+                ac_sin(16), ac_sin(20), ac_sin(24), ac_sin(28),
+                0.f, 0.f, 0.f,
+                ac_sin(0), ac_sin(4), ac_sin(8), ac_sin(12),
+                ac_sin(16), ac_sin(20), ac_sin(24), ac_sin(28),
+                0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
+                0.f, 0.f,0.f, 0.f, 0.f, 0.f,
+                0.f, 0.f,0.f, 0.f,0.f, 0.f,
+                0.f,
+        };
     }
 
     class Animation;
