@@ -469,9 +469,9 @@ namespace rose::gm {
 
         bool mRedrawBackground{true};   ///< When true the background Texture needs to be redrawn.
 
-        bool mAnimation{false};         ///< When true there are animations to draw over the background.
-
         Texture mBackground{};          ///< The background Texture.
+
+        uint32_t mFrame{};              ///< The rendering frame.
 
         std::vector<Rectangle> mDisplayBounds{};
 

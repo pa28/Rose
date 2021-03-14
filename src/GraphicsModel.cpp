@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include "Animation.h"
 #include "Font.h"
 #include "GraphicsModel.h"
 #include "Texture.h"
@@ -247,17 +248,18 @@ namespace rose::gm {
             mContext.renderPresent();
         }
 
-        if (mAnimation || mRedrawBackground) {
+        if (Animator::getAnimator() || mRedrawBackground) {
             mContext.setDrawColor(color::RGBA::TransparentBlack);
             mContext.renderClear();
             mContext.renderCopy(mBackground);
-            if (mAnimation) {
-                // Render animated widgets.
+            if (Animator::getAnimator()) {
+                Animator::getAnimator().animate(mContext, mFrame);
             }
             mContext.renderPresent();
         }
 
         mRedrawBackground = false;
+        mFrame++;
     }
 
 //    std::optional<FocusTree> GraphicsModel::focusTree(Screen &screen, Position mousePosition) {

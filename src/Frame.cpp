@@ -360,6 +360,7 @@ namespace rose {
         context.fillRect(dst, interpolated);
         context.setDrawBlendMode(SDL_BLENDMODE_BLEND);
         gm::TextureSetBlendMode(mask, SDL_BLENDMODE_BLEND);
+//        std::cout << __PRETTY_FUNCTION__ << ' ' << value << interpolated << '\n';
     }
 
     void FrameElements::drawFrame(gm::Context &context, Rectangle widgetRect) {
@@ -394,7 +395,7 @@ namespace rose {
         return layoutRect;
     }
 
-    void Frame::draw(gm::Context &context, const Position &containerPosition) {
+    void Frame::drawAnimate(gm::Context &context, const Position &containerPosition) {
         drawFrame(context, Rectangle{containerPosition + mPos, mSize});
         Manager::draw(context, containerPosition + mFramePadding.position() + Position{mFrameWidth});
     }

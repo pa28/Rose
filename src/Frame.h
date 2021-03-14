@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include "Animation.h"
 #include "Color.h"
 #include "ImageStore.h"
 #include "Visual.h"
@@ -69,7 +70,7 @@ namespace rose {
         int mFrameWidth{2};
         Padding mFramePadding{};
         BorderStyle mBorderStyle{BorderStyle::Bevel};
-        CornerStyle mCornerStyle{CornerStyle::Square};
+        CornerStyle mCornerStyle{CornerStyle::Round};
         bool mInvert{};
         gm::Texture mBorder{};
         gm::Texture mBackground{};
@@ -209,12 +210,18 @@ namespace rose {
 
     };
 
-    class Frame : public Manager, public FrameElements {
+    class Frame : public Manager, public FrameElements, public Animation {
     protected:
 
     public:
         Frame() noexcept : Manager(), FrameElements() {
             mLayoutManager = std::make_unique<FrameLayoutManager>();
+            animationCallback([&](gm::Context& context, const Position &position, uint32_t frame){
+                auto idx = frame % ActionCurves::PositiveSine.size();
+                mColorValue = ActionCurves::PositiveSine[idx];
+                mBackground.reset();
+                drawAnimate(context, position);
+            });
         }
 
         ~Frame() override = default;
@@ -223,7 +230,12 @@ namespace rose {
             mPadding = Padding{padding};
         }
 
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void drawAnimate(gm::Context &context, const Position &containerPosition);
+
+        void draw(gm::Context &context, const Position &containerPosition) override {
+            setAnimation(getNode<Animation>(), containerPosition);
+            drawAnimate(context,containerPosition);
+        }
 
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
