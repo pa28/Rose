@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     application.screen() << wdg<Window>()
                             << wdg<Manager>()
                                  << wdg<Frame>(0) << Position{10, 10}
-                                    << wdg<ImageLabel>(ImageId::Location, 40)
+                                    << wdg<ImageLabel>(ImageId::Heart, 40)
                                     << Parent{} << Parent{}
                                  << wdg<Frame>(5) << Position{54, 10}
                                     << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)

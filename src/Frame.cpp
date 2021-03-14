@@ -252,15 +252,15 @@ namespace rose {
         else
             color = !mInvert ? mBaseColor : mInvertColor;
 
-        auto texture = createBackgroundTexture(context, src, dst, color);
+        auto texture = gm::CreateTexture(context, src.size());
         auto [useBorder,selectedCorners] = decoration();
 
         gm::TextureSetBlendMode(texture, SDL_BLENDMODE_NONE);
-        mTexture = gm::CreateTexture(context, dst.size());
+        mBorder = gm::CreateTexture(context, dst.size());
 
-        gm::RenderTargetGuard renderTargetGuard(context, mTexture);
+        gm::RenderTargetGuard renderTargetGuard(context, mBorder);
         context.renderCopy(texture);
-        gm::TextureSetBlendMode(mTexture, SDL_BLENDMODE_BLEND);
+        gm::TextureSetBlendMode(mBorder, SDL_BLENDMODE_BLEND);
 
         ImageId roundCnr = ImageId::NoImage;
         ImageId squareCnr = ImageId::NoImage;
@@ -318,50 +318,68 @@ namespace rose {
         }
     }
 
+    gm::Texture
+    FrameElements::createBackgroundMask(gm::Context &context, const Size size, int frameWidth, bool roundCorners) {
+        gm::Texture mask = gm::CreateTexture(context, size);
+        gm::TextureSetBlendMode(mask, SDL_BLENDMODE_NONE);
+        ImageStore &is{ImageStore::getStore()};
+
+        {
+            gm::RenderTargetGuard renderTargetGuard(context, mask);
+            Rectangle filterFill{frameWidth, frameWidth, size.w - frameWidth * 2, size.h - frameWidth * 2};
+            context.fillRect(filterFill, color::RGBA::OpaqueBlack);
+
+            if (roundCorners) {
+                auto trimSize = is.size(ImageId::RoundCornerTrim) / 2;
+                Rectangle trimSrc{Position::Zero, trimSize}, trimDst{Position::Zero, trimSize};
+
+                is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+                trimDst.x = size.w - trimSrc.w;
+                trimSrc.x = trimSize.w;
+                is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+                trimDst.y = size.h - trimSrc.h;
+                trimSrc.y = trimSize.h;
+                is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+                trimDst.x = 0;
+                trimSrc.x = 0;
+                is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+            }
+            gm::TextureSetBlendMode(mask, SDL_BLENDMODE_BLEND);
+        }
+
+        return std::move(mask);
+    }
+
+    void FrameElements::colorBackgroundMask(gm::Context &context, gm::Texture &mask, const color::RGBA &base,
+                                            const color::RGBA &active, float value) {
+        value = std::clamp(value, 0.0f, 1.0f);
+        Rectangle dst{Position::Zero, gm::TextureGetSize(mask)};
+        gm::RenderTargetGuard renderTargetGuard(context, mask);
+        context.setDrawBlendMode(SDL_BLENDMODE_ADD);
+        auto interpolated = base.interpolate(active, value);
+        context.fillRect(dst, interpolated);
+        context.setDrawBlendMode(SDL_BLENDMODE_BLEND);
+        gm::TextureSetBlendMode(mask, SDL_BLENDMODE_BLEND);
+    }
+
     void FrameElements::drawFrame(gm::Context &context, Rectangle widgetRect) {
         Rectangle src{0, 0, widgetRect.w, widgetRect.h};
         Rectangle dst{widgetRect};
 
-        if (!mTexture) {
-            drawBackground(context, src, dst);
-            gm::TextureSetBlendMode(mTexture, SDL_BLENDMODE_BLEND);
+        if (mBorderStyle != BorderStyle::None) {
+            if (!mBorder) {
+                drawBackground(context, src, dst);
+                gm::TextureSetBlendMode(mBorder, SDL_BLENDMODE_BLEND);
+            }
         }
 
-        gm::Texture maskTexture = gm::CreateTexture(context, src.size());
-        gm::Texture textureA = gm::CreateTexture(context, src.size());
-        if (!mFilter) {
-            // ToDo: Invert the mask then layer background - filter - mask.
-            ImageStore &is{ImageStore::getStore()};
-            Rectangle trimSrc{}, trimDst{};
-            mFilter = gm::CreateTexture(context, src.size());
-            gm::TextureSetBlendMode(maskTexture, SDL_BLENDMODE_NONE);
-
-            gm::RenderTargetGuard renderTargetGuard(context, maskTexture);
-            Rectangle filterFill{mFrameWidth, mFrameWidth, src.w - mFrameWidth*2, src.h - mFrameWidth*2};
-            context.fillRect(filterFill, color::RGBA::OpaqueBlack);
-
-            auto trimSize = is.size(ImageId::RoundCornerTrim) / 2;
-            trimSrc = trimSize;
-            trimDst = trimSize;
-            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
-            trimDst.x = src.w - trimSrc.w;
-            trimSrc.x = trimSize.w;
-            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
-            trimDst.y = src.h - trimSrc.h;
-            trimSrc.y = trimSize.h;
-            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
-            trimDst.x = 0;
-            trimSrc.x = 0;
-            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
-
-            context.setDrawBlendMode(SDL_BLENDMODE_ADD);
-            context.fillRect(src, color::DarkBaseColor);
-            context.setDrawBlendMode(SDL_BLENDMODE_BLEND);
-            gm::TextureSetBlendMode(maskTexture, SDL_BLENDMODE_BLEND);
+        if (!mBackground) {
+            mBackground = createBackgroundMask(context, src.size(), mFrameWidth, mCornerStyle == CornerStyle::Round);
+            colorBackgroundMask(context, mBackground, mInactiveColor, mActiveColor, mColorValue);
         }
 
-//        context.renderCopy(mTexture, dst);
-        context.renderCopy(maskTexture, dst);
+        context.renderCopy(mBorder, dst);
+        context.renderCopy(mBackground, dst);
     }
 
     Rectangle

@@ -19,7 +19,7 @@ namespace rose {
 
     static constexpr std::array<IconImage, 34> IconImageList{{
                                                                      {ImageId::Compass, ENTYPO_ICON_COMPASS, color::DarkTextColour},
-                                                                     {ImageId::Heart, ENTYPO_ICON_HEART, color::DarKRed},
+                                                                     {ImageId::Heart, ENTYPO_ICON_HEART, color::DarkRedHSVA.toRGBA()},
                                                                      {ImageId::HeartEmpty, ENTYPO_ICON_HEART_EMPTY, color::DarkTextColour},
                                                                      {ImageId::Cancel, ENTYPO_ICON_CANCEL_CIRCLED, color::DarkTextColour},
                                                                      {ImageId::Help, ENTYPO_ICON_CIRCLED_HELP, color::DarkTextColour},

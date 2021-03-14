@@ -63,13 +63,16 @@ namespace rose {
         color::RGBA mBotColor{color::DarkBotColor};
         color::RGBA mLeftColor{color::DarkLeftColor};
         color::RGBA mRightColor{color::DarkRightColor};
+        color::RGBA mActiveColor{color::DarkRedHSVA.toRGBA()};
+        color::RGBA mInactiveColor{color::DarkBaseColor};
+        float mColorValue{0.0f};
         int mFrameWidth{2};
         Padding mFramePadding{};
-        BorderStyle mBorderStyle{BorderStyle::None};
-        CornerStyle mCornerStyle{CornerStyle::Round};
+        BorderStyle mBorderStyle{BorderStyle::Bevel};
+        CornerStyle mCornerStyle{CornerStyle::Square};
         bool mInvert{};
-        gm::Texture mTexture{};
-        gm::Texture mFilter{};
+        gm::Texture mBorder{};
+        gm::Texture mBackground{};
 
         /**
          * @enum SelectedCorners
@@ -168,22 +171,28 @@ namespace rose {
         /// Set the BorderStyle
         void set(const BorderStyle borderStyle) {
             mBorderStyle = borderStyle;
-            mTexture.reset();
+            mBorder.reset();
         }
 
         /// Set the CornerStyle
         void set(const CornerStyle cornerStyle) {
             mCornerStyle = cornerStyle;
-            mTexture.reset();
+            mBorder.reset();
         }
 
         /// Set the state, true = inverted.
         void setState(bool state) {
             mInvert = state;
-            mTexture.reset();
+            mBorder.reset();
         }
 
         [[nodiscard]] bool getState() const { return mInvert; }
+
+        static gm::Texture
+        createBackgroundMask(gm::Context &context, Size size, int frameWidth, bool roundCorners = false);
+
+        static void colorBackgroundMask(gm::Context &context, gm::Texture &mask, const color::RGBA &base,
+                                        const color::RGBA &active, float value);
     };
 
     class FrameLayoutManager : public LayoutManager {

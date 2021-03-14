@@ -137,7 +137,19 @@ namespace rose::color {
             return RGBA{r() + color.r(), g() + color.g(), b() + color.b(), a() + color.a()};
         }
 
-        /// Set the Alpha channel
+        [[nodiscard]] constexpr RGBA interpolate(const RGBA& to, float v) const noexcept {
+            auto inter = [](float from, float to, float value) -> float {
+                return from + (to - from) * value;
+            };
+
+            RGBA result{};
+            result[0] = inter(operator[](0), to[0], v);
+            result[1] = inter(operator[](1), to[1], v);
+            result[2] = inter(operator[](2), to[2], v);
+            result[3] = inter(operator[](3), to[3], v);
+
+            return result;
+        }
 
         HSVA toHSVA() const;
     };
@@ -277,6 +289,20 @@ namespace rose::color {
         constexpr float &alpha() noexcept { return operator[](3); }
 
         [[nodiscard]] constexpr float alpha() const noexcept { return operator[](3); }
+
+        [[nodiscard]] constexpr HSVA interpolate(const HSVA& to, float v) const noexcept {
+            auto inter = [](float from, float to, float value) -> float {
+                return from + (to - from) * value;
+            };
+
+            HSVA result{};
+            result[0] = inter(operator[](0), to[0], v);
+            result[1] = inter(operator[](1), to[1], v);
+            result[2] = inter(operator[](2), to[2], v);
+            result[3] = inter(operator[](3), to[3], v);
+
+            return result;
+        }
     };
 
     constexpr RGBA::RGBA(const HSVA &hsva) noexcept : RGBA(hsva.toRGBA()) {
@@ -484,7 +510,9 @@ namespace rose::color {
     static constexpr color::RGBA DarkRightColor{DarkBaseColorHSVA.modValue(-0.15)};
     static constexpr color::RGBA DarkInvertColor{DarkBaseColorHSVA.modValue(-0.075)};
     static constexpr color::RGBA DarkTextColour{DarkBaseColorHSVA.contrasting()};
-    static constexpr color::RGBA DarKRed{ 1.f, 0.f, 0.f, 1.f};
+    static constexpr color::HSVA DarkRedHSVA{ 5.f, 1.f, 0.6f, 1.f};
+    static constexpr color::HSVA DarkGreenHSVA{ 100.f, 1.f, 0.6f, 1.f};
+    static constexpr color::HSVA DarkYellowHSVA{ 50.f, 1.f, 0.6f, 1.f};
 }
 
 inline std::ostream& operator<<(std::ostream& strm, const rose::color::RGBA& rgba) {
