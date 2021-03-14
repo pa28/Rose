@@ -137,6 +137,11 @@ namespace rose {
         void setVisible(bool visible) noexcept {
             mVisible = visible;
         }
+
+        /// Set Id
+        void setId(const Id& id) noexcept {
+            mId = id;
+        }
     };
 
     /**
@@ -368,3 +373,9 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     return widget;
 }
 
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Id& id) {
+    static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
+    widget->setId(id);
+    return widget;
+}

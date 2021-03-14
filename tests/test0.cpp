@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     std::shared_ptr<Manager> manager{};
     std::shared_ptr<Widget> widget{};
     application.screen() << wdg<Window>()
-                            << wdg<Manager>() << std::make_unique<LinearLayout>() << Position{10,10}
+                            << wdg<Manager>() << Id{"row"} << std::make_unique<LinearLayout>(Orientation::Vertical) << Position{10,10}
                                  << wdg<Frame>(0)
                                     << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                                     << Parent{} << Parent{}
