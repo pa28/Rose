@@ -13,6 +13,11 @@
 
 namespace rose {
 
+    enum class Orientation {
+        Horizontal,
+        Vertical,
+    };
+
     namespace set {
         static constexpr std::string_view SetAppSize{"SetAppSize"};
         static constexpr std::string_view SetAppPosition{"SetAppPosition"};
@@ -35,7 +40,7 @@ namespace rose {
         constexpr Position& operator=(const Position &p) = default;
         constexpr Position& operator=(Position &&p) = default;
 
-        constexpr Position(int p) noexcept : x(p), y(p) {}
+        constexpr explicit Position(int p) noexcept : x(p), y(p) {}
 
         /// Add two positions together.
         constexpr Position operator+(const Position &p) const noexcept {
@@ -48,6 +53,22 @@ namespace rose {
 
         bool operator==(const Position &other) const noexcept {
             return x == other.x && y == other.y;
+        }
+
+        int& primary(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? x : y;
+        }
+
+        int& secondary(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? y : x;
+        }
+
+        [[nodiscard]] constexpr int primary(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? x : y;
+        }
+
+        [[nodiscard]] constexpr int secondary(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? y : x;
         }
 
         static Position Zero;
@@ -103,6 +124,22 @@ namespace rose {
 
         Size operator/(const int divisor) const  {
             return Size{w / divisor, h / divisor};
+        }
+
+        int& primary(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? w : h;
+        }
+
+        int& secondary(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? h : w;
+        }
+
+        [[nodiscard]] constexpr int primary(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? w : h;
+        }
+
+        [[nodiscard]] constexpr int secondary(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? h : w;
         }
 
         static Size Zero;
@@ -245,6 +282,38 @@ namespace rose {
         [[nodiscard]] constexpr Position position() const noexcept { return Position{l, t}; }
 
         [[nodiscard]] constexpr Size size() const noexcept { return Size{horizontal(), vertical()}; }
+
+        int& priLead(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? l : t;
+        }
+
+        int& priLag(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? r : b;
+        }
+
+        int& secLead(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? t : l;
+        }
+
+        int& secLag(Orientation o) noexcept {
+            return o == Orientation::Horizontal ? b : r;
+        }
+
+        [[nodiscard]] constexpr int priLead(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? l : t;
+        }
+
+        [[nodiscard]] constexpr int priLag(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? r : b;
+        }
+
+        [[nodiscard]] constexpr int secLead(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? t : l;
+        }
+
+        [[nodiscard]] constexpr int secLag(Orientation o) const noexcept {
+            return o == Orientation::Horizontal ? b : r;
+        }
     };
 
     std::array<char, 8> utf8(int c);
