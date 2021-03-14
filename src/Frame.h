@@ -65,10 +65,11 @@ namespace rose {
         color::RGBA mRightColor{color::DarkRightColor};
         int mFrameWidth{2};
         Padding mFramePadding{};
-        BorderStyle mBorderStyle{BorderStyle::Notch};
+        BorderStyle mBorderStyle{BorderStyle::None};
         CornerStyle mCornerStyle{CornerStyle::Round};
         bool mInvert{};
         gm::Texture mTexture{};
+        gm::Texture mFilter{};
 
         /**
          * @enum SelectedCorners
@@ -145,6 +146,11 @@ namespace rose {
          * @param dst The destination rectangle.
          */
         void drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst);
+
+        gm::Texture
+        createBackgroundTexture(gm::Context &context, Rectangle &src, Rectangle &dst, const color::RGBA &color);
+
+        std::tuple<UseBorder,SelectedCorners> decoration();
 
         /**
          * @brief Draw the Frame and background.

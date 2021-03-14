@@ -187,7 +187,7 @@ namespace rose {
         }
     }
 
-    void FrameElements::drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst) {
+    std::tuple<UseBorder, FrameElements::SelectedCorners> FrameElements::decoration() {
         SelectedCorners selectedCorners = NoCorners;
         UseBorder useBorder;
         switch (mBorderStyle) {
@@ -222,15 +222,45 @@ namespace rose {
                 break;
         }
 
+        return std::make_tuple(useBorder, selectedCorners);
+    }
+
+    gm::Texture FrameElements::createBackgroundTexture(gm::Context &context, Rectangle &src, Rectangle &dst,
+                                                       const color::RGBA &color) {
+        auto [useBorder,selectedCorners] = decoration();
+
         gm::Surface surface{dst.w, dst.h, 32, SDL_PIXELFORMAT_RGBA8888};
         if (!surface)
             throw gm::SurfaceRuntimeError(StringCompositor(__PRETTY_FUNCTION__ , " (", dst.w, ',', ") :", SDL_GetError()));
 
+        Rectangle rectangle{mFrameWidth, mFrameWidth, dst.w - mFrameWidth*2, dst.h - mFrameWidth*2};
+        surface.fillRectangle(rectangle, color);
+
+        if (mCornerStyle == CornerStyle::Round) {
+            auto cornerSize = ImageStore::getStore().size(ImageId::BevelOutRoundCorners);
+            trimCorners(surface, color, selectedCorners, cornerSize, dst.size());
+        }
+
+        auto texture = surface.toTexture(context);
+        return std::move(texture);
+    }
+
+    void FrameElements::drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst) {
         color::RGBA color;
         if (mBorderStyle == BorderStyle::Notch)
             color = mBaseColor;
         else
             color = !mInvert ? mBaseColor : mInvertColor;
+
+        auto texture = createBackgroundTexture(context, src, dst, color);
+        auto [useBorder,selectedCorners] = decoration();
+
+        gm::TextureSetBlendMode(texture, SDL_BLENDMODE_NONE);
+        mTexture = gm::CreateTexture(context, dst.size());
+
+        gm::RenderTargetGuard renderTargetGuard(context, mTexture);
+        context.renderCopy(texture);
+        gm::TextureSetBlendMode(mTexture, SDL_BLENDMODE_BLEND);
 
         ImageId roundCnr = ImageId::NoImage;
         ImageId squareCnr = ImageId::NoImage;
@@ -255,21 +285,6 @@ namespace rose {
                 squareCnr = ImageId::NotchOutSquareCorners;
                 break;
         }
-
-        surface.fillRectangle(color);
-
-        if (mCornerStyle == CornerStyle::Round) {
-            auto cornerSize = ImageStore::getStore().size(ImageId::BevelOutRoundCorners);
-            trimCorners(surface, color, selectedCorners, cornerSize, dst.size());
-        }
-
-        auto texture = surface.toTexture(context);
-        gm::TextureSetBlendMode(texture, SDL_BLENDMODE_NONE);
-        mTexture = gm::CreateTexture(context, dst.size());
-
-        gm::RenderTargetGuard renderTargetGuard(context, mTexture);
-        context.renderCopy(texture);
-        gm::TextureSetBlendMode(mTexture, SDL_BLENDMODE_BLEND);
 
         if (mBorderStyle != BorderStyle::None && mBorderStyle != BorderStyle::Unset) {
             auto corner = mCornerStyle == CornerStyle::Round ? roundCnr : squareCnr;
@@ -307,11 +322,46 @@ namespace rose {
         Rectangle src{0, 0, widgetRect.w, widgetRect.h};
         Rectangle dst{widgetRect};
 
-        if (!mTexture)
+        if (!mTexture) {
             drawBackground(context, src, dst);
+            gm::TextureSetBlendMode(mTexture, SDL_BLENDMODE_BLEND);
+        }
 
-        gm::TextureSetBlendMode(mTexture, SDL_BLENDMODE_BLEND);
-        context.renderCopy(mTexture, dst);
+        gm::Texture maskTexture = gm::CreateTexture(context, src.size());
+        gm::Texture textureA = gm::CreateTexture(context, src.size());
+        if (!mFilter) {
+            // ToDo: Invert the mask then layer background - filter - mask.
+            ImageStore &is{ImageStore::getStore()};
+            Rectangle trimSrc{}, trimDst{};
+            mFilter = gm::CreateTexture(context, src.size());
+            gm::TextureSetBlendMode(maskTexture, SDL_BLENDMODE_NONE);
+
+            gm::RenderTargetGuard renderTargetGuard(context, maskTexture);
+            Rectangle filterFill{mFrameWidth, mFrameWidth, src.w - mFrameWidth*2, src.h - mFrameWidth*2};
+            context.fillRect(filterFill, color::RGBA::OpaqueBlack);
+
+            auto trimSize = is.size(ImageId::RoundCornerTrim) / 2;
+            trimSrc = trimSize;
+            trimDst = trimSize;
+            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+            trimDst.x = src.w - trimSrc.w;
+            trimSrc.x = trimSize.w;
+            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+            trimDst.y = src.h - trimSrc.h;
+            trimSrc.y = trimSize.h;
+            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+            trimDst.x = 0;
+            trimSrc.x = 0;
+            is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
+
+            context.setDrawBlendMode(SDL_BLENDMODE_ADD);
+            context.fillRect(src, color::DarkBaseColor);
+            context.setDrawBlendMode(SDL_BLENDMODE_BLEND);
+            gm::TextureSetBlendMode(maskTexture, SDL_BLENDMODE_BLEND);
+        }
+
+//        context.renderCopy(mTexture, dst);
+        context.renderCopy(maskTexture, dst);
     }
 
     Rectangle
