@@ -66,7 +66,7 @@ namespace rose {
         color::RGBA mRightColor{color::DarkRightColor};
         color::RGBA mActiveColor{color::DarkRedHSVA.toRGBA()};
         color::RGBA mInactiveColor{color::DarkBaseColor};
-        float mColorValue{0.0f};
+        float mColorValue{}, mLastColorValue{};
         int mFrameWidth{2};
         Padding mFramePadding{};
         BorderStyle mBorderStyle{BorderStyle::Bevel};
@@ -219,8 +219,11 @@ namespace rose {
             animationCallback([&](gm::Context& context, const Position &position, uint32_t frame){
                 auto idx = frame % ActionCurves::HeartBeat.size();
                 mColorValue = ActionCurves::HeartBeat[idx];
-                mBackground.reset();
-                drawAnimate(context, position);
+                if (mColorValue != mLastColorValue) {
+                    mBackground.reset();
+                    drawAnimate(context, position);
+                    mLastColorValue = mColorValue;
+                }
             });
         }
 
