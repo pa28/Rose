@@ -220,7 +220,7 @@ namespace rose {
                                         color::RGBA top, color::RGBA bot,
                                         color::RGBA left, color::RGBA right) {
 
-        gm::Surface surfaceBevelOut, surfaceNotchIn, surfaceBevelIn, surfaceNotchOut;
+        gm::Surface surfaceBevelOut, surfaceNotchIn, surfaceBevelIn, surfaceNotchOut, roundCorner;
 
         int rS = radius * scale;        // The radius at scale
         int bS = borderWidth * scale;   // The border width at scale
@@ -230,6 +230,7 @@ namespace rose {
         surfaceNotchIn = createBlankSurface(size);
         surfaceBevelIn = createBlankSurface(size);
         surfaceNotchOut = createBlankSurface(size);
+        roundCorner = createBlankSurface(size);
 
         auto pixelFormat = surfaceBevelOut->format;
 
@@ -250,7 +251,9 @@ namespace rose {
                     surfaceBevelIn.pixel(x, y) = pixel;
                     surfaceNotchOut.pixel(x, y) = pixel;
                     surfaceNotchIn.pixel(x, y) = pixel;
+                    roundCorner.pixel(x, y) = gm::mapRGBA(pixelFormat, color::RGBA::TransparentBlack);
                 } else if (r2 > r1) {
+                    roundCorner.pixel(x, y) = gm::mapRGBA(pixelFormat, color::RGBA::TransparentBlack);
                     float s = (float) (yr * yr) / (float) r2;
                     float c = (float) (xr * xr) / (float) r2;
                     auto tl = gm::mapRGBA(pixelFormat, top * s + left * c);
@@ -302,6 +305,7 @@ namespace rose {
                     }
                     // inside the min radius is transparent
                 } else {
+                    roundCorner.pixel(x, y) = gm::mapRGBA(pixelFormat, color::RGBA::OpaqueBlack);
                     auto pixel = color::set_a_value(surfaceBevelOut.pixel(x, y), 0);
                     surfaceBevelOut.pixel(x, y) = pixel;
                     surfaceBevelIn.pixel(x, y) = pixel;
@@ -314,25 +318,30 @@ namespace rose {
         gm::Texture texture;
 
         texture = surfaceBevelOut.toTexture(context);
-        gm::Texture bevelOutCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture bevelOutCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
         copyFullTexture(context, texture, bevelOutCornerTrim);
         setImage(ImageId::BevelOutRoundCorners, std::move(bevelOutCornerTrim));
 
         texture = surfaceBevelIn.toTexture(context);
-        gm::Texture bevelInCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture bevelInCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
         copyFullTexture(context, texture, bevelInCornerTrim);
         setImage(ImageId::BevelInRoundCorners, std::move(bevelInCornerTrim));
 
         texture = surfaceNotchOut.toTexture(context);
-        gm::Texture notchOutCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture notchOutCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
         copyFullTexture(context, texture, notchOutCornerTrim);
         setImage(ImageId::NotchOutRoundCorners, std::move(notchOutCornerTrim));
 
         texture = surfaceNotchIn.toTexture(context);
-        gm::Texture notchInCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture notchInCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
         copyFullTexture(context, texture, notchInCornerTrim);
         setImage(ImageId::NotchInRoundCorners, std::move(notchInCornerTrim));
 
+        texture = roundCorner.toTexture(context);
+        gm::Texture roundCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
+        copyFullTexture(context, texture, roundCornerTrim);
+        gm::TextureSetBlendMode(roundCornerTrim, SDL_BLENDMODE_NONE);
+        setImage(ImageId::RoundCornerTrim, std::move(roundCornerTrim));
     }
 
     void ImageStore::createCenters(gm::Context &context, int scale, int radius) {

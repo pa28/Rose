@@ -62,6 +62,7 @@ namespace rose {
         BevelInRoundCorners,
         NotchOutRoundCorners,
         NotchInRoundCorners,
+        RoundCornerTrim,
         // ImageIds for Centres
         CenterRoundBaseColor,
         CenterRoundInvertColor,
