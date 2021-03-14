@@ -63,7 +63,8 @@ namespace rose {
     Rectangle Window::layout(gm::Context &context, const Rectangle &screenRect) {
         for (auto &content : (*this)) {
             if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
-                manager->layout(context, screenRect);
+                auto rect = manager->layout(context, screenRect);
+                manager->setScreenRectangle(rect);
             }
         }
         return screenRect;
@@ -72,28 +73,22 @@ namespace rose {
     void Manager::draw(gm::Context &context, const Position &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {
-            if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
-                manager->draw(context, drawPadding(mScreenRect.position()));
-            } else if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                widget->draw(context, drawPadding(mScreenRect.position()));
+            if (auto visual = std::dynamic_pointer_cast<Visual>(content); visual) {
+                visual->draw(context, drawPadding(mScreenRect.position()));
             }
         }
     }
 
     Rectangle Manager::layout(gm::Context &context, const Rectangle &screenRect) {
         Rectangle managerRect{screenRect};
-        if (mPreferredPos != Position::Zero) {
-            managerRect = mPreferredPos;
-        }
 
         if (mPreferredSize != Size::Zero) {
             managerRect = mPreferredSize;
         }
 
         auto rect = mLayoutManager->layoutContent(context, managerRect, begin(), end());
-        mPos = rect.position();
-        mSize = rect.size();
-        return layoutPadding(rect);
+        rect = layoutPadding(rect);
+        return Rectangle{mPreferredPos,rect.size()};
     }
 
     void Manager::focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result) {
