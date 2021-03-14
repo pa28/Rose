@@ -101,6 +101,10 @@ namespace rose {
             return Size{w - other.w, h - other.h};
         }
 
+        Size operator/(const int divisor) const  {
+            return Size{w / divisor, h / divisor};
+        }
+
         static Size Zero;
     };
 
