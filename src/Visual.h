@@ -229,6 +229,12 @@ namespace rose {
         [[nodiscard]] size_t maximumContent() const { return mMaxContent; }
     };
 
+    template<class Layout, typename ... Args>
+    std::unique_ptr<Layout> layout(Args ... args) {
+        static_assert(std::is_base_of_v<LayoutManager, Layout>, "Layout must be derived from LayoutManager.");
+        return std::make_unique<Layout>(args ...);
+    }
+
     class SimpleLayout : public LayoutManager {
     public:
         SimpleLayout() = default;
