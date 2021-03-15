@@ -24,17 +24,19 @@ int main(int argc, char **argv) {
 
     application.screen() << wdg<Window>()
                          << wdg<Frame>(5) << Position{10, 10} << FrameColor{FrameColorType::InactiveColor, color::DarkYellowHSVA.toRGBA()}
-                         << wdg<Manager>() << Id{"row"} << layout<LinearLayout>(Orientation::Vertical)
-                         << wdg<Frame>(0) << curve<ActionCurves::HeartBeat>() << FrameColor{FrameColorType::ActiveColor, color::DarkRedHSVA.toRGBA()}
-                         << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
-                         << endw
-                         << endw
-                         << wdg<Frame>(5) << curve<ActionCurves::PositiveSine>()
-                                 << FrameColor{FrameColorType::ActiveColor, color::DarkGreenHSVA.toRGBA()}
-                                << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
-                                << endw
-                            << endw
-                         << endw;
+                             << wdg<Manager>() << Id{"row"} << layout<LinearLayout>(Orientation::Vertical, 5)
+                                 << wdg<Frame>(0) << curve<ActionCurves::HeartBeat>()
+                                     << FrameColor{FrameColorType::ActiveColor, color::DarkRedHSVA.toRGBA()}
+                                         << AnimationEnable{rose::AnimationEnable::Enable}
+                                         << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
+                                             << endw
+                                         << endw
+                                 << wdg<Frame>(5) << curve<ActionCurves::PositiveSine>()
+                                     << FrameColor{FrameColorType::InactiveColor, color::DarkGreenHSVA.toRGBA()}
+                                         << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
+                                             << endw
+                                         << endw
+                                     << endw;
 
     application.run();
 }

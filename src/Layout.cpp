@@ -42,11 +42,18 @@ namespace rose {
                                           LayoutManager::Itr last) {
         Rectangle layoutRect{};
         Position layoutPos{};
+        bool isFirst = true;
 
         while (first != last) {
             auto visual = std::dynamic_pointer_cast<Visual>(*first);
             if (visual->isVisible()) {
                 auto contentRect = visual->layout(context, screenRect);
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    layoutPos.primary(mOrientation) += mInternalSpacing;
+                    layoutRect.sizePri(mOrientation) += mInternalSpacing;
+                }
                 visual->setScreenRectangle(Rectangle{layoutPos, contentRect.size()});
                 layoutPos.primary(mOrientation) += contentRect.size().primary(mOrientation);
                 layoutRect.sizePri(mOrientation) += contentRect.sizePri(mOrientation);

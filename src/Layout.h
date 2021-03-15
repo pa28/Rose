@@ -32,14 +32,16 @@ namespace rose {
     class LinearLayout : public LayoutManager {
     protected:
         Orientation mOrientation{Orientation::Horizontal};
+        int mInternalSpacing;
 
     public:
         LinearLayout() = default;
 
         ~LinearLayout() override = default;
 
-        explicit LinearLayout(Orientation orientation) : LinearLayout() {
+        explicit LinearLayout(Orientation orientation, int internalSpace = 0) : LinearLayout() {
             mOrientation = orientation;
+            mInternalSpacing = internalSpace;
         }
 
         /// Layout the contents of the associated manager.
