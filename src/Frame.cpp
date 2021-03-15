@@ -246,13 +246,8 @@ namespace rose {
     }
 
     void FrameElements::drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst) {
-        color::RGBA color;
-        if (mBorderStyle == BorderStyle::Notch)
-            color = mBaseColor;
-        else
-            color = !mInvert ? mBaseColor : mInvertColor;
-
         auto texture = gm::CreateTexture(context, src.size());
+
         auto [useBorder,selectedCorners] = decoration();
 
         gm::TextureSetBlendMode(texture, SDL_BLENDMODE_NONE);

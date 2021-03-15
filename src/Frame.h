@@ -64,7 +64,7 @@ namespace rose {
         color::RGBA mBotColor{color::DarkBotColor};
         color::RGBA mLeftColor{color::DarkLeftColor};
         color::RGBA mRightColor{color::DarkRightColor};
-        color::RGBA mActiveColor{color::DarkRedHSVA.toRGBA()};
+        color::RGBA mActiveColor{color::DarkBaseColor};
         color::RGBA mInactiveColor{color::DarkBaseColor};
         float mColorValue{}, mLastColorValue{};
         int mFrameWidth{2};
@@ -187,6 +187,17 @@ namespace rose {
             mBorder.reset();
         }
 
+        /// Set the active color.
+        void setActiveColor(const color::RGBA &color) {
+            mActiveColor = color;
+        }
+
+        /// Set the background color.
+        void setInactiveColor(const color::RGBA &color) {
+            mInactiveColor = color;
+            mColorValue = 0.5;
+        }
+
         [[nodiscard]] bool getState() const { return mInvert; }
 
         static gm::Texture
@@ -217,12 +228,16 @@ namespace rose {
         Frame() noexcept : Manager(), FrameElements() {
             mLayoutManager = std::make_unique<FrameLayoutManager>();
             animationCallback([&](gm::Context& context, const Position &position, uint32_t frame){
-                auto idx = frame % ActionCurves::HeartBeat.size();
-                mColorValue = ActionCurves::HeartBeat[idx];
-                if (mColorValue != mLastColorValue) {
-                    mBackground.reset();
-                    drawAnimate(context, position);
-                    mLastColorValue = mColorValue;
+                if (mActionCurve) {
+                    auto idx = frame % mActionCurve->size();
+                    mColorValue = (*mActionCurve)[idx];
+                    if (mColorValue != mLastColorValue) {
+                        mBackground.reset();
+                        drawAnimate(context, position);
+                        mLastColorValue = mColorValue;
+                    }
+                } else {
+                    removeAnimation(getNode<Animation>());
                 }
             });
         }
@@ -236,25 +251,51 @@ namespace rose {
         void drawAnimate(gm::Context &context, const Position &containerPosition);
 
         void draw(gm::Context &context, const Position &containerPosition) override {
-            setAnimation(getNode<Animation>(), containerPosition);
+            if (mActionCurve)
+                setAnimation(getNode<Animation>(), containerPosition);
             drawAnimate(context,containerPosition);
         }
 
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
     };
+
+    enum class FrameColorType {
+        InactiveColor,
+        ActiveColor,
+    };
+    struct FrameColor {
+        FrameColorType type{};
+        color::RGBA rgba{};
+
+        explicit FrameColor(FrameColorType type, color::RGBA color) : type(type), rgba(color) {}
+    };
 }
 
 template<typename ManagerClass>
 inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::BorderStyle borderStyle) {
-    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
+    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::FrameElements." );
     manager->set(borderStyle);
     return manager;
 }
 
 template<typename ManagerClass>
 inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::CornerStyle cornerStyle) {
-    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::Frame." );
+    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::FrameElements." );
     manager->set(cornerStyle);
+    return manager;
+}
+
+template <class ManagerClass>
+inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::FrameColor& frameColor) {
+    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::FrameElements." );
+    switch (frameColor.type) {
+        case rose::FrameColorType::InactiveColor:
+            manager->setInactiveColor(frameColor.rgba);
+            break;
+        case rose::FrameColorType::ActiveColor:
+            manager->setActiveColor(frameColor.rgba);
+            break;
+    }
     return manager;
 }
