@@ -22,16 +22,18 @@ int main(int argc, char **argv) {
 
     ImageStore &imageStore{ImageStore::getStore(application.context())};
 
-    std::shared_ptr<Manager> manager{};
-    std::shared_ptr<Widget> widget{};
     application.screen() << wdg<Window>()
-                            << wdg<Manager>() << Id{"row"} << layout<LinearLayout>(Orientation::Vertical) << Position{10,10}
-                                 << wdg<Frame>(0)
+                             << wdg<Frame>(5) << Position{10,10}
+                             << wdg<Manager>() << Id{"row"} << layout<LinearLayout>(Orientation::Vertical)
+                                << wdg<Frame>(0)
                                     << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
-                                    << Parent{} << Parent{}
-                                 << wdg<Frame>(5)
+                                    << endw
+                                << endw
+                                << wdg<Frame>(5)
                                     << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
-                                    << Parent{} << Parent{};
+                                    << endw
+                                << endw
+                             << endw;
 
     application.run();
 }

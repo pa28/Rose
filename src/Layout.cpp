@@ -50,7 +50,7 @@ namespace rose {
                 visual->setScreenRectangle(Rectangle{layoutPos, contentRect.size()});
                 layoutPos.primary(mOrientation) += contentRect.size().primary(mOrientation);
                 layoutRect.sizePri(mOrientation) += contentRect.sizePri(mOrientation);
-                layoutRect.sizeSec(mOrientation) = std::max(layoutRect.sizeSec(mOrientation),contentRect.sizePri(mOrientation));
+                layoutRect.sizeSec(mOrientation) = std::max(layoutRect.sizeSec(mOrientation),contentRect.sizeSec(mOrientation));
             }
             first++;
         }

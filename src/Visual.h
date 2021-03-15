@@ -306,11 +306,11 @@ namespace rose {
         SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
 
         auto container() { return mContainer.lock(); }
-
-        auto container() const { return mContainer.lock(); }
     };
 
     struct Parent {};
+
+    static Parent endw{};
 
     template<class WidgetClass, typename ... Args>
     inline std::shared_ptr<WidgetClass> wdg(Args ... args) {

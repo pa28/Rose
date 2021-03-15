@@ -55,6 +55,12 @@ namespace rose {
 
         virtual ~Node() = default;
 
+        std::shared_ptr<Container> container() const {
+            if (mContainer.expired())
+                return nullptr;
+            return mContainer.lock();
+        }
+
         /**
          * @brief Create a Node with no arguments.
          * @tparam NodeType The type of Node to create.
