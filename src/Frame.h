@@ -53,8 +53,8 @@ namespace rose {
     };
 
     /**
-     * @class Frame
-     * @brief
+     * @class FrameElements
+     * @brief Encapsulation of the visual elements of a Frame.
      */
     class FrameElements {
     protected:
@@ -227,7 +227,7 @@ namespace rose {
     public:
         Frame() noexcept : Manager(), FrameElements() {
             mLayoutManager = std::make_unique<FrameLayoutManager>();
-            animationCallback([&](gm::Context& context, const Position &position, uint32_t frame){
+            mAnimationCallback = [&](gm::Context &context, const Position &position, uint32_t frame) {
                 if (mActionCurve) {
                     auto idx = frame % mActionCurve->size();
                     mColorValue = (*mActionCurve)[idx];
@@ -239,7 +239,13 @@ namespace rose {
                 } else {
                     removeAnimation(getNode<Animation>());
                 }
-            });
+            };
+
+            mAnimationEnableStateCallback = [&](AnimationEnable animationEnable){
+                if (animationEnable == AnimationEnable::Disable && mAnimationEnableState == AnimationEnable::Enable) {
+                    removeAnimation(getNode<Animation>());
+                }
+            };
         }
 
         ~Frame() override = default;
@@ -251,7 +257,7 @@ namespace rose {
         void drawAnimate(gm::Context &context, const Position &containerPosition);
 
         void draw(gm::Context &context, const Position &containerPosition) override {
-            if (mActionCurve)
+            if (mActionCurve && mAnimationEnableState == AnimationEnable::Enable)
                 setAnimation(getNode<Animation>(), containerPosition);
             drawAnimate(context,containerPosition);
         }

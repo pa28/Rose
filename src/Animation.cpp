@@ -29,8 +29,8 @@ namespace rose {
 
     void Animator::animate(gm::Context &context, uint32_t frame) {
         for (auto &animation : mAnimations) {
-            if (animation.first->mAnimate)
-                animation.first->mAnimate(context, animation.second, frame);
+            if (animation.first->mAnimationCallback)
+                animation.first->mAnimationCallback(context, animation.second, frame);
         }
     }
 }

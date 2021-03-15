@@ -16,6 +16,14 @@
 #include "GraphicsModel.h"
 namespace rose {
 
+    /**
+     * @enum AnimationEnable
+     * @brief An enumeration to enable or disable animation.
+     */
+    enum class AnimationEnable {
+        Disable, Enable,
+    };
+
     namespace ActionCurves {
         static constexpr float FrameRate = 30.f;
         constexpr float ac_sin(int t) {
@@ -125,10 +133,17 @@ namespace rose {
         friend class Animator;
     public:
         using Callback = std::function<void(gm::Context& context, const Position&, uint32_t frame)>;
+        using Enable = std::function<void(AnimationEnable animationEnable)>;
+
         std::unique_ptr<ActionCurves::ActionCurve> mActionCurve{};
 
     protected:
-        Callback mAnimate;
+        Callback mAnimationCallback;
+
+        Enable mAnimationEnableStateCallback;
+
+        AnimationEnable mAnimationEnableState{AnimationEnable::Disable};
+
     public:
         Animation();
 
@@ -142,12 +157,14 @@ namespace rose {
             Animator::getAnimator().remove(animation);
         }
 
-        void animationCallback(Callback cb) {
-            mAnimate = std::move(cb);
-        }
-
         void setActionCurve(std::unique_ptr<ActionCurves::ActionCurve> &&actionCurve) {
             mActionCurve = std::move(actionCurve);
+        }
+
+        void setAnimationEnable(AnimationEnable animationEnable) {
+            mAnimationEnableState = animationEnable;
+            if (mAnimationEnableStateCallback)
+                mAnimationEnableStateCallback(animationEnable);
         }
     };
 }
@@ -156,5 +173,12 @@ template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, std::unique_ptr<rose::ActionCurves::ActionCurve>&& curve) {
     static_assert(std::is_base_of_v<rose::Animation,WidgetClass>, "WidgetClass must be derived from rose::Animation.");
     widget->setActionCurve(std::move(curve));
+    return widget;
+}
+
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::AnimationEnable animationEnable) {
+    static_assert(std::is_base_of_v<rose::Animation,WidgetClass>, "WidgetClass must be derived from rose::Animation.");
+    widget->setAnimationEnable(animationEnable);
     return widget;
 }
