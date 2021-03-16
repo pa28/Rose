@@ -72,6 +72,7 @@ namespace rose::gm {
             SDL_QueryTexture(get(), nullptr, nullptr, &size.w, &size.h);
             return size;
         }
+
+        int setAlphaMod(float alpha);
     };
 }
-

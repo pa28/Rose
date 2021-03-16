@@ -68,16 +68,13 @@ namespace rose {
 
         class HeartBeat : public ActionCurve {
         protected:
-            static constexpr std::array<float, 38> data{
-                    ac_sin(0), ac_sin(4), ac_sin(8), ac_sin(12),
-                    ac_sin(16), ac_sin(20), ac_sin(24), ac_sin(28),
-                    0.f, 0.f, 0.f,
-                    ac_sin(0), ac_sin(4), ac_sin(8), ac_sin(12),
-                    ac_sin(16), ac_sin(20), ac_sin(24), ac_sin(28),
-                    0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-                    0.f,
+            static constexpr std::array<float, 30> data{
+                    ac_sin(0), ac_sin(6),ac_sin(12),ac_sin(18),
+                    ac_sin(24), 0.f,0.f, 0.f,0.f, 0.f,
+                    ac_sin(0), ac_sin(6),ac_sin(12),ac_sin(18),
+                    ac_sin(24), 0.f,0.f, 0.f,0.f, 0.f,
+                    0.f, 0.f,0.f, 0.f, 0.f, 0.f,
+                    0.f, 0.f,0.f, 0.f,
             };
 
         public:

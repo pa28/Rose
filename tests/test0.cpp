@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
                          << wdg<Frame>(5) << Position{10, 10} << FrameColor{FrameColorType::InactiveColor, color::DarkYellowHSVA.toRGBA()}
                              << wdg<Manager>() << Id{"row"} << layout<LinearLayout>(Orientation::Vertical, 5)
                                  << wdg<Frame>(0) << curve<ActionCurves::HeartBeat>()
-                                     << FrameColor{FrameColorType::ActiveColor, color::DarkRedHSVA.toRGBA()}
+                                     << FrameColor{FrameColorType::AnimateColor, color::DarkRedHSVA.toRGBA()}
                                          << AnimationEnable{rose::AnimationEnable::Enable}
                                          << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                                              << endw

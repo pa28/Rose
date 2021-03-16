@@ -355,6 +355,7 @@ namespace rose {
         context.fillRect(dst, interpolated);
         context.setDrawBlendMode(SDL_BLENDMODE_BLEND);
         mask.setBlendMode(SDL_BLENDMODE_BLEND);
+        std::cout << ' ' << value << '\t' << interpolated << base << active << '\n';
     }
 
     void FrameElements::drawFrame(gm::Context &context, Rectangle widgetRect) {
@@ -368,13 +369,20 @@ namespace rose {
             }
         }
 
-        if (!mBackground) {
-            mBackground = createBackgroundMask(context, src.size(), mFrameWidth, mCornerStyle == CornerStyle::Round);
-            colorBackgroundMask(context, mBackground, mInactiveColor, mActiveColor, mColorValue);
+        if (!mAnimagedBG) {
+            mAnimagedBG = createBackgroundMask(context, src.size(), mFrameWidth, mCornerStyle == CornerStyle::Round);
+            colorBackgroundMask(context, mAnimagedBG, mActiveColor, mInactiveColor, 0.);
+        }
+
+        if (!mInactiveBG) {
+            mInactiveBG = createBackgroundMask(context, src.size(), mFrameWidth, mCornerStyle == CornerStyle::Round);
+            colorBackgroundMask(context, mInactiveBG, mInactiveColor, mActiveColor, 0.);
         }
 
         context.renderCopy(mBorder, dst);
-        context.renderCopy(mBackground, dst);
+        context.renderCopy(mInactiveBG, dst);
+        mAnimagedBG.setAlphaMod(mColorValue);
+        context.renderCopy(mAnimagedBG, dst);
     }
 
     Rectangle

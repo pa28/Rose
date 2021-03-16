@@ -73,7 +73,8 @@ namespace rose {
         CornerStyle mCornerStyle{CornerStyle::Square};
         bool mInvert{};
         gm::Texture mBorder{};
-        gm::Texture mBackground{};
+        gm::Texture mInactiveBG{};
+        gm::Texture mAnimagedBG{};
 
         /**
          * @enum SelectedCorners
@@ -179,23 +180,28 @@ namespace rose {
         void set(const CornerStyle cornerStyle) {
             mCornerStyle = cornerStyle;
             mBorder.reset();
+            mAnimagedBG.reset();
+            mInactiveBG.reset();
         }
 
         /// Set the state, true = inverted.
         void setState(bool state) {
             mInvert = state;
             mBorder.reset();
+            mAnimagedBG.reset();
+            mInactiveBG.reset();
         }
 
         /// Set the active color.
-        void setActiveColor(const color::RGBA &color) {
+        void setAnimateColor(const color::RGBA &color) {
             mActiveColor = color;
+            mAnimagedBG.reset();
         }
 
         /// Set the background color.
         void setInactiveColor(const color::RGBA &color) {
             mInactiveColor = color;
-            mColorValue = 0.5;
+            mInactiveBG.reset();
         }
 
         [[nodiscard]] bool getState() const { return mInvert; }
@@ -232,7 +238,6 @@ namespace rose {
                     auto idx = frame % mActionCurve->size();
                     mColorValue = (*mActionCurve)[idx];
                     if (mColorValue != mLastColorValue) {
-                        mBackground.reset();
                         drawAnimate(context, position);
                         mLastColorValue = mColorValue;
                     }
@@ -268,7 +273,7 @@ namespace rose {
 
     enum class FrameColorType {
         InactiveColor,
-        ActiveColor,
+        AnimateColor,
     };
     struct FrameColor {
         FrameColorType type{};
@@ -299,8 +304,8 @@ inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> ma
         case rose::FrameColorType::InactiveColor:
             manager->setInactiveColor(frameColor.rgba);
             break;
-        case rose::FrameColorType::ActiveColor:
-            manager->setActiveColor(frameColor.rgba);
+        case rose::FrameColorType::AnimateColor:
+            manager->setAnimateColor(frameColor.rgba);
             break;
     }
     return manager;

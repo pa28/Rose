@@ -19,4 +19,9 @@ namespace rose::gm {
     Texture::Texture(Context &context, Size size) {
         reset(SDL_CreateTexture(context.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.w, size.h));
     }
+
+    int Texture::setAlphaMod(float alpha) {
+        uint8_t alphaMod = static_cast<uint8_t>(255.f * std::clamp(alpha, 0.f, 1.f));
+        return SDL_SetTextureAlphaMod(get(), alphaMod);
+    }
 }
