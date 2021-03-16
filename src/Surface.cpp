@@ -84,7 +84,8 @@ namespace rose::gm {
     }
 
     Texture Surface::toTexture(Context &context) {
-        Texture texture{SDL_CreateTextureFromSurface(context.get(), get())};
+        Texture texture{};
+        texture.reset(SDL_CreateTextureFromSurface(context.get(), get()));
         if (!texture) {
             std::cerr << __PRETTY_FUNCTION__ << " Error: " << SDL_GetError() << '\n';
         }

@@ -246,16 +246,16 @@ namespace rose {
     }
 
     void FrameElements::drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst) {
-        auto texture = gm::CreateTexture(context, src.size());
+        gm::Texture texture{context, src.size()};
 
         auto [useBorder,selectedCorners] = decoration();
 
-        gm::TextureSetBlendMode(texture, SDL_BLENDMODE_NONE);
-        mBorder = gm::CreateTexture(context, dst.size());
+        texture.setBlendMode(SDL_BLENDMODE_NONE);
+        mBorder = gm::Texture{context, dst.size()};
 
         gm::RenderTargetGuard renderTargetGuard(context, mBorder);
         context.renderCopy(texture);
-        gm::TextureSetBlendMode(mBorder, SDL_BLENDMODE_BLEND);
+        mBorder.setBlendMode(SDL_BLENDMODE_BLEND);
 
         ImageId roundCnr = ImageId::NoImage;
         ImageId squareCnr = ImageId::NoImage;
@@ -315,8 +315,8 @@ namespace rose {
 
     gm::Texture
     FrameElements::createBackgroundMask(gm::Context &context, const Size size, int frameWidth, bool roundCorners) {
-        gm::Texture mask = gm::CreateTexture(context, size);
-        gm::TextureSetBlendMode(mask, SDL_BLENDMODE_NONE);
+        gm::Texture mask{context, size};
+        mask.setBlendMode(SDL_BLENDMODE_NONE);
         ImageStore &is{ImageStore::getStore()};
 
         {
@@ -339,7 +339,7 @@ namespace rose {
                 trimSrc.x = 0;
                 is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
             }
-            gm::TextureSetBlendMode(mask, SDL_BLENDMODE_BLEND);
+            mask.setBlendMode(SDL_BLENDMODE_BLEND);
         }
 
         return std::move(mask);
@@ -348,14 +348,13 @@ namespace rose {
     void FrameElements::colorBackgroundMask(gm::Context &context, gm::Texture &mask, const color::RGBA &base,
                                             const color::RGBA &active, float value) {
         value = std::clamp(value, 0.0f, 1.0f);
-        Rectangle dst{Position::Zero, gm::TextureGetSize(mask)};
+        Rectangle dst{Position::Zero, mask.getSize()};
         gm::RenderTargetGuard renderTargetGuard(context, mask);
         context.setDrawBlendMode(SDL_BLENDMODE_ADD);
         auto interpolated = base.interpolate(active, value);
         context.fillRect(dst, interpolated);
         context.setDrawBlendMode(SDL_BLENDMODE_BLEND);
-        gm::TextureSetBlendMode(mask, SDL_BLENDMODE_BLEND);
-//        std::cout << __PRETTY_FUNCTION__ << ' ' << value << interpolated << '\n';
+        mask.setBlendMode(SDL_BLENDMODE_BLEND);
     }
 
     void FrameElements::drawFrame(gm::Context &context, Rectangle widgetRect) {
@@ -365,7 +364,7 @@ namespace rose {
         if (mBorderStyle != BorderStyle::None) {
             if (!mBorder) {
                 drawBackground(context, src, dst);
-                gm::TextureSetBlendMode(mBorder, SDL_BLENDMODE_BLEND);
+                mBorder.setBlendMode(SDL_BLENDMODE_BLEND);
             }
         }
 

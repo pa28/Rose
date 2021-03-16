@@ -177,7 +177,7 @@ namespace rose {
             Size size{};
             auto image = mImageMap.find(imageId);
             if (image != mImageMap.end()) {
-                size = gm::TextureGetSize(image->second);
+                size = image->second.getSize();
             }
             return size;
         }

@@ -28,35 +28,50 @@ namespace rose::gm {
         }
     };
 
+    class Context;
+
     /**
      * @class Texture
      * @brief Abstraction of SDL_Texture
      */
-    using Texture = std::unique_ptr<SDL_Texture,TextureDestroy>;
+    class Texture : public std::unique_ptr<SDL_Texture,TextureDestroy> {
+    public:
+        Texture() = default;
+        ~Texture() = default;
 
-    class Context;
+        Texture(const Texture&) = delete;
+        Texture(Texture &&) = default;
+        Texture& operator=(const Texture &) = delete;
+        Texture& operator=(Texture &&) = default;
 
-    /**
-     * @breif Create a Texture
-     * @param context The Context to use.
-     * @param format The pixel format from SDL_PixelFormatEnum.
-     * @param access The Texture access from SDL_TextureAccess.
-     * @param width The width of the texture.
-     * @param height The height of the texture.
-     */
-    Texture CreateTexture(Context &context, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height);
+        /**
+         * @breif Create a Texture
+         * @param context The Context to use.
+         * @param format The pixel format from SDL_PixelFormatEnum.
+         * @param access The Texture access from SDL_TextureAccess.
+         * @param width The width of the texture.
+         * @param height The height of the texture.
+         */
+        Texture(Context& context, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height);
 
-    /**
-     * @brief Create a Texture
-     * @details Builds a Texture compatible with building up textures within Rose . The pixel format is
-     * SDL_PIXELFORMAT_RGBA8888, the texture access is SDL_TEXTUREACCESS_TARGET.
-     * @param context The renderer to use.
-     * @param size The size of the texture.
-     */
-    Texture CreateTexture(Context &context, Size size);
+        /**
+         * @brief Create a Texture
+         * @details Builds a Texture compatible with building up textures within Rose . The pixel format is
+         * SDL_PIXELFORMAT_RGBA8888, the texture access is SDL_TEXTUREACCESS_TARGET.
+         * @param context The renderer to use.
+         * @param size The size of the texture.
+         */
+        Texture(Context &context, Size size);
 
-    int TextureSetBlendMode(Texture& texture, SDL_BlendMode blendMode);
+        int setBlendMode(SDL_BlendMode blendMode) {
+            return SDL_SetTextureBlendMode(get(), blendMode);
+        }
 
-    Size TextureGetSize(Texture &texture);
+        Size getSize() {
+            Size size{};
+            SDL_QueryTexture(get(), nullptr, nullptr, &size.w, &size.h);
+            return size;
+        }
+    };
 }
 

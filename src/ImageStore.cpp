@@ -113,7 +113,7 @@ namespace rose {
     void copyFullTexture(gm::Context &renderer, gm::Texture &src, gm::Texture &dst) {
         gm::RenderTargetGuard renderTargetGuard(renderer, dst);
         renderer.renderCopy(src);
-        gm::TextureSetBlendMode(dst, SDL_BLENDMODE_BLEND);
+        dst.setBlendMode(SDL_BLENDMODE_BLEND);
     }
 
     gm::Surface createBlankSurface(int size) {
@@ -196,22 +196,22 @@ namespace rose {
         gm::Texture texture;
 
         texture = surfaceBevelOut.toTexture(context);
-        gm::Texture bevelOutCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture bevelOutCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, bevelOutCornerTrim);
         setImage(ImageId::BevelOutSquareCorners, std::move(bevelOutCornerTrim));
 
         texture = surfaceBevelIn.toTexture(context);
-        gm::Texture bevelInCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture bevelInCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, bevelInCornerTrim);
         setImage(ImageId::BevelInSquareCorners, std::move(bevelInCornerTrim));
 
         texture = surfaceNotchOut.toTexture(context);
-        gm::Texture notchOutCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture notchOutCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, notchOutCornerTrim);
         setImage(ImageId::NotchOutSquareCorners, std::move(notchOutCornerTrim));
 
         texture = surfaceNotchIn.toTexture(context);
-        gm::Texture notchInCornerTrim = CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture notchInCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, notchInCornerTrim);
         setImage(ImageId::NotchInSquareCorners, std::move(notchInCornerTrim));
     }
@@ -318,29 +318,29 @@ namespace rose {
         gm::Texture texture;
 
         texture = surfaceBevelOut.toTexture(context);
-        gm::Texture bevelOutCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture bevelOutCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, bevelOutCornerTrim);
         setImage(ImageId::BevelOutRoundCorners, std::move(bevelOutCornerTrim));
 
         texture = surfaceBevelIn.toTexture(context);
-        gm::Texture bevelInCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture bevelInCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, bevelInCornerTrim);
         setImage(ImageId::BevelInRoundCorners, std::move(bevelInCornerTrim));
 
         texture = surfaceNotchOut.toTexture(context);
-        gm::Texture notchOutCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture notchOutCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, notchOutCornerTrim);
         setImage(ImageId::NotchOutRoundCorners, std::move(notchOutCornerTrim));
 
         texture = surfaceNotchIn.toTexture(context);
-        gm::Texture notchInCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture notchInCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, notchInCornerTrim);
         setImage(ImageId::NotchInRoundCorners, std::move(notchInCornerTrim));
 
         texture = roundCorner.toTexture(context);
-        gm::Texture roundCornerTrim = gm::CreateTexture(context, Size{radius * 2, radius * 2});
+        gm::Texture roundCornerTrim{context, Size{radius * 2, radius * 2}};
         copyFullTexture(context, texture, roundCornerTrim);
-        gm::TextureSetBlendMode(roundCornerTrim, SDL_BLENDMODE_NONE);
+        roundCornerTrim.setBlendMode(SDL_BLENDMODE_NONE);
         setImage(ImageId::RoundCornerTrim, std::move(roundCornerTrim));
     }
 
@@ -420,10 +420,10 @@ namespace rose {
             }
 
             texture = surface.toTexture(context);
-            gm::Texture center = gm::CreateTexture(context, Size{radius * 2, radius * 2});
+            gm::Texture center{context, Size{radius * 2, radius * 2}};
             gm::RenderTargetGuard renderTargetGuard(context, center);
             context.renderCopy(texture);
-            gm::TextureSetBlendMode(center, SDL_BLENDMODE_BLEND);
+            center.setBlendMode(SDL_BLENDMODE_BLEND);
             setImage(id, std::move(center));
         }
     }

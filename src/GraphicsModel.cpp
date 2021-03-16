@@ -58,11 +58,6 @@ namespace rose::gm {
     };
 #endif //GRAPHICS_MODEL_SDL2
 
-    Texture Context::createTexture(Size size) {
-        auto texture = CreateTexture(*this, size);
-        return std::move(texture);
-    }
-
     int Context::renderCopy(const Texture &texture, Rectangle dst) {
         SDL_Rect dstRect{dst.x, dst.y, dst.w, dst.h};
 
@@ -82,7 +77,7 @@ namespace rose::gm {
     void Context::copyFullTexture(Texture &source, Texture &destination) {
         RenderTargetGuard renderTargetGuard(*this, destination);
         renderCopy(source);
-        TextureSetBlendMode(destination, SDL_BLENDMODE_BLEND);
+        destination.setBlendMode(SDL_BLENDMODE_BLEND);
     }
 
     int Context::renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
@@ -223,8 +218,8 @@ namespace rose::gm {
     }
 
     void GraphicsModel::drawAll(std::shared_ptr<Screen> &screen) {
-        if (!mBackground || (TextureGetSize(mBackground) != screenRectangle().size())) {
-            mBackground = CreateTexture(mContext, screenRectangle().size());
+        if (!mBackground || (mBackground.getSize() != screenRectangle().size())) {
+            mBackground = Texture{mContext, screenRectangle().size()};
             mRedrawBackground = true;
         }
 
