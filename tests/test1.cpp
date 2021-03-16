@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
     Environment &environment{Environment::getEnvironment()};
     Application application{argc, argv};
 
-    application.initialize(environment.appName(), Size{1600, 960});
+    application.initialize(environment.appName(), Size{800, 480});
 
     ImageStore &imageStore{ImageStore::getStore(application.context())};
 
