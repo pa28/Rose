@@ -14,9 +14,17 @@
 using namespace rose;
 
 class ChronoLayout : public LayoutManager {
+public:
+
+    enum Layout {
+        TopLeft, TopRight, BottomLeft, BottomRight,
+    };
+
 protected:
+    Layout mLayout{TopLeft};
 
 public:
+
     ChronoLayout() = default;
 
     ~ChronoLayout() override = default;
@@ -54,9 +62,30 @@ public:
 
         std::cout << "    width: " << width << ", height: " << height << ", Ratio: " << (float)width/(float)height << '\n';
 
-        Rectangle mapRectangle{Position::Zero, Size{width,height}};
-        Rectangle sideRect{Position{mapRectangle.w, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-        Rectangle botRect{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+        Rectangle mapRectangle, sideRect, botRect;
+
+        switch (mLayout) {
+            case TopLeft:
+                mapRectangle = Rectangle{Position::Zero, Size{width,height}};
+                sideRect = Rectangle{Position{mapRectangle.w, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                break;
+            case TopRight:
+                mapRectangle = Rectangle{Position{screenRect.w - width, 0}, Size{width,height}};
+                sideRect = Rectangle{Position{0, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                break;
+            case BottomLeft:
+                mapRectangle = Rectangle{Position{0, screenRect.h - height}, Size{width,height}};
+                sideRect = Rectangle{Position{mapRectangle.w, mapRectangle.y}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                break;
+            case BottomRight:
+                mapRectangle = Rectangle{Position{screenRect.w - width, screenRect.h - height}, Size{width,height}};
+                sideRect = Rectangle{Position{0, mapRectangle.y}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                break;
+        }
 
         if (first != last) {
             std::dynamic_pointer_cast<Visual>(*first)->setScreenRectangle(mapRectangle);
