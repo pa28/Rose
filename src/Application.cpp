@@ -77,6 +77,8 @@ namespace rose {
     }
 
     void Application::windowPositionChange(EventSemantics::WindowEventType type, Position position) {
+        std::cout << __PRETTY_FUNCTION__ << position << " Display: "
+            << SDL_GetWindowDisplayIndex(getSdlWindow().get()) << '\n';
         if (mAppState == EventSemantics::Restored) {
             Settings &settings{Settings::getSettings()};
             auto borders = windowBorders();
@@ -236,8 +238,9 @@ namespace rose {
                     SDL_RestoreWindow(mApplication.getSdlWindow().get());
                     break;
                 case SDLK_F3:
-                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
-                    SDL_MaximizeWindow(mApplication.getSdlWindow().get());
+//                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
+//                    SDL_MaximizeWindow(mApplication.getSdlWindow().get());
+//                    break;
                 case SDLK_F4:
                     SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
                     break;

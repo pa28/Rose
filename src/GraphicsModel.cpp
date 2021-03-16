@@ -137,18 +137,6 @@ namespace rose::gm {
 
         atexit(SDL_Quit);
 
-        std::cout << "    Number of displays: " << SDL_GetNumVideoDisplays() << '\n';
-        for (int i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
-            SDL_Rect displayBounds{0,0,0,0};
-
-            if (SDL_GetDisplayBounds(i, &displayBounds)) {
-                mDisplayBounds.emplace_back(Rectangle{});
-            } else {
-                mDisplayBounds.emplace_back(Rectangle{displayBounds.x, displayBounds.y, displayBounds.w, displayBounds.h});
-                std::cout << "    Display " << i << ": " << mDisplayBounds.back() << '\n';
-            }
-        }
-
         SDL_Window *window;        // Declare a pointer to an SDL_Window
         uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
@@ -171,8 +159,22 @@ namespace rose::gm {
         ));
 
         if (mSdlWindow) {
+            std::cout << "    Number of displays: " << SDL_GetNumVideoDisplays() << ", On: "
+                      << SDL_GetWindowDisplayIndex(mSdlWindow.get()) << '\n';
+            for (int i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
+                SDL_Rect displayBounds{0, 0, 0, 0};
+
+                if (SDL_GetDisplayBounds(i, &displayBounds)) {
+                    mDisplayBounds.emplace_back(Rectangle{});
+                } else {
+                    mDisplayBounds.emplace_back(
+                            Rectangle{displayBounds.x, displayBounds.y, displayBounds.w, displayBounds.h});
+                    std::cout << "    Display " << i << ": " << mDisplayBounds.back() << '\n';
+                }
+            }
+
             mContext = Context{mSdlWindow, -1, SDL_RENDERER_ACCELERATED
-                                                      | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC};
+                                               | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC};
 
             if (mContext) {
                 mContext.setDrawBlendMode(SDL_BLENDMODE_BLEND);
