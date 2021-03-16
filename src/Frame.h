@@ -70,7 +70,7 @@ namespace rose {
         int mFrameWidth{2};
         Padding mFramePadding{};
         BorderStyle mBorderStyle{BorderStyle::None};
-        CornerStyle mCornerStyle{CornerStyle::Square};
+        CornerStyle mCornerStyle{CornerStyle::Round};
         bool mInvert{};
         gm::Texture mBorder{};
         gm::Texture mInactiveBG{};
@@ -237,10 +237,10 @@ namespace rose {
                 if (mActionCurve) {
                     auto idx = frame % mActionCurve->size();
                     mColorValue = (*mActionCurve)[idx];
-                    if (mColorValue != mLastColorValue) {
+//                    if (mColorValue != mLastColorValue) {
                         drawAnimate(context, position);
                         mLastColorValue = mColorValue;
-                    }
+//                    }
                 } else {
                     removeAnimation(getNode<Animation>());
                 }

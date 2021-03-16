@@ -40,7 +40,7 @@ namespace rose {
             virtual float operator[](size_t idx) const = 0;
         };
 
-        class PositiveSine : public ActionCurve {
+        class PulsePerSecond : public ActionCurve {
         protected:
             static constexpr std::array<float, 30> data{
                     ac_sin(0), ac_sin(2), ac_sin(4), ac_sin(6),
@@ -53,9 +53,9 @@ namespace rose {
             };
 
         public:
-            PositiveSine() = default;
+            PulsePerSecond() = default;
 
-            ~PositiveSine() override = default;
+            ~PulsePerSecond() override = default;
 
             [[nodiscard]] size_t size() const override {
                 return data.size();
