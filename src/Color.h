@@ -510,9 +510,9 @@ namespace rose::color {
     static constexpr color::RGBA DarkRightColor{DarkBaseColorHSVA.modValue(-0.15)};
     static constexpr color::RGBA DarkInvertColor{DarkBaseColorHSVA.modValue(-0.075)};
     static constexpr color::RGBA DarkTextColour{DarkBaseColorHSVA.contrasting()};
-    static constexpr color::HSVA DarkRedHSVA{ 5.f, 1.f, 0.6f, 1.f};
-    static constexpr color::HSVA DarkGreenHSVA{ 100.f, 1.f, 0.6f, 1.f};
-    static constexpr color::HSVA DarkYellowHSVA{ 50.f, 1.f, 0.6f, 1.f};
+    static constexpr color::HSVA DarkRedHSVA{ 0.f, 1.f, 0.55f, 1.f};
+    static constexpr color::HSVA DarkGreenHSVA{ 95.f, 1.f, 0.55f, 1.f};
+    static constexpr color::HSVA DarkYellowHSVA{ 50.f, 1.f, 0.55f, 1.f};
 }
 
 inline std::ostream& operator<<(std::ostream& strm, const rose::color::RGBA& rgba) {

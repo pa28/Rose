@@ -125,8 +125,8 @@ namespace rose {
     void Application::layout() {
         for (auto &content : ReverseContainerView(*mScreen)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                window->layout(mGraphicsModel.context(),
-                               mGraphicsModel.displayBounds(mGraphicsModel.currentDisplayIndex()));
+                window->layout(mGraphicsModel.context(), mGraphicsModel.screenRectangle());
+//                               mGraphicsModel.displayBounds(mGraphicsModel.currentDisplayIndex()));
             }
         }
         mGraphicsModel.redrawBackground();
@@ -222,7 +222,28 @@ namespace rose {
 
     void EventSemantics::keyboardEvent(SDL_KeyboardEvent &e) {
         std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID
-                  << ", state: " << (uint32_t) e.state << ", repeat: " << (uint32_t) e.repeat << '\n';
+                  << ", state: " << (uint32_t) e.state << ", repeat: " << (uint32_t) e.repeat
+                  << ' ' << SDL_GetKeyName(e.keysym.sym) << '\n';
+        string keyName{SDL_GetKeyName(e.keysym.sym)};
+        if (e.keysym.mod & KMOD_CTRL)
+            switch (e.keysym.sym) {
+                case SDLK_F1:
+//                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
+                    SDL_MinimizeWindow(mApplication.getSdlWindow().get());
+                    break;
+                case SDLK_F2:
+                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
+                    SDL_RestoreWindow(mApplication.getSdlWindow().get());
+                    break;
+                case SDLK_F3:
+                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
+                    SDL_MaximizeWindow(mApplication.getSdlWindow().get());
+                case SDLK_F4:
+                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    break;
+                default:
+                    break;
+            }
     }
 
     void EventSemantics::mouseMotionEvent(SDL_MouseMotionEvent &e) {

@@ -381,6 +381,10 @@ namespace rose {
     Rectangle
     FrameLayoutManager::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                       LayoutManager::Itr last) {
+        if (first == last) {
+            return Rectangle{};
+        }
+
         Rectangle layoutRect{};
         if (auto manager = std::dynamic_pointer_cast<Manager>(*first); manager) {
             layoutRect = manager->layout(context, screenRect);

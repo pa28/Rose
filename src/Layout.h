@@ -48,5 +48,18 @@ namespace rose {
         Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                 LayoutManager::Itr last) override;
     };
+
+    class PlacementLayout : public LayoutManager {
+    protected:
+
+    public:
+        PlacementLayout() = default;
+
+        ~PlacementLayout() override = default;
+
+        /// Layout the contents of the associated manager.
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                LayoutManager::Itr last) override;
+    };
 }
 

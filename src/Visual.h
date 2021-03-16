@@ -11,6 +11,7 @@
 #include <iostream>
 #include <utility>
 #include <optional>
+#include <limits>
 #include "StructuredTypes.h"
 #include "Types.h"
 #include "Utilities.h"
@@ -52,6 +53,67 @@ namespace rose {
         }
     };
 
+    class LayoutHint {
+    public:
+        enum Attachment : int {
+            None,           ///< No attachment.
+            TopLeft,        ///< Attach to the top left corner of the container.
+            TopRight,       ///< Attach to the top right corner of the container.
+            BottomLeft,     ///< Attach to the bottom left corner of the container.
+            BottomRight,    ///< Attach to the bottom right corner of the container.
+            Top,            ///< Attach top to the top of the container.
+            Left,           ///< Attach left to the left of the container.
+            TopTo,          ///< Attach top to the bottom of indexed object.
+            LeftTo,         ///< Attach left to the right of indexed object.
+            Bottom,         ///< Attach bottom to the bottom of the container.
+            Right,          ///< Attach right to the right of the container.
+            BottomTo,       ///< Attach bottom to the top of indexed object.
+            RightTo,        ///< Attach right to the left of indexed object.
+            TopWith,        ///< Set top even with top of indexed object.
+            LeftWith,       ///< Set left even with left of index object.
+            BottomWith,     ///< Set bottom even with bottom of indexed object.
+            RightWith,      ///< Set right even with right of indexed object.
+        };
+
+        static constexpr size_t RefIndexNone = std::numeric_limits<size_t>::max();
+
+    protected:
+        Attachment mAttachment{None};
+        size_t mRefIndex{RefIndexNone};
+        Id mRefId{};
+
+    public:
+        LayoutHint() = default;
+
+        virtual ~LayoutHint() = default;
+
+        explicit LayoutHint(Attachment attachment) {
+            mAttachment = attachment;
+        }
+
+        LayoutHint(Attachment attachment, size_t refIndex) {
+            mAttachment = attachment;
+            mRefIndex = refIndex;
+        }
+
+        LayoutHint(Attachment attachment, Id refId) {
+            mAttachment = attachment;
+            mRefId = refId;
+        }
+
+        [[nodiscard]] Attachment attachment() const {
+            return mAttachment;
+        }
+
+        [[nodiscard]] size_t refIndex() const {
+            return mRefIndex;
+        }
+
+        bool operator<(const LayoutHint& other) const noexcept {
+            return static_cast<int>(mAttachment) < static_cast<int>(other.mAttachment);
+        }
+    };
+
     /**
      * @class Visual
      * @brief The properties common to all visual objects on the screen.
@@ -59,6 +121,8 @@ namespace rose {
      * may or may not be honoured.
      */
     class Visual {
+        friend class LayoutManager;
+
     protected:
         Position mPos{};            ///< Position relative to the container, arrived at by layout.
         Size mSize{};               ///< The size on screen, arrived at by layout.
@@ -69,6 +133,8 @@ namespace rose {
         Id mId{};                   ///< The object Id string.
         State mState{};             ///< The object state Id string.
         bool mVisible{true};        ///< If true the object is visible.
+
+        std::vector<LayoutHint> mLayoutHints{};     ///< A list of LayoutHints for the LayoutManager.
 
     public:
         /**
@@ -129,7 +195,7 @@ namespace rose {
         }
 
         /// Check visibility.
-        constexpr bool isVisible() const noexcept {
+        [[nodiscard]] constexpr bool isVisible() const noexcept {
             return mVisible;
         }
 
@@ -141,6 +207,11 @@ namespace rose {
         /// Set Id
         void setId(const Id& id) noexcept {
             mId = id;
+        }
+
+        /// Add a LayoutHint
+        void addLayoutHint(const LayoutHint &hint) {
+            mLayoutHints.push_back(hint);
         }
     };
 
@@ -217,6 +288,14 @@ namespace rose {
     protected:
         size_t mMaxContent{0};
 
+        static std::vector<LayoutHint>& getLayoutHints(std::shared_ptr<Visual> &visual) {
+            return visual->mLayoutHints;
+        }
+
+        static Rectangle getScreenRectangle(std::shared_ptr<Visual> &visual) {
+            return Rectangle{visual->mPos, visual->mSize};
+        }
+
     public:
         LayoutManager() = default;
         virtual ~LayoutManager() = default;
@@ -282,8 +361,6 @@ namespace rose {
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         void focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result);
-
-        auto container() const { return mContainer.lock(); }
 
         void setLayoutManager(std::unique_ptr<LayoutManager> &&layoutManager) {
             mLayoutManager = std::move(layoutManager);
@@ -383,5 +460,12 @@ template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Id& id) {
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
     widget->setId(id);
+    return widget;
+}
+
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::LayoutHint& hint) {
+    static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
+    widget->addLayoutHint(hint);
     return widget;
 }

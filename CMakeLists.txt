@@ -136,6 +136,9 @@ endif()
 if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
     add_executable(Test0 tests/test0.cpp)
     target_link_libraries(Test0 ${RoseLibraries})
+
+    add_executable(Test1 tests/test1.cpp)
+    target_link_libraries(Test1 ${RoseLibraries})
 endif()
 
 add_executable(Rose main.cpp)

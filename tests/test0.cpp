@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
                                          << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                                              << endw
                                          << endw
-                                 << wdg<Frame>(5) << curve<ActionCurves::PositiveSine>()
+                                 << wdg<Frame>(5) << curve<ActionCurves::PositiveSine>() << LayoutHint{LayoutHint::BottomRight}
                                      << FrameColor{FrameColorType::InactiveColor, color::DarkGreenHSVA.toRGBA()}
                                          << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
                                              << endw

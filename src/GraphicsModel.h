@@ -528,6 +528,10 @@ namespace rose::gm {
             SDL_GetWindowBordersSize(mSdlWindow.get(), &p.t, &p.l, &p.b, &p.r);
             return p;
         }
+
+        SdlWindow& getSdlWindow() {
+            return mSdlWindow;
+        }
     };
 
     /**

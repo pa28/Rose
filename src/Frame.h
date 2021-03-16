@@ -69,8 +69,8 @@ namespace rose {
         float mColorValue{}, mLastColorValue{};
         int mFrameWidth{2};
         Padding mFramePadding{};
-        BorderStyle mBorderStyle{BorderStyle::Notch};
-        CornerStyle mCornerStyle{CornerStyle::Round};
+        BorderStyle mBorderStyle{BorderStyle::None};
+        CornerStyle mCornerStyle{CornerStyle::Square};
         bool mInvert{};
         gm::Texture mBorder{};
         gm::Texture mBackground{};

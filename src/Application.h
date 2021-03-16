@@ -156,6 +156,10 @@ namespace rose {
             return mGraphicsModel.windowBorders();
         }
 
+        gm::SdlWindow& getSdlWindow() {
+            return mGraphicsModel.getSdlWindow();
+        }
+
         virtual void run();
     };
 }

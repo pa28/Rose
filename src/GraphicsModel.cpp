@@ -155,7 +155,7 @@ namespace rose::gm {
         }
 
         SDL_Window *window;        // Declare a pointer to an SDL_Window
-        uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+        uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
