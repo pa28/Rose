@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 
     application.screen() << wdg<Window>()
                          << wdg<Frame>(5) << Position{10, 10} << FrameColor{FrameColorType::InactiveColor, color::DarkYellowHSVA.toRGBA()}
-                         << wdg<Manager>() << Id{"row"} << layout<LinearLayout>(Orientation::Vertical, 5)
+                         << wdg<Manager>() << Id{"row"} << makeLayout<LinearLayout>(Orientation::Vertical, 5)
                          << wdg<Frame>(0) << curve<ActionCurves::HeartBeat>()
                          << FrameColor{FrameColorType::AnimateColor, color::DarkRedHSVA.toRGBA()}
                          << FrameColor{FrameColorType::InactiveColor, color::DarkRedHSVA.withValue(0.25).toRGBA()}

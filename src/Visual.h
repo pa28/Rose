@@ -309,7 +309,7 @@ namespace rose {
     };
 
     template<class Layout, typename ... Args>
-    std::unique_ptr<Layout> layout(Args ... args) {
+    std::unique_ptr<Layout> makeLayout(Args ... args) {
         static_assert(std::is_base_of_v<LayoutManager, Layout>, "Layout must be derived from LayoutManager.");
         return std::make_unique<Layout>(args ...);
     }
@@ -365,6 +365,8 @@ namespace rose {
         void setLayoutManager(std::unique_ptr<LayoutManager> &&layoutManager) {
             mLayoutManager = std::move(layoutManager);
         }
+
+        std::unique_ptr<LayoutManager>& layoutManager() { return mLayoutManager; }
     };
 
     class Widget : public Visual, public Node {
