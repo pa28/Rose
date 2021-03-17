@@ -26,12 +26,14 @@ namespace rose {
         using WindowStateChangeCallback = std::function<void(Application&, WindowEventType)>;
         using WindowPositionChangeCallback = std::function<void(Application&, WindowEventType, Position)>;
         using WindowSizeChangeCallback = std::function<void(Application&, WindowEventType, Size)>;
+        using KeyboardEventCallback = std::function<bool(Application&, const SDL_KeyboardEvent&)>;
 
     protected:
         Application& mApplication;
         WindowSizeChangeCallback windowSizeChangeCallback;
         WindowPositionChangeCallback windowPositionChangeCallback;
         WindowStateChangeCallback windowStateChangeCallback;
+        KeyboardEventCallback keyboardEventCallback;
 
         void windowStateChange(WindowEventType type) {
             if (windowStateChangeCallback)
@@ -55,7 +57,6 @@ namespace rose {
 
         explicit EventSemantics(Application& application) : mApplication(application) {}
 
-#if GRAPHICS_MODEL_SDL2
         void onEvent(SDL_Event &e);
 
         void windowEvent(SDL_WindowEvent &e);
@@ -67,7 +68,6 @@ namespace rose {
         void mouseButtonEvent(SDL_MouseButtonEvent &e);
 
         void mouseWheelEvent(SDL_MouseWheelEvent &e);
-#endif
 
         void setWindowStateChangeCallback(WindowStateChangeCallback callback) {
             windowStateChangeCallback = std::move(callback);
@@ -79,6 +79,10 @@ namespace rose {
 
         void setWindowSizeChangeCallback(WindowSizeChangeCallback callback) {
             windowSizeChangeCallback = std::move(callback);
+        }
+
+        void setKeyboardEventCallback(KeyboardEventCallback callback) {
+            keyboardEventCallback = std::move(callback);
         }
     };
 
@@ -145,6 +149,8 @@ namespace rose {
         virtual void windowSizeChange(EventSemantics::WindowEventType type, Size size);
 
         virtual void windowPositionChange(EventSemantics::WindowEventType type, Position position);
+
+        virtual bool keyboardEventCallback(const SDL_KeyboardEvent& keyboardEvent);
 
         gm::Context& context() { return mGraphicsModel.context(); }
 

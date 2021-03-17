@@ -13,6 +13,41 @@
 
 using namespace rose;
 
+struct Test1 : public Application {
+    Test1() = delete;
+
+    ~Test1() = default;
+
+    Test1(int argc, char **argv) : Application(argc, argv) {}
+
+    bool keyboardEventCallback(const SDL_KeyboardEvent &keyboardEvent) override {
+        static Size Size0{800, 480};
+        static Size Size1{1600, 960};
+        static Size Size2{2400, 1440};
+        static Size Size3{3200, 1920};
+
+        if (keyboardEvent.keysym.mod & (uint) KMOD_CTRL) {
+            auto displayIndex = SDL_GetWindowDisplayIndex(getSdlWindow().get());
+            Size size{};
+            if (keyboardEvent.keysym.sym == SDLK_F8 && mGraphicsModel.displayBounds(displayIndex).size() >= Size3)
+                size = Size3;
+            else if (keyboardEvent.keysym.sym == SDLK_F7 && mGraphicsModel.displayBounds(displayIndex).size() >= Size2)
+                size = Size2;
+            else if (keyboardEvent.keysym.sym == SDLK_F6 && mGraphicsModel.displayBounds(displayIndex).size() >= Size1)
+                size = Size1;
+            else if (keyboardEvent.keysym.sym == SDLK_F5 && mGraphicsModel.displayBounds(displayIndex).size() >= Size0)
+                size = Size0;
+            else
+                return false;
+
+            SDL_SetWindowSize(getSdlWindow().get(), size.w, size.h);
+            windowSizeChange(EventSemantics::WindowEventType::SizeChanged, size);
+        }
+
+        return Application::keyboardEventCallback(keyboardEvent);
+    }
+};
+
 class ChronoLayout : public LayoutManager {
 public:
 
@@ -158,7 +193,7 @@ public:
 
 int main(int argc, char **argv) {
     Environment &environment{Environment::getEnvironment()};
-    Application application{argc, argv};
+    Test1 application{argc, argv};
 
     application.initialize(environment.appName(), Size{800, 480});
 

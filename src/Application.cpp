@@ -88,10 +88,43 @@ namespace rose {
         }
     }
 
+    bool Application::keyboardEventCallback(const SDL_KeyboardEvent &keyboardEvent) {
+        std::cout << __PRETTY_FUNCTION__ << " Id: " << keyboardEvent.windowID
+                  << ", state: " << (uint32_t) keyboardEvent.state << ", repeat: " << (uint32_t) keyboardEvent.repeat
+                  << ' ' << SDL_GetKeyName(keyboardEvent.keysym.sym) << '\n';
+
+        string keyName{SDL_GetKeyName(keyboardEvent.keysym.sym)};
+        if (keyboardEvent.keysym.mod & (uint)KMOD_CTRL)
+            switch (keyboardEvent.keysym.sym) {
+                case SDLK_F1:
+                    SDL_MinimizeWindow(getSdlWindow().get());
+                    return true;
+                case SDLK_F2:
+                    SDL_SetWindowFullscreen(getSdlWindow().get(), 0);
+                    SDL_RestoreWindow(getSdlWindow().get());
+                    return true;
+                case SDLK_F3:
+                    if (SDL_GetWindowFlags(getSdlWindow().get()) & (uint)SDL_WINDOW_RESIZABLE) {
+                        SDL_SetWindowFullscreen(getSdlWindow().get(), 0);
+                        SDL_MaximizeWindow(getSdlWindow().get());
+                    } else {
+                        SDL_SetWindowFullscreen(getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    }
+                    return true;
+                case SDLK_F4:
+                    SDL_SetWindowFullscreen(getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    return true;
+                default:
+                    break;
+            }
+        return false;
+    }
+
     void Application::initialize(const std::string &title, Size defaultSize) {
         mEventSemantics.setWindowStateChangeCallback(&Application::windowStateChange);
         mEventSemantics.setWindowSizeChangeCallback(&Application::windowSizeChange);
         mEventSemantics.setWindowPositionChangeCallback(&Application::windowPositionChange);
+        mEventSemantics.setKeyboardEventCallback(&Application::keyboardEventCallback);
 
         mGraphicsModel.eventCallback = [&](SDL_Event e) {
             mEventSemantics.onEvent(e);
@@ -162,9 +195,9 @@ namespace rose {
             case SDL_FINGERMOTION:
             case SDL_FINGERDOWN:
             case SDL_FINGERUP:
-                break;
+//                break;
             case SDL_MULTIGESTURE:
-                break;
+//                break;
             case SDL_KEYMAPCHANGED:
                 break;
             default:
@@ -223,30 +256,9 @@ namespace rose {
     }
 
     void EventSemantics::keyboardEvent(SDL_KeyboardEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID
-                  << ", state: " << (uint32_t) e.state << ", repeat: " << (uint32_t) e.repeat
-                  << ' ' << SDL_GetKeyName(e.keysym.sym) << '\n';
-        string keyName{SDL_GetKeyName(e.keysym.sym)};
-        if (e.keysym.mod & KMOD_CTRL)
-            switch (e.keysym.sym) {
-                case SDLK_F1:
-//                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
-                    SDL_MinimizeWindow(mApplication.getSdlWindow().get());
-                    break;
-                case SDLK_F2:
-                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
-                    SDL_RestoreWindow(mApplication.getSdlWindow().get());
-                    break;
-                case SDLK_F3:
-//                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), 0);
-//                    SDL_MaximizeWindow(mApplication.getSdlWindow().get());
-//                    break;
-                case SDLK_F4:
-                    SDL_SetWindowFullscreen(mApplication.getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
-                    break;
-                default:
-                    break;
-            }
+        if (keyboardEventCallback)
+            if (keyboardEventCallback(mApplication, e))
+                return;
     }
 
     void EventSemantics::mouseMotionEvent(SDL_MouseMotionEvent &e) {
