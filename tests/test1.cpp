@@ -4,11 +4,8 @@
 #include "GraphicsModel.h"
 #include "Application.h"
 #include "Font.h"
-#include "Frame.h"
-#include "Image.h"
 #include "ImageStore.h"
 #include "Layout.h"
-#include "Text.h"
 #include "Types.h"
 
 using namespace rose;
@@ -35,23 +32,17 @@ public:
 
         std::cout << "\n\n" << __PRETTY_FUNCTION__ << screenRect << '\n';
 
-        int width, height, side, bottom;
+        int width, height;
 
         if (screenRect.size() < Size(800, 480)) {
             width = 660;
             height = 330;
-            side = 140;
-            bottom = 150;
         } else if (screenRect.size() < Size{1600, 960}) {
-            side = 140;
-            bottom = 150;
-            width = screenRect.w - side;
-            height = screenRect.h - bottom;
+            width = screenRect.w - 140;
+            height = screenRect.h - 150;
         } else {
-            side = 280;
-            bottom = 300;
-            width = screenRect.w - side;
-            height = screenRect.h - bottom;
+            width = screenRect.w - 280;
+            height = screenRect.h - 300;
         }
 
         if ((float) width / (float) height > 2.0) {
@@ -241,7 +232,7 @@ struct Test1 : public Application {
 
     void build() {
         auto m = screen() << wdg<Window>()
-                          << wdg<Manager>() >> mManager << rose::makeLayout<ChronoLayout>()
+                          << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                           << wdg<TestMap>() << endw
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
