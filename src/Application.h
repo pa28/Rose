@@ -27,6 +27,9 @@ namespace rose {
         using WindowPositionChangeCallback = std::function<void(Application&, WindowEventType, Position)>;
         using WindowSizeChangeCallback = std::function<void(Application&, WindowEventType, Size)>;
         using KeyboardEventCallback = std::function<bool(Application&, const SDL_KeyboardEvent&)>;
+        using MouseMotionEventCallback = std::function<bool(Application&, const SDL_MouseMotionEvent&)>;
+        using MouseButtonEventCallback = std::function<bool(Application&, const SDL_MouseButtonEvent&)>;
+        using MouseWheelEventCallback = std::function<bool(Application&, const SDL_MouseWheelEvent&)>;
 
     protected:
         Application& mApplication;
@@ -34,6 +37,9 @@ namespace rose {
         WindowPositionChangeCallback windowPositionChangeCallback;
         WindowStateChangeCallback windowStateChangeCallback;
         KeyboardEventCallback keyboardEventCallback;
+        MouseMotionEventCallback mouseMotionEventCallback;
+        MouseButtonEventCallback mouseButtonEventCallback;
+        MouseWheelEventCallback mouseWheelEventCallback;
 
         void windowStateChange(WindowEventType type) {
             if (windowStateChangeCallback)
@@ -83,6 +89,18 @@ namespace rose {
 
         void setKeyboardEventCallback(KeyboardEventCallback callback) {
             keyboardEventCallback = std::move(callback);
+        }
+
+        void setMouseMotionEventCallback(MouseMotionEventCallback callback) {
+            mouseMotionEventCallback = std::move(callback);
+        }
+
+        void setMouseButtonEventCallback(MouseButtonEventCallback callback) {
+            mouseButtonEventCallback = std::move(callback);
+        }
+
+        void setMouseWheelEventCallback(MouseWheelEventCallback callback) {
+            mouseWheelEventCallback = std::move(callback);
         }
     };
 
@@ -151,6 +169,12 @@ namespace rose {
         virtual void windowPositionChange(EventSemantics::WindowEventType type, Position position);
 
         virtual bool keyboardEventCallback(const SDL_KeyboardEvent& keyboardEvent);
+
+        virtual bool mouseMotionEventCallback(const SDL_MouseMotionEvent& mouseMotionEvent);
+
+        virtual bool mouseButtonEventCallback(const SDL_MouseButtonEvent& mouseButtonEvent);
+
+        virtual bool mouseWheelEventCallback(const SDL_MouseWheelEvent& mouseWheelEvent);
 
         gm::Context& context() { return mGraphicsModel.context(); }
 

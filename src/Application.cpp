@@ -120,21 +120,47 @@ namespace rose {
         return false;
     }
 
+    bool Application::mouseMotionEventCallback(const SDL_MouseMotionEvent &mouseMotionEvent) {
+        std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseMotionEvent.windowID << ", which: "
+                  << mouseMotionEvent.which << ", state: " << (uint32_t) mouseMotionEvent.state
+                  << ", pos: " << Position{mouseMotionEvent.x, mouseMotionEvent.y} << " rel: "
+                  << Position{mouseMotionEvent.xrel, mouseMotionEvent.yrel} << '\n';
+        return false;
+    }
+
+    bool Application::mouseButtonEventCallback(const SDL_MouseButtonEvent &mouseButtonEvent) {
+        std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseButtonEvent.windowID << ", which: "
+                  << mouseButtonEvent.which << ", state: " << (uint32_t) mouseButtonEvent.state
+                  << ", pos: " << Position{mouseButtonEvent.x, mouseButtonEvent.y} << '\n';
+        return false;
+    }
+
+    bool Application::mouseWheelEventCallback(const SDL_MouseWheelEvent &mouseWheelEvent) {
+        std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseWheelEvent.windowID << ", which: "
+                  << mouseWheelEvent.which << ", direction: " << mouseWheelEvent.direction << ", pos: "
+                  << Position{mouseWheelEvent.x, mouseWheelEvent.y} << '\n';
+        return false;
+    }
+
     void Application::initialize(const std::string &title, Size defaultSize) {
         mEventSemantics.setWindowStateChangeCallback(&Application::windowStateChange);
         mEventSemantics.setWindowSizeChangeCallback(&Application::windowSizeChange);
         mEventSemantics.setWindowPositionChangeCallback(&Application::windowPositionChange);
         mEventSemantics.setKeyboardEventCallback(&Application::keyboardEventCallback);
+        mEventSemantics.setMouseMotionEventCallback(&Application::mouseMotionEventCallback);
+        mEventSemantics.setMouseButtonEventCallback(&Application::mouseButtonEventCallback);
+        mEventSemantics.setMouseWheelEventCallback(&Application::mouseWheelEventCallback);
 
         mGraphicsModel.eventCallback = [&](SDL_Event e) {
             mEventSemantics.onEvent(e);
         };
+
         Settings &settings{Settings::getSettings()};
 
         auto appSize = settings.getValue(set::SetAppSize, defaultSize);
         auto appPos = settings.getValue(set::SetAppPosition, Position::Undefined);
         mAppState = static_cast<EventSemantics::WindowEventType>(settings.getValue(set::SetAppState,
-                                               static_cast<uint>(EventSemantics::WindowEventType::Restored)));
+                                                                                   static_cast<uint>(EventSemantics::WindowEventType::Restored)));
 
         uint32_t extraFlags = 0;
         switch (mAppState) {
@@ -274,19 +300,20 @@ namespace rose {
     }
 
     void EventSemantics::mouseMotionEvent(SDL_MouseMotionEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID << ", which: " << e.which
-                  << ", state: " << (uint32_t) e.state
-                  << ", pos: " << Position{e.x, e.y} << " rel: " << Position{e.xrel, e.yrel} << '\n';
+        if (mouseMotionEventCallback)
+            if (mouseMotionEventCallback(mApplication, e))
+                return;
     }
 
     void EventSemantics::mouseButtonEvent(SDL_MouseButtonEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID << ", which: " << e.which
-                  << ", state: " << (uint32_t) e.state
-                  << ", pos: " << Position{e.x, e.y} << '\n';
+        if (mouseButtonEventCallback)
+            if (mouseButtonEventCallback(mApplication, e))
+                return;
     }
 
     void EventSemantics::mouseWheelEvent(SDL_MouseWheelEvent &e) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << e.windowID << ", which: " << e.which
-                  << ", direction: " << e.direction << ", pos: " << Position{e.x, e.y} << '\n';
+        if (mouseWheelEventCallback)
+            if (mouseWheelEventCallback(mApplication, e))
+                return;
     }
 }
