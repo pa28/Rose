@@ -259,20 +259,6 @@ namespace rose::gm {
         mFrame++;
     }
 
-//    std::optional<FocusTree> GraphicsModel::focusTree(Screen &screen, Position mousePosition) {
-//        auto it = screen.
-//        for (auto &content : ReverseContainerView(screen)) {
-//            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-//                auto windowRect = window->getScreenRectangle(Position::Zero);
-//                if (windowRect.contains(mousePosition)) {
-//                    return window->focusTree(mousePosition);
-//                } else if (window->isModal())
-//                    return std::nullopt;
-//            }
-//        }
-//        return std::nullopt;
-//    }
-
     DrawColorGuard::DrawColorGuard(Context &context, SDL_Color color) : mContext(context) {
         mStatus = 0;
         if (int status = SDL_GetRenderDrawColor( mContext.get(), &mOldColor.r, &mOldColor.g,

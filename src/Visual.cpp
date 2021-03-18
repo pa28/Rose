@@ -33,24 +33,6 @@ namespace rose {
         return screenRect;
     }
 
-    std::optional<FocusTree> Window::focusTree(Position mousePosition) {
-        for (auto &content : *this) {
-            if (auto visual = std::dynamic_pointer_cast<Visual>(content); visual) {
-                auto rect = visual->getScreenRectangle(mPos);
-                if (rect.contains(mousePosition)) {
-                    FocusTree result{};
-                    if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
-                        manager->focusTree(Position::Zero, mousePosition, result);
-                    } else {
-                        result.second = std::dynamic_pointer_cast<Widget>(content);
-                        return result;
-                    }
-                }
-            }
-        }
-        return std::nullopt;
-    }
-
     void Window::draw(gm::Context &context, const Position &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {
@@ -68,6 +50,37 @@ namespace rose {
             }
         }
         return screenRect;
+    }
+
+    std::shared_ptr<Widget>
+    Window::focusWidget(SemanticGesture gesture, Position position, Position containerPosition) {
+        auto windowRectangle = getScreenRectangle(containerPosition);
+        for (auto &content : *this) {
+            if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
+                if (widget->getScreenRectangle(windowRectangle.position()).contains(position)) {
+                    if(auto focus = widget->focusWidget(gesture, position, windowRectangle.position()); focus)
+                        return focus;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    std::shared_ptr<Widget>
+    Widget::focusWidget(SemanticGesture gesture, Position position, Position containerPosition) {
+        auto widgetRectangle = getScreenRectangle(containerPosition);
+        if (auto manager = getNode<Manager>(); manager) {
+            for (auto &content : *manager) {
+                if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
+                    if (auto focus = widget->focusWidget(gesture, position, widgetRectangle.position()); focus)
+                        return focus;
+                }
+            }
+        }
+        if (supportedSemanticGestures().supports(gesture))
+            return getNode<Widget>();
+
+        return nullptr;
     }
 
     void Manager::draw(gm::Context &context, const Position &containerPosition) {
@@ -89,22 +102,6 @@ namespace rose {
         auto rect = mLayoutManager->layoutContent(context, managerRect, begin(), end());
         rect = layoutPadding(rect);
         return Rectangle{mPreferredPos,rect.size()};
-    }
-
-    void Manager::focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result) {
-        for (auto &content : *this) {
-            if (auto visual = std::dynamic_pointer_cast<Visual>(content); visual) {
-                auto rect = visual->getScreenRectangle(mPos);
-                if (rect.contains(mousePosition)) {
-                    if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
-                        result.first.push_back(manager);
-                        manager->focusTree(rect.position(), mousePosition, result);
-                    } else {
-                        result.second = std::dynamic_pointer_cast<Widget>(content);
-                    }
-                }
-            }
-        }
     }
 
     Manager::Manager() {

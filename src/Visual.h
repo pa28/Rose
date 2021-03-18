@@ -35,8 +35,6 @@ namespace rose {
         std::string_view stateString;
     };
 
-    using FocusTree = std::pair<std::vector<std::shared_ptr<Manager>>,std::shared_ptr<Widget>>;
-
     /**
      * @struct SemanticGesture
      * @brief The type of semantic gesture supported by a Widget.
@@ -279,10 +277,10 @@ namespace rose {
         /// Draw the contents of the Window
         void draw(gm::Context &context, const Position &containerPosition) override;
 
-        /// Layout the contents of teh Window
+        /// Layout the contents of the Window
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
-        std::optional<FocusTree> focusTree(Position mousePosition);
+        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
     };
 
     /**
@@ -350,7 +348,7 @@ namespace rose {
 
         auto container() { return mContainer.lock(); }
 
-        std::shared_ptr<Widget> focusPath(SemanticGesture gesture, Position position, Position containerPosition);
+        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
     };
 
     class Manager : public Widget {

@@ -158,6 +158,8 @@ namespace rose {
 
         void layout();
 
+        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, const Position &position);
+
         [[nodiscard]] Padding windowBorders() const noexcept {
             return mGraphicsModel.windowBorders();
         }

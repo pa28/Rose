@@ -161,10 +161,22 @@ namespace rose {
         for (auto &content : ReverseContainerView(*mScreen)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
                 window->layout(mGraphicsModel.context(), mGraphicsModel.screenRectangle());
-//                               mGraphicsModel.displayBounds(mGraphicsModel.currentDisplayIndex()));
             }
         }
         mGraphicsModel.redrawBackground();
+    }
+
+    std::shared_ptr<Widget> Application::focusWidget(SemanticGesture gesture, const Position &position) {
+        for (auto &content : ReverseContainerView(*mScreen)) {
+            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
+                if (window->getScreenRectangle(Position::Zero).contains(position)) {
+                    return window->focusWidget(gesture, position, Position::Zero);
+                } else if (window->isModal()) {
+                    return nullptr;
+                }
+            }
+        }
+        return nullptr;
     }
 
     void EventSemantics::onEvent(SDL_Event &e) {
