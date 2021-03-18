@@ -43,6 +43,7 @@ namespace rose {
         uint32_t value;
         static SemanticGesture None;
         static SemanticGesture Click;
+        static SemanticGesture Drag;
         static SemanticGesture Scroll;
         static SemanticGesture Multi;
 

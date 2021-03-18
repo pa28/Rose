@@ -151,7 +151,7 @@ namespace rose::color {
             return result;
         }
 
-        HSVA toHSVA() const;
+        [[nodiscard]] HSVA toHSVA() const;
     };
 
     template<typename T>
@@ -511,7 +511,8 @@ namespace rose::color {
     static constexpr color::RGBA DarkInvertColor{DarkBaseColorHSVA.modValue(-0.075)};
     static constexpr color::RGBA DarkTextColour{DarkBaseColorHSVA.contrasting()};
     static constexpr color::HSVA DarkRedHSVA{ 0.f, 1.f, 0.55f, 1.f};
-    static constexpr color::HSVA DarkGreenHSVA{ 95.f, 1.f, 0.55f, 1.f};
+//  (67,139,40) https://www.color-hex.com/color-palette/105943
+    static constexpr color::HSVA DarkGreenHSVA{79.f,1.f,.4f,1.f};
     static constexpr color::HSVA DarkYellowHSVA{ 50.f, 1.f, 0.55f, 1.f};
 }
 
