@@ -142,7 +142,7 @@ namespace rose {
 
         Application(int argc, char **argv);
 
-        void initialize(const std::string &title, Size defaultSize);
+        virtual void initialize(const std::string &title, Size defaultSize);
 
         virtual void windowStateChange(EventSemantics::WindowEventType type);
 
