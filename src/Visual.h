@@ -122,6 +122,7 @@ namespace rose {
      */
     class Visual {
         friend class LayoutManager;
+        SemanticGesture mSemanticGesture{};
 
     protected:
         Position mPos{};            ///< Position relative to the container, arrived at by layout.
@@ -213,6 +214,10 @@ namespace rose {
         void addLayoutHint(const LayoutHint &hint) {
             mLayoutHints.push_back(hint);
         }
+
+        /// Get supported SemanticGestures.
+        [[nodiscard]] SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
+
     };
 
     /**
@@ -331,7 +336,24 @@ namespace rose {
         LayoutManagerError(const LayoutManagerError& other) = default;
     };
 
-    class Manager : public Visual, public Container {
+    class Widget : public Visual, public Container {
+    protected:
+
+    public:
+        Widget() = default;
+        ~Widget() override = default;
+
+        Widget(const Widget&) = delete;
+        Widget(Widget &&) = delete;
+        Widget& operator=(const Widget&) = delete;
+        Widget& operator=(Widget &&) = delete;
+
+        auto container() { return mContainer.lock(); }
+
+        std::shared_ptr<Widget> focusPath(SemanticGesture gesture, Position position, Position containerPosition);
+    };
+
+    class Manager : public Widget {
     protected:
         std::unique_ptr<LayoutManager> mLayoutManager{};
 
@@ -360,31 +382,11 @@ namespace rose {
 
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
-        void focusTree(const Position &containerPosition, const Position &mousePosition, FocusTree &result);
-
         void setLayoutManager(std::unique_ptr<LayoutManager> &&layoutManager) {
             mLayoutManager = std::move(layoutManager);
         }
 
         std::unique_ptr<LayoutManager>& layoutManager() { return mLayoutManager; }
-    };
-
-    class Widget : public Visual, public Node {
-    protected:
-        SemanticGesture mSemanticGesture{};
-
-    public:
-        Widget() = default;
-        ~Widget() override = default;
-
-        Widget(const Widget&) = delete;
-        Widget(Widget &&) = delete;
-        Widget& operator=(const Widget&) = delete;
-        Widget& operator=(Widget &&) = delete;
-
-        SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
-
-        auto container() { return mContainer.lock(); }
     };
 
     struct Parent {};
