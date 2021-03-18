@@ -6,6 +6,7 @@
 #include "Font.h"
 #include "ImageStore.h"
 #include "Layout.h"
+#include "Settings.h"
 #include "Types.h"
 
 using namespace rose;
@@ -20,9 +21,15 @@ public:
 protected:
     Layout mLayout{TopLeft};
 
+    static constexpr std::string_view LayoutScheme{"LayoutScheme"};
+
 public:
 
-    ChronoLayout() = default;
+    ChronoLayout() {
+        Settings& settings{Settings::getSettings()};
+        auto l = settings.getValue(LayoutScheme, static_cast<int>(mLayout));
+        mLayout = static_cast<Layout>(settings.getValue(LayoutScheme, static_cast<int>(mLayout)));
+    }
 
     ~ChronoLayout() override = default;
 
@@ -98,6 +105,8 @@ public:
     bool setLayout(Layout layout) {
         if (mLayout != layout) {
             mLayout = layout;
+            Settings& settings{Settings::getSettings()};
+            settings.setValue(LayoutScheme, static_cast<int>(mLayout));
             return true;
         }
         return false;
