@@ -186,7 +186,8 @@ namespace rose {
     void Application::layout() {
         for (auto &content : ReverseContainerView(*mScreen)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                window->layout(mGraphicsModel.context(), mGraphicsModel.screenRectangle());
+                auto windowRect = window->layout(mGraphicsModel.context(), mGraphicsModel.screenRectangle());
+                window->setScreenRectangle(windowRect);
             }
         }
         mGraphicsModel.redrawBackground();
