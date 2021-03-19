@@ -154,6 +154,11 @@ namespace rose {
         EventSemantics::WindowEventType mAppState{EventSemantics::Restored};
         InputParser mInputParser;
 
+        std::shared_ptr<Widget> mClickFocusWidget{};
+        std::shared_ptr<Widget> mDragFocusWidget{};
+        std::shared_ptr<Widget> mScrollFocusWidget{};
+        std::shared_ptr<Widget> mKeyFocusWidget{};
+
     public:
         Application() = delete;
         ~Application() = default;
@@ -190,6 +195,46 @@ namespace rose {
 
         gm::SdlWindow& getSdlWindow() {
             return mGraphicsModel.getSdlWindow();
+        }
+
+        /**
+         * @brief Set the collection of focus widgets based on what is supported by a found widget.
+         * @param widget The Widget which contains the pointer.
+         * @param checkSupports The foci supported by the check.
+         */
+        void setFocusWidget(const std::shared_ptr<Widget>& widget, SemanticGesture checkSupports) {
+            if (widget) {
+                if (widget->supportedSemanticGestures().supports(SemanticGesture::Click) &&
+                    checkSupports.supports(SemanticGesture::Click))
+                    mClickFocusWidget = widget;
+                if (widget->supportedSemanticGestures().supports(SemanticGesture::Drag) &&
+                    checkSupports.supports(SemanticGesture::Drag))
+                    mDragFocusWidget = widget;
+                if (widget->supportedSemanticGestures().supports(SemanticGesture::Scroll) &&
+                    checkSupports.supports(SemanticGesture::Scroll))
+                    mScrollFocusWidget = widget;
+                if (widget->supportedSemanticGestures().supports(SemanticGesture::Key) &&
+                    checkSupports.supports(SemanticGesture::Key))
+                    mKeyFocusWidget = widget;
+            }
+        }
+
+        /**
+         * @brief Clear the collection of focus widgets base on what is supported by a check that didn't find a Widget.
+         * @param widget The widget that was returned by the check, should be nullptr.
+         * @param checkSupports The foci supported by the check.
+         */
+        void clearFocusWidget(const std::shared_ptr<Widget>& widget,  SemanticGesture checkSupports) {
+            if (!widget) {
+                if (checkSupports.supports(SemanticGesture::Click))
+                    mClickFocusWidget.reset();
+                if (checkSupports.supports(SemanticGesture::Drag))
+                    mDragFocusWidget.reset();
+                if (checkSupports.supports(SemanticGesture::Scroll))
+                    mScrollFocusWidget.reset();
+                if (checkSupports.supports(SemanticGesture::Key))
+                    mKeyFocusWidget.reset();
+            }
         }
 
         virtual void run();

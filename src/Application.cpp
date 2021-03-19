@@ -132,9 +132,13 @@ namespace rose {
         std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseButtonEvent.windowID << ", which: "
                   << mouseButtonEvent.which << ", state: " << (uint32_t) mouseButtonEvent.state
                   << ", pos: " << Position{mouseButtonEvent.x, mouseButtonEvent.y} << '\n';
-        SemanticGesture semanticGesture{SemanticGesture::Click | SemanticGesture::Drag};
+        SemanticGesture semanticGesture{SemanticGesture::Click | SemanticGesture::Drag | SemanticGesture::Key};
         if (mouseButtonEvent.state) {
             auto focus = focusWidget(semanticGesture, Position{mouseButtonEvent.x, mouseButtonEvent.y});
+            if (focus)
+                setFocusWidget(focus, SemanticGesture::Click | SemanticGesture::Drag | SemanticGesture::Key);
+            else
+                clearFocusWidget(focus, SemanticGesture::Click | SemanticGesture::Drag);
         }
         return false;
     }

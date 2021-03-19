@@ -14,7 +14,8 @@ namespace rose {
     SemanticGesture SemanticGesture::Click{0x1};
     SemanticGesture SemanticGesture::Drag{0x2};
     SemanticGesture SemanticGesture::Scroll{0x4};
-    SemanticGesture SemanticGesture::Multi{0x8};
+    SemanticGesture SemanticGesture::Key{0x8};
+    SemanticGesture SemanticGesture::Multi{0x10};
 
     void rose::Screen::draw(gm::Context &context, const Position &containerPosition) {
         setScreenRectangle(containerPosition);

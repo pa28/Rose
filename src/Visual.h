@@ -45,6 +45,7 @@ namespace rose {
         static SemanticGesture Click;
         static SemanticGesture Drag;
         static SemanticGesture Scroll;
+        static SemanticGesture Key;
         static SemanticGesture Multi;
 
         [[nodiscard]] bool supports(SemanticGesture semanticGesture) const {
