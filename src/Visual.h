@@ -50,6 +50,12 @@ namespace rose {
         [[nodiscard]] bool supports(SemanticGesture semanticGesture) const {
             return (value & semanticGesture.value) == semanticGesture.value;
         }
+
+        SemanticGesture operator|(const SemanticGesture& other) {
+            SemanticGesture result{};
+            result.value = value | other.value;
+            return result;
+        }
     };
 
     class LayoutHint {
