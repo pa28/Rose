@@ -125,6 +125,26 @@ namespace rose {
                   << mouseMotionEvent.which << ", state: " << (uint32_t) mouseMotionEvent.state
                   << ", pos: " << Position{mouseMotionEvent.x, mouseMotionEvent.y} << " rel: "
                   << Position{mouseMotionEvent.xrel, mouseMotionEvent.yrel} << '\n';
+        mMousePosition.x = mouseMotionEvent.x;
+        mMousePosition.y = mouseMotionEvent.y;
+        if (mouseMotionEvent.state & (uint32_t) SDL_BUTTON_LEFT) {
+            if (mDragFocusWidget) {
+                if (mDragFocusWidget->contains(mMousePosition)) {
+                    if (mDragFocusWidget == mClickFocusWidget)
+                        clearFocusWidget(mClickFocusWidget, SemanticGesture::Click);
+                } else {
+                    clearFocusWidget(mDragFocusWidget, SemanticGesture::Drag);
+                }
+            } else if (mClickFocusWidget) {
+                if (!mClickFocusWidget->contains(mMousePosition)) {
+                    clearFocusWidget(mClickFocusWidget, SemanticGesture::Click);
+                }
+            }
+        } else {
+            if (mScrollFocusWidget && !mScrollFocusWidget->contains(mMousePosition)) {
+                clearFocusWidget(mScrollFocusWidget, SemanticGesture::Scroll);
+            }
+        }
         return false;
     }
 
@@ -133,7 +153,9 @@ namespace rose {
                   << mouseButtonEvent.which << ", state: " << (uint32_t) mouseButtonEvent.state
                   << ", pos: " << Position{mouseButtonEvent.x, mouseButtonEvent.y} << '\n';
         SemanticGesture semanticGesture{SemanticGesture::Click | SemanticGesture::Drag | SemanticGesture::Key};
-        if (mouseButtonEvent.state) {
+        mMouseButtonPressed = mouseButtonEvent.state == SDL_PRESSED;
+        mMouseButtonId = mouseButtonEvent.button;
+        if (mMouseButtonPressed) {
             auto focus = focusWidget(semanticGesture, Position{mouseButtonEvent.x, mouseButtonEvent.y});
             if (focus)
                 setFocusWidget(focus, SemanticGesture::Click | SemanticGesture::Drag | SemanticGesture::Key);
@@ -147,6 +169,15 @@ namespace rose {
         std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseWheelEvent.windowID << ", which: "
                   << mouseWheelEvent.which << ", direction: " << mouseWheelEvent.direction << ", pos: "
                   << Position{mouseWheelEvent.x, mouseWheelEvent.y} << '\n';
+        if (mScrollFocusWidget) {
+            // Send event to the Widget
+        } else {
+            auto focus = focusWidget(SemanticGesture::Scroll, mMousePosition);
+            if (focus)
+                setFocusWidget(focus, SemanticGesture::Scroll);
+            else
+                clearFocusWidget(focus, SemanticGesture::Scroll);
+        }
         return false;
     }
 

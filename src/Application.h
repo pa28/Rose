@@ -159,8 +159,13 @@ namespace rose {
         std::shared_ptr<Widget> mScrollFocusWidget{};
         std::shared_ptr<Widget> mKeyFocusWidget{};
 
+        bool mMouseButtonPressed{false};
+        uint mMouseButtonId{0};
+        Position mMousePosition{};
+
     public:
         Application() = delete;
+
         ~Application() = default;
 
         Application(int argc, char **argv);
@@ -203,19 +208,46 @@ namespace rose {
          * @param checkSupports The foci supported by the check.
          */
         void setFocusWidget(const std::shared_ptr<Widget>& widget, SemanticGesture checkSupports) {
+            auto changeFocusWidget = [&widget, &checkSupports](std::shared_ptr<Widget>& focus, const SemanticGesture& gesture) {
+                if (widget->supportedSemanticGestures().supports(gesture) && checkSupports.supports(gesture)) {
+                    if (focus)
+                        focus->clearFocus(gesture);
+                    focus = widget;
+                }
+            };
+
             if (widget) {
-                if (widget->supportedSemanticGestures().supports(SemanticGesture::Click) &&
-                    checkSupports.supports(SemanticGesture::Click))
-                    mClickFocusWidget = widget;
-                if (widget->supportedSemanticGestures().supports(SemanticGesture::Drag) &&
-                    checkSupports.supports(SemanticGesture::Drag))
-                    mDragFocusWidget = widget;
-                if (widget->supportedSemanticGestures().supports(SemanticGesture::Scroll) &&
-                    checkSupports.supports(SemanticGesture::Scroll))
-                    mScrollFocusWidget = widget;
-                if (widget->supportedSemanticGestures().supports(SemanticGesture::Key) &&
-                    checkSupports.supports(SemanticGesture::Key))
-                    mKeyFocusWidget = widget;
+                changeFocusWidget(mClickFocusWidget, SemanticGesture::Click);
+//                if (widget->supportedSemanticGestures().supports(SemanticGesture::Click) &&
+//                    checkSupports.supports(SemanticGesture::Click)) {
+//                    if (mClickFocusWidget)
+//                        mClickFocusWidget->clearFocus(SemanticGesture::Click);
+//                    mClickFocusWidget = widget;
+//                }
+
+                changeFocusWidget(mDragFocusWidget, SemanticGesture::Drag);
+//                if (widget->supportedSemanticGestures().supports(SemanticGesture::Drag) &&
+//                    checkSupports.supports(SemanticGesture::Drag)) {
+//                    if (mDragFocusWidget)
+//                        mDragFocusWidget->clearFocus(SemanticGesture::Drag);
+//                    mDragFocusWidget = widget;
+//                }
+
+                changeFocusWidget(mScrollFocusWidget, SemanticGesture::Scroll);
+//                if (widget->supportedSemanticGestures().supports(SemanticGesture::Scroll) &&
+//                    checkSupports.supports(SemanticGesture::Scroll)) {
+//                    if (mScrollFocusWidget)
+//                        mScrollFocusWidget->clearFocus(SemanticGesture::Scroll);
+//                    mScrollFocusWidget = widget;
+//                }
+
+                changeFocusWidget(mKeyFocusWidget, SemanticGesture::Key);
+//                if (widget->supportedSemanticGestures().supports(SemanticGesture::Key) &&
+//                    checkSupports.supports(SemanticGesture::Key)) {
+//                    if (mKeyFocusWidget)
+//                        mScrollFocusWidget->clearFocus(SemanticGesture::Key);
+//                    mKeyFocusWidget = widget;
+//                }
             }
         }
 
@@ -225,15 +257,25 @@ namespace rose {
          * @param checkSupports The foci supported by the check.
          */
         void clearFocusWidget(const std::shared_ptr<Widget>& widget,  SemanticGesture checkSupports) {
-            if (!widget) {
-                if (checkSupports.supports(SemanticGesture::Click))
+            if (widget && !widget->supportedSemanticGestures().supports(checkSupports)) {
+                return;
+            } else {
+                if (checkSupports.supports(SemanticGesture::Click)) {
+                    mClickFocusWidget->clearFocus(SemanticGesture::Click);
                     mClickFocusWidget.reset();
-                if (checkSupports.supports(SemanticGesture::Drag))
+                }
+                if (checkSupports.supports(SemanticGesture::Drag)) {
+                    mDragFocusWidget->clearFocus(SemanticGesture::Drag);
                     mDragFocusWidget.reset();
-                if (checkSupports.supports(SemanticGesture::Scroll))
+                }
+                if (checkSupports.supports(SemanticGesture::Scroll)) {
+                    mScrollFocusWidget->clearFocus(SemanticGesture::Scroll);
                     mScrollFocusWidget.reset();
-                if (checkSupports.supports(SemanticGesture::Key))
+                }
+                if (checkSupports.supports(SemanticGesture::Key)) {
+                    mKeyFocusWidget->clearFocus(SemanticGesture::Key);
                     mKeyFocusWidget.reset();
+                }
             }
         }
 

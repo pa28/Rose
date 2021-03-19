@@ -357,6 +357,10 @@ namespace rose {
         auto container() { return mContainer.lock(); }
 
         std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
+
+        bool contains(const Position &position);
+
+        void clearFocus(const SemanticGesture &gesture);
     };
 
     class Manager : public Widget {
