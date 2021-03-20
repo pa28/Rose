@@ -64,9 +64,22 @@ namespace rose {
         auto windowRectangle = getScreenRectangle(containerPosition);
         for (auto &content : *this) {
             if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                if (widget->getScreenRectangle(windowRectangle.position()).contains(position)) {
+                if (widget->contains(position)) {
                     if(auto focus = widget->focusWidget(gesture, position, windowRectangle.position()); focus)
                         return focus;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    std::shared_ptr<Widget> Window::pointerWidget(Position position) {
+        auto windowRectangle = getScreenRectangle(Position::Zero);
+        for (auto &content : *this) {
+            if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
+                if (widget->contains(position)) {
+                    if (auto ptrWdg = widget->pointerWidget(position, windowRectangle.position()); ptrWdg)
+                        return ptrWdg;
                 }
             }
         }
@@ -79,8 +92,10 @@ namespace rose {
         if (auto manager = getNode<Manager>(); manager) {
             for (auto &content : *manager) {
                 if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                    if (auto focus = widget->focusWidget(gesture, position, widgetRectangle.position()); focus)
-                        return focus;
+                    if (widget->contains(position)) {
+                        if (auto focus = widget->focusWidget(gesture, position, widgetRectangle.position()); focus)
+                            return focus;
+                    }
                 }
             }
         }
@@ -88,6 +103,70 @@ namespace rose {
             return getNode<Widget>();
 
         return nullptr;
+    }
+
+    std::shared_ptr<Widget> Widget::pointerWidget(Position position, Position containerPosition) {
+        auto widgetRectangle = getScreenRectangle(containerPosition);
+        if (auto manager = getNode<Manager>(); manager) {
+            for (auto &content : *manager) {
+                if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
+                    if (widget->contains(position)) {
+                        return widget->pointerWidget(position, widgetRectangle.position());
+                    }
+                }
+            }
+            return manager;
+        }
+        return getNode<Widget>();
+    }
+
+    Position Widget::computeScreenPosition() {
+        std::shared_ptr<Widget> parent = std::dynamic_pointer_cast<Widget>(container());
+        if (parent) {
+            auto position =  parent->computeScreenPosition();
+            position = position + mPos;
+            return position;
+        }
+
+        return Position::Zero;
+    }
+
+    bool Widget::contains(const Position &position) {
+        Rectangle screenRectangle{computeScreenPosition(), mSize};
+        return screenRectangle.contains(position);
+    }
+
+    bool Widget::mouseMotionEvent(bool pressed, uint button, Position mousePos, Position relativePos, bool passed) {
+        if (mMouseMotionCallback) {
+            if (mMouseMotionCallback(pressed, button, mousePos, relativePos)) {
+                if (passed) {
+                    getApplication().capturePointerWidget(getNode<Widget>());
+                }
+                return true;
+            }
+        }
+
+        if (auto widget = std::dynamic_pointer_cast<Widget>(container()); widget && button != 0) {
+            return widget->mouseMotionEvent(pressed, button, mousePos, relativePos, true);
+        }
+
+        return false;
+    }
+
+    bool Widget::mouseScrollEvent(Position deltaPos, bool passed) {
+        std::cout << __PRETTY_FUNCTION__ << deltaPos << '\n';
+        if (mMouseScrollCallback)
+            if (mMouseScrollCallback(deltaPos)) {
+                if (passed)
+                    getApplication().captureScrollWheelWidget(getNode<Widget>());
+                return true;
+            }
+
+        if (auto widget = std::dynamic_pointer_cast<Widget>(container()); widget) {
+            return widget->mouseScrollEvent(deltaPos, true);
+        }
+
+        return false;
     }
 
     void Manager::draw(gm::Context &context, const Position &containerPosition) {

@@ -121,63 +121,57 @@ namespace rose {
     }
 
     bool Application::mouseMotionEventCallback(const SDL_MouseMotionEvent &mouseMotionEvent) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseMotionEvent.windowID << ", which: "
-                  << mouseMotionEvent.which << ", state: " << (uint32_t) mouseMotionEvent.state
-                  << ", pos: " << Position{mouseMotionEvent.x, mouseMotionEvent.y} << " rel: "
-                  << Position{mouseMotionEvent.xrel, mouseMotionEvent.yrel} << '\n';
+        bool result = false;
+
         mMousePosition.x = mouseMotionEvent.x;
         mMousePosition.y = mouseMotionEvent.y;
-        if (mouseMotionEvent.state & (uint32_t) SDL_BUTTON_LEFT) {
-            if (mDragFocusWidget) {
-                if (mDragFocusWidget->contains(mMousePosition)) {
-                    if (mDragFocusWidget == mClickFocusWidget)
-                        clearFocusWidget(mClickFocusWidget, SemanticGesture::Click);
-                } else {
-                    clearFocusWidget(mDragFocusWidget, SemanticGesture::Drag);
-                }
-            } else if (mClickFocusWidget) {
-                if (!mClickFocusWidget->contains(mMousePosition)) {
-                    clearFocusWidget(mClickFocusWidget, SemanticGesture::Click);
-                }
-            }
-        } else {
-            if (mScrollFocusWidget && !mScrollFocusWidget->contains(mMousePosition)) {
-                clearFocusWidget(mScrollFocusWidget, SemanticGesture::Scroll);
+
+        Position relativePos{mouseMotionEvent.xrel, mouseMotionEvent.yrel};
+
+        if (mPointerWidget) {
+            if (mPointerWidget->contains(mMousePosition)) {
+                return mPointerWidget->mouseMotionEvent(mMouseButtonPressed, mMouseButtonId, mMousePosition,
+                                                        relativePos, false);
+            } else {
+                result |= mPointerWidget->leaveEvent();
+                mPointerWidget.reset();
             }
         }
-        return false;
+
+        mPointerWidget = pointerWidget(mMousePosition);
+        if (mPointerWidget) {
+            result |= mPointerWidget->enterEvent();
+        }
+
+        return result;
     }
 
     bool Application::mouseButtonEventCallback(const SDL_MouseButtonEvent &mouseButtonEvent) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseButtonEvent.windowID << ", which: "
-                  << mouseButtonEvent.which << ", state: " << (uint32_t) mouseButtonEvent.state
-                  << ", pos: " << Position{mouseButtonEvent.x, mouseButtonEvent.y} << '\n';
-        SemanticGesture semanticGesture{SemanticGesture::Click | SemanticGesture::Drag | SemanticGesture::Key};
         mMouseButtonPressed = mouseButtonEvent.state == SDL_PRESSED;
-        mMouseButtonId = mouseButtonEvent.button;
-        if (mMouseButtonPressed) {
-            auto focus = focusWidget(semanticGesture, Position{mouseButtonEvent.x, mouseButtonEvent.y});
-            if (focus)
-                setFocusWidget(focus, SemanticGesture::Click | SemanticGesture::Drag | SemanticGesture::Key);
-            else
-                clearFocusWidget(focus, SemanticGesture::Click | SemanticGesture::Drag);
+        if (mMouseButtonPressed)
+            mMouseButtonId |= 1u << (mouseButtonEvent.button - 1u);
+        else
+            mMouseButtonId &= ~(1u << (mouseButtonEvent.button - 1u));
+
+        if (mPointerWidget) {
+            return mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0);
         }
         return false;
     }
 
     bool Application::mouseWheelEventCallback(const SDL_MouseWheelEvent &mouseWheelEvent) {
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << mouseWheelEvent.windowID << ", which: "
-                  << mouseWheelEvent.which << ", direction: " << mouseWheelEvent.direction << ", pos: "
-                  << Position{mouseWheelEvent.x, mouseWheelEvent.y} << '\n';
-        if (mScrollFocusWidget) {
-            // Send event to the Widget
-        } else {
-            auto focus = focusWidget(SemanticGesture::Scroll, mMousePosition);
-            if (focus)
-                setFocusWidget(focus, SemanticGesture::Scroll);
-            else
-                clearFocusWidget(focus, SemanticGesture::Scroll);
+        if (mouseWheelEvent.which == SDL_TOUCH_MOUSEID)
+            return false;
+
+        Position deltaPos{mouseWheelEvent.x, mouseWheelEvent.y};
+        if (mouseWheelEvent.direction == SDL_MOUSEWHEEL_FLIPPED) {
+            deltaPos.x *= -1;
+            deltaPos.y *= -1;
         }
+
+        if (mPointerWidget)
+            return mPointerWidget->mouseScrollEvent(deltaPos, false);
+
         return false;
     }
 
@@ -242,6 +236,20 @@ namespace rose {
                 }
             }
         }
+        return nullptr;
+    }
+
+    std::shared_ptr<Widget> Application::pointerWidget(const Position position) {
+        for (auto &content : ReverseContainerView(*mScreen)) {
+            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
+                if (window->getScreenRectangle(Position::Zero).contains(position)) {
+                    return window->pointerWidget(position);
+                } else if (window->isModal()) {
+                    return nullptr;
+                }
+            }
+        }
+
         return nullptr;
     }
 

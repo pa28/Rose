@@ -49,7 +49,7 @@ namespace rose {
         static SemanticGesture Multi;
 
         [[nodiscard]] bool supports(SemanticGesture semanticGesture) const {
-            return (value & semanticGesture.value) == semanticGesture.value;
+            return (value & semanticGesture.value) != 0;
         }
 
         SemanticGesture operator|(const SemanticGesture& other) {
@@ -128,9 +128,9 @@ namespace rose {
      */
     class Visual {
         friend class LayoutManager;
-        SemanticGesture mSemanticGesture{};
 
     protected:
+        SemanticGesture mSemanticGesture{};
         Position mPos{};            ///< Position relative to the container, arrived at by layout.
         Size mSize{};               ///< The size on screen, arrived at by layout.
         Position mPreferredPos{};   ///< The preferred position.
@@ -306,6 +306,9 @@ namespace rose {
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
+
+        std::shared_ptr<Widget> pointerWidget(Position position);
+
         std::shared_ptr<Screen> getScreen() {
             if (auto screen = std::dynamic_pointer_cast<Screen>(container()))
                 return screen;
@@ -371,24 +374,43 @@ namespace rose {
     };
 
     class Widget : public Visual, public Container {
+    public:
+        using EventCallback = std::function<bool()>;
+        using ScrollCallback = std::function<bool(Position deltaPos)>;
+        using ButtonCallback = std::function<bool(bool pressed, uint button, uint clicks)>;
+        using MouseMotionCallback = std::function<bool(bool pressed, uint state, Position mousePosition,
+                                                       Position relativePosition)>;
+
     protected:
+        EventCallback mEnterEventCallback{};
+        EventCallback mLeaveEventCallback{};
+        ButtonCallback mButtonEventCallback{};
+        MouseMotionCallback mMouseMotionCallback{};
+        ScrollCallback mMouseScrollCallback{};
 
     public:
         Widget() = default;
+
         ~Widget() override = default;
 
-        Widget(const Widget&) = delete;
-        Widget(Widget &&) = delete;
-        Widget& operator=(const Widget&) = delete;
-        Widget& operator=(Widget &&) = delete;
+        Widget(const Widget &) = delete;
 
-        auto container() { return mContainer.lock(); }
+        Widget(Widget &&) = delete;
+
+        Widget &operator=(const Widget &) = delete;
+
+        Widget &operator=(Widget &&) = delete;
 
         std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
 
+        std::shared_ptr<Widget> pointerWidget(Position position, Position containerPosition);
+
+        Position computeScreenPosition();
+
         bool contains(const Position &position);
 
-        void clearFocus(const SemanticGesture &gesture);
+        void clearFocus(const SemanticGesture &gesture) {}
+
         Application& getApplication() {
             if (auto window = getWindow(); window) {
                 if (auto screen = window->getScreen(); screen)
@@ -427,6 +449,60 @@ namespace rose {
             return nullptr;
         }
 
+        /**
+         * @brief Notify Widget of mouse pointer enter event.
+         * @return True if event is consumed.
+         */
+        bool enterEvent() {
+            std::cout << __PRETTY_FUNCTION__ << '\n';
+            if (mEnterEventCallback)
+                return mEnterEventCallback();
+            return false;
+        }
+
+        /**
+         * @brief Notify Widget of mouse pointer leave event.
+         * @return True if event is consumed.
+         */
+        bool leaveEvent() {
+            std::cout << __PRETTY_FUNCTION__ << '\n';
+            if (mLeaveEventCallback)
+                return mLeaveEventCallback();
+            return false;
+        }
+
+        /**
+         * @brief Notify Widget of mouse button events.
+         * @param pressed True if a button is pressed.
+         * @param button The button that changed state.
+         * @param clicks The number of clicks.
+         * @return True if the event is consumed.
+         */
+        bool buttonEvent(bool pressed, uint button, uint clicks) {
+            std::cout << __PRETTY_FUNCTION__ << ' ' << pressed << ' ' << button << ' ' << clicks << '\n';
+            if (mButtonEventCallback)
+                return mButtonEventCallback(pressed, button, clicks);
+            return false;
+        }
+
+        /**
+         * @brief Notify Widget of mouse motion events.
+         * @details If this Widget does not consume the event, and any button is pressed, it is passed up the tree.
+         * @param pressed True if a button is pressed.
+         * @param button A bitwise or of pressed buttons.
+         * @param mousePos The screen position of the mouse.
+         * @param relativePos The relative motion of the mouse.
+         * @return True if the event is consumed.
+         */
+        bool mouseMotionEvent(bool pressed, uint button, Position mousePos, Position relativePos, bool passed);
+
+        /**
+         * @brief Notify Widget of mouse scroll wheel events.
+         * @details If this Widget does not consume the event it is passed up the tree.
+         * @param deltaPos The delta position of the scroll wheel motion.
+         * @return True if the event is consumed.
+         */
+        bool mouseScrollEvent(Position deltaPos, bool passed);
     };
 
     class Manager : public Widget {

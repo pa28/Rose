@@ -9,11 +9,22 @@
 
 namespace rose {
 
-/**
- * @class ButtonSemantics
- * @brief
- */
-    class ButtonSemantics {
+    /**
+    * @class PointerInteractions
+    * @brief
+    */
+    class PointerInteractions {
+    protected:
+
+    public:
+        PointerInteractions() = default;
+        virtual ~PointerInteractions() = default;
+
+        PointerInteractions(const PointerInteractions&) = delete;
+        PointerInteractions(PointerInteractions &&) = delete;
+        PointerInteractions& operator=(const PointerInteractions&) = delete;
+        PointerInteractions& operator=(PointerInteractions&&) = delete;
+
 
     };
 }

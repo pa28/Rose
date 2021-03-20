@@ -130,10 +130,12 @@ public:
     TestWidget &operator=(TestWidget &&) = delete;
 
     explicit TestWidget(color::RGBA c) : TestWidget() {
+        mSemanticGesture = SemanticGesture::Key | SemanticGesture::Click | SemanticGesture::Scroll | SemanticGesture::Drag;
         mColor = c;
     }
 
     TestWidget(Size size, color::RGBA c) : TestWidget() {
+        mSemanticGesture = SemanticGesture::Key | SemanticGesture::Click | SemanticGesture::Scroll | SemanticGesture::Drag;
         mPreferredSize = size;
         mColor = c;
     }

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "Visual.h"
 #include "GraphicsModel.h"
 
@@ -154,6 +156,7 @@ namespace rose {
         EventSemantics::WindowEventType mAppState{EventSemantics::Restored};
         InputParser mInputParser;
 
+        std::shared_ptr<Widget> mPointerWidget{};
         std::shared_ptr<Widget> mClickFocusWidget{};
         std::shared_ptr<Widget> mDragFocusWidget{};
         std::shared_ptr<Widget> mScrollFocusWidget{};
@@ -193,6 +196,8 @@ namespace rose {
         void layout();
 
         std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, const Position &position);
+
+        std::shared_ptr<Widget> pointerWidget(Position position);
 
         [[nodiscard]] Padding windowBorders() const noexcept {
             return mGraphicsModel.windowBorders();
@@ -277,6 +282,18 @@ namespace rose {
                     mKeyFocusWidget.reset();
                 }
             }
+        }
+
+        void capturePointerWidget(std::shared_ptr<Widget> widget) {
+            if (mPointerWidget)
+                mPointerWidget->leaveEvent();
+            mPointerWidget = std::move(widget);
+        }
+
+        void captureScrollWheelWidget(std::shared_ptr<Widget> widget) {
+            if (mPointerWidget)
+                mPointerWidget->leaveEvent();
+            mPointerWidget = std::move(widget);
         }
 
         virtual void run();

@@ -55,6 +55,12 @@ namespace rose {
 
         virtual ~Node() = default;
 
+        std::shared_ptr<Container> container() {
+            if (mContainer.expired())
+                return nullptr;
+            return mContainer.lock();
+        }
+
         std::shared_ptr<Container> container() const {
             if (mContainer.expired())
                 return nullptr;
