@@ -14,7 +14,7 @@ using namespace rose::gm;
 namespace rose {
 
     Application::Application(int argc, char **argv) : mEventSemantics(*this), mInputParser(argc, argv) {
-        mScreen = std::make_shared<Screen>();
+        mScreen = std::make_shared<Screen>(*this);
     }
 
     void Application::windowStateChange(EventSemantics::WindowEventType type) {

@@ -226,14 +226,23 @@ namespace rose {
 
     };
 
+    class Application;
+
     /**
      * @class Screen
      * @brief An abstraction of the available display screen.
      */
     class Screen : public Visual, public Container {
+        Application& mApplication;
+
     public:
-        Screen() = default;
+        explicit Screen(Application &application);
         ~Screen() override = default;
+
+        Screen(const Screen&) = delete;
+        Screen(Screen &&) = delete;
+        Screen& operator=(const Screen&) = delete;
+        Screen& operator=(Screen &&) = delete;
 
         /**
          * @brief Add a Window to the screen.
@@ -251,6 +260,14 @@ namespace rose {
 
         /// Layout the screen contents.
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
+
+        Application& getApplication() {
+            return mApplication;
+        }
+
+        const Application& getApplication() const {
+            return mApplication;
+        }
     };
 
     /**
@@ -289,6 +306,17 @@ namespace rose {
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
+        std::shared_ptr<Screen> getScreen() {
+            if (auto screen = std::dynamic_pointer_cast<Screen>(container()))
+                return screen;
+            return nullptr;
+        }
+
+        std::shared_ptr<Screen> getScreen() const {
+            if (auto screen = std::dynamic_pointer_cast<Screen>(container()))
+                return screen;
+            return nullptr;
+        }
     };
 
     /**
@@ -361,6 +389,44 @@ namespace rose {
         bool contains(const Position &position);
 
         void clearFocus(const SemanticGesture &gesture);
+        Application& getApplication() {
+            if (auto window = getWindow(); window) {
+                if (auto screen = window->getScreen(); screen)
+                    return screen->getApplication();
+            }
+            throw std::runtime_error("No path from Widget to Screen to Application.");
+        }
+
+        Application& getApplication() const {
+            if (auto window = getWindow(); window) {
+                if (auto screen = window->getScreen(); screen)
+                    return screen->getApplication();
+            }
+            throw std::runtime_error("No path from Widget to Screen to Application.");
+        }
+
+        std::shared_ptr<Window> getWindow() {
+            auto c = container();
+            while (c) {
+                if (auto window = std::dynamic_pointer_cast<Window>(c); window)
+                    return window;
+                c = c->container();
+            }
+
+            return nullptr;
+        }
+
+        std::shared_ptr<Window> getWindow() const {
+            auto c = container();
+            while (c) {
+                if (auto window = std::dynamic_pointer_cast<Window>(c); window)
+                    return window;
+                c = c->container();
+            }
+
+            return nullptr;
+        }
+
     };
 
     class Manager : public Widget {

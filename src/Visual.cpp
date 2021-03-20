@@ -6,6 +6,7 @@
  */
 
 #include "Visual.h"
+#include "Application.h"
 #include "GraphicsModel.h"
 
 namespace rose {
@@ -16,6 +17,10 @@ namespace rose {
     SemanticGesture SemanticGesture::Scroll{0x4};
     SemanticGesture SemanticGesture::Key{0x8};
     SemanticGesture SemanticGesture::Multi{0x10};
+
+    Screen::Screen(Application &application) : mApplication(application) {
+
+    }
 
     void rose::Screen::draw(gm::Context &context, const Position &containerPosition) {
         setScreenRectangle(containerPosition);
