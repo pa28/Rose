@@ -12,7 +12,10 @@
 namespace rose {
 
     ButtonSemantics::ButtonSemantics(Widget &widget) : mWidget(widget) {
+
+        // Get and process the mouse button events from the Widget.
         mWidget.setButtonEventCallback([&](bool pressed, uint button, uint clicks) {
+            auto oldState = mState;
             switch (mButtonType) {
                 case ButtonType::PushButton:
                     switch (mState) {
@@ -66,29 +69,32 @@ namespace rose {
                     }
                     break;
             }
-            displayState();
+            if (oldState != mState)
+                displayState();
             return true;
         });
 
+        // Get and process the enter events from the Widget.
         mWidget.setEnterLeaveEventCallback([&]() {
             enterLeaveCallback();
             return true;
         });
 
+        // Get and process the leave events from the widget.
         mWidget.setLeaveEventCallback([&]() {
             enterLeaveCallback();
             return true;
         });
 
-        mWidget.setMouseMotionEventCallback([&](bool pressed, uint state, Position mousePosition,
-                                                Position relativePosition) {
-            enterLeaveCallback();
-            return true;
-        });
+        // Get and process mouse motion events.
+//        mWidget.setMouseMotionEventCallback([&](bool pressed, uint state, Position mousePosition,
+//                                                Position relativePosition) {
+//            enterLeaveCallback();
+//            return true;
+//        });
     }
 
     void ButtonSemantics::setButtonState(bool active) {
-        std::cout << __PRETTY_FUNCTION__ << ' ';
         switch (mButtonType) {
             case ButtonType::PushButton:
                 if (active) {
@@ -129,25 +135,23 @@ namespace rose {
     }
 
     void ButtonSemantics::displayState() {
-        std::cout << __PRETTY_FUNCTION__ << ' ';
-        switch (mState) {
-            case Active:
-                std::cout << "Active";
-                break;
-            case Inactive:
-                std::cout << "Inactive";
-                break;
-            case PressedInactive:
-                std::cout << "PressedInactive";
-                break;
-            case PressedActive:
-                std::cout << "PressedActive";
-                break;
-            case SetActive:
-            case SetInactive:
-                std::cout << "Error state.";
-                break;
-        }
-        std::cout << '\n';
+        if (mButtonDisplayCallback)
+            switch (mState) {
+                case Active:
+                    mButtonDisplayCallback(ButtonDisplayState::Active);
+                    break;
+                case Inactive:
+                    mButtonDisplayCallback(ButtonDisplayState::Inactive);
+                    break;
+                case PressedInactive:
+                    mButtonDisplayCallback(ButtonDisplayState::PressedInactive);
+                    break;
+                case PressedActive:
+                    mButtonDisplayCallback(ButtonDisplayState::PressedActive);
+                    break;
+                case SetActive:
+                case SetInactive:
+                    throw std::logic_error("Button transition to terminal in state machine.");
+            }
     }
 }
