@@ -25,6 +25,12 @@ namespace rose {
         PressedInactive,    ///< User pressed the button in the Inactive state.
     };
 
+    enum class ButtonStateChange {
+        Pushed,             ///< Push button has been pushed.
+        Off,                ///< Toggle button changed to off.
+        On,                 ///< Toggle button changed to on.
+    };
+
     /**
      * @brief Basic event callback with no argumetns.
      */
@@ -61,6 +67,12 @@ namespace rose {
      * @param buttonDisplayState A ButtonDisplayState value indicating how the button should be displayed.
      */
     using ButtonDisplayCallback = std::function<void(ButtonDisplayState buttonDisplayState)>;
+
+    /**
+     * @brief Button state change callback.
+     * @param buttonStateChange Indicates the change in state of the button.
+     */
+    using ButtonStateChangeCallback = std::function<void(ButtonStateChange buttonStateChange)>;
 
     /**
      * @brief Keyboard shortcut callback.

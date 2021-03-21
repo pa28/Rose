@@ -5,7 +5,7 @@
  * @date 2021-03-20
  */
 
-#include <exception>
+#include <stdexcept>
 #include "PointerInteractions.h"
 #include "Visual.h"
 
@@ -20,7 +20,6 @@ namespace rose {
                 case ButtonType::PushButton:
                     switch (mState) {
                         case Inactive:
-                        case Active:
                             if (pressed && (button & 1u))
                                 mState = PressedInactive;
                             else if (!pressed && !(button &1u))
@@ -30,16 +29,14 @@ namespace rose {
                             if (!pressed && !(button & 1u))
                                 mState = SetActive;
                             break;
+                        case Active:
                         case PressedActive:
-                            if (!pressed && !(button & 1u))
-                                mState = SetInactive;
-                            break;
                         case SetInactive:
                         case SetActive:
                             throw std::logic_error("Button transition to terminal in state machine.");
                     }
-                    if (mState == SetActive || mState == SetActive) {
-                        setButtonState(mState == SetActive);
+                    if (mState == SetActive) {
+                        setButtonState(true);
                     }
                     break;
                 case ButtonType::ToggleButton:
@@ -85,6 +82,59 @@ namespace rose {
             enterLeaveCallback();
             return true;
         });
+
+        // Get and process the keyboard shortcut events from the widget.
+        mWidget.setKeyboardShortcutCallback([&](SDL_Keycode keycode, bool state, uint repeat){
+
+            switch (mButtonType) {
+                case ButtonType::PushButton:
+                    switch (mState) {
+                        case Inactive:
+                            if (state && (repeat == 0))
+                                mState = PressedInactive;
+                            break;
+                        case PressedInactive:
+                            if (!state || repeat != 0)
+                                mState = SetActive;
+                            break;
+                        case Active:
+                        case PressedActive:
+                        case SetInactive:
+                        case SetActive:
+                            throw std::logic_error("Button transition to terminal in state machine.");
+                    }
+                    if (mState == SetActive) {
+                        setButtonState(true);
+                    }
+                    break;
+                case ButtonType::ToggleButton:
+                    switch (mState) {
+                        case Inactive:
+                            if (state && repeat == 0)
+                                mState = PressedInactive;
+                            break;
+                        case Active:
+                            if (state && repeat == 0)
+                                mState = PressedActive;
+                            break;
+                        case PressedInactive:
+                            if (!state || repeat > 0)
+                                mState = SetActive;
+                            break;
+                        case PressedActive:
+                            if (!state || repeat > 0)
+                                mState = SetInactive;
+                            break;
+                        case SetInactive:
+                        case SetActive:
+                            throw std::logic_error("Button transition to terminal in state machine.");
+                    }
+                    if (mState == SetActive || mState == SetInactive) {
+                        setButtonState(mState == SetActive);
+                    }
+                    break;
+            }
+        });
     }
 
     void ButtonSemantics::setButtonState(bool active) {
@@ -92,16 +142,19 @@ namespace rose {
             case ButtonType::PushButton:
                 if (active) {
                     mState = Inactive;
-                    std::cout << "Pushed\n";
+                    if (mButtonStateChangeCallback)
+                        mButtonStateChangeCallback(ButtonStateChange::Pushed);
                 }
                 break;
             case ButtonType::ToggleButton:
                 if (active) {
                     mState = Active;
-                    std::cout << "Active\n";
+                    if (mButtonStateChangeCallback)
+                        mButtonStateChangeCallback(ButtonStateChange::On);
                 } else {
                     mState = Inactive;
-                    std::cout << "Inactive\n";
+                    if (mButtonStateChangeCallback)
+                        mButtonStateChangeCallback(ButtonStateChange::Off);
                 }
                 break;
         }

@@ -51,7 +51,8 @@ namespace rose {
         void enterLeaveCallback();          ///< Callback when the pointer enters or leaves the Widget.
         void displayState();                ///< Called when the button display state changes.
 
-        ButtonDisplayCallback mButtonDisplayCallback{}; ///< A callback to the Widget to change the display state.
+        ButtonDisplayCallback mButtonDisplayCallback{};         ///< A callback to the Widget to change the display state.
+        ButtonStateChangeCallback mButtonStateChangeCallback{}; ///< A callback to the Widget with the new button state.
 
     public:
         ButtonSemantics() = delete;
@@ -71,6 +72,14 @@ namespace rose {
          */
         void setButtonDisplayCallback(ButtonDisplayCallback buttonDisplayCallback) {
             mButtonDisplayCallback = std::move(buttonDisplayCallback);
+        }
+
+        /**
+         * @brief Set the ButtonStateChangeCallback function.
+         * @param buttonStateChangeCallback The function.
+         */
+        void setButtonStateChangeCallback(ButtonStateChangeCallback buttonStateChangeCallback) {
+            mButtonStateChangeCallback = std::move(buttonStateChangeCallback);
         }
     };
 }

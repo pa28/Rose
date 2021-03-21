@@ -124,7 +124,8 @@ namespace rose {
             std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
             if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut != mKeyboardShortcuts.end()) {
                 if (auto widget = shortcut->second.lock(); widget)
-                    widget->keyboardShortcutCallback(shortcut->first, keyboardEvent.state == SDL_PRESSED, keyboardEvent.repeat);
+                    widget->keyboardShortcutEvent(shortcut->first, keyboardEvent.state == SDL_PRESSED,
+                                                  keyboardEvent.repeat);
                 else
                     mKeyboardShortcuts.erase(shortcut->first);
             }

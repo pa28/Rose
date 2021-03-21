@@ -383,6 +383,7 @@ namespace rose {
         ButtonCallback mButtonEventCallback{};
         MouseMotionCallback mMouseMotionCallback{};
         ScrollCallback mMouseScrollCallback{};
+        KeyboardShortcutCallback mKeyboardShortcutCallback{};
 
     public:
         Widget() = default;
@@ -401,12 +402,25 @@ namespace rose {
 
         std::shared_ptr<Widget> pointerWidget(Position position, Position containerPosition);
 
+        /**
+         * @brief Recursively compute the Widget Position on the Screen.
+         * @return The computed Position.
+         */
         Position computeScreenPosition();
 
+        /**
+         * @brief Determine if a given Screen Position is within the Widget Rectangle.
+         * @param position The Screen Position.
+         * @return True if the Position is within the Rectangle.
+         */
         bool contains(const Position &position);
 
 //        void clearFocus(const SemanticGesture &gesture) {}
 
+        /**
+         * @brief Get a reference to the Application object.
+         * @return The reference.
+         */
         Application& getApplication() {
             if (auto window = getWindow(); window) {
                 if (auto screen = window->getScreen(); screen)
@@ -415,6 +429,7 @@ namespace rose {
             throw std::runtime_error("No path from Widget to Screen to Application.");
         }
 
+        /// const version of getApplication()
         Application& getApplication() const {
             if (auto window = getWindow(); window) {
                 if (auto screen = window->getScreen(); screen)
@@ -423,6 +438,10 @@ namespace rose {
             throw std::runtime_error("No path from Widget to Screen to Application.");
         }
 
+        /**
+         * @brief Get the Window ancestor of a Widget.
+         * @return The Window.
+         */
         std::shared_ptr<Window> getWindow() {
             auto c = container();
             while (c) {
@@ -434,6 +453,7 @@ namespace rose {
             return nullptr;
         }
 
+        /// const version of getWindow().
         std::shared_ptr<Window> getWindow() const {
             auto c = container();
             while (c) {
@@ -530,7 +550,12 @@ namespace rose {
          * @brief Notify the Widget of a keyboard shortcut invocation.
          * @param keycode The keycode registered to the Widget.
          */
-        void keyboardShortcutCallback(SDL_Keycode keycode, bool state, uint repeat);
+        bool keyboardShortcutEvent(SDL_Keycode keycode, bool state, uint repeat);
+
+        /// Set the keyboard shortcut callback
+        void setKeyboardShortcutCallback(KeyboardShortcutCallback keyboardShortcutCallback) {
+            mKeyboardShortcutCallback = std::move(keyboardShortcutCallback);
+        }
     };
 
     class Manager : public Widget {
