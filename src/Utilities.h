@@ -9,6 +9,7 @@
 
 #include "XDGFilePaths.h"
 #include <iterator>
+#include <algorithm>
 
 #define XSTR(arg) STR(arg)  ///< Used to stringize the value of an argument
 #define STR(arg) #arg       ///< Used to stringize the value of an argument
@@ -16,6 +17,14 @@
 #define FILE_LOC " -- ", __FILE__, ':', __LINE__    ///< Macro to create a location within a source file
 
 namespace rose {
+
+    template<typename U, typename C>
+    bool any_flag_of(U flag, C container) {
+        static_assert(std::is_unsigned_v<U>, "Argument flag must be unsigned type." );
+        return std::any_of(container.begin(), container.end(), [&flag](U value){
+            return (flag & value) == value;
+        });
+    }
 
     /**
      * @class ReverseContainerView

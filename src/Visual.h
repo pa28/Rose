@@ -525,6 +525,12 @@ namespace rose {
         void setMouseScrollEventCallback(ScrollCallback scrollCallback) {
             mMouseScrollCallback = std::move(scrollCallback);
         }
+
+        /**
+         * @brief Notify the Widget of a keyboard shortcut invocation.
+         * @param keycode The keycode registered to the Widget.
+         */
+        void keyboardShortcutCallback(SDL_Keycode keycode, bool state, uint repeat);
     };
 
     class Manager : public Widget {

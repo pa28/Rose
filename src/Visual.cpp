@@ -136,6 +136,10 @@ namespace rose {
         return false;
     }
 
+    void Widget::keyboardShortcutCallback(SDL_Keycode keycode, bool state, uint repeat) {
+        std::cout << __PRETTY_FUNCTION__ << (state ? " Pressed." : " Released.") << ' ' << repeat << '\n';
+    }
+
     void Manager::draw(gm::Context &context, const Position &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {

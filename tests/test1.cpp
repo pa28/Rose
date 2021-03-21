@@ -262,11 +262,14 @@ struct Test1 : public Application {
     }
 
     void build() {
+        std::shared_ptr<Widget> widget{};
+
         auto m = screen() << wdg<Window>()
                           << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                           << wdg<TestMap>() << endw
-                          << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
+                          << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
+        registerKeyboardShortcut(SDLK_w, widget);
     }
 };
 

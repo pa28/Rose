@@ -162,6 +162,8 @@ namespace rose {
         std::shared_ptr<Widget> mScrollFocusWidget{};
         std::shared_ptr<Widget> mKeyFocusWidget{};
 
+        std::map<SDL_Keycode, std::weak_ptr<Widget>> mKeyboardShortcuts{};
+
         bool mMouseButtonPressed{false};
         uint mMouseButtonId{0};
         Position mMousePosition{};
@@ -215,6 +217,11 @@ namespace rose {
             if (mPointerWidget)
                 mPointerWidget->leaveEvent();
             mPointerWidget = std::move(widget);
+        }
+
+        void registerKeyboardShortcut(SDL_Keycode keycode, const std::shared_ptr<Widget>& widget) {
+            std::cout << __PRETTY_FUNCTION__ << " keycode: " << keycode << '\n';
+            mKeyboardShortcuts[keycode] = widget;
         }
 
         virtual void run();

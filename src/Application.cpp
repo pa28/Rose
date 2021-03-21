@@ -89,12 +89,15 @@ namespace rose {
     }
 
     bool Application::keyboardEventCallback(const SDL_KeyboardEvent &keyboardEvent) {
+        static constexpr std::array<uint,2> KeyboardCtlKeyMods{ KMOD_LCTRL, KMOD_RCTRL };
+        static constexpr std::array<uint,2> KeyboardAltKeyMods{ KMOD_LALT, KMOD_RALT };
+
         std::cout << __PRETTY_FUNCTION__ << " Id: " << keyboardEvent.windowID
                   << ", state: " << (uint32_t) keyboardEvent.state << ", repeat: " << (uint32_t) keyboardEvent.repeat
                   << ' ' << SDL_GetKeyName(keyboardEvent.keysym.sym) << '\n';
 
         string keyName{SDL_GetKeyName(keyboardEvent.keysym.sym)};
-        if (keyboardEvent.keysym.mod & (uint)KMOD_CTRL)
+        if (any_flag_of(keyboardEvent.keysym.mod & (uint)KMOD_CTRL, KeyboardCtlKeyMods))
             switch (keyboardEvent.keysym.sym) {
                 case SDLK_F1:
                     SDL_MinimizeWindow(getSdlWindow().get());
@@ -117,6 +120,15 @@ namespace rose {
                 default:
                     break;
             }
+        else if (any_flag_of(keyboardEvent.keysym.mod & (uint)KMOD_ALT, KeyboardAltKeyMods)) {
+            std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
+            if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut != mKeyboardShortcuts.end()) {
+                if (auto widget = shortcut->second.lock(); widget)
+                    widget->keyboardShortcutCallback(shortcut->first, keyboardEvent.state == SDL_PRESSED, keyboardEvent.repeat);
+                else
+                    mKeyboardShortcuts.erase(shortcut->first);
+            }
+        }
         return false;
     }
 

@@ -9,6 +9,7 @@
 #pragma once
 
 #include <functional>
+#include <SDL.h>
 #include "Types.h"
 
 namespace rose {
@@ -60,5 +61,13 @@ namespace rose {
      * @param buttonDisplayState A ButtonDisplayState value indicating how the button should be displayed.
      */
     using ButtonDisplayCallback = std::function<void(ButtonDisplayState buttonDisplayState)>;
+
+    /**
+     * @brief Keyboard shortcut callback.
+     * @details Called when a registered ALt-Key is pressed
+     * @param keycode The SDL_Keycode representing the key pressed with modifiers removed.
+     * @param state True if the key is pressed, false if released.
+     */
+    using KeyboardShortcutCallback = std::function<void(SDL_Keycode keycode, bool state, uint repeat)>;
 
 }
