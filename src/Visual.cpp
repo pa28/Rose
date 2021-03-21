@@ -59,20 +59,6 @@ namespace rose {
         return screenRect;
     }
 
-    std::shared_ptr<Widget>
-    Window::focusWidget(SemanticGesture gesture, Position position, Position containerPosition) {
-        auto windowRectangle = getScreenRectangle(containerPosition);
-        for (auto &content : *this) {
-            if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                if (widget->contains(position)) {
-                    if(auto focus = widget->focusWidget(gesture, position, windowRectangle.position()); focus)
-                        return focus;
-                }
-            }
-        }
-        return nullptr;
-    }
-
     std::shared_ptr<Widget> Window::pointerWidget(Position position) {
         auto windowRectangle = getScreenRectangle(Position::Zero);
         for (auto &content : *this) {
@@ -83,25 +69,6 @@ namespace rose {
                 }
             }
         }
-        return nullptr;
-    }
-
-    std::shared_ptr<Widget>
-    Widget::focusWidget(SemanticGesture gesture, Position position, Position containerPosition) {
-        auto widgetRectangle = getScreenRectangle(containerPosition);
-        if (auto manager = getNode<Manager>(); manager) {
-            for (auto &content : *manager) {
-                if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                    if (widget->contains(position)) {
-                        if (auto focus = widget->focusWidget(gesture, position, widgetRectangle.position()); focus)
-                            return focus;
-                    }
-                }
-            }
-        }
-        if (supportedSemanticGestures().supports(gesture))
-            return getNode<Widget>();
-
         return nullptr;
     }
 

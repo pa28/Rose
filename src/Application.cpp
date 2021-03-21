@@ -226,19 +226,6 @@ namespace rose {
         mGraphicsModel.redrawBackground();
     }
 
-    std::shared_ptr<Widget> Application::focusWidget(SemanticGesture gesture, const Position &position) {
-        for (auto &content : ReverseContainerView(*mScreen)) {
-            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                if (window->getScreenRectangle(Position::Zero).contains(position)) {
-                    return window->focusWidget(gesture, position, Position::Zero);
-                } else if (window->isModal()) {
-                    return nullptr;
-                }
-            }
-        }
-        return nullptr;
-    }
-
     std::shared_ptr<Widget> Application::pointerWidget(const Position position) {
         for (auto &content : ReverseContainerView(*mScreen)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {

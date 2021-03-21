@@ -44,7 +44,7 @@ namespace rose {
         };
 
         InteractionState mState{Inactive};                  ///< Hold the internal interaction state.
-        ButtonType mButtonType{ButtonType::ToggleButton};     ///< The button type.
+        ButtonType mButtonType{ButtonType::PushButton};     ///< The button type.
         Widget &mWidget;                                    ///< The Widget that implements the button.
 
         void setButtonState(bool active);   ///< Called when the Active/Inactive state is resolved.

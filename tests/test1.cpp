@@ -120,7 +120,24 @@ protected:
     ButtonSemantics mButtonSemantics;
 
 public:
-    TestWidget() : mButtonSemantics(static_cast<Widget&>(*this)) {}
+    TestWidget() : mButtonSemantics(static_cast<Widget&>(*this)) {
+        mButtonSemantics.setButtonDisplayCallback([](ButtonDisplayState buttonDisplayState){
+            switch (buttonDisplayState) {
+                case rose::ButtonDisplayState::Active:
+                    std::cout << __PRETTY_FUNCTION__ << " Active\n";
+                    break;
+                case rose::ButtonDisplayState::Inactive:
+                    std::cout << __PRETTY_FUNCTION__ << " Inactive\n";
+                    break;
+                case rose::ButtonDisplayState::PressedInactive:
+                    std::cout << __PRETTY_FUNCTION__ << " Pressed Inactive\n";
+                    break;
+                case rose::ButtonDisplayState::PressedActive:
+                    std::cout << __PRETTY_FUNCTION__ << " Pressed Active\n";
+                    break;
+            }
+        });
+    }
 
     ~TestWidget() override = default;
 

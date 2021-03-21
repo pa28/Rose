@@ -397,7 +397,7 @@ namespace rose {
 
         Widget &operator=(Widget &&) = delete;
 
-        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
+//        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
 
         std::shared_ptr<Widget> pointerWidget(Position position, Position containerPosition);
 
@@ -405,7 +405,7 @@ namespace rose {
 
         bool contains(const Position &position);
 
-        void clearFocus(const SemanticGesture &gesture) {}
+//        void clearFocus(const SemanticGesture &gesture) {}
 
         Application& getApplication() {
             if (auto window = getWindow(); window) {
@@ -499,6 +499,7 @@ namespace rose {
         /**
          * @brief Notify Widget of mouse motion events.
          * @details If this Widget does not consume the event, and any button is pressed, it is passed up the tree.
+         * This allows a Manager above the pointer focused Widget to receive drag events.
          * @param pressed True if a button is pressed.
          * @param button A bitwise or of pressed buttons.
          * @param mousePos The screen position of the mouse.
