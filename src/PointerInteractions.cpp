@@ -85,13 +85,6 @@ namespace rose {
             enterLeaveCallback();
             return true;
         });
-
-        // Get and process mouse motion events.
-//        mWidget.setMouseMotionEventCallback([&](bool pressed, uint state, Position mousePosition,
-//                                                Position relativePosition) {
-//            enterLeaveCallback();
-//            return true;
-//        });
     }
 
     void ButtonSemantics::setButtonState(bool active) {
