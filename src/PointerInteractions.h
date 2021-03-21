@@ -9,23 +9,44 @@
 
 namespace rose {
 
-    /**
-    * @class PointerInteractions
-    * @brief
-    */
-    class PointerInteractions {
+    class Widget;
+
+    enum class ButtonType {
+        PushButton,
+        ToggleButton,
+    };
+
+    class ButtonSemantics {
     protected:
 
+        enum InteractionState {
+            Inactive,
+            Active,
+            PressedActive,
+            PressedInactive,
+            SetActive,
+            SetInactive,
+        };
+
+        InteractionState mState{Inactive};
+        ButtonType mButtonType{ButtonType::PushButton};
+        Widget &mWidget;
+
+        void setButtonState(bool active);
+        void enterLeaveCallback();
+        void displayState();
+
     public:
-        PointerInteractions() = default;
-        virtual ~PointerInteractions() = default;
+        ButtonSemantics() = delete;
+        virtual ~ButtonSemantics() = default;
 
-        PointerInteractions(const PointerInteractions&) = delete;
-        PointerInteractions(PointerInteractions &&) = delete;
-        PointerInteractions& operator=(const PointerInteractions&) = delete;
-        PointerInteractions& operator=(PointerInteractions&&) = delete;
+        explicit ButtonSemantics(Widget &);
 
+        ButtonSemantics(const ButtonSemantics&) = delete;
+        ButtonSemantics(ButtonSemantics&&) = delete;
 
+        ButtonSemantics& operator=(const ButtonSemantics&) = delete;
+        ButtonSemantics& operator=(ButtonSemantics&&) = delete;
     };
 }
 

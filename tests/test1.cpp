@@ -1,6 +1,7 @@
 //
 // Created by richard on 2021-03-15.
 //
+#include "PointerInteractions.h"
 #include "GraphicsModel.h"
 #include "Application.h"
 #include "Font.h"
@@ -116,8 +117,10 @@ public:
 class TestWidget : public Widget {
 protected:
     color::RGBA mColor;
+    ButtonSemantics mButtonSemantics;
+
 public:
-    TestWidget() = default;
+    TestWidget() : mButtonSemantics(static_cast<Widget&>(*this)) {}
 
     ~TestWidget() override = default;
 

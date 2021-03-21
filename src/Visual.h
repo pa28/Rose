@@ -12,6 +12,7 @@
 #include <utility>
 #include <optional>
 #include <limits>
+#include "Callbacks.h"
 #include "StructuredTypes.h"
 #include "Types.h"
 #include "Utilities.h"
@@ -375,11 +376,6 @@ namespace rose {
 
     class Widget : public Visual, public Container {
     public:
-        using EventCallback = std::function<bool()>;
-        using ScrollCallback = std::function<bool(Position deltaPos)>;
-        using ButtonCallback = std::function<bool(bool pressed, uint button, uint clicks)>;
-        using MouseMotionCallback = std::function<bool(bool pressed, uint state, Position mousePosition,
-                                                       Position relativePosition)>;
 
     protected:
         EventCallback mEnterEventCallback{};
@@ -460,6 +456,11 @@ namespace rose {
             return false;
         }
 
+        /// Set the enter callback
+        void setEnterLeaveEventCallback(EventCallback eventCallback) {
+            mEnterEventCallback = std::move(eventCallback);
+        }
+
         /**
          * @brief Notify Widget of mouse pointer leave event.
          * @return True if event is consumed.
@@ -469,6 +470,11 @@ namespace rose {
             if (mLeaveEventCallback)
                 return mLeaveEventCallback();
             return false;
+        }
+
+        /// Set the leave callback
+        void setLeaveEventCallback(EventCallback eventCallback) {
+            mLeaveEventCallback = std::move(eventCallback);
         }
 
         /**
@@ -485,6 +491,11 @@ namespace rose {
             return false;
         }
 
+        /// Set the button callback
+        void setButtonEventCallback(ButtonCallback buttonCallback) {
+            mButtonEventCallback = std::move(buttonCallback);
+        }
+
         /**
          * @brief Notify Widget of mouse motion events.
          * @details If this Widget does not consume the event, and any button is pressed, it is passed up the tree.
@@ -496,6 +507,11 @@ namespace rose {
          */
         bool mouseMotionEvent(bool pressed, uint button, Position mousePos, Position relativePos, bool passed);
 
+        /// Set the mouse motion callback
+        void setMouseMotionEventCallback(MouseMotionCallback mouseMotionCallback) {
+            mMouseMotionCallback = std::move(mouseMotionCallback);
+        }
+
         /**
          * @brief Notify Widget of mouse scroll wheel events.
          * @details If this Widget does not consume the event it is passed up the tree.
@@ -503,6 +519,11 @@ namespace rose {
          * @return True if the event is consumed.
          */
         bool mouseScrollEvent(Position deltaPos, bool passed);
+
+        /// Set the mouse scroll callback
+        void setMouseScrollEventCallback(ScrollCallback scrollCallback) {
+            mMouseScrollCallback = std::move(scrollCallback);
+        }
     };
 
     class Manager : public Widget {
