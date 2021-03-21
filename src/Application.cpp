@@ -97,7 +97,7 @@ namespace rose {
                   << ' ' << SDL_GetKeyName(keyboardEvent.keysym.sym) << '\n';
 
         string keyName{SDL_GetKeyName(keyboardEvent.keysym.sym)};
-        if (any_flag_of(keyboardEvent.keysym.mod & (uint)KMOD_CTRL, KeyboardCtlKeyMods))
+        if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_CTRL, KeyboardCtlKeyMods))
             switch (keyboardEvent.keysym.sym) {
                 case SDLK_F1:
                     SDL_MinimizeWindow(getSdlWindow().get());
@@ -120,7 +120,7 @@ namespace rose {
                 default:
                     break;
             }
-        else if (any_flag_of(keyboardEvent.keysym.mod & (uint)KMOD_ALT, KeyboardAltKeyMods)) {
+        else if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_ALT, KeyboardAltKeyMods)) {
             std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
             if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut != mKeyboardShortcuts.end()) {
                 if (auto widget = shortcut->second.lock(); widget)
