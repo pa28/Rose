@@ -21,7 +21,8 @@ namespace rose {
     template<typename U, typename C>
     bool oneFlagOf(U flag, C container) {
         static_assert(std::is_unsigned_v<U>, "Argument flag must be unsigned type." );
-        return std::any_of(container.begin(), container.end(), [&flag](U value){
+        static_assert(std::is_unsigned_v<typename C::value_type>, "Container must hold an unsigned type.");
+        return std::any_of(container.begin(), container.end(), [&flag](typename C::value_type value){
             return flag == value;
         });
     }
