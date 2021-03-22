@@ -275,6 +275,7 @@ namespace rose {
         InactiveColor,
         AnimateColor,
     };
+
     struct FrameColor {
         FrameColorType type{};
         color::RGBA rgba{};
