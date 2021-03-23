@@ -395,8 +395,10 @@ namespace rose {
         Rectangle layoutRect{};
         if (auto manager = std::dynamic_pointer_cast<Manager>(*first); manager) {
             layoutRect = manager->layout(context, screenRect);
+            manager->setScreenRectangle(layoutRect);
         } else if (auto widget = std::dynamic_pointer_cast<Widget>(*first); widget) {
             layoutRect = widget->layout(context, screenRect);
+            widget->setScreenRectangle(layoutRect);
         }
         return layoutRect;
     }
