@@ -36,17 +36,17 @@ namespace rose {
 
     protected:
         std::string mText{};                ///< The UTF8 or ASCII text to render.
-        color::RGBA mTextFgColor{};         ///< The foreground color to use.
-        color::RGBA mTextBgColor{};         ///< The background color to use if rendering Shaded.
+        color::RGBA mTextFgColor;           ///< The foreground color to use.
+        color::RGBA mTextBgColor;           ///< The background color to use if rendering Shaded.
         RenderStyle mRenderStyle{Blended};  ///< The style of rendering Solid, Shaded, or Blended.
-        std::string mFontName{};            ///< The name of the True Type Font to use.
-        int mPointSize{0};                  ///< The point (pixel) size of the font.
+        std::string mFontName;              ///< The name of the True Type Font to use.
+        int mPointSize;                     ///< The point (pixel) size of the font.
         gm::Texture mTexture{};             ///< The generated Texture.
         Size mTextSize{};                   ///< The size of the Texture in pixels.
         Status mStatus{OK};                 ///< The Status of the last operation.
 
     public:
-        Text() = default;
+        Text();
         virtual ~Text() = default;
 
         Text(const Text &) = delete;

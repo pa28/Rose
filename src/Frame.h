@@ -58,14 +58,14 @@ namespace rose {
      */
     class FrameElements {
     protected:
-        color::RGBA mBaseColor{color::DarkBaseColor};
-        color::RGBA mInvertColor{color::DarkInvertColor};
-        color::RGBA mTopColor{color::DarkTopColor};
-        color::RGBA mBotColor{color::DarkBotColor};
-        color::RGBA mLeftColor{color::DarkLeftColor};
-        color::RGBA mRightColor{color::DarkRightColor};
-        color::RGBA mActiveColor{color::DarkBaseColor};
-        color::RGBA mInactiveColor{color::DarkBaseColor};
+        color::RGBA mBaseColor;
+        color::RGBA mInvertColor;
+        color::RGBA mTopColor;
+        color::RGBA mBotColor;
+        color::RGBA mLeftColor;
+        color::RGBA mRightColor;
+        color::RGBA mActiveColor;
+        color::RGBA mInactiveColor;
         float mColorValue{}, mLastColorValue{};
         int mFrameWidth{2};
         Padding mFramePadding{};
@@ -165,7 +165,7 @@ namespace rose {
         void drawFrame(gm::Context &context, Rectangle widgetRect);
 
     public:
-        FrameElements() = default;
+        FrameElements();
         virtual ~FrameElements() = default;
 
         explicit FrameElements(int padding) : mFramePadding(padding) {}

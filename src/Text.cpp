@@ -8,10 +8,19 @@
 #include "Settings.h"
 #include "Surface.h"
 #include "Text.h"
+#include "Theme.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 
 namespace rose {
+
+    Text::Text() {
+        Theme& theme{Theme::getTheme()};
+        mFontName = theme.BoldFont;
+        mPointSize = theme.LabelPointSize;
+        mTextFgColor = theme.TextColour.toRGBA();
+        mTextBgColor = color::RGBA::TransparentBlack;
+    }
 
     Text::Status Text::createTextureBlended(gm::Context &context) {
         if (mText.empty())
@@ -51,20 +60,12 @@ namespace rose {
         return mStatus;
     }
 
-    TextLabel::TextLabel(const std::string &text, const std::string& fontName, int pointSize) : Widget() {
+    TextLabel::TextLabel(const std::string &text, const std::string& fontName, int pointSize) : Widget(), Text() {
         mText = text;
-        mFontName = fontName;
-        mPointSize = pointSize;
-        mTextBgColor = color::DarkBaseColor;
-        mTextFgColor = color::DarkTextColour;
     }
 
-    TextLabel::TextLabel(const Id &id, const std::string &fontName, int pointSize) {
+    TextLabel::TextLabel(const Id &id, const std::string &fontName, int pointSize) : Widget(), Text() {
         mId = id;
-        mFontName = fontName;
-        mPointSize = pointSize;
-        mTextBgColor = color::DarkBaseColor;
-        mTextFgColor = color::DarkTextColour;
         Settings &settings{Settings::getSettings()};
         mText = settings.getValue(id.idString, std::string{id.idString});
     }

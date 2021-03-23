@@ -6,9 +6,20 @@
  */
 
 #include "Frame.h"
+#include "Theme.h"
 #include "Utilities.h"
 
 namespace rose {
+
+    FrameElements::FrameElements() {
+        Theme &theme{Theme::getTheme()};
+        mBaseColor = mInactiveColor = mActiveColor = theme.BaseColor.toRGBA();
+        mTopColor = theme.TopColor.toRGBA();
+        mBotColor = theme.BotColor.toRGBA();
+        mLeftColor = theme.LeftColor.toRGBA();
+        mRightColor = theme.RightColor.toRGBA();
+    }
+
     void FrameElements::trimCorners(gm::Surface &surface, color::RGBA color, FrameElements::SelectedCorners selectedCorners,
                                     Size cornerSize,
                                     Size frameSize) {
