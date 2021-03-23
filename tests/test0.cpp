@@ -33,7 +33,9 @@ int main(int argc, char **argv) {
                          << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                          << endw
                          << endw
-                         << wdg<ButtonFrame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
+                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::PushButton)
+                            << endw
+                         << wdg<Frame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
                                      << FrameColor{FrameColorType::InactiveColor, color::DarkGreenHSVA.toRGBA()}
                                          << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
                                              << endw

@@ -200,4 +200,13 @@ namespace rose {
                     throw std::logic_error("Button transition to terminal in state machine.");
             }
     }
+
+    void ButtonSemantics::setButtonType(ButtonType buttonType) {
+        mButtonType = buttonType;
+        if (mState != Inactive) {
+            mState = Inactive;
+            displayState();
+            setButtonState(false);
+        }
+    }
 }

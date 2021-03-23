@@ -66,6 +66,8 @@ namespace rose {
         ButtonSemantics& operator=(const ButtonSemantics&) = delete;
         ButtonSemantics& operator=(ButtonSemantics&&) = delete;
 
+        void setButtonType(ButtonType buttonType);
+
         /**
          * @brief Set the ButtonDisplayCallback function.
          * @param buttonDisplayCallback The function.
