@@ -306,8 +306,6 @@ namespace rose {
         /// Layout the contents of the Window
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
-        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
-
         std::shared_ptr<Widget> pointerWidget(Position position);
 
         std::shared_ptr<Screen> getScreen() {
@@ -470,7 +468,6 @@ namespace rose {
          * @return True if event is consumed.
          */
         bool enterEvent() {
-            std::cout << __PRETTY_FUNCTION__ << '\n';
             if (mEnterEventCallback)
                 return mEnterEventCallback();
             return false;
@@ -486,7 +483,6 @@ namespace rose {
          * @return True if event is consumed.
          */
         bool leaveEvent() {
-            std::cout << __PRETTY_FUNCTION__ << '\n';
             if (mLeaveEventCallback)
                 return mLeaveEventCallback();
             return false;
@@ -504,12 +500,7 @@ namespace rose {
          * @param clicks The number of clicks.
          * @return True if the event is consumed.
          */
-        bool buttonEvent(bool pressed, uint button, uint clicks) {
-            std::cout << __PRETTY_FUNCTION__ << ' ' << pressed << ' ' << button << ' ' << clicks << '\n';
-            if (mButtonEventCallback)
-                return mButtonEventCallback(pressed, button, clicks);
-            return false;
-        }
+        bool buttonEvent(bool pressed, uint button, uint clicks, bool passed);
 
         /// Set the button callback
         void setButtonEventCallback(ButtonCallback buttonCallback) {

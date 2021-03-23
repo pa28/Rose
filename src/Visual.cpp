@@ -63,7 +63,8 @@ namespace rose {
         auto windowRectangle = getScreenRectangle(Position::Zero);
         for (auto &content : *this) {
             if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                if (widget->contains(position)) {
+                auto widgetRectangle = widget->getScreenRectangle(windowRectangle.position());
+                if (widgetRectangle.contains(position)) {
                     if (auto ptrWdg = widget->pointerWidget(position, windowRectangle.position()); ptrWdg)
                         return ptrWdg;
                 }
@@ -77,7 +78,8 @@ namespace rose {
         if (auto manager = getNode<Manager>(); manager) {
             for (auto &content : *manager) {
                 if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
-                    if (widget->contains(position)) {
+                    auto wRect = widget->getScreenRectangle(widgetRectangle.position());
+                    if (wRect.contains(position)) {
                         return widget->pointerWidget(position, widgetRectangle.position());
                     }
                 }
@@ -101,6 +103,22 @@ namespace rose {
     bool Widget::contains(const Position &position) {
         Rectangle screenRectangle{computeScreenPosition(), mSize};
         return screenRectangle.contains(position);
+    }
+
+    bool Widget::buttonEvent(bool pressed, uint button, uint clicks, bool passed) {
+        if (mButtonEventCallback)
+            if (mButtonEventCallback(pressed, button, clicks)) {
+                if (passed) {
+                    getApplication().capturePointerWidget(getNode<Widget>());
+                }
+                return true;
+            }
+
+        if (auto widget = std::dynamic_pointer_cast<Widget>(container()); widget) {
+            return widget->buttonEvent(pressed, button, clicks, true);
+        }
+
+        return false;
     }
 
     bool Widget::mouseMotionEvent(bool pressed, uint button, Position mousePos, Position relativePos, bool passed) {

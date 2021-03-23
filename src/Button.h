@@ -24,7 +24,7 @@ namespace rose {
         ButtonStateChangeCallback mButtonStateChangeCallback{};
 
     public:
-        ButtonFrame();
+        ButtonFrame() noexcept;
 
         ~ButtonFrame() override = default;
 
@@ -35,6 +35,20 @@ namespace rose {
         ButtonFrame& operator=(const ButtonFrame&) = delete;
 
         ButtonFrame& operator=(ButtonFrame&&) = delete;
+
+        explicit ButtonFrame(int padding) noexcept;
+
+        /// Draw the screen contents.
+        void draw(gm::Context &context, const Position &containerPosition) override {
+            std::cout << __PRETTY_FUNCTION__ << '\n';
+            Frame::drawAnimate(context, containerPosition);
+        }
+
+        /// Layout the screen contents.
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
+            std::cout << __PRETTY_FUNCTION__ << '\n';
+            return Frame::layout(context, screenRect);
+        }
 
     };
 

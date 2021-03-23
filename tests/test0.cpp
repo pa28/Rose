@@ -4,6 +4,7 @@
 
 #include "GraphicsModel.h"
 #include "Application.h"
+#include "Button.h"
 #include "Font.h"
 #include "Frame.h"
 #include "Image.h"
@@ -32,7 +33,7 @@ int main(int argc, char **argv) {
                          << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                          << endw
                          << endw
-                         << wdg<Frame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
+                         << wdg<ButtonFrame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
                                      << FrameColor{FrameColorType::InactiveColor, color::DarkGreenHSVA.toRGBA()}
                                          << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)
                                              << endw

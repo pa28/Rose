@@ -141,19 +141,30 @@ namespace rose {
 
         Position relativePos{mouseMotionEvent.xrel, mouseMotionEvent.yrel};
 
-        if (mPointerWidget) {
-            if (mPointerWidget->contains(mMousePosition)) {
-                return mPointerWidget->mouseMotionEvent(mMouseButtonPressed, mMouseButtonId, mMousePosition,
-                                                        relativePos, false);
+        if (auto widget = pointerWidget(mMousePosition); widget) {
+//            std::cout << mMousePosition << ' '
+//                      << std::hex << setw(16) << setfill(' ') << mPointerWidget.get()
+//                      << std::hex << setw(16) << setfill(' ') << widget.get()
+//                      << std::dec
+//                      << '\n';
+
+            if (mPointerWidget) {
+                if (mPointerWidget != widget) {
+                    result |= mPointerWidget->leaveEvent();
+                    mPointerWidget = widget;
+                    result |= mPointerWidget->enterEvent();
+                }
+                result |= mPointerWidget->mouseMotionEvent(mMouseButtonPressed, mMouseButtonId, mMousePosition,
+                                                           relativePos, false);
             } else {
+                mPointerWidget = widget;
+                return mPointerWidget->enterEvent();
+            }
+        } else {
+            if (mPointerWidget) {
                 result |= mPointerWidget->leaveEvent();
                 mPointerWidget.reset();
             }
-        }
-
-        mPointerWidget = pointerWidget(mMousePosition);
-        if (mPointerWidget) {
-            result |= mPointerWidget->enterEvent();
         }
 
         return result;
@@ -167,7 +178,7 @@ namespace rose {
             mMouseButtonId &= ~(1u << (mouseButtonEvent.button - 1u));
 
         if (mPointerWidget) {
-            return mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0);
+            return mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
         }
         return false;
     }
@@ -242,7 +253,8 @@ namespace rose {
     std::shared_ptr<Widget> Application::pointerWidget(const Position position) {
         for (auto &content : ReverseContainerView(*mScreen)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                if (window->getScreenRectangle(Position::Zero).contains(position)) {
+                auto windowRect = window->getScreenRectangle(Position::Zero);
+                if (windowRect.contains(position)) {
                     return window->pointerWidget(position);
                 } else if (window->isModal()) {
                     return nullptr;

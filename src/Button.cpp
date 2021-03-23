@@ -9,13 +9,19 @@
 
 namespace rose {
 
-    ButtonFrame::ButtonFrame() : Frame(), mButtonSemantics(*this) {
+    ButtonFrame::ButtonFrame() noexcept : Frame(), mButtonSemantics(*this) {
         mButtonSemantics.setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState){
-            std::cout << __PRETTY_FUNCTION__ << '\n';
+            std::cout << __PRETTY_FUNCTION__ << ' ' << (int)buttonDisplayState << '\n';
         });
 
         mButtonSemantics.setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange){
-            std::cout << __PRETTY_FUNCTION__ << '\n';
+            std::cout << __PRETTY_FUNCTION__ << ' ' << (int)buttonStateChange << "\n\n";
         });
     }
+
+    ButtonFrame::ButtonFrame(int padding) noexcept: ButtonFrame() {
+        mPadding = Padding{padding};
+    }
+
+
 }
