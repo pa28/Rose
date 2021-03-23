@@ -23,11 +23,34 @@ namespace rose {
         mLayoutManager = std::make_unique<TextButtonLayoutManager>(*this);
 
         mButtonSemantics.setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState){
-            std::cout << "setButtonDisplayCallback" << ' ' << (int)buttonDisplayState << '\n';
+            switch (buttonDisplayState) {
+                case ButtonDisplayState::Active:
+                    std::cout << "Display state: Active\n";
+                    break;
+                case ButtonDisplayState::Inactive:
+                    std::cout << "Display state: Inactive\n";
+                    break;
+                case ButtonDisplayState::PressedActive:
+                    std::cout << "Display state: PressedActive\n";
+                    break;
+                case ButtonDisplayState::PressedInactive:
+                    std::cout << "Display state: PressedInactive\n";
+                    break;
+            }
         });
 
         mButtonSemantics.setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange){
-            std::cout << "setButtonStateChangeCallback" << ' ' << (int)buttonStateChange << "\n\n";
+            switch (buttonStateChange) {
+                case ButtonStateChange::Pushed:
+                    std::cout << "Button state: Pushed\n";
+                    break;
+                case ButtonStateChange::Off:
+                    std::cout << "Button state: Off\n";
+                    break;
+                case ButtonStateChange::On:
+                    std::cout << "Button state: On\n";
+                    break;
+            }
         });
     }
 

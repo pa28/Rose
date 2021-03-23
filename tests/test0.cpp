@@ -29,11 +29,10 @@ int main(int argc, char **argv) {
                          << wdg<Frame>(0) << curve<ActionCurves::HeartBeat>()
                          << FrameColor{FrameColorType::AnimateColor, color::DarkRedHSVA.toRGBA()}
                          << FrameColor{FrameColorType::InactiveColor, color::DarkRedHSVA.withValue(0.25).toRGBA()}
-                         << AnimationEnable{rose::AnimationEnable::Enable}
-                         << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
-                         << endw
-                         << endw
-                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::PushButton)
+                             << AnimationEnable{rose::AnimationEnable::Enable}
+                             << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
+                                << endw << endw
+                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::ToggleButton)
                             << endw
                          << wdg<Frame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
                                      << FrameColor{FrameColorType::InactiveColor, color::DarkGreenHSVA.toRGBA()}
