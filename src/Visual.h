@@ -326,8 +326,9 @@ namespace rose {
      * @brief A pure virtual base class for layout managers.
      */
     class LayoutManager {
+
     protected:
-        size_t mMaxContent{0};
+        size_t mMaxContent{UnlimitedContent};
 
         static std::vector<LayoutHint>& getLayoutHints(std::shared_ptr<Visual> &visual) {
             return visual->mLayoutHints;
@@ -338,6 +339,8 @@ namespace rose {
         }
 
     public:
+        static constexpr size_t UnlimitedContent = std::numeric_limits<size_t>::max();
+
         LayoutManager() = default;
         virtual ~LayoutManager() = default;
         using Itr = Container::iterator;
@@ -560,7 +563,7 @@ namespace rose {
 
         void add(const std::shared_ptr<Node> &node) override {
             if (mLayoutManager) {
-                if (mLayoutManager->maximumContent() == 0 || size() < mLayoutManager->maximumContent()) {
+                if (mLayoutManager->maximumContent() == LayoutManager::UnlimitedContent || size() < mLayoutManager->maximumContent()) {
                     if (std::dynamic_pointer_cast<Widget>(node) || std::dynamic_pointer_cast<Manager>(node))
                         Container::add(node);
                     else
