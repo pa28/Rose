@@ -10,6 +10,7 @@
 #include <iostream>
 #include <tuple>
 #include <utility>
+#include "Color.h"
 
 namespace rose {
 
@@ -18,11 +19,47 @@ namespace rose {
         Vertical,
     };
 
+    /**
+     * @enum BorderStyle
+     * @brief The types of border supported.
+     */
+    enum class BorderStyle {
+        Unset,      ///< Not set to a valid value.
+        None,       ///< No border
+        BevelOut,   ///< A beveled out border
+        BevelIn,    ///< A beveled in border
+        NotchOut,   ///< A notch out border
+        NotchIn,    ///< A notch in border
+    };
+
+    /**
+     * @enum CornerStyle
+     * @brief Types of corners supported.
+     */
+    enum class CornerStyle {
+        Unset,      ///< Not set to a valid value.
+        Square,     ///< Square corners
+        Round,      ///< Round corners.
+    };
+
     namespace set {
         static constexpr std::string_view SetAppSize{"SetAppSize"};
         static constexpr std::string_view SetAppPosition{"SetAppPosition"};
         static constexpr std::string_view SetAppState{"SetAppState"};
     }
+
+    struct FrameSettings {
+        std::pair<color::RGBA,color::RGBA>  backgroundPair;
+        std::pair<BorderStyle,BorderStyle>  borderStylePair;
+
+        color::RGBA background(bool invert) {
+            return invert ? backgroundPair.second : backgroundPair.first;
+        }
+
+        BorderStyle borderStyle(bool invert) {
+            return invert ? borderStylePair.second : borderStylePair.first;
+        }
+    };
 
     /**
      * @struct Position

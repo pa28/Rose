@@ -18,7 +18,7 @@ namespace rose {
         Theme& theme{Theme::getTheme()};
         mFontName = theme.BoldFont;
         mPointSize = theme.LabelPointSize;
-        mTextFgColor = theme.TextColour.toRGBA();
+        mTextFgColor = theme.rgba(ThemeColor::Text);
         mTextBgColor = color::RGBA::TransparentBlack;
     }
 

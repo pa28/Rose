@@ -10,35 +10,11 @@
 #include <cstdint>
 #include "Animation.h"
 #include "Color.h"
+#include "Theme.h"
 #include "ImageStore.h"
 #include "Visual.h"
 
 namespace rose {
-
-    /**
-     * @enum BorderStyle
-     * @brief The types of border supported.
-     */
-    enum class BorderStyle {
-        Unset,      ///< Not set to a valid value.
-        None,       ///< No border
-        Bevel,      ///< A beveled out border
-        BevelIn,    ///< A beveled in border
-        Notch,      ///< A notch border
-        TabTop,     ///< TabButton border, tabs on top
-        TabLeft,    ///< TabButton border, tabs on left
-        TabPage,    ///< TabPage border.
-    };
-
-    /**
-     * @enum CornerStyle
-     * @brief Types of corners supported.
-     */
-    enum class CornerStyle {
-        Unset,      ///< Not set to a valid value.
-        Square,     ///< Square corners
-        Round,      ///< Round corners.
-    };
 
     /**
      * @enum UseBorder
@@ -75,6 +51,8 @@ namespace rose {
         gm::Texture mBorder{};
         gm::Texture mInactiveBG{};
         gm::Texture mAnimatedBG{};
+
+        FrameSettings mFrameSettings{};
 
         /**
          * @enum SelectedCorners
@@ -140,7 +118,7 @@ namespace rose {
          * @param extend If true, extend the side(s) in the direction of increasing Y or X (down or right).
          */
         void
-        renderSelectedSides(gm::Context &context, FrameElements::SelectedSides selectedSides, UseBorder useBorder,
+        renderSelectedSides(gm::Context &context, FrameElements::SelectedSides selectedSides, BorderStyle useBorder,
                             ImageId corner, const Size &size, int extend = 0);
 
         /**

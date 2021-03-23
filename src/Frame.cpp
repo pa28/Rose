@@ -13,13 +13,15 @@ namespace rose {
 
     FrameElements::FrameElements() {
         Theme &theme{Theme::getTheme()};
-        mBaseColor = theme.BaseColor.toRGBA();
-        mActiveColor = theme.InvertColor.toRGBA();
-        mTopColor = theme.TopColor.toRGBA();
-        mBotColor = theme.BotColor.toRGBA();
-        mLeftColor = theme.LeftColor.toRGBA();
-        mRightColor = theme.RightColor.toRGBA();
-        mInactiveColor = theme.BaseColor.toRGBA();
+        mBaseColor = theme.rgba(ThemeColor::Base);
+        mActiveColor = theme.rgba(ThemeColor::Invert);
+        mTopColor = theme.rgba(ThemeColor::Top);
+        mBotColor = theme.rgba(ThemeColor::Bottom);
+        mLeftColor = theme.rgba(ThemeColor::Left);
+        mRightColor = theme.rgba(ThemeColor::Right);
+        mInactiveColor = theme.rgba(ThemeColor::Base);
+
+        mFrameSettings = theme.SemiBevelFrame;
     }
 
     void FrameElements::trimCorners(gm::Surface &surface, color::RGBA color, FrameElements::SelectedCorners selectedCorners,
@@ -88,7 +90,7 @@ namespace rose {
     }
 
     void
-    FrameElements::renderSelectedSides(gm::Context& context, FrameElements::SelectedSides selectedSides, UseBorder useBorder,
+    FrameElements::renderSelectedSides(gm::Context& context, FrameElements::SelectedSides selectedSides, BorderStyle useBorder,
                                        ImageId corner, const Size &size, int extend) {
         auto cornerSize = ImageStore::getStore().size(corner);
         Rectangle fill0, fill1;
@@ -102,21 +104,22 @@ namespace rose {
                 fill0.w = fill1.w = size.w - cornerSize.w / (extend ? 2 : 1);
                 fill0.h = fill1.h = mFrameWidth / 2;
                 switch (useBorder) {
-                    case UseBorder::BevelOut:
+                    case BorderStyle::BevelOut:
                         color0 = color1 = mTopColor;
                         break;
-                    case UseBorder::BevelIn:
+                    case BorderStyle::BevelIn:
                         color0 = color1 = mBotColor;
                         break;
-                    case UseBorder::NotchIn:
+                    case BorderStyle::NotchIn:
                         color0 = mBotColor;
                         color1 = mTopColor;
                         break;
-                    case UseBorder::NotchOut:
+                    case BorderStyle::NotchOut:
                         color0 = mTopColor;
                         color1 = mBotColor;
                         break;
-                    case UseBorder::None:
+                    case BorderStyle::None:
+                    default:
                         break;
                 }
             } else if ((s & selectedSides) & SelectedSides::BotSide) {
@@ -126,21 +129,22 @@ namespace rose {
                 fill0.w = fill1.w = size.w - cornerSize.w / (extend ? 2 : 1);
                 fill0.h = fill1.h = mFrameWidth / 2;
                 switch (useBorder) {
-                    case UseBorder::BevelOut:
+                    case BorderStyle::BevelOut:
                         color0 = color1 = mBotColor;
                         break;
-                    case UseBorder::BevelIn:
+                    case BorderStyle::BevelIn:
                         color0 = color1 = mTopColor;
                         break;
-                    case UseBorder::NotchIn:
+                    case BorderStyle::NotchIn:
                         color0 = mBotColor;
                         color1 = mTopColor;
                         break;
-                    case UseBorder::NotchOut:
+                    case BorderStyle::NotchOut:
                         color0 = mTopColor;
                         color1 = mBotColor;
                         break;
-                    case UseBorder::None:
+                    case BorderStyle::None:
+                    default:
                         break;
                 }
             } else if ((s & selectedSides) & SelectedSides::LeftSide) {
@@ -150,21 +154,22 @@ namespace rose {
                 fill0.w = fill1.w = mFrameWidth / 2;
                 fill0.h = fill1.h = size.h - cornerSize.h / (extend ? 2 : 1);
                 switch (useBorder) {
-                    case UseBorder::BevelOut:
+                    case BorderStyle::BevelOut:
                         color0 = color1 = mLeftColor;
                         break;
-                    case UseBorder::BevelIn:
+                    case BorderStyle::BevelIn:
                         color0 = color1 = mRightColor;
                         break;
-                    case UseBorder::NotchIn:
+                    case BorderStyle::NotchIn:
                         color0 = mRightColor;
                         color1 = mLeftColor;
                         break;
-                    case UseBorder::NotchOut:
+                    case BorderStyle::NotchOut:
                         color0 = mLeftColor;
                         color1 = mRightColor;
                         break;
-                    case UseBorder::None:
+                    case BorderStyle::None:
+                    default:
                         break;
                 }
             } else if ((s & selectedSides) & SelectedSides::RightSide) {
@@ -174,21 +179,22 @@ namespace rose {
                 fill0.w = fill1.w = mFrameWidth / 2;
                 fill0.h = fill1.h = size.h - cornerSize.h / (extend ? 2 : 1);
                 switch (useBorder) {
-                    case UseBorder::BevelOut:
+                    case BorderStyle::BevelOut:
                         color0 = color1 = mRightColor;
                         break;
-                    case UseBorder::BevelIn:
+                    case BorderStyle::BevelIn:
                         color0 = color1 = mLeftColor;
                         break;
-                    case UseBorder::NotchIn:
+                    case BorderStyle::NotchIn:
                         color0 = mRightColor;
                         color1 = mLeftColor;
                         break;
-                    case UseBorder::NotchOut:
+                    case BorderStyle::NotchOut:
                         color0 = mLeftColor;
                         color1 = mRightColor;
                         break;
-                    case UseBorder::None:
+                    case BorderStyle::None:
+                    default:
                         break;
                 }
             }
@@ -209,7 +215,7 @@ namespace rose {
                 useBorder = None;
                 selectedCorners = AllCorners;
                 break;
-            case BorderStyle::Bevel:
+            case BorderStyle::BevelOut:
                 useBorder = mInvert ? BevelIn : BevelOut;
                 selectedCorners = AllCorners;
                 break;
@@ -217,21 +223,9 @@ namespace rose {
                 useBorder = mInvert ? BevelOut : BevelIn;
                 selectedCorners = AllCorners;
                 break;
-            case BorderStyle::Notch:
+            case BorderStyle::NotchIn:
                 useBorder = mInvert ? NotchOut : NotchIn;
                 selectedCorners = AllCorners;
-                break;
-            case BorderStyle::TabLeft:
-                useBorder = NotchIn;
-                selectedCorners = LeftCorners;
-                break;
-            case BorderStyle::TabTop:
-                useBorder = NotchIn;
-                selectedCorners = TopCorners;
-                break;
-            case BorderStyle::TabPage:
-                useBorder = NotchIn;
-                selectedCorners = BottomCorners;
                 break;
         }
 
@@ -240,7 +234,9 @@ namespace rose {
 
     gm::Texture FrameElements::createBackgroundTexture(gm::Context &context, Rectangle &src, Rectangle &dst,
                                                        const color::RGBA &color) {
-        auto [useBorder,selectedCorners] = decoration();
+//        auto [useBorder,selectedCorners] = decoration();
+        auto useBorder = mFrameSettings.borderStyle(mInvert);
+        auto selectedCorners = AllCorners;
 
         gm::Surface surface{dst.w, dst.h, 32, SDL_PIXELFORMAT_RGBA8888};
         if (!surface)
@@ -261,7 +257,9 @@ namespace rose {
     void FrameElements::drawBackground(gm::Context &context, Rectangle &src, Rectangle &dst) {
         gm::Texture texture{context, src.size()};
 
-        auto [useBorder,selectedCorners] = decoration();
+//        auto [useBorder,selectedCorners] = decoration();
+        auto useBorder = mFrameSettings.borderStyle(mInvert);
+        auto selectedCorners = AllCorners;
 
         texture.setBlendMode(SDL_BLENDMODE_NONE);
         mBorder = gm::Texture{context, dst.size()};
@@ -274,54 +272,56 @@ namespace rose {
         ImageId squareCnr = ImageId::NoImage;
 
         switch (useBorder) {
-            case None:
+            case BorderStyle::None:
                 break;
-            case BevelOut:
+            case BorderStyle::BevelOut:
                 roundCnr = ImageId::BevelOutRoundCorners;
                 squareCnr = ImageId::BevelOutSquareCorners;
                 break;
-            case BevelIn:
+            case BorderStyle::BevelIn:
                 roundCnr = ImageId::BevelInRoundCorners;
                 squareCnr = ImageId::BevelInSquareCorners;
                 break;
-            case NotchIn:
+            case BorderStyle::NotchIn:
                 roundCnr = ImageId::NotchInRoundCorners;
                 squareCnr = ImageId::NotchInSquareCorners;
                 break;
-            case NotchOut:
+            case BorderStyle::NotchOut:
                 roundCnr = ImageId::NotchOutRoundCorners;
                 squareCnr = ImageId::NotchOutSquareCorners;
+                break;
+            default:
                 break;
         }
 
         if (mBorderStyle != BorderStyle::None && mBorderStyle != BorderStyle::Unset) {
             auto corner = mCornerStyle == CornerStyle::Round ? roundCnr : squareCnr;
-            if (mBorderStyle == BorderStyle::Notch || mBorderStyle == BorderStyle::Bevel || mBorderStyle == BorderStyle::BevelIn) {
+            if (mBorderStyle == BorderStyle::NotchIn || mBorderStyle == BorderStyle::BevelOut || mBorderStyle == BorderStyle::BevelIn) {
                 renderSelectedCorners(context, SelectedCorners::AllCorners, corner, dst.size());
                 renderSelectedSides(context, SelectedSides::AllSides, useBorder, corner, dst.size(), 0);
-            } else if (mBorderStyle == BorderStyle::TabTop) {
-                renderSelectedCorners(context, SelectedCorners::TopCorners, corner, dst.size());
-                renderSelectedSides(context, SelectedSides::TopSide, useBorder, corner, dst.size(), 0);
-                renderSelectedSides(context, (SelectedSides) (SelectedSides::LeftSide | SelectedSides::RightSide),
-                                    useBorder, corner, dst.size(), 1);
-                if (mInvert) {
-                    renderSelectedCorners(context, SelectedCorners::BottomCorners, squareCnr, dst.size());
-                    renderSelectedSides(context, SelectedSides::BotSide, useBorder, corner, dst.size(), 0);
-                }
-            } else if (mBorderStyle == BorderStyle::TabLeft) {
-                renderSelectedCorners(context, SelectedCorners::LeftCorners, corner, dst.size());
-                renderSelectedSides(context, SelectedSides::LeftSide, useBorder, corner, dst.size(), 0);
-                renderSelectedSides(context, (SelectedSides) (SelectedSides::TopSide | SelectedSides::BotSide),
-                                    useBorder, corner, dst.size(), 1);
-                if (mInvert) {
-                    renderSelectedCorners(context, SelectedCorners::RightCorners, squareCnr, dst.size());
-                    renderSelectedSides(context, SelectedSides::RightSide, useBorder, corner, dst.size(), 0);
-                }
-            } else if (mBorderStyle == BorderStyle::TabPage) {
-                renderSelectedCorners(context, SelectedCorners::BottomCorners, corner, dst.size());
-                renderSelectedSides(context, SelectedSides::BotSide, useBorder, corner, dst.size(), 0);
-                renderSelectedSides(context, (SelectedSides) (SelectedSides::LeftSide | SelectedSides::RightSide),
-                                    useBorder, corner, dst.size(), -1);
+//            } else if (mBorderStyle == BorderStyle::TabTop) {
+//                renderSelectedCorners(context, SelectedCorners::TopCorners, corner, dst.size());
+//                renderSelectedSides(context, SelectedSides::TopSide, useBorder, corner, dst.size(), 0);
+//                renderSelectedSides(context, (SelectedSides) (SelectedSides::LeftSide | SelectedSides::RightSide),
+//                                    useBorder, corner, dst.size(), 1);
+//                if (mInvert) {
+//                    renderSelectedCorners(context, SelectedCorners::BottomCorners, squareCnr, dst.size());
+//                    renderSelectedSides(context, SelectedSides::BotSide, useBorder, corner, dst.size(), 0);
+//                }
+//            } else if (mBorderStyle == BorderStyle::TabLeft) {
+//                renderSelectedCorners(context, SelectedCorners::LeftCorners, corner, dst.size());
+//                renderSelectedSides(context, SelectedSides::LeftSide, useBorder, corner, dst.size(), 0);
+//                renderSelectedSides(context, (SelectedSides) (SelectedSides::TopSide | SelectedSides::BotSide),
+//                                    useBorder, corner, dst.size(), 1);
+//                if (mInvert) {
+//                    renderSelectedCorners(context, SelectedCorners::RightCorners, squareCnr, dst.size());
+//                    renderSelectedSides(context, SelectedSides::RightSide, useBorder, corner, dst.size(), 0);
+//                }
+//            } else if (mBorderStyle == BorderStyle::TabPage) {
+//                renderSelectedCorners(context, SelectedCorners::BottomCorners, corner, dst.size());
+//                renderSelectedSides(context, SelectedSides::BotSide, useBorder, corner, dst.size(), 0);
+//                renderSelectedSides(context, (SelectedSides) (SelectedSides::LeftSide | SelectedSides::RightSide),
+//                                    useBorder, corner, dst.size(), -1);
             }
         }
     }

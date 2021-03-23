@@ -8,8 +8,22 @@
 #pragma once
 
 #include "Color.h"
+#include "Types.h"
 
 namespace rose {
+
+    enum class ThemeColor : size_t {
+        Base,
+        Top,
+        Bottom,
+        Left,
+        Right,
+        Invert,
+        Text,
+        Red,
+        Green,
+        Yellow,
+    };
 
     /**
      * @class Theme
@@ -21,7 +35,7 @@ namespace rose {
     public:
         ~Theme() = default;
 
-        static Theme& getTheme() {
+        static Theme &getTheme() {
             static Theme instance{};
             return instance;
         }
@@ -29,17 +43,41 @@ namespace rose {
         /**
          * Colors
          */
-        color::HSVA
-                BaseColor{200.f, .00, .25, 1.0},
-                TopColor{BaseColor.modValue(0.2)},
-                BotColor{BaseColor.modValue(-0.15)},
-                LeftColor{BaseColor.modValue(0.1)},
-                RightColor{BaseColor.modValue(-0.15)},
-                InvertColor{BaseColor.modValue(-0.075)},
-                TextColour{BaseColor.contrasting()},
-                RedHSVA{ 0.f, 1.f, 0.55f, 1.f},
-                GreenHSVA{79.f,1.f,.4f,1.f},
-                YellowHSVA{ 50.f, 1.f, 0.55f, 1.f};
+        color::HSVA BaseColorHSVA{200.f, .00, .25, 1.0};
+
+        std::array<color::HSVA, 10> _hsva{{
+                                                 BaseColorHSVA,
+                                                 BaseColorHSVA.modValue(0.2),
+                                                 BaseColorHSVA.modValue(-0.15),
+                                                 BaseColorHSVA.modValue(0.1),
+                                                 BaseColorHSVA.modValue(-0.15),
+                                                 BaseColorHSVA.modValue(-0.075),
+                                                 BaseColorHSVA.contrasting(),
+                                                 {0.f, 1.f, 0.55f, 1.f},
+                                                 {79.f, 1.f, .4f, 1.f},
+                                                 {50.f, 1.f, 0.55f, 1.f}
+                                         }};
+
+        std::array<color::RGBA, 10> _rgba{{
+                                                 _hsva[0].toRGBA(),
+                                                 _hsva[1].toRGBA(),
+                                                 _hsva[2].toRGBA(),
+                                                 _hsva[3].toRGBA(),
+                                                 _hsva[4].toRGBA(),
+                                                 _hsva[5].toRGBA(),
+                                                 _hsva[6].toRGBA(),
+                                                 _hsva[7].toRGBA(),
+                                                 _hsva[8].toRGBA(),
+                                                 _hsva[9].toRGBA(),
+                                         }};
+
+        color::RGBA rgba(ThemeColor themeColor) {
+            return _rgba[static_cast<std::size_t>(themeColor)];
+        };
+
+        color::HSVA hsva(ThemeColor themeColor) {
+            return _hsva[static_cast<std::size_t>(themeColor)];
+        }
 
         /**
          * Fonts
@@ -65,7 +103,26 @@ namespace rose {
         /**
          * Padding
          */
-         int ButtonPadding{5};
+        int ButtonPadding{5};
+
+        /**
+         * Frame styles
+         */
+        FrameSettings CleanFrame{
+                { rgba(ThemeColor::Base), rgba(ThemeColor::Invert)},
+                {BorderStyle::None, BorderStyle::None}
+        };
+
+        FrameSettings BevelFrame{
+                { rgba(ThemeColor::Base), rgba(ThemeColor::Invert)},
+                {BorderStyle::BevelOut, BorderStyle::BevelIn}
+        };
+
+        FrameSettings SemiBevelFrame{
+                { rgba(ThemeColor::Base), rgba(ThemeColor::Invert)},
+                {BorderStyle::NotchIn, BorderStyle::BevelIn}
+        };
+
     };
 }
 
