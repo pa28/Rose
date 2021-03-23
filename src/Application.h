@@ -224,6 +224,10 @@ namespace rose {
             mKeyboardShortcuts[keycode] = widget;
         }
 
+        void redrawBackground() {
+            mGraphicsModel.redrawBackground();
+        }
+
         virtual void run();
     };
 }

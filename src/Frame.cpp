@@ -13,11 +13,13 @@ namespace rose {
 
     FrameElements::FrameElements() {
         Theme &theme{Theme::getTheme()};
-        mBaseColor = mInactiveColor = mActiveColor = theme.BaseColor.toRGBA();
+        mBaseColor = theme.BaseColor.toRGBA();
+        mActiveColor = theme.InvertColor.toRGBA();
         mTopColor = theme.TopColor.toRGBA();
         mBotColor = theme.BotColor.toRGBA();
         mLeftColor = theme.LeftColor.toRGBA();
         mRightColor = theme.RightColor.toRGBA();
+        mInactiveColor = theme.BaseColor.toRGBA();
     }
 
     void FrameElements::trimCorners(gm::Surface &surface, color::RGBA color, FrameElements::SelectedCorners selectedCorners,
@@ -380,20 +382,20 @@ namespace rose {
             }
         }
 
-        if (!mAnimagedBG) {
-            mAnimagedBG = createBackgroundMask(context, src.size(), mFrameWidth, mCornerStyle == CornerStyle::Round);
-            colorBackgroundMask(context, mAnimagedBG, mActiveColor, mInactiveColor, 0.);
+        if (!mAnimatedBG) {
+            mAnimatedBG = createBackgroundMask(context, src.size(), mFrameWidth, mCornerStyle == CornerStyle::Round);
+            colorBackgroundMask(context, mAnimatedBG, mActiveColor, mInactiveColor, 0.);
         }
 
         if (!mInactiveBG) {
             mInactiveBG = createBackgroundMask(context, src.size(), mFrameWidth, mCornerStyle == CornerStyle::Round);
-            colorBackgroundMask(context, mInactiveBG, mInactiveColor, mActiveColor, 0.);
+            colorBackgroundMask(context, mInactiveBG, mInactiveColor, mActiveColor, mInvert ? 1.0 : 0.);
         }
 
         context.renderCopy(mBorder, dst);
         context.renderCopy(mInactiveBG, dst);
-        mAnimagedBG.setAlphaMod(mColorValue);
-        context.renderCopy(mAnimagedBG, dst);
+        mAnimatedBG.setAlphaMod(mColorValue);
+        context.renderCopy(mAnimatedBG, dst);
     }
 
     Rectangle

@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
                              << AnimationEnable{rose::AnimationEnable::Enable}
                              << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                                 << endw << endw
-                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::ToggleButton)
+                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::ToggleButton) << BorderStyle{BorderStyle::Bevel}
                             << endw
                          << wdg<Frame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
                                      << FrameColor{FrameColorType::InactiveColor, color::DarkGreenHSVA.toRGBA()}

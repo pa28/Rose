@@ -74,7 +74,7 @@ namespace rose {
         bool mInvert{};
         gm::Texture mBorder{};
         gm::Texture mInactiveBG{};
-        gm::Texture mAnimagedBG{};
+        gm::Texture mAnimatedBG{};
 
         /**
          * @enum SelectedCorners
@@ -180,7 +180,7 @@ namespace rose {
         void set(const CornerStyle cornerStyle) {
             mCornerStyle = cornerStyle;
             mBorder.reset();
-            mAnimagedBG.reset();
+            mAnimatedBG.reset();
             mInactiveBG.reset();
         }
 
@@ -188,14 +188,14 @@ namespace rose {
         void setState(bool state) {
             mInvert = state;
             mBorder.reset();
-            mAnimagedBG.reset();
+            mAnimatedBG.reset();
             mInactiveBG.reset();
         }
 
         /// Set the active color.
         void setAnimateColor(const color::RGBA &color) {
             mActiveColor = color;
-            mAnimagedBG.reset();
+            mAnimatedBG.reset();
         }
 
         /// Set the background color.
