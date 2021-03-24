@@ -45,7 +45,6 @@ namespace rose {
         float mColorValue{}, mLastColorValue{};
         int mFrameWidth{2};
         Padding mFramePadding{};
-        BorderStyle mBorderStyle{BorderStyle::None};
         CornerStyle mCornerStyle{CornerStyle::Round};
         bool mInvert{};
         gm::Texture mBorder{};
@@ -148,12 +147,6 @@ namespace rose {
 
         explicit FrameElements(int padding) : mFramePadding(padding) {}
 
-        /// Set the BorderStyle
-        void set(const BorderStyle borderStyle) {
-            mBorderStyle = borderStyle;
-            mBorder.reset();
-        }
-
         /// Set the CornerStyle
         void set(const CornerStyle cornerStyle) {
             mCornerStyle = cornerStyle;
@@ -189,6 +182,13 @@ namespace rose {
 
         static void colorBackgroundMask(gm::Context &context, gm::Texture &mask, const color::RGBA &base,
                                         const color::RGBA &active, float value);
+
+        void frameSettings(const FrameSettings& frameSettings) {
+            mFrameSettings = frameSettings;
+            mBorder.reset();
+            mInactiveBG.reset();
+            mAnimatedBG.reset();
+        }
     };
 
     class FrameLayoutManager : public LayoutManager {
@@ -215,10 +215,8 @@ namespace rose {
                 if (mActionCurve) {
                     auto idx = frame % mActionCurve->size();
                     mColorValue = (*mActionCurve)[idx];
-//                    if (mColorValue != mLastColorValue) {
-                        drawAnimate(context, position);
-                        mLastColorValue = mColorValue;
-//                    }
+                    drawAnimate(context, position);
+                    mLastColorValue = mColorValue;
                 } else {
                     removeAnimation(getNode<Animation>());
                 }
@@ -263,13 +261,6 @@ namespace rose {
 }
 
 template<typename ManagerClass>
-inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::BorderStyle borderStyle) {
-    static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::FrameElements." );
-    manager->set(borderStyle);
-    return manager;
-}
-
-template<typename ManagerClass>
 inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::CornerStyle cornerStyle) {
     static_assert(std::is_base_of_v<rose::FrameElements,ManagerClass>, "ManagerClass must be derived from rose::FrameElements." );
     manager->set(cornerStyle);
@@ -287,5 +278,13 @@ inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> ma
             manager->setAnimateColor(frameColor.rgba);
             break;
     }
+    return manager;
+}
+
+template <class ManagerClass>
+inline std::shared_ptr<ManagerClass> operator<<(std::shared_ptr<ManagerClass> manager, const rose::FrameSettings& frameSettings) {
+    static_assert(std::is_base_of_v<rose::FrameElements, ManagerClass>,
+                  "ManagerClass must be derived from rose::FrameElements.");
+    manager->frameSettings(frameSettings);
     return manager;
 }

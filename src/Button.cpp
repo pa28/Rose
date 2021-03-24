@@ -44,7 +44,7 @@ namespace rose {
             }
             getApplication().redrawBackground();
             mInactiveBG.reset();
-            if (mBorderStyle != BorderStyle::None)
+            if (mFrameSettings.borderStyle(true) != BorderStyle::None || mFrameSettings.borderStyle(false) != BorderStyle::None)
                 mBorder.reset();
         });
 

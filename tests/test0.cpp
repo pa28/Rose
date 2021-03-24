@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     Theme& theme{Theme::getTheme()};
 
     application.screen() << wdg<Window>()
-                         << wdg<Frame>(5) << Position{10, 10} << FrameColor{FrameColorType::InactiveColor, theme.rgba(rose::ThemeColor::Base)}
+                         << wdg<Frame>(5) << Position{10, 10} << theme.SemiBevelFrame
                          << wdg<Manager>() << Id{"row"} << makeLayout<LinearLayout>(Orientation::Vertical, 5)
                          << wdg<Frame>(0) << curve<ActionCurves::HeartBeat>()
                          << FrameColor{FrameColorType::AnimateColor, theme.rgba(rose::ThemeColor::Red)}
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
                              << AnimationEnable{rose::AnimationEnable::Enable}
                              << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
                                 << endw << endw
-                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::ToggleButton) << BorderStyle{BorderStyle::NotchIn}
+                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::PushButton) << theme.SemiBevelFrame
                             << endw
                          << wdg<Frame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
                                      << FrameColor{FrameColorType::InactiveColor, theme.rgba(rose::ThemeColor::Green)}
