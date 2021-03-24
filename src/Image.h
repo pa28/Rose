@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ImageStore.h"
+#include "Theme.h"
 
 namespace rose {
 
@@ -34,15 +35,16 @@ namespace rose {
         Size mRequestedSize{};
 
     public:
-        ImageLabel() = default;
+        explicit ImageLabel(ImageId imageId = ImageId::ThreeDots) : Image(imageId) {
+            mRequestedSize = Theme::getTheme().ImageLabelSize;
+        }
+
         ~ImageLabel() override = default;
 
         ImageLabel(const ImageLabel&) = delete;
         ImageLabel(ImageLabel &&) = delete;
         ImageLabel& operator=(const ImageLabel&) = delete;
         ImageLabel& operator=(ImageLabel &&) = delete;
-
-        explicit ImageLabel(ImageId imageId) : Image(imageId) {}
 
         ImageLabel(ImageId imageId, Size size);
 

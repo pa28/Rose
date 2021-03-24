@@ -32,10 +32,11 @@ int main(int argc, char **argv) {
                          << FrameColor{FrameColorType::AnimateColor, theme.rgba(rose::ThemeColor::Red)}
                          << FrameColor{FrameColorType::InactiveColor, theme.hsva(rose::ThemeColor::Red).withValue(0.25).toRGBA()}
                              << AnimationEnable{rose::AnimationEnable::Enable}
-                             << wdg<ImageLabel>(ImageId::HeartEmpty, 40)
+                             << wdg<ImageLabel>(ImageId::HeartEmpty)
                                 << endw << endw
-                         << wdg<TextButton>(Id{"lblHello"}, ButtonType::PushButton) << theme.SemiBevelFrame
-                            << endw
+                         << wdg<ImageButton>(ImageId::ThreeDots, ButtonType::ToggleButton)
+                                 << theme.CleanFrame
+                                 << endw
                          << wdg<Frame>(5) << curve<ActionCurves::PulsePerSecond>() << LayoutHint{LayoutHint::BottomRight}
                                      << FrameColor{FrameColorType::InactiveColor, theme.rgba(rose::ThemeColor::Green)}
                                          << wdg<TextLabel>( Id{"lblHello"}, "FreeSansBold", 30)

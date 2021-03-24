@@ -91,17 +91,78 @@ namespace rose {
         return mTextButton.layoutContent(context, screenRect);
     }
 
-    ImageButton::ImageButton() noexcept : ButtonFrame(), Image() {
+    ImageButton::ImageButton(ButtonType buttonType) noexcept : ButtonFrame(), Image() {
+        mRequestedSize = Theme::getTheme().ImageLabelSize;
+        mButtonSemantics.setButtonType(buttonType);
+
+        mLayoutManager = std::make_unique<ImageButtonLayoutManager>(*this);
+
         mButtonSemantics.setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState){
-            std::cout << __PRETTY_FUNCTION__ << ' ' << (int)buttonDisplayState << '\n';
+            buttonDisplayStateChange(buttonDisplayState);
+            getApplication().redrawBackground();
         });
 
         mButtonSemantics.setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange){
-            std::cout << __PRETTY_FUNCTION__ << ' ' << (int)buttonStateChange << "\n\n";
+            switch (buttonStateChange) {
+                case ButtonStateChange::Pushed:
+                    std::cout << "Button state: Pushed\n";
+                    break;
+                case ButtonStateChange::Off:
+                    std::cout << "Button state: Off\n";
+                    break;
+                case ButtonStateChange::On:
+                    std::cout << "Button state: On\n";
+                    break;
+            }
         });
     }
 
-    ImageButton::ImageButton(ImageId imageId) noexcept: ImageButton() {
+    ImageButton::ImageButton(ImageId imageId, ButtonType buttonType) noexcept: ImageButton(buttonType) {
         mImageId = imageId;
+    }
+
+    Rectangle ImageButton::layout(gm::Context &context, const Rectangle &screenRect) {
+        return Frame::layout(context, screenRect);
+    }
+
+    void ImageButton::draw(gm::Context &context, const Position &containerPosition) {
+        Frame::draw(context, containerPosition);
+
+        auto drawPosition = drawPadding(containerPosition) + mPos + mFramePadding.position() + Position{mFrameWidth};
+
+        if (mImageId != ImageId::NoImage) {
+            ImageStore& imageStore{ImageStore::getStore()};
+            std::cout << __PRETTY_FUNCTION__ << drawPosition << '+' << mPos << '+' << mFramePadding.position()
+                      << '+' << Position{mFrameWidth} << '\n';
+            Rectangle dst{drawPosition, imageStore.size(mImageId)};
+            imageStore.renderCopy(context, mImageId, dst);
+        }
+    }
+
+    Rectangle ImageButton::layoutContent(gm::Context &context, const Rectangle &screenRect) {
+        mSize = ImageStore::getStore().size(mImageId);
+        if (mPreferredSize)
+            mSize = mPreferredSize;
+        mPos = mPreferredPos;
+
+        if (mSize < mRequestedSize) {
+            auto space = mRequestedSize - mSize;
+            mPadding.l = space.w / 2;
+            mPadding.r = space.w - mPadding.l;
+            mPadding.t = space.h / 2;
+            mPadding.b = space.h - mPadding.t;
+        }
+
+        return Rectangle{mPos, mSize};
+    }
+
+    ImageButtonLayoutManager::ImageButtonLayoutManager(ImageButton &imageButton) : mImageButton(imageButton) {
+        mMaxContent = 0;
+    }
+
+    Rectangle
+    ImageButtonLayoutManager::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                            LayoutManager::Itr last) {
+        return mImageButton.layoutContent(context, screenRect);
     }
 }

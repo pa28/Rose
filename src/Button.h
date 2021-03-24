@@ -46,6 +46,9 @@ namespace rose {
      */
     class TextButton : public ButtonFrame , public Text {
     protected:
+        friend class TextButtonLayoutManager;
+
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect);
 
     public:
         ~TextButton() override = default;
@@ -76,8 +79,6 @@ namespace rose {
          */
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
-        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect);
-
         /**
          * @brief Draw the text button.
          * @details The text is rendered relative the the parent Container.
@@ -104,7 +105,13 @@ namespace rose {
 
     class ImageButton : public ButtonFrame, public Image {
     protected:
+        friend class ImageButtonLayoutManager;
+
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect);
+
         ImageId mImageId{ImageId::ThreeDots};
+
+        Size mRequestedSize{};
 
     public:
         ~ImageButton() override = default;
@@ -117,10 +124,41 @@ namespace rose {
 
         ImageButton& operator=(ImageButton&&) = delete;
 
-        ImageButton() noexcept;
+        explicit ImageButton(ButtonType buttonType = ButtonType::PushButton) noexcept;
 
-        explicit ImageButton(ImageId imageId) noexcept;
+        explicit ImageButton(ImageId imageId, ButtonType buttonType = ButtonType::PushButton) noexcept;
 
+        /**
+         * @brief Layout the image button.
+         * @param context The graphics Context to use.
+         * @param screenRect The available screen Rectangle.
+         * @return The requested screen Rectangle.
+         */
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
+
+        /**
+         * @brief Draw the image button.
+         * @details The text is rendered relative the the parent Container.
+         * @param context The graphics context to use.
+         * @param containerPosition The position of the parent Container.
+         */
+        void draw(gm::Context &context, const Position &containerPosition) override;
+
+    };
+
+    class ImageButtonLayoutManager : public LayoutManager {
+    protected:
+        ImageButton& mImageButton;
+
+    public:
+
+        ImageButtonLayoutManager() = delete;
+        ~ImageButtonLayoutManager() override = default;
+
+        explicit ImageButtonLayoutManager(ImageButton& imageButton);
+
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                LayoutManager::Itr last) override;
     };
 }
 

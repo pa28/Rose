@@ -106,6 +106,11 @@ namespace rose {
         int ButtonPadding{5};
 
         /**
+         * Sizes
+         */
+        Size ImageLabelSize{40,40};
+
+        /**
          * Frame styles
          */
         FrameSettings CleanFrame{
