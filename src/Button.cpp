@@ -24,28 +24,8 @@ namespace rose {
         mLayoutManager = std::make_unique<TextButtonLayoutManager>(*this);
 
         mButtonSemantics.setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState){
-            switch (buttonDisplayState) {
-                case ButtonDisplayState::Active:
-                    mInvert = true;
-                    std::cout << "Display state: Active\n";
-                    break;
-                case ButtonDisplayState::Inactive:
-                    mInvert = false;
-                    std::cout << "Display state: Inactive\n";
-                    break;
-                case ButtonDisplayState::PressedActive:
-                    mInvert = false;
-                    std::cout << "Display state: PressedActive\n";
-                    break;
-                case ButtonDisplayState::PressedInactive:
-                    mInvert = true;
-                    std::cout << "Display state: PressedInactive\n";
-                    break;
-            }
+            buttonDisplayStateChange(buttonDisplayState);
             getApplication().redrawBackground();
-            mInactiveBG.reset();
-            if (mFrameSettings.borderStyle(true) != BorderStyle::None || mFrameSettings.borderStyle(false) != BorderStyle::None)
-                mBorder.reset();
         });
 
         mButtonSemantics.setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange){

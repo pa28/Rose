@@ -141,6 +141,12 @@ namespace rose {
          */
         void drawFrame(gm::Context &context, Rectangle widgetRect);
 
+        /**
+         * @brief Make visual changes to FrameElements for button display.
+         * @param buttonDisplayState The button display state.
+         */
+        void buttonDisplayStateChange(ButtonDisplayState buttonDisplayState);
+
     public:
         FrameElements();
         virtual ~FrameElements() = default;

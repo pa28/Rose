@@ -104,6 +104,7 @@ namespace rose {
 
     class ImageButton : public ButtonFrame, public Image {
     protected:
+        ImageId mImageId{ImageId::ThreeDots};
 
     public:
         ~ImageButton() override = default;
