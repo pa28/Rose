@@ -221,7 +221,7 @@ namespace rose {
                 if (mActionCurve) {
                     auto idx = frame % mActionCurve->size();
                     mColorValue = (*mActionCurve)[idx];
-                    drawAnimate(context, position);
+                    draw(context, position);
                     mLastColorValue = mColorValue;
                 } else {
                     removeAnimation(getNode<Animation>());
