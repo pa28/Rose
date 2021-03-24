@@ -66,6 +66,7 @@ namespace rose {
         Status createTextureBlended(gm::Context &context);
     };
 
+#if 0
     class TextLabel : public Widget, protected Text {
     protected:
 
@@ -111,5 +112,6 @@ namespace rose {
          */
         void draw(gm::Context &context, const Position &containerPosition) override;
     };
+#endif
 }
 

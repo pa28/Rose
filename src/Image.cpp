@@ -8,7 +8,7 @@
 #include "Image.h"
 
 namespace rose {
-
+#if 0
     void ImageLabel::draw(gm::Context &context, const Position &containerPosition) {
         ImageStore& imageStore{ImageStore::getStore()};
         if (imageStore.exists(mImageId)) {
@@ -20,4 +20,5 @@ namespace rose {
     ImageLabel::ImageLabel(ImageId imageId, Size size) : ImageLabel(imageId) {
         mRequestedSize = size;
     }
+#endif
 }

@@ -12,47 +12,51 @@
 
 namespace rose {
 
-    ButtonFrame::ButtonFrame() noexcept : Frame(), mButtonSemantics(*this) {
+    ButtonFrame::ButtonFrame(ButtonType buttonType) noexcept : Frame() {
+        if (buttonType != ButtonType::Label) {
+            mButtonSemantics = std::make_unique<ButtonSemantics>(*this);
+            mButtonSemantics->setButtonType(buttonType);
+        }
         mPadding = Padding{Theme::getTheme().ButtonPadding};
     }
 
 
-    TextButton::TextButton() noexcept : ButtonFrame(), Text() {
+    TextButton::TextButton(ButtonType buttonType) noexcept : ButtonFrame(buttonType), Text() {
         mPointSize = Theme::getTheme().ButtonPointSize;
         mFontName = Theme::getTheme().BoldFont;
 
         mLayoutManager = std::make_unique<TextButtonLayoutManager>(*this);
 
-        mButtonSemantics.setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState){
-            buttonDisplayStateChange(buttonDisplayState);
-            getApplication().redrawBackground();
-        });
+        if (mButtonSemantics) {
+            mButtonSemantics->setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState) {
+                buttonDisplayStateChange(buttonDisplayState);
+                getApplication().redrawBackground();
+            });
 
-        mButtonSemantics.setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange){
-            switch (buttonStateChange) {
-                case ButtonStateChange::Pushed:
-                    std::cout << "Button state: Pushed\n";
-                    break;
-                case ButtonStateChange::Off:
-                    std::cout << "Button state: Off\n";
-                    break;
-                case ButtonStateChange::On:
-                    std::cout << "Button state: On\n";
-                    break;
-            }
-        });
+            mButtonSemantics->setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange) {
+                switch (buttonStateChange) {
+                    case ButtonStateChange::Pushed:
+                        std::cout << "Button state: Pushed\n";
+                        break;
+                    case ButtonStateChange::Off:
+                        std::cout << "Button state: Off\n";
+                        break;
+                    case ButtonStateChange::On:
+                        std::cout << "Button state: On\n";
+                        break;
+                }
+            });
+        }
     }
 
-    TextButton::TextButton(const std::string &text, ButtonType buttonType) : TextButton() {
+    TextButton::TextButton(const std::string &text, ButtonType buttonType) : TextButton(buttonType) {
         mText = text;
-        mButtonSemantics.setButtonType(buttonType);
     }
 
-    TextButton::TextButton(const Id &id, ButtonType buttonType) : TextButton() {
+    TextButton::TextButton(const Id &id, ButtonType buttonType) : TextButton(buttonType) {
         mId = id;
         Settings &settings{Settings::getSettings()};
         mText = settings.getValue(id.idString, std::string{id.idString});
-        mButtonSemantics.setButtonType(buttonType);
     }
 
     Rectangle TextButton::layout(gm::Context &context, const Rectangle &screenRect) {
@@ -69,8 +73,6 @@ namespace rose {
         auto drawPosition = drawPadding(containerPosition) + mPos + mFramePadding.position() + Position{mFrameWidth};
 
         if (mTexture) {
-            std::cout << __PRETTY_FUNCTION__ << drawPosition << '+' << mPos << '+' << mFramePadding.position()
-            << '+' << Position{mFrameWidth} << '\n';
             Rectangle dst{drawPosition, mTextSize};
             context.renderCopy(mTexture, dst);
         }
@@ -91,30 +93,31 @@ namespace rose {
         return mTextButton.layoutContent(context, screenRect);
     }
 
-    ImageButton::ImageButton(ButtonType buttonType) noexcept : ButtonFrame(), Image() {
+    ImageButton::ImageButton(ButtonType buttonType) noexcept : ButtonFrame(buttonType), Image() {
         mRequestedSize = Theme::getTheme().ImageLabelSize;
-        mButtonSemantics.setButtonType(buttonType);
 
         mLayoutManager = std::make_unique<ImageButtonLayoutManager>(*this);
 
-        mButtonSemantics.setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState){
-            buttonDisplayStateChange(buttonDisplayState);
-            getApplication().redrawBackground();
-        });
+        if (mButtonSemantics) {
+            mButtonSemantics->setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState) {
+                buttonDisplayStateChange(buttonDisplayState);
+                getApplication().redrawBackground();
+            });
 
-        mButtonSemantics.setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange){
-            switch (buttonStateChange) {
-                case ButtonStateChange::Pushed:
-                    std::cout << "Button state: Pushed\n";
-                    break;
-                case ButtonStateChange::Off:
-                    std::cout << "Button state: Off\n";
-                    break;
-                case ButtonStateChange::On:
-                    std::cout << "Button state: On\n";
-                    break;
-            }
-        });
+            mButtonSemantics->setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange) {
+                switch (buttonStateChange) {
+                    case ButtonStateChange::Pushed:
+                        std::cout << "Button state: Pushed\n";
+                        break;
+                    case ButtonStateChange::Off:
+                        std::cout << "Button state: Off\n";
+                        break;
+                    case ButtonStateChange::On:
+                        std::cout << "Button state: On\n";
+                        break;
+                }
+            });
+        }
     }
 
     ImageButton::ImageButton(ImageId imageId, ButtonType buttonType) noexcept: ImageButton(buttonType) {
@@ -132,8 +135,6 @@ namespace rose {
 
         if (mImageId != ImageId::NoImage) {
             ImageStore& imageStore{ImageStore::getStore()};
-            std::cout << __PRETTY_FUNCTION__ << drawPosition << '+' << mPos << '+' << mFramePadding.position()
-                      << '+' << Position{mFrameWidth} << '\n';
             Rectangle dst{drawPosition, imageStore.size(mImageId)};
             imageStore.renderCopy(context, mImageId, dst);
         }

@@ -19,6 +19,7 @@ namespace rose {
      * @details Determines how buttons respond to user interaction.
      */
     enum class ButtonType {
+        Label,              ///< A button without any button semantics but can be inverted and animated.
         PushButton,         ///< When pressed and released signals an action.
         ToggleButton,       ///< When pressed and released changes state from Active to Inactive or back.
     };

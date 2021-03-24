@@ -60,6 +60,7 @@ namespace rose {
         return mStatus;
     }
 
+#if 0
     TextLabel::TextLabel(const std::string &text, const std::string& fontName, int pointSize) : Widget(), Text() {
         mText = text;
     }
@@ -80,4 +81,5 @@ namespace rose {
             context.renderCopy(mTexture, dst);
         }
     }
+#endif
 }

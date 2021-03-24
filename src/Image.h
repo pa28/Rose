@@ -30,6 +30,7 @@ namespace rose {
 
     };
 
+#if 0
     class ImageLabel : public Widget, protected Image {
     protected:
         Size mRequestedSize{};
@@ -81,5 +82,6 @@ namespace rose {
          */
         void draw(gm::Context &context, const Position &containerPosition) override;
     };
+#endif
 }
 

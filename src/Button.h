@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <memory>
 #include "Frame.h"
 #include "PointerInteractions.h"
 #include "Text.h"
@@ -20,7 +21,7 @@ namespace rose {
      */
     class ButtonFrame : public Frame {
     protected:
-        ButtonSemantics mButtonSemantics;
+        std::unique_ptr<ButtonSemantics> mButtonSemantics{};
 
         ButtonDisplayCallback mButtonDisplayCallback{};
         ButtonStateChangeCallback mButtonStateChangeCallback{};
@@ -36,7 +37,7 @@ namespace rose {
 
         ButtonFrame& operator=(ButtonFrame&&) = delete;
 
-        explicit ButtonFrame() noexcept;
+        explicit ButtonFrame(ButtonType buttonType) noexcept;
 
     };
 
@@ -61,13 +62,15 @@ namespace rose {
 
         TextButton& operator=(TextButton&&) = delete;
 
-        TextButton() noexcept;
+        explicit TextButton(ButtonType buttonType = ButtonType::PushButton) noexcept;
 
         explicit TextButton(const std::string& text, ButtonType buttonType = ButtonType::PushButton);
 
-        explicit TextButton(const char* text, ButtonType buttonType = ButtonType::PushButton) : TextButton(std::string{text}, buttonType) {}
+        explicit TextButton(const char* text, ButtonType buttonType = ButtonType::PushButton)
+            : TextButton(std::string{text}, buttonType) {}
 
-        explicit TextButton(const std::string_view& text, ButtonType buttonType = ButtonType::PushButton) : TextButton(std::string{text}, buttonType) {}
+        explicit TextButton(const std::string_view& text, ButtonType buttonType = ButtonType::PushButton)
+            : TextButton(std::string{text}, buttonType) {}
 
         explicit TextButton(const Id& id, ButtonType buttonType = ButtonType::PushButton);
 
@@ -86,6 +89,32 @@ namespace rose {
          * @param containerPosition The position of the parent Container.
          */
         void draw(gm::Context &context, const Position &containerPosition) override;
+    };
+
+    class TextLabel : public TextButton {
+    public:
+        ~TextLabel() override = default;
+
+        TextLabel(const TextLabel&) = delete;
+
+        TextLabel(TextLabel&&) = delete;
+
+        TextLabel& operator=(const TextLabel&) = delete;
+
+        TextLabel& operator=(TextLabel&&) = delete;
+
+        explicit TextLabel() noexcept : TextButton(ButtonType::Label) {}
+
+        explicit TextLabel(const std::string& text) noexcept : TextButton(text, ButtonType::Label) {}
+
+        explicit TextLabel(const char* text)
+                : TextButton(std::string{text}, ButtonType::Label) {}
+
+        explicit TextLabel(const std::string_view& text)
+                : TextButton(std::string{text}, ButtonType::Label) {}
+
+        explicit TextLabel(const Id& id) noexcept : TextButton(id, ButtonType::Label) {}
+
     };
 
     class TextButtonLayoutManager : public LayoutManager {
@@ -143,6 +172,24 @@ namespace rose {
          * @param containerPosition The position of the parent Container.
          */
         void draw(gm::Context &context, const Position &containerPosition) override;
+
+    };
+
+    class ImageLabel : public ImageButton {
+    public:
+        ~ImageLabel() override = default;
+
+        ImageLabel(const ImageLabel&) = delete;
+
+        ImageLabel(ImageLabel&&) = delete;
+
+        ImageLabel& operator=(const ImageLabel&) = delete;
+
+        ImageLabel& operator=(ImageLabel&&) = delete;
+
+        explicit ImageLabel() noexcept : ImageButton(ButtonType::Label) {}
+
+        explicit ImageLabel(ImageId imageId) noexcept : ImageButton(imageId, ButtonType::Label) {}
 
     };
 
