@@ -241,13 +241,11 @@ namespace rose::gm {
                     window->draw(mContext, Position::Zero);
                 }
             }
-
-//            mContext.renderPresent();
         }
 
         if (Animator::getAnimator() || mRedrawBackground) {
 //            mContext.setDrawColor(color::RGBA::TransparentBlack);
-//            mContext.renderClear();
+            mContext.renderClear();
             mContext.renderCopy(mBackground);
             if (Animator::getAnimator()) {
                 Animator::getAnimator().animate(mContext, mFrame);
