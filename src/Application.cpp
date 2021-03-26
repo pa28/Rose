@@ -194,7 +194,7 @@ namespace rose {
                                                                relativePos, false);
                     break;
                 case SDL_FINGERDOWN:
-                    std::cout << "    Finger down.\n";
+                    std::cout << (mPointerWidget ? "OK" : "Bad") <<  "    Finger down.\n";
                     mMouseButtonPressed = true;
                     mMouseButtonId = 1;
                     result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
@@ -205,6 +205,11 @@ namespace rose {
                     mMouseButtonId = 0;
                     result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
                     break;
+            }
+        } else {
+            if (mPointerWidget) {
+                result |= mPointerWidget->leaveEvent();
+                mPointerWidget.reset();
             }
         }
         return result;
