@@ -331,6 +331,7 @@ namespace rose {
             case SDL_FINGERMOTION:
             case SDL_FINGERDOWN:
             case SDL_FINGERUP:
+                std::cout << __PRETTY_FUNCTION__ << " fingerTouchEvent\n";
                 fingerTouchEvent(e.tfinger);
                 break;
             case SDL_MULTIGESTURE:

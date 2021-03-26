@@ -110,7 +110,7 @@ namespace rose {
         }
 
         void setFingerTouchEventCallback(FingerTouchEventCallback callback) {
-            fingerTouchEventCallback = callback;
+            fingerTouchEventCallback = std::move(callback);
         }
     };
 
