@@ -166,29 +166,38 @@ namespace rose {
     }
 
     bool Application::fingerTouchEventCallback(const SDL_TouchFingerEvent &fingerTouchEvent) {
+        std::cout << __PRETTY_FUNCTION__ << '\n';
         bool result = false;
         mMousePosition.x = util::roundToInt(fingerTouchEvent.x * (float)mScreen->getSize().w);
         mMousePosition.y = util::roundToInt(fingerTouchEvent.y * (float)mScreen->getSize().h);
         Position relativePos{util::roundToInt(fingerTouchEvent.dx * (float)mScreen->getSize().w),
                              util::roundToInt(fingerTouchEvent.dy * (float)mScreen->getSize().h)};
 
+        std::cout << "    Position: " << mMousePosition << ", dP: " << relativePos << '\n';
+
         if (auto widget = pointerWidget(mMousePosition); widget) {
             if (mPointerWidget) {
-                result |= mPointerWidget->leaveEvent();
-                mPointerWidget = widget;
-                result |= mPointerWidget->enterEvent();
+                if (mPointerWidget != widget) {
+                    result |= mPointerWidget->leaveEvent();
+                    mPointerWidget = widget;
+                    result |= mPointerWidget->enterEvent();
+                }
             }
+
             switch (fingerTouchEvent.type) {
                 case SDL_FINGERMOTION:
+                    std::cout << "    Finger motion.\n";
                     result |= mPointerWidget->mouseMotionEvent(mMouseButtonPressed, mMouseButtonId, mMousePosition,
                                                                relativePos, false);
                     break;
                 case SDL_FINGERDOWN:
+                    std::cout << "    Finger down.\n";
                     mMouseButtonPressed = true;
                     mMouseButtonId = 1;
                     result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
                     break;
                 case SDL_FINGERUP:
+                    std::cout << "    Finger up.\n";
                     mMouseButtonPressed = false;
                     mMouseButtonId = 0;
                     result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
