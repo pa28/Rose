@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "Settings.h"
 #include "Utilities.h"
+#include "Math.h"
 
 using namespace rose::gm;
 
@@ -142,12 +143,6 @@ namespace rose {
         Position relativePos{mouseMotionEvent.xrel, mouseMotionEvent.yrel};
 
         if (auto widget = pointerWidget(mMousePosition); widget) {
-//            std::cout << mMousePosition << ' '
-//                      << std::hex << setw(16) << setfill(' ') << mPointerWidget.get()
-//                      << std::hex << setw(16) << setfill(' ') << widget.get()
-//                      << std::dec
-//                      << '\n';
-
             if (mPointerWidget) {
                 if (mPointerWidget != widget) {
                     result |= mPointerWidget->leaveEvent();
@@ -167,6 +162,39 @@ namespace rose {
             }
         }
 
+        return result;
+    }
+
+    bool Application::fingerTouchEventCallback(const SDL_TouchFingerEvent &fingerTouchEvent) {
+        bool result = false;
+        mMousePosition.x = util::roundToInt(fingerTouchEvent.x * (float)mScreen->getSize().w);
+        mMousePosition.y = util::roundToInt(fingerTouchEvent.y * (float)mScreen->getSize().h);
+        Position relativePos{util::roundToInt(fingerTouchEvent.dx * (float)mScreen->getSize().w),
+                             util::roundToInt(fingerTouchEvent.dy * (float)mScreen->getSize().h)};
+
+        if (auto widget = pointerWidget(mMousePosition); widget) {
+            if (mPointerWidget) {
+                result |= mPointerWidget->leaveEvent();
+                mPointerWidget = widget;
+                result |= mPointerWidget->enterEvent();
+            }
+            switch (fingerTouchEvent.type) {
+                case SDL_FINGERMOTION:
+                    result |= mPointerWidget->mouseMotionEvent(mMouseButtonPressed, mMouseButtonId, mMousePosition,
+                                                               relativePos, false);
+                    break;
+                case SDL_FINGERDOWN:
+                    mMouseButtonPressed = true;
+                    mMouseButtonId = 1;
+                    result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
+                    break;
+                case SDL_FINGERUP:
+                    mMouseButtonPressed = false;
+                    mMouseButtonId = 0;
+                    result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
+                    break;
+            }
+        }
         return result;
     }
 
@@ -207,6 +235,7 @@ namespace rose {
         mEventSemantics.setMouseMotionEventCallback(&Application::mouseMotionEventCallback);
         mEventSemantics.setMouseButtonEventCallback(&Application::mouseButtonEventCallback);
         mEventSemantics.setMouseWheelEventCallback(&Application::mouseWheelEventCallback);
+        mEventSemantics.setFingerTouchEventCallback(&Application::fingerTouchEventCallback);
 
         mGraphicsModel.eventCallback = [&](SDL_Event e) {
             mEventSemantics.onEvent(e);
@@ -293,7 +322,8 @@ namespace rose {
             case SDL_FINGERMOTION:
             case SDL_FINGERDOWN:
             case SDL_FINGERUP:
-//                break;
+                fingerTouchEvent(e.tfinger);
+                break;
             case SDL_MULTIGESTURE:
 //                break;
             case SDL_KEYMAPCHANGED:
@@ -375,5 +405,10 @@ namespace rose {
         if (mouseWheelEventCallback)
             if (mouseWheelEventCallback(mApplication, e))
                 return;
+    }
+
+    void EventSemantics::fingerTouchEvent(SDL_TouchFingerEvent &e) {
+        if (fingerTouchEventCallback)
+            fingerTouchEventCallback(mApplication, e);
     }
 }
