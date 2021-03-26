@@ -242,7 +242,7 @@ namespace rose::gm {
                 }
             }
 
-            mContext.renderPresent();
+//            mContext.renderPresent();
         }
 
         if (Animator::getAnimator() || mRedrawBackground) {
