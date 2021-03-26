@@ -196,7 +196,6 @@ namespace rose::gm {
  * @brief The Rose version of the SDL event loop.
  */
     void GraphicsModel::eventLoop(std::shared_ptr<Screen> &screen) {
-#if GRAPHICS_MODEL_SDL2
         SDL_Event e;
         Fps fps;
 
@@ -216,7 +215,6 @@ namespace rose::gm {
 
             fps.next();
         }
-#endif
     }
 
     void GraphicsModel::drawAll(std::shared_ptr<Screen> &screen) {
@@ -228,12 +226,7 @@ namespace rose::gm {
         if (mRedrawBackground) {
             RenderTargetGuard renderTargetGuard{mContext, mBackground};
 
-            std::cout << color::DarkBaseColorHSVA << '\n'
-                      << color::DarkBaseColor << '\n'
-                      << color::DarkInvertColor << '\n';
-
             mContext.setDrawColor(color::DarkBaseColor);
-//            mContext.setDrawColor(color::RGBA{0.f, 0.5f, 0.f, 1.0f});
             mContext.renderClear();
 
             for (auto &content : *screen) {
@@ -244,7 +237,6 @@ namespace rose::gm {
         }
 
         if (Animator::getAnimator() || mRedrawBackground) {
-//            mContext.setDrawColor(color::RGBA::TransparentBlack);
             mContext.renderClear();
             mContext.renderCopy(mBackground);
             if (Animator::getAnimator()) {
