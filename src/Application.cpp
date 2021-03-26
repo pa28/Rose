@@ -168,10 +168,13 @@ namespace rose {
     bool Application::fingerTouchEventCallback(const SDL_TouchFingerEvent &fingerTouchEvent) {
         std::cout << __PRETTY_FUNCTION__ << '\n';
         bool result = false;
-        mMousePosition.x = util::roundToInt(fingerTouchEvent.x * (float)mScreen->getSize().w);
-        mMousePosition.y = util::roundToInt(fingerTouchEvent.y * (float)mScreen->getSize().h);
-        Position relativePos{util::roundToInt(fingerTouchEvent.dx * (float)mScreen->getSize().w),
-                             util::roundToInt(fingerTouchEvent.dy * (float)mScreen->getSize().h)};
+
+        auto screenRect = mGraphicsModel.screenRectangle();
+
+        mMousePosition.x = util::roundToInt(fingerTouchEvent.x * (float)screenRect.w);
+        mMousePosition.y = util::roundToInt(fingerTouchEvent.y * (float)screenRect.h);
+        Position relativePos{util::roundToInt(fingerTouchEvent.dx * (float)screenRect.w),
+                             util::roundToInt(fingerTouchEvent.dy * (float)screenRect.h)};
 
         std::cout << "    Position: " << mMousePosition << ", dP: " << relativePos << '\n';
 
@@ -304,10 +307,6 @@ namespace rose {
     }
 
     void EventSemantics::onEvent(SDL_Event &e) {
-        std::cout << __PRETTY_FUNCTION__ << " type=" << e.type
-        << "\n    SDL_FINGERMOTION = " << SDL_FINGERMOTION
-        << "\n    SDL_FINGERDOWN   = " << SDL_FINGERDOWN
-        << "\n    SDL_FINGERUP     = " << SDL_FINGERUP << '\n';
         switch (e.type) {
             case SDL_WINDOWEVENT:
                 windowEvent(e.window);
@@ -335,7 +334,6 @@ namespace rose {
             case SDL_FINGERMOTION:
             case SDL_FINGERDOWN:
             case SDL_FINGERUP:
-                std::cout << __PRETTY_FUNCTION__ << " fingerTouchEvent\n";
                 fingerTouchEvent(e.tfinger);
                 break;
             case SDL_MULTIGESTURE:
