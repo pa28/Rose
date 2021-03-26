@@ -114,10 +114,8 @@ namespace rose::gm {
 
         Context &operator=(Context &&context) = default;
 
-#if GRAPHICS_MODEL_SDL2
         explicit Context(SdlWindow &window, int index, Uint32 flags) : Context()
         { mRenderer.reset(SDL_CreateRenderer(window.get(), index, flags)); }
-#endif
 
         /// Test for a valid Context
         explicit operator bool() const noexcept { return mRenderer.operator bool(); }

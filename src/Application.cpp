@@ -166,7 +166,6 @@ namespace rose {
     }
 
     bool Application::fingerTouchEventCallback(const SDL_TouchFingerEvent &fingerTouchEvent) {
-        std::cout << __PRETTY_FUNCTION__ << '\n';
         bool result = false;
 
         auto screenRect = mGraphicsModel.screenRectangle();
@@ -191,19 +190,16 @@ namespace rose {
 
             switch (fingerTouchEvent.type) {
                 case SDL_FINGERMOTION:
-                    std::cout << "    Finger motion.\n";
                     result |= mPointerWidget->mouseMotionEvent(mMouseButtonPressed, mMouseButtonId, mMousePosition,
                                                                relativePos, false);
                     break;
                 case SDL_FINGERDOWN:
-                    std::cout << (mPointerWidget ? "OK" : "Bad") <<  "    Finger down.\n";
                     mMouseButtonPressed = true;
                     mMouseButtonId = 1;
                     result |= mPointerWidget->enterEvent();
                     result |= mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
                     break;
                 case SDL_FINGERUP:
-                    std::cout << "    Finger up.\n";
                     mMouseButtonPressed = false;
                     mMouseButtonId = 0;
                     result |= mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
