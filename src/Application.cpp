@@ -185,6 +185,8 @@ namespace rose {
                     mPointerWidget = widget;
                     result |= mPointerWidget->enterEvent();
                 }
+            } else {
+                mPointerWidget = widget;
             }
 
             switch (fingerTouchEvent.type) {
@@ -197,21 +199,19 @@ namespace rose {
                     std::cout << (mPointerWidget ? "OK" : "Bad") <<  "    Finger down.\n";
                     mMouseButtonPressed = true;
                     mMouseButtonId = 1;
-                    result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
+                    result |= mPointerWidget->enterEvent();
+                    result |= mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
                     break;
                 case SDL_FINGERUP:
                     std::cout << "    Finger up.\n";
                     mMouseButtonPressed = false;
                     mMouseButtonId = 0;
-                    result = mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
+                    result |= mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
+                    result |= mPointerWidget->leaveEvent();
                     break;
             }
-        } else {
-            if (mPointerWidget) {
-                result |= mPointerWidget->leaveEvent();
-                mPointerWidget.reset();
-            }
         }
+
         return result;
     }
 
