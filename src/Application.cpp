@@ -304,6 +304,10 @@ namespace rose {
     }
 
     void EventSemantics::onEvent(SDL_Event &e) {
+        std::cout << __PRETTY_FUNCTION__ << " type=" << e.type
+        << "\n    SDL_FINGERMOTION = " << SDL_FINGERMOTION
+        << "\n    SDL_FINGERDOWN   = " << SDL_FINGERDOWN
+        << "\n    SDL_FINGERUP     = " << SDL_FINGERUP << '\n';
         switch (e.type) {
             case SDL_WINDOWEVENT:
                 windowEvent(e.window);
