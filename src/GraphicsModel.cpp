@@ -247,7 +247,7 @@ namespace rose::gm {
 
         if (Animator::getAnimator() || mRedrawBackground) {
 //            mContext.setDrawColor(color::RGBA::TransparentBlack);
-            mContext.renderClear();
+//            mContext.renderClear();
             mContext.renderCopy(mBackground);
             if (Animator::getAnimator()) {
                 Animator::getAnimator().animate(mContext, mFrame);
