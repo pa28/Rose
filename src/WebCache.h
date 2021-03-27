@@ -201,7 +201,7 @@ namespace rose {
         /**
          * @brief Fetch all cache items which have not been previously cached or have expired cache times.
          */
-        uint fetchAll() {
+        bool fetchAll() {
             AsyncList asyncList{};
             std::lock_guard<std::mutex> lockGuard{mMutex};
 
@@ -217,14 +217,15 @@ namespace rose {
                     mAsyncList.emplace_back(
                             std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath,
                                        cacheFileTime));
-//                    auto[status, key] = fetch(item.first, constructUrl(item.second), itemPath, cacheFileTime);
-//                    std::cout << __PRETTY_FUNCTION__ << ' ' << status << ' ' << item.second << '\n';
                 }
             }
-            return mAsyncList.size();
+            return !mAsyncList.empty();
         }
 
-        uint processFutures() {
+        bool processFutures() {
+            if (mAsyncList.empty())
+                return false;
+
             std::lock_guard<std::mutex> lockGuard{mMutex};
             std::chrono::milliseconds span{100};
             for (auto &item : mAsyncList) {
@@ -243,7 +244,7 @@ namespace rose {
                                            [](std::future<result_t> &f) -> bool { return !f.valid(); }),
                             mAsyncList.end());
 
-            return mAsyncList.size();
+            return !mAsyncList.empty();
         }
     };
 
