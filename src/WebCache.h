@@ -20,6 +20,7 @@
 #include <utility>
 #include <future>
 #include <vector>
+#include "Signals.h"
 
 namespace rose {
 
@@ -27,6 +28,8 @@ namespace rose {
         uint32_t key;
         std::string_view name;
     };
+
+    using WebCacheProtocol = Protocol<uint32_t,long>;
 
     using namespace std::filesystem;
 
@@ -69,6 +72,8 @@ namespace rose {
             return fileClockToSystemClock(std::filesystem::last_write_time(filePath));
         }
 
+        WebCacheProtocol::signal_type cacheLoaded{};
+
     protected:
         std::error_code mEc{};          ///< The last error code returned from a std::filesystem operation.
         std::string mRootURI{};         ///< The root URI for items in the cache.
@@ -104,6 +109,7 @@ namespace rose {
                  : WebCache(rootUri, xdgDir, storeRoot, duration) {
                      setCacheItem(first, last);
                  }
+
         /**
          * @brief Add or change a cache item.
          * @param key The key to identify the cache item.
@@ -194,7 +200,7 @@ namespace rose {
          * @param localId The local id.
          * @return The constructed URL.
          */
-        std::string constructUrl(const local_id_t &localId) {
+        virtual std::string constructUrl(const local_id_t &localId) {
             return mRootURI + localId;
         }
 
@@ -233,6 +239,7 @@ namespace rose {
                     if (item.valid()) {
                         if (auto futureStatus = item.wait_for(span); futureStatus == std::future_status::ready) {
                             auto[status, key] = item.get();
+                            cacheLoaded.transmit(key,status);
                         }
                     }
                 } catch (const std::exception &e) {
