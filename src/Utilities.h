@@ -111,7 +111,9 @@ namespace rose {
 
         [[nodiscard]] const std::string& appName() const { return mAppName; }
 
-        std::filesystem::path configHome() { return mConfigHome; }
+        [[nodiscard]] const std::filesystem::path& configHome() const { return mConfigHome; }
+
+        [[nodiscard]] const std::filesystem::path& cacheHome() const { return mCacheHome; }
 
         /**
          * @brief Find the XDG directory for a specified application name.

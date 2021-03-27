@@ -116,6 +116,7 @@ list(APPEND ROSE_SRC
         src/Types.cpp
         src/Utilities.cpp
         src/Visual.cpp
+        src/WebCache.cpp
         src/XDGFilePaths.cpp
         )
 
@@ -141,6 +142,9 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
 
     add_executable(Test1 tests/test1.cpp)
     target_link_libraries(Test1 ${RoseLibraries})
+
+    add_executable(Test2 tests/test2.cpp)
+    target_link_libraries(Test2 ${RoseLibraries})
 endif()
 
 add_executable(Rose main.cpp)
