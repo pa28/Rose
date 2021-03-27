@@ -23,6 +23,11 @@
 
 namespace rose {
 
+    struct WebCacheItem {
+        uint32_t key;
+        std::string_view name;
+    };
+
     using namespace std::filesystem;
 
     /**
@@ -93,6 +98,12 @@ namespace rose {
         WebCache(const std::string &rootUri, const path &xdgDir, const std::string &storeRoot,
                  std::chrono::system_clock::duration duration);
 
+        template<typename It>
+        WebCache(const std::string &rootUri, const path &xdgDir, const std::string &storeRoot,
+                 std::chrono::system_clock::duration duration, It first, It last)
+                 : WebCache(rootUri, xdgDir, storeRoot, duration) {
+                     setCacheItem(first, last);
+                 }
         /**
          * @brief Add or change a cache item.
          * @param key The key to identify the cache item.
@@ -100,6 +111,20 @@ namespace rose {
          */
         void setCacheItem(key_t key, local_id_t localId) {
             mItemMap[key] = std::move(localId);
+        }
+
+        /**
+         * @brief Add or change cache items from a container.
+         * @tparam It The iterator type.
+         * @param first The first item iterator.
+         * @param last The last item iterator.
+         */
+        template<typename It>
+        void setCacheItem(It first, It last) {
+            while (first != last) {
+                setCacheItem(first->key, std::string(first->name));
+                first++;
+            }
         }
 
         /**
