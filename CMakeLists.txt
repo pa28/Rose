@@ -154,7 +154,7 @@ add_dependencies(Rose rose)
 
 add_executable(Chrono applications/Chrono/main.cpp
         applications/Chrono/MapProjection.cpp
-        applications/Chrono/MapProjection.h)
+        applications/Chrono/MapProjection.h applications/Chrono/SatelliteModel.cpp applications/Chrono/SatelliteModel.h)
 target_link_libraries(Chrono ${RoseLibraries})
 
 add_executable(Life applications/ConwayLife.cpp)

@@ -22,7 +22,7 @@
 #include "SettingsNames.h"
 #include "TimeBox.h"
 #include "Ephemeris.h"
-#include "Plan13.h"
+#include "applications/Chrono/Plan13.h"
 
 using namespace rose;
 
