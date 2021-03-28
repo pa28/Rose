@@ -202,6 +202,11 @@ namespace rose {
          */
         bool setForegroundBackground();
 
+        /**
+         * @brief Add the selected maps to the current cache list and invoke a load if required.
+         */
+        void cacheCurrentMaps();
+
     public:
         MapProjection() = delete;
 

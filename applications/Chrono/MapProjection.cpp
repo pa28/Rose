@@ -27,22 +27,22 @@ namespace rose {
             mMapCache.processFutures();
         };
 
-        for (auto mapSize = MapSize::Small; mapSize < MapSize::Last; mapSize = static_cast<MapSize>(static_cast<uint32_t>(mapSize)+1)) {
-            for (auto depiction = MapDepiction::Terrain; depiction < MapDepiction::Last; depiction = static_cast<MapDepiction>(static_cast<uint32_t>(depiction)+1)) {
-                auto mapId = MapImageId(depiction, mapSize, MapIllumination::Day);
-                auto mapName = MapFileName(depiction, mapSize, MapIllumination::Day);
-                mMapCache.setCacheItem(mapId, mapName);
-                std::cout << __PRETTY_FUNCTION__ << ' ' << mapId << ' ' << mapName << '\n';
+        cacheCurrentMaps();
+    }
 
-                mapId = MapImageId(depiction, mapSize, MapIllumination::Night);
-                mapName = MapFileName(depiction, mapSize, MapIllumination::Night);
-                mMapCache.setCacheItem(mapId, mapName);
-                std::cout << __PRETTY_FUNCTION__ << ' ' << mapId << ' ' << mapName << '\n';
-            }
+    void MapProjection::cacheCurrentMaps() {
+        std::array<std::tuple<MapDepiction,MapSize,MapIllumination>,2> maps{
+                std::make_tuple(mMapDepiction, mMapSize, MapIllumination::Day),
+                std::make_tuple(mMapDepiction, mMapSize, MapIllumination::Night),
+        };
+
+        for (auto &map : maps) {
+            auto [depiction,size,illumination] = map;
+            auto id = MapImageId(depiction,size,illumination);
+            auto name = MapFileName(depiction,size,illumination);
+            mMapCache.setCacheItem(id, name);
+            mMapCache.fetchItem(id);
         }
-
-        mMapCache.fetchItem(MapImageId(mMapDepiction, mMapSize, MapIllumination::Day));
-        mMapCache.fetchItem(MapImageId(mMapDepiction, mMapSize, MapIllumination::Night));
     }
 
     void MapProjection::addedToContainer() {
