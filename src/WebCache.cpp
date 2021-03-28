@@ -6,6 +6,7 @@
  */
 
 #include "WebCache.h"
+#include <iomanip>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/Infos.hpp>

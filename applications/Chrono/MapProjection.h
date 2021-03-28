@@ -55,7 +55,7 @@ namespace rose {
             default:
                 break;
         }
-        return Size::Zero;
+        return Size{};
     }
 
     static constexpr uint32_t MapImageId(MapDepiction mapDepiction, MapSize mapSize, MapIllumination illumination) {
