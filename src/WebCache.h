@@ -99,8 +99,10 @@ namespace rose {
             if (!itemPath.empty()) {
                 std::optional<time_t> cacheFileTime{};
                 if (exists(itemPath))
-                    if (cacheFileTime = cacheTime(itemPath); !cacheFileTime)
+                    if (cacheFileTime = cacheTime(itemPath); !cacheFileTime) {
+                        cacheLoaded.transmit(item.first, 503);
                         return;
+                    }
 
                 mAsyncList.emplace_back(
                         std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath, tempPath,
