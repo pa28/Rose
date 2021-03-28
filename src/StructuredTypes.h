@@ -55,6 +55,14 @@ namespace rose {
 
         virtual ~Node() = default;
 
+        /**
+         * @brief Called when a Node is added to a Container.
+         * @details By default it is ignored but can be used to perform initialization that is required
+         * when a Node is placed in a Container.
+         */
+        virtual void addedToContainer() {
+        }
+
         std::shared_ptr<Container> container() {
             if (mContainer.expired())
                 return nullptr;
@@ -161,6 +169,7 @@ namespace rose {
             if (auto container = getNode<Container>(); container) {
                 container->push_back(node);
                 node->mContainer = container;
+                node->addedToContainer();
             }
         }
 
