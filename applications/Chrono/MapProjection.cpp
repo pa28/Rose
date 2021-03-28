@@ -17,14 +17,6 @@ namespace rose {
         mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
                                                Environment::getEnvironment().cacheHome(),
                                                "Maps", std::chrono::hours{24 * 30});
-        mMapSlot = WebCacheProtocol::createSlot();
-        mMapSlot->receiver = [&](uint32_t key, long status) {
-            std::cout << __PRETTY_FUNCTION__ << ' ' << key << ' ' << status << '\n';
-            getApplication().redrawBackground();
-        };
-        mMapCache->cacheLoaded.connect(mMapSlot);
-
-        cacheCurrentMaps();
     }
 
     void MapProjection::cacheCurrentMaps() {
@@ -44,6 +36,14 @@ namespace rose {
 
     void MapProjection::addedToContainer() {
         Node::addedToContainer();
+        mMapSlot = WebCacheProtocol::createSlot();
+        mMapSlot->receiver = [&](uint32_t key, long status) {
+            std::cout << __PRETTY_FUNCTION__ << ' ' << key << ' ' << status << '\n';
+            getApplication().redrawBackground();
+        };
+        mMapCache->cacheLoaded.connect(mMapSlot);
+
+        cacheCurrentMaps();
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {

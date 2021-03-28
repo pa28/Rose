@@ -52,6 +52,24 @@ namespace rose {
     };
 
     /**
+     * @class Ephemeris
+     * @brief
+     */
+    class Ephemeris : public std::map<std::string_view, std::array<std::string_view,3>> {
+    protected:
+        std::string mEphemerisSet{};
+
+    public:
+        Ephemeris() = default;
+        ~Ephemeris() = default;
+
+        explicit Ephemeris(const std::filesystem::path& filePath);
+
+        void readFile(const std::filesystem::path &filePath);
+
+    };
+
+    /**
      * @class SatelliteModel
      * @brief
      */
@@ -60,6 +78,8 @@ namespace rose {
         std::unique_ptr<ClearSkyEphemeris> mEphemerisCache{};
 
         WebCacheProtocol::slot_type mCacheLoaded{};
+
+        Ephemeris mEphemeris{};
 
         SatelliteModel();
 

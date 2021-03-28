@@ -10,6 +10,7 @@
 #include "Settings.h"
 #include "Types.h"
 #include "MapProjection.h"
+#include "SatelliteModel.h"
 
 using namespace rose;
 
@@ -252,6 +253,8 @@ struct Chrono : public Application {
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
         registerKeyboardShortcut(SDLK_w, widget);
+
+        SatelliteModel::getModel();
     }
 };
 
