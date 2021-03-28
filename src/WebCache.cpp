@@ -5,6 +5,7 @@
  * @date 2021-03-27
  */
 
+#include <iomanip>
 #include "WebCache.h"
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
