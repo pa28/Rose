@@ -37,6 +37,8 @@ namespace rose {
 
         mMapCache.fetchItem(MapImageId(mMapDepiction, mMapSize, MapIllumination::Day));
         mMapCache.fetchItem(MapImageId(mMapDepiction, mMapSize, MapIllumination::Night));
+
+        while (mMapCache.processFutures());
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
