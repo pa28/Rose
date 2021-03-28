@@ -63,7 +63,7 @@ namespace rose::gm {
          * @brief Create a surface from a file.
          * @param path The path to the file to load.
          */
-        explicit Surface(std::filesystem::path &path);
+        explicit Surface(const std::filesystem::path &path);
 
         /**
          * @brief Constructor. Create a surface using SDL_CreateRGBSurfaceWithFormat()

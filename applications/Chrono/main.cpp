@@ -9,6 +9,7 @@
 #include "Layout.h"
 #include "Settings.h"
 #include "Types.h"
+#include "MapProjection.h"
 
 using namespace rose;
 
@@ -89,6 +90,7 @@ public:
         }
 
         if (first != last) {
+            std::dynamic_pointer_cast<Widget>(*first)->layout(context, mapRectangle);
             std::dynamic_pointer_cast<Visual>(*first)->setScreenRectangle(mapRectangle);
             for (size_t i = 1; first + i != last; i++) {
                 if (i == 1) {
@@ -172,27 +174,6 @@ public:
     }
 };
 
-class TestMap : public TestWidget {
-public:
-    ~TestMap() override = default;
-
-    TestMap(const TestMap &) = delete;
-
-    TestMap(TestMap &&) = delete;
-
-    TestMap &operator=(const TestMap &) = delete;
-
-    TestMap &operator=(TestMap &&) = delete;
-
-    explicit TestMap() : TestWidget(color::DarkGreenHSVA.toRGBA()) {
-    }
-
-    /// Layout the visual.
-    Rectangle layout(rose::gm::Context &context, const Rectangle &screenRect) override {
-        return screenRect;
-    }
-};
-
 struct Chrono : public Application {
     std::shared_ptr<Manager> mManager{};
 
@@ -262,11 +243,12 @@ struct Chrono : public Application {
     }
 
     void build() {
+        Environment &environment{Environment::getEnvironment()};
         std::shared_ptr<Widget> widget{};
 
         auto m = screen() << wdg<Window>()
                           << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                          << wdg<TestMap>() << endw
+                          << wdg<MapProjection>(environment.cacheHome()) << endw
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
         registerKeyboardShortcut(SDLK_w, widget);

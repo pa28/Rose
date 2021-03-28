@@ -72,6 +72,21 @@ namespace rose {
             return fileClockToSystemClock(std::filesystem::last_write_time(filePath));
         }
 
+        void asyncFetchItem(item_map_t::value_type& item) {
+            auto itemPath = mStoreRoot;
+            itemPath.append(translateItemLocalId(item.second));
+            if (!itemPath.empty()) {
+                std::optional<time_t> cacheFileTime{};
+                if (exists(itemPath))
+                    if (cacheFileTime = cacheTime(itemPath); !cacheFileTime)
+                        return;
+
+                mAsyncList.emplace_back(
+                        std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath,
+                                   cacheFileTime));
+            }
+        }
+
         WebCacheProtocol::signal_type cacheLoaded{};
 
     protected:
@@ -170,6 +185,19 @@ namespace rose {
         }
 
         /**
+         * @brief Get the local path to an item if it is known and exists in the local store.
+         * @param key The item key.
+         * @return std::optional<path> with the file path if it exists.
+         */
+        std::optional<path> localItemExists(key_t key) {
+            if (auto itemPath = itemLocalPath(key); !itemPath.empty()) {
+                if (exists(itemPath))
+                    return itemPath;
+            }
+            return std::nullopt;
+        }
+
+        /**
          * @brief Get the time the item was cached if the cache time has expired.
          * @param itemPath The item path (returned by itemLocalPath()).
          * @return A time_t expressing the last write time of the local file if cache time has expired, an
@@ -204,6 +232,10 @@ namespace rose {
             return mRootURI + localId;
         }
 
+        bool itemKnown(key_t key) {
+            return mItemMap.find(key) != mItemMap.end();
+        }
+
         /**
          * @brief Fetch all cache items which have not been previously cached or have expired cache times.
          */
@@ -212,18 +244,15 @@ namespace rose {
             std::lock_guard<std::mutex> lockGuard{mMutex};
 
             for (auto &item : mItemMap) {
-                auto itemPath = mStoreRoot;
-                itemPath.append(translateItemLocalId(item.second));
-                if (!itemPath.empty()) {
-                    std::optional<time_t> cacheFileTime{};
-                    if (exists(itemPath))
-                        if (cacheFileTime = cacheTime(itemPath); !cacheFileTime)
-                            continue;
+                asyncFetchItem(item);
+            }
+            return !mAsyncList.empty();
+        }
 
-                    mAsyncList.emplace_back(
-                            std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath,
-                                       cacheFileTime));
-                }
+        bool fetchItem(key_t key) {
+            auto item = mItemMap.find(key);
+            if (item != mItemMap.end()) {
+                asyncFetchItem(*item);
             }
             return !mAsyncList.empty();
         }

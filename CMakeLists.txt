@@ -140,9 +140,6 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
     add_executable(Test0 tests/test0.cpp)
     target_link_libraries(Test0 ${RoseLibraries})
 
-    add_executable(Test1 tests/test1.cpp)
-    target_link_libraries(Test1 ${RoseLibraries})
-
     add_executable(Test2 tests/test2.cpp)
     target_link_libraries(Test2 ${RoseLibraries})
 endif()
@@ -151,9 +148,14 @@ add_executable(Rose main.cpp)
 target_link_libraries(Rose ${RoseLibraries})
 add_dependencies(Rose rose)
 
-add_executable(HamChrono applications/HamChrono/HamChrono.cpp applications/HamChrono/MapProjection.cpp applications/HamChrono/MapProjection.h applications/HamChrono/ConfigDialog.cpp applications/HamChrono/ConfigDialog.h applications/HamChrono/SettingsNames.h applications/HamChrono/Plan13.cpp applications/HamChrono/Plan13.h applications/HamChrono/Ephemeris.cpp applications/HamChrono/Ephemeris.h applications/HamChrono/SatelliteDataDisplay.cpp applications/HamChrono/SatelliteDataDisplay.h src/StructuredTypes.cpp src/StructuredTypes.h)
-target_link_libraries(HamChrono ${RoseLibraries})
-add_dependencies(HamChrono rose)
+#add_executable(HamChrono applications/HamChrono/HamChrono.cpp applications/HamChrono/MapProjection.cpp applications/HamChrono/MapProjection.h applications/HamChrono/ConfigDialog.cpp applications/HamChrono/ConfigDialog.h applications/HamChrono/SettingsNames.h applications/HamChrono/Plan13.cpp applications/HamChrono/Plan13.h applications/HamChrono/Ephemeris.cpp applications/HamChrono/Ephemeris.h applications/HamChrono/SatelliteDataDisplay.cpp applications/HamChrono/SatelliteDataDisplay.h src/StructuredTypes.cpp src/StructuredTypes.h)
+#target_link_libraries(HamChrono ${RoseLibraries})
+#add_dependencies(HamChrono rose)
+
+add_executable(Chrono applications/Chrono/main.cpp
+        applications/Chrono/MapProjection.cpp
+        applications/Chrono/MapProjection.h)
+target_link_libraries(Chrono ${RoseLibraries})
 
 add_executable(Life applications/ConwayLife.cpp)
 target_link_libraries(Life ${RoseLibraries})
@@ -187,7 +189,7 @@ set_target_properties(
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
 
 install(TARGETS
-        rose Rose Life RoseExec RoseShell HamChrono
+        rose Rose Life RoseExec RoseShell Chrono
         COMPONENT ROSE_RUNTIME EXCLUDE_FROM_ALL
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

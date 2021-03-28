@@ -69,21 +69,23 @@ int main(int argc, char **argv) {
     };
 
     WebCache webCache{"https://www.clearskyinstitute.com/ham/HamClock/maps/",
-                      environment.cacheHome(), "Maps", std::chrono::minutes {1},
+                      environment.cacheHome(), "Maps",
+                      std::chrono::hours{24 * 30},
                       Maps.begin(), Maps.end()};
 
     webCache.cacheLoaded.connect(mapSlot);
 
-    if (webCache.fetchAll())
-        while (webCache.processFutures())
-            ;
-
-    ClearSkyEphemeris clearSkyEphemeris{ "http://clearskyinstitute.com/ham/HamClock/", environment.cacheHome(),
-                             "Ephemeris", std::chrono::hours{24}, CS_Ephem.begin(), CS_Ephem.end()};
+    ClearSkyEphemeris clearSkyEphemeris{"http://clearskyinstitute.com/ham/HamClock/",
+                                        environment.cacheHome(), "Ephemeris",
+                                        std::chrono::hours{24},
+                                        CS_Ephem.begin(), CS_Ephem.end()};
 
     clearSkyEphemeris.cacheLoaded.connect(ephemSlot);
 
-    if (clearSkyEphemeris.fetchAll())
-        while (clearSkyEphemeris.processFutures())
-            ;
+    webCache.fetchAll();
+    clearSkyEphemeris.fetchAll();
+
+    while (webCache.processFutures());
+
+    while (clearSkyEphemeris.processFutures());
 }

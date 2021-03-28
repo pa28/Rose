@@ -14,7 +14,7 @@
 
 namespace rose::gm {
 
-    Surface::Surface(std::filesystem::path &path) : Surface() {
+    Surface::Surface(const std::filesystem::path &path) : Surface() {
         reset(IMG_Load(path.c_str()));
         if (!operator bool()) {
             throw SurfaceRuntimeError(StringCompositor("IMG_Load from: ", path.string(), " -- ", IMG_GetError()));
