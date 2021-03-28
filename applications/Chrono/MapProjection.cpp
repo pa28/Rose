@@ -5,21 +5,27 @@
  * @date 2021-03-27
  */
 
+#include "Application.h"
 #include "MapProjection.h"
 #include "GraphicsModel.h"
 #include "Math.h"
 
 namespace rose {
 
-    MapProjection::MapProjection(const path &configHome)
+    MapProjection::MapProjection(const std::filesystem::path &configHome)
             : mMapCache("https://www.clearskyinstitute.com/ham/HamClock/maps/", configHome, "Maps",
                         std::chrono::hours{24 * 30}) {
         mMapSlot = WebCacheProtocol::createSlot();
         mMapSlot->receiver = [&](uint32_t key, long status) {
             std::cout << __PRETTY_FUNCTION__ << ' ' << key << ' ' << status << '\n';
+            getApplication().redrawBackground();
         };
-
         mMapCache.cacheLoaded.connect(mMapSlot);
+
+        frameSlot = gm::GraphicsModelFrameProtocol::createSlot();
+        frameSlot->receiver = [&](uint32_t frame) {
+            mMapCache.processFutures();
+        };
 
         for (auto mapSize = MapSize::Small; mapSize < MapSize::Last; mapSize = static_cast<MapSize>(static_cast<uint32_t>(mapSize)+1)) {
             for (auto depiction = MapDepiction::Terrain; depiction < MapDepiction::Last; depiction = static_cast<MapDepiction>(static_cast<uint32_t>(depiction)+1)) {
@@ -37,12 +43,14 @@ namespace rose {
 
         mMapCache.fetchItem(MapImageId(mMapDepiction, mMapSize, MapIllumination::Day));
         mMapCache.fetchItem(MapImageId(mMapDepiction, mMapSize, MapIllumination::Night));
+    }
 
-        while (mMapCache.processFutures());
+    void MapProjection::addedToContainer() {
+        Node::addedToContainer();
+        getApplication().connectFramSignal(frameSlot);
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
-        mMapCache.processFutures();
 
         std::array<uint32_t,2> mapId{MapImageId(mMapDepiction, mMapSize, MapIllumination::Day),
                                      MapImageId(mMapDepiction, mMapSize, MapIllumination::Night)};

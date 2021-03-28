@@ -215,11 +215,15 @@ namespace rose {
 
         MapProjection &operator=(MapProjection &&) = delete;
 
-        explicit MapProjection(const std::filesystem::path& configHome);
+        explicit MapProjection(const std::filesystem::path &configHome);
 
         void draw(gm::Context &context, const Position &containerPosition) override;
 
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
+
+        gm::GraphicsModelFrameProtocol::slot_type frameSlot{};
+
+        void addedToContainer() override;
 
     };
 }

@@ -218,6 +218,8 @@ namespace rose::gm {
     }
 
     void GraphicsModel::drawAll(std::shared_ptr<Screen> &screen) {
+        mFrameStartSignal.transmit(mFrame);
+
         if (!mBackground || (mBackground.getSize() != screenRectangle().size())) {
             mBackground = Texture{mContext, screenRectangle().size()};
             mRedrawBackground = true;

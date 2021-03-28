@@ -20,6 +20,7 @@
 #include "Visual.h"
 #include "Color.h"
 #include "Texture.h"
+#include "Signals.h"
 
 
 namespace rose {
@@ -455,6 +456,9 @@ namespace rose::gm {
         }
     };
 
+    /// Protocol for notifying objects that the application is about to start a new frame.
+    using GraphicsModelFrameProtocol = Protocol<uint32_t>;
+
     class GraphicsModel {
     protected:
 #if GRAPHICS_MODEL_SDL2
@@ -472,6 +476,8 @@ namespace rose::gm {
         uint32_t mFrame{};              ///< The rendering frame.
 
         std::vector<Rectangle> mDisplayBounds{};
+
+        GraphicsModelFrameProtocol::signal_type mFrameStartSignal{};
 
     public:
         GraphicsModel() = default;
@@ -529,6 +535,10 @@ namespace rose::gm {
 
         SdlWindow& getSdlWindow() {
             return mSdlWindow;
+        }
+
+        void connectFramSignal(GraphicsModelFrameProtocol::slot_type& slot) {
+            mFrameStartSignal.connect(slot);
         }
     };
 
