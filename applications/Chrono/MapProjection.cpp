@@ -12,20 +12,17 @@
 
 namespace rose {
 
-    MapProjection::MapProjection(const std::filesystem::path &configHome)
-            : mMapCache("https://www.clearskyinstitute.com/ham/HamClock/maps/", configHome, "Maps",
-                        std::chrono::hours{24 * 30}) {
+    MapProjection::MapProjection() {
+        Environment &environment{Environment::getEnvironment()};
+        mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
+                                               Environment::getEnvironment().cacheHome(),
+                                               "Maps", std::chrono::hours{24 * 30});
         mMapSlot = WebCacheProtocol::createSlot();
         mMapSlot->receiver = [&](uint32_t key, long status) {
             std::cout << __PRETTY_FUNCTION__ << ' ' << key << ' ' << status << '\n';
             getApplication().redrawBackground();
         };
-        mMapCache.cacheLoaded.connect(mMapSlot);
-
-        frameSlot = gm::GraphicsModelFrameProtocol::createSlot();
-        frameSlot->receiver = [&](uint32_t frame) {
-            mMapCache.processFutures();
-        };
+        mMapCache->cacheLoaded.connect(mMapSlot);
 
         cacheCurrentMaps();
     }
@@ -40,14 +37,13 @@ namespace rose {
             auto [depiction,size,illumination] = map;
             auto id = MapImageId(depiction,size,illumination);
             auto name = MapFileName(depiction,size,illumination);
-            mMapCache.setCacheItem(id, name);
-            mMapCache.fetchItem(id);
+            mMapCache->setCacheItem(id, name);
+            mMapCache->fetchItem(id);
         }
     }
 
     void MapProjection::addedToContainer() {
         Node::addedToContainer();
-        getApplication().connectFramSignal(frameSlot);
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
@@ -55,8 +51,8 @@ namespace rose {
         std::array<uint32_t,2> mapId{MapImageId(mMapDepiction, mMapSize, MapIllumination::Day),
                                      MapImageId(mMapDepiction, mMapSize, MapIllumination::Night)};
 
-        std::array<std::optional<std::filesystem::path>,2> mapPath{mMapCache.localItemExists(mapId[0]),
-                                                    mMapCache.localItemExists(mapId[1])};
+        std::array<std::optional<std::filesystem::path>,2> mapPath{mMapCache->localItemExists(mapId[0]),
+                                                    mMapCache->localItemExists(mapId[1])};
 
         if (mapPath[0] && mapPath[1]) {
             for (size_t i = 0; i < mapPath.size(); i++) {

@@ -201,10 +201,6 @@ namespace rose {
 
         virtual bool fingerTouchEventCallback(const SDL_TouchFingerEvent& fingerTouchEvent);
 
-        void connectFramSignal(gm::GraphicsModelFrameProtocol::slot_type& slot) {
-            mGraphicsModel.connectFramSignal(slot);
-        }
-
         gm::Context& context() { return mGraphicsModel.context(); }
 
         std::shared_ptr<Screen>& screen() { return mScreen; }

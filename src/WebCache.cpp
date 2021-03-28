@@ -18,12 +18,17 @@ namespace rose {
         mStoreRoot.append(storeRoot);
         mCacheValidDuration = duration;
 
-        std::cout << __PRETTY_FUNCTION__ << ' ' << mStoreRoot.string() << '\n';
-
         if (!create_directories(mStoreRoot, mEc) && mEc.value()) {
             std::cerr << "Creation of backing store directory \"" << mStoreRoot.string() << "\" failed "
                       << mEc << '\n';
         }
+
+        mFrameProtocol = GraphicsModelFrameProtocol::createSlot();
+        mFrameProtocol->receiver = [&](uint32_t frame) {
+            if (!processFutures()) {
+                CommonSignals::getCommonSignals().frameSignal.disconnect(mFrameProtocol);
+            }
+        };
 
         mStoreStatus = status(mStoreRoot);
     }

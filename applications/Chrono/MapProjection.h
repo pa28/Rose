@@ -154,7 +154,7 @@ namespace rose {
      */
     class MapProjection : public Widget {
     protected:
-        WebCache mMapCache;
+        std::unique_ptr<WebCache> mMapCache{};
         WebCacheProtocol::slot_type mMapSlot{};
         MapProjectionType mProjection{MapProjectionType::StationAzimuthal};
         MapDepiction mMapDepiction{MapDepiction::Terrain};
@@ -208,7 +208,7 @@ namespace rose {
         void cacheCurrentMaps();
 
     public:
-        MapProjection() = delete;
+        MapProjection();
 
         ~MapProjection() override = default;
 
@@ -220,13 +220,11 @@ namespace rose {
 
         MapProjection &operator=(MapProjection &&) = delete;
 
-        explicit MapProjection(const std::filesystem::path &configHome);
-
         void draw(gm::Context &context, const Position &containerPosition) override;
 
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
-        gm::GraphicsModelFrameProtocol::slot_type frameSlot{};
+        GraphicsModelFrameProtocol::slot_type frameSlot{};
 
         void addedToContainer() override;
 

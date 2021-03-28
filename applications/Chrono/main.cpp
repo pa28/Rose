@@ -248,7 +248,7 @@ struct Chrono : public Application {
 
         auto m = screen() << wdg<Window>()
                           << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                          << wdg<MapProjection>(environment.cacheHome()) << endw
+                          << wdg<MapProjection>() << endw
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
         registerKeyboardShortcut(SDLK_w, widget);

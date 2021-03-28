@@ -20,7 +20,7 @@
 #include <utility>
 #include <future>
 #include <vector>
-#include "Signals.h"
+#include "CommonSignals.h"
 
 namespace rose {
 
@@ -38,6 +38,8 @@ namespace rose {
      * @brief Fetch web resources caching them in the local filesystem following XDG specifications.
      */
     class WebCache {
+        GraphicsModelFrameProtocol::slot_type mFrameProtocol{};
+
     public:
         using key_t = uint32_t;
         using local_id_t = std::string;
@@ -72,23 +74,6 @@ namespace rose {
             return fileClockToSystemClock(std::filesystem::last_write_time(filePath));
         }
 
-        void asyncFetchItem(item_map_t::value_type& item) {
-            auto itemPath = mStoreRoot;
-            auto tempPath = mStoreRoot;
-            auto itemName = translateItemLocalId(item.second);
-            itemPath.append(itemName);
-            tempPath.append('.' + itemName);
-            if (!itemPath.empty()) {
-                std::optional<time_t> cacheFileTime{};
-                if (exists(itemPath))
-                    if (cacheFileTime = cacheTime(itemPath); !cacheFileTime)
-                        return;
-
-                mAsyncList.emplace_back(
-                        std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath, tempPath, cacheFileTime ));
-            }
-        }
-
         WebCacheProtocol::signal_type cacheLoaded{};
 
     protected:
@@ -104,6 +89,25 @@ namespace rose {
 
         /// The duration local files are considered valid. The interval between cache refresh checks.
         std::chrono::system_clock::duration mCacheValidDuration{};
+
+        void asyncFetchItem(item_map_t::value_type& item) {
+            auto itemPath = mStoreRoot;
+            auto tempPath = mStoreRoot;
+            auto itemName = translateItemLocalId(item.second);
+            itemPath.append(itemName);
+            tempPath.append('.' + itemName);
+            if (!itemPath.empty()) {
+                std::optional<time_t> cacheFileTime{};
+                if (exists(itemPath))
+                    if (cacheFileTime = cacheTime(itemPath); !cacheFileTime)
+                        return;
+
+                mAsyncList.emplace_back(
+                        std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath, tempPath,
+                                   cacheFileTime));
+                CommonSignals::getCommonSignals().frameSignal.connect(mFrameProtocol);
+            }
+        }
 
     public:
         WebCache() = delete;
