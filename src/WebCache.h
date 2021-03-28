@@ -74,7 +74,10 @@ namespace rose {
 
         void asyncFetchItem(item_map_t::value_type& item) {
             auto itemPath = mStoreRoot;
-            itemPath.append(translateItemLocalId(item.second));
+            auto tempPath = mStoreRoot;
+            auto itemName = translateItemLocalId(item.second);
+            itemPath.append(itemName);
+            tempPath.append('.' + itemName);
             if (!itemPath.empty()) {
                 std::optional<time_t> cacheFileTime{};
                 if (exists(itemPath))
@@ -82,8 +85,7 @@ namespace rose {
                         return;
 
                 mAsyncList.emplace_back(
-                        std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath,
-                                   cacheFileTime));
+                        std::async(std::launch::async, fetch, item.first, constructUrl(item.second), itemPath, tempPath, cacheFileTime ));
             }
         }
 
@@ -214,13 +216,14 @@ namespace rose {
         /**
          * @brief Fetch a cache item.
          * @param key The item key.
-         * @param url The item url (returned by constructUrl()).
+         * @param itemUrl The item url (returned by constructUrl()).
          * @param itemPath The full item path.
          * @param cacheFileTime The std::optional returned by cacheTime().
          * @return A tuple containing the returned HTTP status code and the item key.
          */
-        static result_t
-        fetch(key_t key, const std::string &url, const path &itemPath, std::optional<time_t> cacheFileTime);
+        static WebCache::result_t
+        fetch(WebCache::key_t key, const std::string &itemUrl, const path &itemPath, const path &tempPath,
+              std::optional<time_t> cacheFileTime);
 
         /**
          * @brief Construct the appropriate URL for the item.
@@ -254,6 +257,10 @@ namespace rose {
             if (item != mItemMap.end()) {
                 asyncFetchItem(*item);
             }
+            return !mAsyncList.empty();
+        }
+
+        bool pendingFutures() const {
             return !mAsyncList.empty();
         }
 

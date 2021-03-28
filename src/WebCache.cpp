@@ -28,9 +28,10 @@ namespace rose {
         mStoreStatus = status(mStoreRoot);
     }
 
-    WebCache::result_t WebCache::fetch(WebCache::key_t key, const std::string &itemUrl, const path &itemPath,
-                                                      std::optional<time_t> cacheFileTime) {
-        std::ofstream strm{itemPath.c_str(), std::ofstream::trunc};
+    WebCache::result_t
+    WebCache::fetch(WebCache::key_t key, const std::string &itemUrl, const path &itemPath, const path &tempPath,
+                    std::optional<time_t> cacheFileTime) {
+        std::ofstream strm{tempPath.c_str(), std::ofstream::trunc};
         long responseCode{599};
 
         if (strm) {
@@ -58,6 +59,8 @@ namespace rose {
             }
 
             strm.close();
+            if (responseCode == 200)
+                rename(tempPath, itemPath);
         }
         return std::make_tuple(responseCode, key);
     }
