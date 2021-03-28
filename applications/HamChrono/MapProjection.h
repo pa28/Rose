@@ -31,10 +31,10 @@ namespace rose {
         CTVisual,
     };
 
-    enum class MapProjectionType {
+    enum class ProjectionType {
         Mercator,
         StationMercator,
-        StationAzimuthal,
+        StationAzmuthal,
     };
 
     /**
@@ -219,14 +219,14 @@ namespace rose {
         std::atomic_bool mNewSurfaces{};          ///< True when there are new Surfaces to render into Textures.
         std::atomic_bool mAbortFuture{};          ///< Set to true to abort a running std::future.
 
-        MapProjectionType mProjection{MapProjectionType::Mercator};   ///< The desired projection display
+        ProjectionType mProjection{ProjectionType::Mercator};   ///< The desired projection display
         std::shared_ptr<WebFileCache> mMapCache{};
         ImageId mDayMapImage{};         ///< The base day Mercator map image.
         ImageId mNightMapImage{};       ///< The base night Mercator map image.
         GeoPosition mQth{};             ///< The station location.
         GeoPosition mQthRad{};          ///< The station location in radians.
         GeoPosition mAntipode{};        ///< The station antipode in radians.
-        Size mMapImgSize{};                ///< The size of the base maps in pixels.
+        Size mMapSize{};                ///< The size of the base maps in pixels.
         int mSelectedSatellite{};       ///< The Satellite to display tracking for.
 
         std::array<sdl::Surface,static_cast<std::size_t>(MapDataType::MapCount)> mMapSurface{};
@@ -321,7 +321,7 @@ namespace rose {
          * @param projection True if the projection is Azimuthal.
          * @param splitPixel The split location for Mercator station centric projections.
          */
-        void drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, MapProjectionType projection,
+        void drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, ProjectionType projection,
                          int splitPixel);
 
         /**
@@ -334,7 +334,7 @@ namespace rose {
          */
         template<typename InputIterator>
         void drawMapItems(InputIterator first, InputIterator last, sdl::Renderer &renderer, Rectangle mapRect,
-                          MapProjectionType projection, int splitPixel = 0) {
+                          ProjectionType projection, int splitPixel = 0) {
             while (first != last) {
                 drawMapItem(*first, renderer, mapRect, projection, splitPixel);
                 ++first;
@@ -410,7 +410,7 @@ namespace rose {
          * @param projection True if the desired map is an Azimuthal projection.
          * @return The map Position.
          */
-        Position geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel);
+        Position geoToMap(GeoPosition geo, ProjectionType projection, int splitPixel);
 
         /**
          * @brief Set the Moon ephemeris

@@ -18,7 +18,7 @@ namespace rose {
 
     MapProjection::MapProjection(std::shared_ptr<WebFileCache> mapCache, Size mapSize) {
         mMapCache = std::move(mapCache);
-        mMapImgSize = mapSize;
+        mMapSize = mapSize;
 
         for (auto &icon : mSatelliteIconArray)
             mSatelliteIconStack.push(icon);
@@ -50,7 +50,7 @@ namespace rose {
             std::filesystem::path filePath(mMapCache->cacheRootPath());
             filePath.append(mMapCache->at(map).objectSrcName());
             sdl::Surface bmp{filePath};
-            mMapSurface[map] = sdl::Surface{mMapImgSize.width(), mMapImgSize.height()};
+            mMapSurface[map] = sdl::Surface{mMapSize.width(),mMapSize.height()};
             mMapSurface[map].blitSurface(bmp);
 
             mAzSurface[map] = sdl::Surface{mMapSurface[map]->w, mMapSurface[map]->h};
@@ -141,8 +141,8 @@ namespace rose {
                 setStationIcons(rose()->settings()->getValue(set::QTH, GeoPosition{0.,0.}));
                 mFutureAziProj = std::async(std::launch::async, &MapProjection::computeAzimuthalMaps, this);
             } else if (name == set::AzimuthalMode) {
-                mProjection = rose()->settings()->getValue(set::AzimuthalMode, 0) ? MapProjectionType::StationAzimuthal :
-                              MapProjectionType::StationMercator;
+                mProjection = rose()->settings()->getValue(set::AzimuthalMode, 0) ? ProjectionType::StationAzmuthal :
+                        ProjectionType::StationMercator;
                 setNeedsDrawing();
             } else if (name == set::CelestialMode) {
                 mCelestialMode = rose()->settings()->getValue(set::CelestialMode, 0) != 0;
@@ -163,8 +163,8 @@ namespace rose {
             }
         });
 
-        mProjection = rose()->settings()->getValue(set::AzimuthalMode, 0) ? MapProjectionType::StationAzimuthal :
-                      MapProjectionType::StationMercator;
+        mProjection = rose()->settings()->getValue(set::AzimuthalMode, 0) ? ProjectionType::StationAzmuthal :
+                      ProjectionType::StationMercator;
         mCelestialMode = rose()->settings()->getValue(set::CelestialMode, 0) != 0;
         mSatelliteMode = rose()->settings()->getValue(set::SatelliteMode, 0) != 0;
         mAnnotationMode = rose()->settings()->getValue(set::AnnotationMode, 0) != 0;
@@ -174,7 +174,7 @@ namespace rose {
     }
 
     Rectangle MapProjection::widgetLayout(sdl::Renderer &renderer, Rectangle available, uint layoutStage) {
-        return Rectangle{0, 0, mMapImgSize.width(), mMapImgSize.height()};
+        return Rectangle{0, 0, mMapSize.width(), mMapSize.height()};
     }
 
     void MapProjection::draw(sdl::Renderer &renderer, Rectangle parentRect) {
@@ -207,17 +207,17 @@ namespace rose {
 
         int splitPixel = 0;
         switch (mProjection) {
-            case MapProjectionType::Mercator:
+            case ProjectionType::Mercator:
                 renderer.renderCopy(mMercator[0], widgetRect);
                 renderer.renderCopy(mMercator[1], widgetRect);
                 break;
-            case MapProjectionType::StationMercator: {
+            case ProjectionType::StationMercator: {
                 auto lon = mQth.lon();
-                splitPixel = util::roundToInt((double)mMapImgSize.width() * ((lon) / 360.));
+                splitPixel = util::roundToInt((double)mMapSize.width() * ((lon) / 360.));
                 if (splitPixel < 0)
-                    splitPixel += mMapImgSize.width();
+                    splitPixel += mMapSize.width();
 
-                Rectangle src{splitPixel, 0, mMapImgSize.width() - splitPixel, mMapImgSize.height()};
+                Rectangle src{splitPixel, 0, mMapSize.width()-splitPixel, mMapSize.height()};
                 Rectangle dst{widgetRect};
                 dst.width() = src.width();
                 dst.height() = src.height();
@@ -232,7 +232,7 @@ namespace rose {
                 renderer.renderCopy(mMercator[1], src, dst);
             }
                 break;
-            case MapProjectionType::StationAzimuthal:
+            case ProjectionType::StationAzmuthal:
                 renderer.renderCopy(mAzimuthal[0], widgetRect);
                 renderer.renderCopy(mAzimuthal[1], widgetRect);
                 break;
@@ -268,7 +268,7 @@ namespace rose {
         }
     }
 
-    void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, MapProjectionType projection,
+    void MapProjection::drawMapItem(const MapIcon &mapItem, sdl::Renderer &renderer, Rectangle mapRectangle, ProjectionType projection,
                                     int splitPixel) {
         if (mapItem.imageId == RoseImageInvalid)
             return;
@@ -311,15 +311,15 @@ namespace rose {
             dst.x() += mapRectangle.width();
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
         } else if (h > 0 && w == 0) {
-            if (projection != MapProjectionType::StationAzimuthal || h < iconSize.height() / 2) {
+            if (projection != ProjectionType::StationAzmuthal || h < iconSize.height() / 2) {
 //                dst.y() = mapRectangle.y() - h;
                 rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
             }
-            if (projection != MapProjectionType::StationAzimuthal || h >= iconSize.height() / 2) {
+            if (projection != ProjectionType::StationAzmuthal || h >= iconSize.height() / 2) {
 //                dst.y() += mapRectangle.height();
                 rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
             }
-        } else if (h > 0 && w > 0 && projection != MapProjectionType::StationAzimuthal) {
+        } else if (h > 0 && w > 0 && projection != ProjectionType::StationAzmuthal) {
             dst.x() = mapRectangle.x() - w;
             dst.y() = mapRectangle.y() - h;
             rose()->imageRepository().renderCopy(renderer, mapItem.imageId, dst);
@@ -424,20 +424,20 @@ namespace rose {
         // Compute Azmuthal maps from the Mercator maps
         auto siny = sin(mQthRad.lat());
         auto cosy = cos(mQthRad.lat());
-        for (int y = 0; y < mMapImgSize.height(); y += 1) {
-            for (int x = 0; x < mMapImgSize.width(); x += 1) {
+        for (int y = 0; y < mMapSize.height(); y += 1) {
+            for (int x = 0; x < mMapSize.width(); x += 1) {
                 if (mAbortFuture) {
                     mAbortFuture = false;
                     return false;
                 }
 
-                auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapImgSize, mQthRad, siny, cosy);
+                auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapSize, mQthRad, siny, cosy);
                 if (valid) {
                     GeoPosition position{lat, lon};
-                    auto xx = min(mMapImgSize.width() - 1,
-                                  (int) round((double) mMapImgSize.width() * ((lon + M_PI) / (2 * M_PI))));
-                    auto yy = min(mMapImgSize.height() - 1,
-                                  (int) round((double) mMapImgSize.height() * ((M_PI_2 - lat) / M_PI)));
+                    auto xx = min(mMapSize.width() - 1,
+                                  (int) round((double) mMapSize.width() * ((lon + M_PI) / (2 * M_PI))));
+                    auto yy = min(mMapSize.height() - 1,
+                                  (int) round((double) mMapSize.height() * ((M_PI_2 - lat) / M_PI)));
                     mAzSurface[0].pixel(x, y) = sdl::mapRGBA(mAzSurface[0]->format,
                                                              sdl::getRGBA(mMapSurface[0]->format,
                                                                           mMapSurface[0].pixel(xx, yy)));
@@ -477,8 +477,8 @@ namespace rose {
 
     bool MapProjection::setForegroundBackground() {
         for (size_t i = 0; i < mMercatorTemp.size(); ++i) {
-            mMercatorTemp[i] = sdl::Surface{mMapImgSize};
-            mAzimuthalTemp[i] = sdl::Surface{mMapImgSize};
+            mMercatorTemp[i] = sdl::Surface{mMapSize};
+            mAzimuthalTemp[i] = sdl::Surface{mMapSize};
 
             mMercatorTemp[i].setBlendMode(SDL_BLENDMODE_BLEND);
             mAzimuthalTemp[i].setBlendMode(SDL_BLENDMODE_BLEND);
@@ -494,8 +494,8 @@ namespace rose {
         // Three loops for: Longitude, Latitude, and map form (Mercator, Azimuthal).
         // This lets us use the common calculations without repeating them, easier than
         // debugging two areas with the same computation.
-        for (int x = 0; x < mMapImgSize.width(); x += 1) {
-            for (int y = 0; y < mMapImgSize.height(); y += 1) {
+        for (int x = 0; x < mMapSize.width(); x += 1) {
+            for (int y = 0; y < mMapSize.height(); y += 1) {
                 for (int az = 0; az < 2; ++az) {
                     float alpha = 1.;
                     bool valid;
@@ -509,7 +509,7 @@ namespace rose {
 
                     if (az == 1) {
                         // The Azimuthal coordinates that correspond to a map pixel
-                        auto tuple = xyToAzLatLong(x, y, mMapImgSize,
+                        auto tuple = xyToAzLatLong(x, y, mMapSize,
                                                    mQthRad, siny, cosy);
                         valid = get<0>(tuple);
                         latE = get<1>(tuple);
@@ -517,10 +517,10 @@ namespace rose {
                     } else {
                         // The Mercator coordinates for the same map pixel
                         valid = true;
-                        lonE = (float) ((float) x - (float) mMapImgSize.width() / 2.f) * (float) M_PI /
-                               (float) ((float) mMapImgSize.width() / 2.);
-                        latE = (float) ((float) mMapImgSize.height() / 2.f - (float) y) * (float) M_PI_2 /
-                               (float) ((float) mMapImgSize.height() / 2.);
+                        lonE = (float) ((float) x - (float) mMapSize.width() / 2.f) * (float) M_PI /
+                               (float) ((float) mMapSize.width() / 2.);
+                        latE = (float) ((float) mMapSize.height() / 2.f - (float) y) * (float) M_PI_2 /
+                               (float) ((float) mMapSize.height() / 2.);
                     }
                     if (valid) {
                         // Compute the amont of solar illumination and use it to compute the pixel alpha value
@@ -577,41 +577,41 @@ namespace rose {
         }
     }
 
-    Position MapProjection::geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel) {
+    Position MapProjection::geoToMap(GeoPosition geo, ProjectionType projection, int splitPixel) {
         Position mapPos{};
 
         switch (projection) {
-            case MapProjectionType::StationAzimuthal: {
+            case ProjectionType::StationAzmuthal: {
                 double ca, B;
                 solveSphere(geo.lon() - mQthRad.lon(), M_PI_2 - geo.lat(), sin(mQthRad.lat()),
                             cos(mQthRad.lat()), ca, B);
                 if (ca > 0) {
                     auto a = acos(ca);
-                    auto R0 = (double) mMapImgSize.width() / 4. - 1.;
-                    auto R = a * (double) mMapImgSize.width() / (2. * M_PI);
+                    auto R0 = (double) mMapSize.width() / 4. - 1.;
+                    auto R = a * (double) mMapSize.width() / (2. * M_PI);
                     R = std::min(R, R0);
                     auto dx = R * sin(B);
                     auto dy = R * cos(B);
-                    mapPos = Position{mMapImgSize.width() / 4 + roundToInt(dx), mMapImgSize.height() / 2 - roundToInt(dy)};
+                    mapPos = Position{mMapSize.width() / 4 + roundToInt(dx), mMapSize.height() / 2 - roundToInt(dy)};
                 } else {
                     auto a = M_PI - acos(ca);
-                    auto R0 = (double) mMapImgSize.width() / 4 - 1;
-                    auto R = a * (double) mMapImgSize.width() / (2.f * (float) M_PI);
+                    auto R0 = (double) mMapSize.width() / 4 - 1;
+                    auto R = a * (double) mMapSize.width() / (2.f * (float) M_PI);
                     R = std::min(R, R0);
                     auto dx = -R * sin(B);
                     auto dy = R * cos(B);
-                    mapPos = Position{3 * mMapImgSize.width() / 4 + roundToInt(dx), mMapImgSize.height() / 2 - roundToInt(dy)};
+                    mapPos = Position{3 * mMapSize.width() / 4 + roundToInt(dx), mMapSize.height() / 2 - roundToInt(dy)};
                 }
             }
             break;
-            case MapProjectionType::Mercator:
-                mapPos = Position{roundToInt(mMapImgSize.width() * (geo.lon() + M_PI) / (2. * M_PI)) % mMapImgSize.width(),
-                            roundToInt(mMapImgSize.height() * (M_PI_2 - geo.lat()) / M_PI)};
+            case ProjectionType::Mercator:
+                mapPos = Position{roundToInt(mMapSize.width() * (geo.lon() + M_PI) / (2. * M_PI)) % mMapSize.width(),
+                            roundToInt(mMapSize.height() * (M_PI_2 - geo.lat()) / M_PI)};
                 break;
-            case MapProjectionType::StationMercator: {
-                mapPos = Position{roundToInt(mMapImgSize.width() * (geo.lon() + M_PI) / (2. * M_PI)) % mMapImgSize.width(),
-                                roundToInt(mMapImgSize.height() * (M_PI_2 - geo.lat()) / M_PI)};
-                mapPos.x() = (mapPos.x() + mMapImgSize.width() - splitPixel) % mMapImgSize.width();
+            case ProjectionType::StationMercator: {
+                mapPos = Position{roundToInt(mMapSize.width() * (geo.lon() + M_PI) / (2. * M_PI)) % mMapSize.width(),
+                                roundToInt(mMapSize.height() * (M_PI_2 - geo.lat()) / M_PI)};
+                mapPos.x() = (mapPos.x() + mMapSize.width() - splitPixel) % mMapSize.width();
                 break;
             }
         }
@@ -799,16 +799,16 @@ namespace rose {
         }
 
         switch (mProjection) {
-            case MapProjectionType::Mercator:
-            case MapProjectionType::StationMercator:
+            case ProjectionType::Mercator:
+            case ProjectionType::StationMercator:
                 mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
-                    return (abs(p0.x() - p1.x()) < mMapImgSize.width() / 2);
+                    return (abs(p0.x() - p1.x()) < mMapSize.width()/2);
                 });
                 break;
-            case MapProjectionType::StationAzimuthal:
+            case ProjectionType::StationAzmuthal:
                 mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
-                    return (p0.x() < mMapImgSize.width() / 2 && p1.x() < mMapImgSize.width() / 2) ||
-                           (p0.x() > mMapImgSize.width() / 2 && p1.x() > mMapImgSize.width() / 2);
+                    return (p0.x() < mMapSize.width()/2 && p1.x() < mMapSize.width()/2) ||
+                            (p0.x() > mMapSize.width()/2 && p1.x() > mMapSize.width()/2);
                 });
                 break;
         }
@@ -845,14 +845,14 @@ namespace rose {
             auto d1 = d;
 
             switch (mProjection) {
-                case MapProjectionType::Mercator:
-                case MapProjectionType::StationMercator:
+                case ProjectionType::Mercator:
+                case ProjectionType::StationMercator:
                     if (geo.lat() > 0)
                         d0 = range(geo, GeoPosition{M_PI_2, geo.lon()});
                     else
                         d0 = range(geo, GeoPosition{-M_PI_2, geo.lon()});
                     break;
-                case MapProjectionType::StationAzimuthal:
+                case ProjectionType::StationAzmuthal:
                     d0 = range(geo, mQthRad);
                     d1 = range(geo, mAntipode);
                     break;
@@ -864,34 +864,34 @@ namespace rose {
             while (firstBearing < lastBearing) {
                 auto p = geoToMap(projected(geo, d, firstBearing), mProjection, splitPixel);
                 if (p.x() < 0)
-                    p.x() += mMapImgSize.width();
-                if (p.x() > mMapImgSize.width())
-                    p.x() -= mMapImgSize.width();
+                    p.x() += mMapSize.width();
+                if (p.x() > mMapSize.width())
+                    p.x() -= mMapSize.width();
                 mapPoints.emplace_back(p);
                 firstBearing += BearingStep;
             }
 
             switch (mProjection) {
-                case MapProjectionType::Mercator:
-                case MapProjectionType::StationMercator:
+                case ProjectionType::Mercator:
+                case ProjectionType::StationMercator:
                     if (d0 < d) {
                         std::sort(mapPoints.begin(), mapPoints.end(), [](Position &p0, Position &p1) {
                             return p0.x() < p1.x();
                         });
 
                         mapPoints.front().x() = 0;
-                        mapPoints.back().x() = mMapImgSize.width() - 1;
+                        mapPoints.back().x() = mMapSize.width() - 1;
                         mapPoints.partition();
                     } else {
                         mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
-                            return (abs(p0.x() - p1.x()) < mMapImgSize.width() / 2);
+                            return (abs(p0.x() - p1.x()) < mMapSize.width() / 2);
                         });
                     }
                     break;
-                case MapProjectionType::StationAzimuthal:
+                case ProjectionType::StationAzmuthal:
                     mapPoints.partition([&](const Position &p0, const Position &p1) -> bool {
-                        return (p0.x() < mMapImgSize.width() / 2 && p1.x() < mMapImgSize.width() / 2) ||
-                               (p0.x() > mMapImgSize.width() / 2 && p1.x() > mMapImgSize.width() / 2);
+                        return (p0.x() < mMapSize.width() / 2 && p1.x() < mMapSize.width() / 2) ||
+                               (p0.x() > mMapSize.width() / 2 && p1.x() > mMapSize.width() / 2);
                     });
                     break;
             }
