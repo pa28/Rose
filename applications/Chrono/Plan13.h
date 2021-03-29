@@ -204,7 +204,7 @@ public:
     [[nodiscard]] std::tuple<int, uint, uint, uint, uint, uint>
     gettime() const;
 
-    time_t mktime();
+    time_t mktime() const;
 
     bool operator<(const DateTime &rhs) const;
 

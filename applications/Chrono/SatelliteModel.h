@@ -131,7 +131,7 @@ namespace rose {
 
         void predict(const DateTime &dateTime);
 
-        void passPrediction();
+        void passPrediction(uint maxCount, const std::string &favorite);
     };
 
     static constexpr long COARSE_DT = 90L;
@@ -149,6 +149,19 @@ namespace rose {
 
         SatellitePassData() = default;
         ~SatellitePassData() = default;
+
+        /**
+         * @brief Create a std::string that describes the pass.
+         * @details If relative == 0 then times that are converted are converted to absolute dates and times in GMT.
+         * If the rise time is valid and in the future it is entered into the string first followed by " - " and the
+         * set time. If relative is not 0 the set time is converted relative to the rise time. This provides the
+         * rise time followed by the pass duration.<p/>
+         * If the rise time is not valid only the set time is converted providing the set time if relative is 0 or
+         * the duration if relative is not 0.
+         * @param relative A time_t to make the strings relative to.
+         * @return a std::string with the formatted pass timing data.
+         */
+        [[nodiscard]] std::string passTimeString(time_t relative = 0) const;
 
         /// Return true if pass not found and search time not exceeded.
         bool search(DateTime& now) const noexcept {

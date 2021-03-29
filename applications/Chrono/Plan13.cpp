@@ -128,7 +128,7 @@ DateTime::gettime() const {
     return std::make_tuple(year, month, day, h, m, s);
 }
 
-time_t DateTime::mktime() {
+time_t DateTime::mktime() const {
     auto[year, month, day, h, m, s] = gettime();
     auto timer = time(nullptr);
     auto timeInfo = gmtime(&timer);

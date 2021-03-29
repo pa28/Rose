@@ -84,7 +84,7 @@ namespace rose {
         std::cout << __PRETTY_FUNCTION__ << ' ' << duration.count() << '\n';
     }
 
-    void SatelliteObservation::passPrediction() {
+    void SatelliteObservation::passPrediction(uint maxCount, const std::string &favorite) {
         auto start = std::chrono::high_resolution_clock::now();
         DateTime now{true};
         std::vector<SatellitePassData> passData{};
@@ -168,7 +168,7 @@ namespace rose {
         std::cout << __PRETTY_FUNCTION__ << " Satellite count: " << passData.size() << '\n';
 
         passData.erase(std::remove_if(passData.begin(), passData.end(), [&](SatellitePassData &pass) -> bool {
-            return !pass.goodPass(60.);
+            return !pass.goodPass(15.);
         }), passData.end());
 
         std::cout << __PRETTY_FUNCTION__ << " Good pass count: " << passData.size() << '\n';
@@ -177,8 +177,63 @@ namespace rose {
             return p0.riseTime < p1.riseTime;
         });
 
+        if (passData.size() > maxCount) {
+            auto count = (favorite.empty() ? maxCount : maxCount - 1);
+            passData.erase(std::remove_if(passData.begin() + count, passData.end(), [&favorite](SatellitePassData &pass) -> bool {
+                return !(pass.satellite.getName() == favorite);
+            }), passData.end());
+        }
+
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
         std::cout << __PRETTY_FUNCTION__ << " Time: " << duration.count() << "ms\n";
+
+        auto relative = time(nullptr);
+        for (auto &pass : passData) {
+            std::cout << pass.satellite.getName() << ": " << pass.passTimeString(relative) << '\n';
+        }
+    }
+
+    std::string SatellitePassData::passTimeString(time_t relative) const {
+        auto mkTimeStr = [](std::ostream &s, time_t t, time_t relative) {
+            static constexpr size_t bufferLength = 64;
+            static constexpr char fmtMinSec[] = "%M:%S";
+            static constexpr char fmtHourMin[] = "%Hh%M";
+            static constexpr char fmtDayHourMin[] = "%jd%Hh%M";
+            static constexpr char fmtDate[] = "%F";
+
+            time_t timer = t - relative;
+            auto lt = localtime(&timer);
+            timer += lt->tm_gmtoff;
+            auto tm = gmtime(&timer);
+            char buffer[bufferLength];
+            char *fmt = const_cast<char *>(fmtMinSec);
+            if (timer >= 172800)
+                fmt = const_cast<char *>(fmtDate);
+            if (timer >= 86400)
+                fmt = const_cast<char *>(fmtDayHourMin);
+            else if (timer >= 3600)
+                fmt = const_cast<char *>(fmtHourMin);
+            auto length = strftime(buffer, bufferLength, fmt, tm);
+            s << buffer;
+        };
+
+        DateTime now{true};
+        if (riseOk && riseTime > now) {
+            std::stringstream strm{};
+            auto rise = riseTime.mktime();
+            mkTimeStr(strm, rise, relative);
+            strm << " - ";
+            if (setOk) {
+                mkTimeStr(strm, setTime.mktime(), relative ? rise : 0);
+            }
+            return strm.str();
+        } else if (setOk && setTime > now) {
+            std::stringstream strm{};
+            mkTimeStr(strm, setTime.mktime(), relative);
+            return strm.str();
+        }
+
+        return "Set.";
     }
 }
