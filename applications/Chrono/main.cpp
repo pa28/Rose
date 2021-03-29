@@ -257,9 +257,7 @@ struct Chrono : public Application {
         Observer observer{45., -75., 0.};
         DateTime now{true};
         SatelliteObservation obs{observer};
-        obs.predict(now);
-
-        exit(0);
+        obs.passPrediction();
     }
 };
 

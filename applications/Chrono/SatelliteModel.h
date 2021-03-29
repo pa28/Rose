@@ -11,6 +11,7 @@
 #include "WebCache.h"
 #include "Plan13.h"
 #include <memory>
+#include <algorithm>
 
 namespace rose {
 
@@ -129,6 +130,48 @@ namespace rose {
         explicit SatelliteObservation(const Observer &observer);
 
         void predict(const DateTime &dateTime);
+
+        void passPrediction();
+    };
+
+    static constexpr long COARSE_DT = 90L;
+    static constexpr long FINE_DT = (-2L);
+    static constexpr double SAT_MIN_EL = 1.;
+
+    struct SatellitePassData {
+        Satellite satellite{};
+        bool riseOk{false}, setOk{false}, everUp{false}, everDown{false};
+        long deltaTime{COARSE_DT};
+        double altitude{}, azimuth{}, range{}, rangeRate{}, latRad{}, lonRad{}, periodDays{},
+            maxAltitude{}, prevAltitude{0}, setAz{0}, riseAz{0};
+
+        DateTime srchTime{}, riseTime{}, setTime{};
+
+        SatellitePassData() = default;
+        ~SatellitePassData() = default;
+
+        /// Return true if pass not found and search time not exceeded.
+        bool search(DateTime& now) const noexcept {
+            return (!setOk || !riseOk) && srchTime < now + 2.0F && (srchTime > now || altitude > -1.);
+        }
+
+        [[nodiscard]] bool goodPass(double minAltitude) const noexcept {
+            return riseOk && setOk && maxAltitude >= minAltitude;
+        }
+
+        void setTopo(const Observer& observer) {
+            auto topo = satellite.topo(observer);
+            altitude = std::get<0>(topo);
+            azimuth = std::get<1>(topo);
+            range = std::get<2>(topo);
+            rangeRate = std::get<3>(topo);
+        }
+
+        void setGeo() {
+            auto geo = satellite.geo();
+            latRad = std::get<0>(geo);
+            lonRad = std::get<1>(geo);
+        }
     };
 }
 
