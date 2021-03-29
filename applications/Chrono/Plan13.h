@@ -79,8 +79,8 @@ struct P13 {
     constexpr static double EQC1 = 0.03340;
     constexpr static double EQC2 = 0.00035;
     constexpr static double INS = RADIANS(23.4375);
-    constexpr static double CNS = math::cos(INS);
-    constexpr static double SNS = math::sin(INS);
+    constexpr static double CNS = cx_math::cos(INS);
+    constexpr static double SNS = cx_math::sin(INS);
 
     /*
     constexpr static SatelliteEphemeris ISS =
@@ -204,7 +204,7 @@ public:
     [[nodiscard]] std::tuple<int, uint, uint, uint, uint, uint>
     gettime() const;
 
-    time_t mktime();
+    time_t mktime() const;
 
     bool operator<(const DateTime &rhs) const;
 

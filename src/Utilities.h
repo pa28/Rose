@@ -1,113 +1,31 @@
-/** @file Utilities.h
-  * @author Richard Buckley <richard.buckley@ieee.org>
-  * @version 1.0
-  * @date 2020-11-13
-  * @brief Miscellaneous utility classes and functions.
-  */
+/**
+ * @file Utilities.h
+ * @author Richard Buckley <richard.buckley@ieee.org>
+ * @version 1.0
+ * @date 2021-03-06
+ */
 
 #pragma once
 
-#include <exception>
-#include <filesystem>
-#include <iomanip>
-#include <memory>
-#include <optional>
-#include <sstream>
-#include <chrono>
-#include <SDL.h>
-#include <stack>
-#include "Constants.h"
+#include "XDGFilePaths.h"
+#include <iterator>
+#include <algorithm>
 
-namespace rose::util {
+#define XSTR(arg) STR(arg)  ///< Used to stringize the value of an argument
+#define STR(arg) #arg       ///< Used to stringize the value of an argument
 
-    template<typename T>
-    std::string fmtNumber(T value, int precision) {
-        std::stringstream strm{};
-        strm << std::setprecision(precision) << value;
-        return strm.str();
+#define FILE_LOC " -- ", __FILE__, ':', __LINE__    ///< Macro to create a location within a source file
+
+namespace rose {
+
+    template<typename U, typename C>
+    bool oneFlagOf(U flag, C container) {
+        static_assert(std::is_unsigned_v<U>, "Argument flag must be unsigned type." );
+        static_assert(std::is_unsigned_v<typename C::value_type>, "Container must hold an unsigned type.");
+        return std::any_of(container.begin(), container.end(), [&flag](typename C::value_type value){
+            return flag == value;
+        });
     }
-
-    /**
-     * @struct iterator_pair
-     * @brief A pair of iterators which may be used as first and last in the sequence [first .. last)
-     * @tparam Iterator The type of iterator
-     */
-    template<class Iterator>
-    struct iterator_pair {
-        Iterator mBegin, mEnd;
-
-        Iterator begin() const { return mBegin; }
-        Iterator end() const { return mEnd; }
-    };
-
-    /**
-     * @brief An iterator type definition.
-     */
-    template<class C>
-    using iterator_t = decltype(std::begin(std::declval<C&>()));
-
-    /**
-     * @brief Crate an iterator_pair to generate an offset sequence.
-     * @details The returned iterator pair will form a sequence over the container of [first+skip ... last)
-     * @tparam C The type of the container.
-     * @param container The container
-     * @param skip the offset
-     * @return An iterator_pair<iterator_t<C>>
-     */
-    template<class C>
-    iterator_pair<iterator_t<C>> offset(C& container, size_t skip) {
-        return {std::next(container.begin(), skip), container.end()};
-    }
-
-    /**
-     * @brief A function to print ScreenMetric values.
-     * @tparam T The underlying type of the metric.
-     * @tparam N The number of elements in the metric.
-     * @param strm The std::ostream to print on.
-     * @param metric The ScreenMetric value.
-     * @return The std::stream.
-     */
-    template<typename T, size_t N>
-    std::ostream & printScreenMetric(std::ostream &strm, const std::array<T,N> &metric) {
-        strm << '(' << metric.front();
-        for (auto &i : offset(metric,1)) {
-            strm << ',' << i;
-        }
-        return strm << ')';
-    }
-
-    /**
-     * @brief Convert a filesystem time to a system clock time point.
-     * @tparam T The type of the file time point.
-     * @param fileTimePoint The value of the file time point.
-     * @return std::chrono::system_clock::time_point.
-     */
-    template<typename T>
-    extern std::chrono::system_clock::time_point fileClockToSystemClock(T fileTimePoint) {
-        using namespace std::chrono_literals;
-        using namespace std::chrono;
-
-        auto sysWriteTime = time_point_cast<system_clock::duration>(
-                fileTimePoint - decltype(fileTimePoint)::clock::now() +
-                system_clock::now());
-        return sysWriteTime;
-    }
-
-    /**
-     * @struct FontMetrics
-     * @brief The size metrics that pertain to a particular font.
-     */
-    struct FontMetrics {
-        int fontAscent,     ///< The height above the base line.
-        fontDescent,        ///< The length of descenders below the baseline a negative number.
-        fontHeight,         ///< The total height of the font (ascent - descent
-        fontLineSkip;       ///< The size of a line advance for the font.
-
-        constexpr FontMetrics(const FontMetrics &) noexcept = default;
-        constexpr FontMetrics(FontMetrics &&) noexcept = default;
-        constexpr FontMetrics& operator=(const FontMetrics &) noexcept = default;
-        constexpr FontMetrics& operator=(FontMetrics &&) noexcept = default;
-    };
 
     /**
      * @class ReverseContainerView
@@ -147,34 +65,6 @@ namespace rose::util {
     };
 
     /**
-     * @namespace rose::util
-     * @brief Utility Functions
-     */
-
-#define XSTR(arg) STR(arg)  ///< Used to stringize the value of an argument
-#define STR(arg) #arg       ///< Used to stringize the value of an argument
-
-#define FILE_LOC " -- ", __FILE__, ':', __LINE__    ///< Macro to create a location within a source file
-
-    /**
-     * @brief A type to encode the location of an error: file name and line number.
-     */
-    using DebugTuple = std::optional<std::tuple<const std::string_view, unsigned int>>;
-
-    /**
-     * @brief A macro to turn file location on or off.
-     */
-#define DEBUG_TUPLE(use) use ? std::make_optional(std::make_tuple(std::string_view{__FILE__},__LINE__)) : (std::nullopt)
-
-    /**
-     * @brief Comute the boolean exclusive or of a with b.
-     * @param a
-     * @param b
-     * @return
-     */
-    static bool bxor(bool a, bool b) { return b == !a; }
-
-    /**
     * @brief Composite a pack of arguments that are streamable to a string.
     * @tparam Arg First argument type
     * @tparam Args Rest of the argument types
@@ -189,4 +79,52 @@ namespace rose::util {
         ((out << std::forward<Args>(args)), ...);
         return out.str();
     }
+
+    class Environment {
+    protected:
+        Environment();
+
+        std::filesystem::path mHomeDirectory;       ///< The user's home directory path
+        std::filesystem::path mDataHome;            ///< The user's XDG Data Home path
+        std::filesystem::path mConfigHome;          ///< The user's XDG Config Home path
+        std::filesystem::path mCacheHome;           ///< The user's XDG Cache Home path
+        std::filesystem::path mSharedImages;        ///< Image resources installed with the application.
+        XDGFilePaths mFilePaths{};                  ///< XDG Spec file paths.
+
+        std::string mAppName;                       ///< Application name as provided by the system.
+
+    public:
+        ~Environment() = default;
+
+        Environment(const Environment &) = delete;
+
+        Environment(Environment &&) = delete;
+
+        Environment& operator=(const Environment &) = delete;
+
+        Environment& operator=(Environment &&) = delete;
+
+        static Environment &getEnvironment() {
+            static Environment instance{};
+            return instance;
+        }
+
+        [[nodiscard]] const std::string& appName() const { return mAppName; }
+
+        [[nodiscard]] const std::filesystem::path& configHome() const { return mConfigHome; }
+
+        [[nodiscard]] const std::filesystem::path& cacheHome() const { return mCacheHome; }
+
+        /**
+         * @brief Find the XDG directory for a specified application name.
+         * @details If the path location does not exist, and create is set to true, it is created along with all
+         * parent directories with permissions set to std::filesystem::perms::all modified by umask(2).
+         * @param name The XDG Name.
+         * @param appName The application name.
+         * @param create Set to true if non-existent directories should be created.
+         * @return
+         */
+        std::filesystem::path getenv_path(XDGFilePaths::XDG_Name name, const std::string &appName, bool create);
+    };
 }
+

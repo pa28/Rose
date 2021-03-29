@@ -1,138 +1,133 @@
-/** @file Theme.h
-  * @author Richard Buckley <richard.buckley@ieee.org>
-  * @version 1.0
-  * @date 2020-10-22
-  * @brief Application visual theme related values.
-  */
-
-/*
-    Another significant redesign to update the coding standards to C++17,
-    reduce the amount of bare pointer handling (especially in user code),
-    and focus on the RaspberryPi environment.
-    
-    License terms for the changes as well as the base nanogui-sdl code are
-    contained int the LICENSE.txt file.
-    
-    A significant redesign of this code was contributed by Christian Schueller.
-
-    Based on NanoGUI by Wenzel Jakob <wenzel@inf.ethz.ch>.
-    Adaptation for SDL by Dalerank <dalerankn8@gmail.com>
-
-    All rights reserved. Use of this source code is governed by a
-    BSD-style license that can be found in the LICENSE.txt file.
-*/
+/**
+ * @file Theme.h
+ * @author Richard Buckley <richard.buckley@ieee.org>
+ * @version 1.0
+ * @date 2021-03-23
+ */
 
 #pragma once
 
 #include "Color.h"
-#include "Constants.h"
-
+#include "Types.h"
 
 namespace rose {
 
+    enum class ThemeColor : size_t {
+        Base,
+        Top,
+        Bottom,
+        Left,
+        Right,
+        Invert,
+        Text,
+        Red,
+        Green,
+        Yellow,
+    };
+
     /**
      * @class Theme
-     * @brief Storage for values which affect the look and feel of the application.
+     * @brief A set of values that provide defaults forming a cohesive visual and operational theme.
      */
     class Theme {
+    protected:
+        Theme() = default;
     public:
-        Theme();
+        ~Theme() = default;
 
-        color::HSVA mBaseColorHSLA{dBaseColorHSLA};
-        color::RGBA mBaseColor{dBaseColorHSLA};
-        color::RGBA mTopColor{dTopColor};
-        color::RGBA mBotColor{dBotColor};
-        color::RGBA mLeftColor{dLeftColor};
-        color::RGBA mRightColor{dRightColor};
-        color::RGBA mInvertColor{dInvertColor};
-        color::RGBA mTextColour{dBaseColorHSLA.contrasting()};
-        color::RGBA mWhite{dWhite};
-        color::RGBA mBlack{dBlack};
-        color::RGBA mRed{dRed};
-        color::RGBA mYellow{dYellow};
-        color::RGBA mGreen{dGreen};
+        static Theme &getTheme() {
+            static Theme instance{};
+            return instance;
+        }
 
-        BorderStyle mBorderStyle{dBorderStyle};
-        CornerStyle mCornerStyle{dCornerStyle};
-        int mFrameWidth{dFrameWidth};
-        int mPadding{dPadding};
-        int mButtonPadding{dButtonPadding};
-        int mCPUNormalMax{dCPUNormalMax};
-        int mCPUWarningMax{dCPUWarningMax};
-        int mImageButtonSize{dImageButtonSize};
-        std::string mFontRootPath{dFontRootPath};
-        std::string mDefaultFontName{dDefaultFontName};
+        /**
+         * Colors
+         */
+        color::HSVA BaseColorHSVA{200.f, .00, .25, 1.0};
 
-        std::string mTimeBoxTimeFont{dFixePitchFont};
-        std::string mKeyboardFont{dFixePitchFont};
-        std::string mTimeBoxHoursMinFmt{dTimeBoxHoursMinFmt};
-        std::string mTimeBoxSecFmt{dTimeBoxSecFmt};
-        std::string mTimeBoxSmallSecFmt{dTimeBoxSmallSecFmt};
-        std::string mDateBoxFont{dDateBoxFont};
-        std::string mTimeBoxDateFmt{dTimeBoxDateFmt};
-        std::string mTimeBoxSmallDateFmt{dTimeBoxSmallDateFmt};
-        int mTimeBoxFontSize{dTimeBoxFontSize};
-        int mTimeBoxDateFontSize{dTimeBoxDateFontSize};
-        int mDateBoxFontSize{dDateBoxFontSize};
-        int mFontPointSize{dFontPointSize};
-        int mKeyboardFontPointSize{dKeyboardPointSize};
-        int mIconFontSize{dIconPointSize};
-        int mTitleFontSize{dTitlePointSize};
-        int mLabelBadgeSpace{dLabelBadgeSpace};
-        std::string mIconFontName{dIconFontName};
+        std::array<color::HSVA, 10> _hsva{{
+                                                 BaseColorHSVA,
+                                                 BaseColorHSVA.modValue(0.2),
+                                                 BaseColorHSVA.modValue(-0.15),
+                                                 BaseColorHSVA.modValue(0.1),
+                                                 BaseColorHSVA.modValue(-0.15),
+                                                 BaseColorHSVA.modValue(-0.075),
+                                                 BaseColorHSVA.contrasting(),
+                                                 {0.f, 1.f, 0.55f, 1.f},
+                                                 {79.f, 1.f, .4f, 1.f},
+                                                 {50.f, 1.f, 0.55f, 1.f}
+                                         }};
 
-//        static constexpr color::HSVA dBaseColorHSLA{{200.f, .00, .20, 1.0}};
-//        static constexpr std::array<float, 5> dColorSetMods{0.2, -0.15, 0.1, -0.2, -0.1};
-        static constexpr color::HSVA dBaseColorHSLA{{200.f, .00, .15, 1.0}};
-        static constexpr std::array<float, 5> dColorSetMods{0.2, -0.15, 0.1, -0.15, -0.075};
-        static constexpr color::RGBA dBaseColor{dBaseColorHSLA};
-        static constexpr color::RGBA dTopColor{dBaseColorHSLA.modValue(0.2)};
-        static constexpr color::RGBA dBotColor{dBaseColorHSLA.modValue(-0.15)};
-        static constexpr color::RGBA dLeftColor{dBaseColorHSLA.modValue(0.1)};
-        static constexpr color::RGBA dRightColor{dBaseColorHSLA.modValue(-0.15)};
-        static constexpr color::RGBA dInvertColor{dBaseColorHSLA.modValue(-0.075)};
+        std::array<color::RGBA, 10> _rgba{{
+                                                 _hsva[0].toRGBA(),
+                                                 _hsva[1].toRGBA(),
+                                                 _hsva[2].toRGBA(),
+                                                 _hsva[3].toRGBA(),
+                                                 _hsva[4].toRGBA(),
+                                                 _hsva[5].toRGBA(),
+                                                 _hsva[6].toRGBA(),
+                                                 _hsva[7].toRGBA(),
+                                                 _hsva[8].toRGBA(),
+                                                 _hsva[9].toRGBA(),
+                                         }};
 
-        static constexpr color::HSVA dWhite{{0.0f, 0.0f, 1.0f, 1.0f }};
-        static constexpr color::HSVA dBlack{{0.0f, 0.0f, 0.0f, 1.0f }};
-        static constexpr color::HSVA dRed{{10.f, 0.7f, 0.8f, 1.0f }};
-        static constexpr color::HSVA dYellow{{60.f, 0.7f, 0.8f, 1.0f }};
-        static constexpr color::HSVA dGreen{{120.f, 0.7f, 0.8f, 1.0f }};
+        color::RGBA rgba(ThemeColor themeColor) {
+            return _rgba[static_cast<std::size_t>(themeColor)];
+        };
 
-        static constexpr BorderStyle dBorderStyle{BorderStyle::Unset};
-        static constexpr CornerStyle dCornerStyle{CornerStyle::Square};
-        static constexpr int dFrameWidth = 2;
-        static constexpr int dPadding = 6;
-        static constexpr int dButtonPadding = 4;
-        static constexpr int dImageButtonSize = 50;
-        static constexpr int dCPUNormalMax = 55000;
-        static constexpr int dCPUWarningMax = 60000;
+        color::HSVA hsva(ThemeColor themeColor) {
+            return _hsva[static_cast<std::size_t>(themeColor)];
+        }
 
-        static constexpr std::string_view dFontRootPath = "/usr/share/fonts:/usr/local/share/fonts";
-        static constexpr std::string_view dDefaultFontName = "FreeSans";
+        /**
+         * Fonts
+         */
+        std::string
+                TextFont{"FreeSans"},
+                BoldFont{"FreeSansBold"},
+                ObliqueFont{"FreeSansOblique"},
+                BoldObliqueFont{"FreeSansBoldOblique"},
+                FixedFont{"FreeMono"},
+                FixedBoldFont{"FreeMonoBold"},
+                FixedObliqueFont{"FreeMonoOblique"},
+                FixedBoldObliqueFont{"FreeMonoBoldOblique"},
+                EntypoFont{"entypo"};
 
-        static constexpr std::string_view dFixePitchFont = "FreeMonoBold";    ///< Default font name
-        static constexpr std::string_view dTimeBoxHoursMinFmt = "%R";           ///< Default hours minutes format
-        static constexpr std::string_view dTimeBoxSecFmt = "%S %Z";             ///< Default seconds format
-        static constexpr std::string_view dTimeBoxSmallSecFmt = "%Z";           ///< Small version seconds format
-        static constexpr int dTimeBoxFontSize = 30;                             ///< Default time font size
-        static constexpr int dTimeBoxDateFontSize = 20;                         ///< Default date font size
+        /**
+         * Font Point Sizes
+         */
+        int ButtonPointSize{30},
+            LabelPointSize{30},
+            TextPointSize{20};
 
-        static constexpr std::string_view dDateBoxFont = "FreeSansBold";
-        static constexpr std::string_view dTimeBoxDateFmt = "%a %b %d, %Y";
-        static constexpr std::string_view dTimeBoxSmallDateFmt = "%a %b %d";
-        static constexpr int dDateBoxFontSize = 20;
+        /**
+         * Padding
+         */
+        int ButtonPadding{5};
 
-        static constexpr int dFontPointSize = 30;
-        static constexpr int dKeyboardPointSize = 40;
-        static constexpr int dIconPointSize = 50;
-        static constexpr int dTitlePointSize = 20;
+        /**
+         * Sizes
+         */
+        Size ImageLabelSize{40,40};
 
-        static constexpr int dLabelBadgeSpace = 5;
+        /**
+         * Frame styles
+         */
+        FrameSettings CleanFrame{
+                { rgba(ThemeColor::Base), rgba(ThemeColor::Invert)},
+                {BorderStyle::None, BorderStyle::None}
+        };
 
-        static constexpr std::string_view dIconFontName = "entypo";
+        FrameSettings BevelFrame{
+                { rgba(ThemeColor::Base), rgba(ThemeColor::Invert)},
+                {BorderStyle::BevelOut, BorderStyle::BevelIn}
+        };
+
+        FrameSettings SemiBevelFrame{
+                { rgba(ThemeColor::Base), rgba(ThemeColor::Invert)},
+                {BorderStyle::NotchIn, BorderStyle::BevelIn}
+        };
 
     };
 }
-
-
 

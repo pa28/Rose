@@ -98,39 +98,25 @@ include_directories(include)
 list(APPEND EXTRA_LIBS GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 sqlite3 pthread dl rt m stdc++fs uuid)
 
 list(APPEND ROSE_SRC
-        src/AntiAliasedDrawing.cpp
-        src/Border.cpp
+        src/Application.cpp
+        src/Animation.cpp
         src/Button.cpp
-        src/Cache.cpp
         src/Color.cpp
-        src/Container.cpp
-        src/EventSemantics.cpp
         src/Frame.cpp
-        src/Gauge.cpp
-        src/ImageRepository.cpp
-        src/ImageView.cpp
-        src/Keyboard.cpp
-        src/Label.cpp
-        src/LinearScale.cpp
-        src/Menu.cpp
-        src/PopupWindow.cpp
-        src/Renderer.cpp
-        src/Rose.cpp
+        src/GraphicsModel.cpp
+        src/Image.cpp
+        src/ImageStore.cpp
+        src/Layout.cpp
+        src/PointerInteractions.cpp
         src/Settings.cpp
-        src/ScreenMetrics.cpp
-        src/ScrollArea.cpp
-        src/SingleChild.cpp
+        src/StructuredTypes.cpp
         src/Surface.cpp
-        src/Tab.cpp
+        src/Text.cpp
         src/Texture.cpp
-        src/TextField.cpp
-        src/Theme.cpp
-        src/TimeBox.cpp
-        src/Timer.cpp
+        src/Types.cpp
         src/Utilities.cpp
-        src/Slider.cpp
-        src/SystemMonitor.cpp
-        src/Widget.cpp
+        src/Visual.cpp
+        src/WebCache.cpp
         src/XDGFilePaths.cpp
         )
 
@@ -148,25 +134,38 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     add_library(rose SHARED ${ROSE_SRC})
 else()
     add_library(rose STATIC ${ROSE_SRC})
-    add_executable(Test tests/WidgetTest.cpp)
-    target_link_libraries(Test ${RoseLibraries})
-    add_dependencies(Test rose)
 endif()
 
+if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
+    add_executable(Test0 tests/test0.cpp)
+    target_link_libraries(Test0 ${RoseLibraries})
+
+    add_executable(Test2 tests/test2.cpp)
+    target_link_libraries(Test2 ${RoseLibraries})
+endif()
 
 add_executable(Rose main.cpp)
 target_link_libraries(Rose ${RoseLibraries})
 add_dependencies(Rose rose)
 
-add_executable(HamChrono applications/HamChrono/HamChrono.cpp applications/HamChrono/MapProjection.cpp applications/HamChrono/MapProjection.h applications/HamChrono/ConfigDialog.cpp applications/HamChrono/ConfigDialog.h applications/HamChrono/SettingsNames.h applications/HamChrono/Plan13.cpp applications/HamChrono/Plan13.h applications/HamChrono/Ephemeris.cpp applications/HamChrono/Ephemeris.h applications/HamChrono/SatelliteDataDisplay.cpp applications/HamChrono/SatelliteDataDisplay.h)
-target_link_libraries(HamChrono ${RoseLibraries})
-add_dependencies(HamChrono rose)
+#add_executable(HamChrono applications/HamChrono/HamChrono.cpp applications/HamChrono/MapProjection.cpp applications/HamChrono/MapProjection.h applications/HamChrono/ConfigDialog.cpp applications/HamChrono/ConfigDialog.h applications/HamChrono/SettingsNames.h applications/HamChrono/Plan13.cpp applications/HamChrono/Plan13.h applications/HamChrono/Ephemeris.cpp applications/HamChrono/Ephemeris.h applications/HamChrono/SatelliteDataDisplay.cpp applications/HamChrono/SatelliteDataDisplay.h src/StructuredTypes.cpp src/StructuredTypes.h)
+#target_link_libraries(HamChrono ${RoseLibraries})
+#add_dependencies(HamChrono rose)
+
+add_executable(Chrono applications/Chrono/main.cpp
+        applications/Chrono/MapProjection.cpp
+        applications/Chrono/MapProjection.h
+        applications/Chrono/SatelliteModel.cpp
+        applications/Chrono/SatelliteModel.h
+        applications/Chrono/Plan13.cpp
+        applications/Chrono/Plan13.h)
+target_link_libraries(Chrono ${RoseLibraries})
 
 add_executable(Life applications/ConwayLife.cpp)
 target_link_libraries(Life ${RoseLibraries})
 add_dependencies(Life rose)
 
-add_executable(RoseExec applications/RoseExec.cpp src/Command.cpp)
+add_executable(RoseExec applications/RoseExec.cpp src0/Command.cpp)
 target_link_libraries(RoseExec stdc++fs)
 
 add_executable(RoseShell applications/RoseShell.cpp)
@@ -194,7 +193,7 @@ set_target_properties(
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
 
 install(TARGETS
-        rose Rose Life RoseExec RoseShell HamChrono
+        rose Rose Life RoseExec RoseShell Chrono
         COMPONENT ROSE_RUNTIME EXCLUDE_FROM_ALL
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -216,7 +215,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts"
         COMPONENT ROSE_RUNTIME
         )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src0/"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
         COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL
         FILES_MATCHING PATTERN "*.h")

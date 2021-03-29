@@ -26,21 +26,14 @@
 #include <algorithm>
 #include <array>
 #include <SDL.h>
-#include "Constants.h"
+#include <iostream>
+#include "Configuration.h"
 
 /**
  * @namespace rose::color
  * @brief Color management.
  */
 namespace rose::color {
-
-    /**
-     * @brief Set the Alpha value in a pixel color.
-     * @param pixel The pixel color
-     * @param a The alpha value
-     * @return The modified pixel color.
-     */
-    static constexpr uint32_t set_a_value(uint32_t pixel, uint32_t a) { return (pixel & cmask) | a << ashift; }
 
     /**
      * @struct Value
@@ -55,8 +48,9 @@ namespace rose::color {
          * @brief Constructor, initialize color to transparent black.
          */
         constexpr Value() noexcept: std::array<float, 4>() {
-            for (size_t i = 0; i < size(); ++i)
-                operator[](i) = 0.f;
+            for (auto &v : *this) {
+                v = 0.f;
+            }
         }
 
         constexpr explicit Value(std::array<float, 4> v) noexcept: std::array<float, 4>(v) {}
@@ -71,6 +65,10 @@ namespace rose::color {
 
         static const RGBA TransparentBlack;
 
+        static const RGBA OpaqueBlack;
+
+        static const RGBA OpaqueWhite;
+
         constexpr RGBA() noexcept = default;
 
         /// Construct RGBA from a std::array of floats in range [0.0 ... 1.0]
@@ -82,14 +80,6 @@ namespace rose::color {
             operator[](1) = (float) (g & 0xffu) / 255.f;
             operator[](2) = (float) (b & 0xffu) / 255.f;
             operator[](3) = (float) (a & 0xffu) / 255.f;
-        }
-
-        /// Construct RGBA from uint8_t components in the range [0 ... 255]
-        constexpr RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a) noexcept {
-            operator[](0) = (float) (r) / 255.f;
-            operator[](1) = (float) (g) / 255.f;
-            operator[](2) = (float) (b) / 255.f;
-            operator[](3) = (float) (a) / 255.f;
         }
 
         /// Construct RGBA from float components in range [0.0 ... 1.0]
@@ -146,6 +136,22 @@ namespace rose::color {
         constexpr RGBA operator+(const RGBA color) const noexcept {
             return RGBA{r() + color.r(), g() + color.g(), b() + color.b(), a() + color.a()};
         }
+
+        [[nodiscard]] constexpr RGBA interpolate(const RGBA& to, float v) const noexcept {
+            auto inter = [](float from, float to, float value) -> float {
+                return from + (to - from) * value;
+            };
+
+            RGBA result{};
+            result[0] = inter(operator[](0), to[0], v);
+            result[1] = inter(operator[](1), to[1], v);
+            result[2] = inter(operator[](2), to[2], v);
+            result[3] = inter(operator[](3), to[3], v);
+
+            return result;
+        }
+
+        [[nodiscard]] HSVA toHSVA() const;
     };
 
     template<typename T>
@@ -172,6 +178,13 @@ namespace rose::color {
             operator[](0) /= 360.f;
         }
 
+        constexpr HSVA(float h, float s, float v, float a) noexcept: Value() {
+            operator[](0) = h / 360.f;
+            operator[](1) = s;
+            operator[](2) = v;
+            operator[](3) = a;
+        }
+
         [[nodiscard]] constexpr HSVA modValue(float dValue) const noexcept {
             HSVA result{*this};
             result[2] += dValue;
@@ -179,8 +192,8 @@ namespace rose::color {
         }
 
         /**
-         * @brief Get a new colour from this HSL colour by modifying the hue value.
-         * @param hue The new hue value
+         * @brief Get a new colour from this HSL colour by modifying the hue.
+         * @param hue The new hue.
          * @return The new HSL colour.
          */
         [[nodiscard]] constexpr HSVA withHue(uint32_t hue) const {
@@ -188,8 +201,30 @@ namespace rose::color {
         }
 
         /**
-         * @brief Get a new colour from this HSL colour by modifying the hue value.
-         * @param hue The new hue value
+         * @brief Get a new colour from this HSL colour by modifying the saturation.
+         * @param sat The new saturation.
+         * @return The new HSL colour.
+         */
+        [[nodiscard]] constexpr HSVA withSaturation(float sat) const {
+            HSVA result{*this};
+            result[1] = std::clamp(sat, 0.f, 1.f);
+            return result;
+        }
+
+        /**
+         * @brief Get a new colour from this HSL colour by modifying the value.
+         * @param val The new value.
+         * @return The new HSL colour.
+         */
+        [[nodiscard]] constexpr HSVA withValue(float val) const {
+            HSVA result{*this};
+            result[2] = std::clamp(val, 0.f, 1.f);
+            return result;
+        }
+
+        /**
+         * @brief Get a new colour from this HSL colour by modifying the saturation value.
+         * @param sat The new saturation value
          * @return The new HSL colour.
          */
         [[nodiscard]] constexpr HSVA withMinSaturation(float sat) const {
@@ -202,10 +237,10 @@ namespace rose::color {
          */
         [[nodiscard]] constexpr HSVA contrasting() const {
             float value = 0;
-            if (operator[](2) < 0.5)
-                value = operator[](2) + 0.4;
+            if (operator[](2) < 0.5f)
+                value = operator[](2) + 0.4f;
             else
-                value = operator[](2) - 0.4;
+                value = operator[](2) - 0.4f;
             return HSVA{{operator[](0), operator[](1), value, operator[](3)}};
         }
 
@@ -254,10 +289,33 @@ namespace rose::color {
         constexpr float &alpha() noexcept { return operator[](3); }
 
         [[nodiscard]] constexpr float alpha() const noexcept { return operator[](3); }
+
+        [[nodiscard]] constexpr HSVA interpolate(const HSVA& to, float v) const noexcept {
+            auto inter = [](float from, float to, float value) -> float {
+                return from + (to - from) * value;
+            };
+
+            HSVA result{};
+            result[0] = inter(operator[](0), to[0], v);
+            result[1] = inter(operator[](1), to[1], v);
+            result[2] = inter(operator[](2), to[2], v);
+            result[3] = inter(operator[](3), to[3], v);
+
+            return result;
+        }
     };
 
     constexpr RGBA::RGBA(const HSVA &hsva) noexcept : RGBA(hsva.toRGBA()) {
     }
+
+    /**
+     * @brief Set the Alpha value in a pixel color.
+     * @param pixel The pixel color
+     * @param a The alpha value
+     * @return The modified pixel color.
+     */
+    static constexpr uint32_t set_a_value(uint32_t pixel, uint32_t a) { return (pixel & cmask) | a << ashift; }
+
 
     /**
      * @class Interpolator
@@ -443,4 +501,27 @@ namespace rose::color {
             return iterator;
         }
     };
+
+    static constexpr color::HSVA DarkBaseColorHSVA{{200.f, .00, .25, 1.0}};
+    static constexpr color::RGBA DarkBaseColor{DarkBaseColorHSVA};
+    static constexpr color::RGBA DarkTopColor{DarkBaseColorHSVA.modValue(0.2)};
+    static constexpr color::RGBA DarkBotColor{DarkBaseColorHSVA.modValue(-0.15)};
+    static constexpr color::RGBA DarkLeftColor{DarkBaseColorHSVA.modValue(0.1)};
+    static constexpr color::RGBA DarkRightColor{DarkBaseColorHSVA.modValue(-0.15)};
+    static constexpr color::RGBA DarkInvertColor{DarkBaseColorHSVA.modValue(-0.075)};
+    static constexpr color::RGBA DarkTextColour{DarkBaseColorHSVA.contrasting()};
+    static constexpr color::HSVA DarkRedHSVA{ 0.f, 1.f, 0.55f, 1.f};
+//  (67,139,40) https://www.color-hex.com/color-palette/105943
+    static constexpr color::HSVA DarkGreenHSVA{79.f,1.f,.4f,1.f};
+    static constexpr color::HSVA DarkYellowHSVA{ 50.f, 1.f, 0.55f, 1.f};
+}
+
+inline std::ostream& operator<<(std::ostream& strm, const rose::color::RGBA& rgba) {
+    strm << "[RGBA " << rgba.r() << ',' << rgba.g() << ',' << rgba.b() << ',' << rgba.a() << "] ";
+    return strm;
+}
+
+inline std::ostream& operator<<(std::ostream& strm, const rose::color::HSVA& hsva) {
+    strm << "[HSVA " << hsva.hue() << ',' << hsva.saturation() << ',' << hsva.value() << ',' << hsva.alpha() << "] ";
+    return strm;
 }

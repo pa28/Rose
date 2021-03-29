@@ -30,7 +30,8 @@
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <map>
-#include "Theme.h"
+#include <vector>
+//#include "Theme.h"
 #include "Utilities.h"
 
 namespace rose {
@@ -74,10 +75,22 @@ namespace rose {
     protected:
         std::vector<std::filesystem::path> mFontPathList{};
 
+        FontCache() {
+            std::stringstream strm("/usr/share/fonts:/usr/local/share/fonts");
+            std::string rootPathStr{};
+            while (getline(strm, rootPathStr, ':')) {
+                mFontPathList.emplace_back(rootPathStr);
+            }
+        }
+
     public:
         ~FontCache() = default;
 
-        FontCache() = default;
+        static FontCache& getFontCache() {
+            static FontCache instance{};
+
+            return instance;
+        }
 
         /**
          * @brief Locate a font file.
@@ -106,14 +119,6 @@ namespace rose {
         std::optional<std::filesystem::path> getFontPath(StringType fontName) {
             if (auto found = mFontPathMap.find(fontName); found != mFontPathMap.end())
                 return found->second;
-
-            if (mFontPathList.empty()) {
-                std::stringstream strm(std::string{Theme::dFontRootPath});
-                std::string rootPathStr{};
-                while (getline(strm, rootPathStr, ':')) {
-                    mFontPathList.emplace_back(rootPathStr);
-                }
-            }
 
             for (auto const &rootPath : mFontPathList) {
                 auto fontPath = locateFont(rootPath, fontName);
@@ -164,13 +169,29 @@ namespace rose {
     }
 
     /**
+     * @struct FontMetrics
+     * @brief The size metrics that pertain to a particular font.
+     */
+    struct FontMetrics {
+        int fontAscent,     ///< The height above the base line.
+        fontDescent,        ///< The length of descenders below the baseline a negative number.
+        fontHeight,         ///< The total height of the font (ascent - descent
+        fontLineSkip;       ///< The size of a line advance for the font.
+
+        constexpr FontMetrics(const FontMetrics &) noexcept = default;
+        constexpr FontMetrics(FontMetrics &&) noexcept = default;
+        constexpr FontMetrics& operator=(const FontMetrics &) noexcept = default;
+        constexpr FontMetrics& operator=(FontMetrics &&) noexcept = default;
+    };
+
+    /**
      * @brief Get the font metrics of the current font.
      * @details See <a href="https://www.libsdl.org/projects/SDL_ttf/docs/SDL_ttf_29.html#SEC29">TTF_FontHeight</a>
      * et al.
      * @return a std::tuple with font height, font ascent, font descent, and font line skip.
      */
     inline auto getFontMetrics(FontPointer &font) {
-        util::FontMetrics fontMetrics{};
+        FontMetrics fontMetrics{};
         fontMetrics.fontHeight = TTF_FontHeight(font.get());
         fontMetrics.fontAscent = TTF_FontAscent(font.get());
         fontMetrics.fontDescent = TTF_FontDescent(font.get());
@@ -192,12 +213,11 @@ namespace rose {
         if (!font) {
             font = fontCache.getFont("FreeSans", fontSize);
             if (!font)
-                throw std::runtime_error(util::StringCompositor("Neither font", fontName, " nor default font 'FreeSans' found: ",
+                throw std::runtime_error(StringCompositor("Neither font", fontName, " nor default font 'FreeSans' found: ",
                                                           FILE_LOC));
         }
         return font;
     }
-
 }
 
 

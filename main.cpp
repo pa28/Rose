@@ -143,7 +143,7 @@ public:
 
         auto mainWindow = createWindow() << BackgroundColor(mTheme.mBaseColor);
         auto rowWidget = mainWindow << wdg<Row>();
-        rowWidget << wdg<Frame>(6)
+        rowWidget << wdg<FrameElements>(6)
                     << DrawBackground::None
                     << BorderStyle::Notch
                     << CornerStyle::Round
@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
     app->initialLayout(app->getRenderer());
 
     if (app) {
-        app->eventLoop();
+        app->eventLoop(<#initializer#>);
     }
 
     return static_cast<int>(app->getErrorCode());

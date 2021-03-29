@@ -12,11 +12,13 @@
 #include <soci/soci.h>
 #include <sqlite3/soci-sqlite3.h>
 #include "Color.h"
-#include "ScreenMetrics.h"
 #include "Signals.h"
+#include "Types.h"
 
 namespace rose {
     using namespace std;
+
+    struct SettingsUpdateProtocol : public Protocol<std::string> {};
 
     /**
      * @class Settings
@@ -24,7 +26,6 @@ namespace rose {
      */
     class Settings {
     protected:
-        SignalSerialNumber mSignalSerialNumber{};       ///< The serial number to identify this object.
         std::filesystem::path mDbPath;                  ///< The file path to the settings database
 
         static constexpr std::string_view string_table = "settings_string";         ///< The string table
@@ -40,32 +41,22 @@ namespace rose {
          */
         void transmitDataUpdate(const std::string& dataName);
 
+        Settings();
+
     public:
-        Settings() = delete;
 
-        /**
-         * @brief Create or open a settings database.
-         * @details The database is created or opened from the directory specified in configPath with the name
-         * "settings".
-         * @param configPath The application configuration path.
-         */
-        explicit Settings(const std::filesystem::path& configPath);
-
-        /**
-         * @brief Create or open a settings database.
-         * @details The database is created or opened from the directory specified in configPath with the name
-         * contained in name.
-         * @param configPath The application configuration path.
-         * @param name The database file name.
-         */
-        Settings(const std::filesystem::path& configPath, const std::string &name);
+        static Settings& getSettings() {
+            static Settings instance{};
+            return instance;
+        }
 
         /**
          * @brief Initialize the database, creating the required tables if they have not been created.
          */
         void initializeDatabase();
 
-        Signal<std::string> dataChangeTx{};
+        /// The Signal to notify of settings updates.
+        SettingsUpdateProtocol::signal_type dataChangeTx{};
 
         /**
          * @brief Get a value from settings the database.
@@ -94,6 +85,20 @@ namespace rose {
                 }
                 return nullopt;
             } else if constexpr (is_base_of_v<std::array<int,2>, T>) {
+                soci::row r;
+                sql << "SELECT a,b FROM " << int_pair_table << " WHERE name = \"" << name << '"', soci::into(r);
+                if (sql.got_data() && r.get_indicator(0) == soci::i_ok && r.get_indicator(1) == soci::i_ok) {
+                    return T{r.get<int>(0), r.get<int>(1)};
+                }
+                return nullopt;
+            } else if constexpr (is_base_of_v<Size, T>) {
+                soci::row r;
+                sql << "SELECT a,b FROM " << int_pair_table << " WHERE name = \"" << name << '"', soci::into(r);
+                if (sql.got_data() && r.get_indicator(0) == soci::i_ok && r.get_indicator(1) == soci::i_ok) {
+                    return T{r.get<int>(0), r.get<int>(1)};
+                }
+                return nullopt;
+            } else if constexpr (is_base_of_v<Position, T>) {
                 soci::row r;
                 sql << "SELECT a,b FROM " << int_pair_table << " WHERE name = \"" << name << '"', soci::into(r);
                 if (sql.got_data() && r.get_indicator(0) == soci::i_ok && r.get_indicator(1) == soci::i_ok) {
@@ -163,7 +168,14 @@ namespace rose {
             } else if constexpr (is_floating_point_v<T>) {
                 sql << "INSERT OR REPLACE INTO " << real_table << " (name,value) VALUES (\"" << name << "\"," << value << ')';
             } else if constexpr (is_base_of_v<std::array<int,2>,T>) {
-                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\"," << value.at(0) << ',' << value.at(1) << ')';
+                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
+                    << value.at(0) << ',' << value.at(1) << ')';
+            } else if constexpr (is_base_of_v<Size,T>) {
+                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
+                    << value.w << ',' << value.h << ')';
+            } else if constexpr (is_base_of_v<Position,T>) {
+                sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
+                    << value.x << ',' << value.y << ')';
             } else if constexpr (is_base_of_v<std::array<double,2>,T>) {
                 sql << "INSERT OR REPLACE INTO " << real_pair_table << " (name,a,b) VALUES (\"" << name << "\"," << value.at(0) << ',' << value.at(1) << ')';
             } else if constexpr (is_same_v<T,string> || is_same_v<T,const string> ||

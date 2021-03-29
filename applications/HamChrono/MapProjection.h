@@ -15,7 +15,7 @@
 #include "Math.h"
 #include "Rose.h"
 #include "Ephemeris.h"
-#include "Plan13.h"
+#include "applications/Chrono/Plan13.h"
 #include "SettingsNames.h"
 
 namespace rose {

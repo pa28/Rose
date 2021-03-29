@@ -1,9 +1,12 @@
-//
-// Created by richard on 2020-10-22.
-//
+/**
+ * @file Theme.cpp
+ * @author Richard Buckley <richard.buckley@ieee.org>
+ * @version 1.0
+ * @date 2021-03-23
+ */
 
 #include "Theme.h"
 
-rose::Theme::Theme() {
+namespace rose {
 
 }

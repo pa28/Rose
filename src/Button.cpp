@@ -1,249 +1,169 @@
-//
-// Created by richard on 2020-10-27.
-//
+/**
+ * @file Button.cpp
+ * @author Richard Buckley <richard.buckley@ieee.org>
+ * @version 1.0
+ * @date 2021-03-22
+ */
 
-#include "Border.h"
+#include "Application.h"
 #include "Button.h"
-#include "Manipulators.h"
+#include "Settings.h"
+#include "Theme.h"
 
 namespace rose {
 
-    ButtonFrame::ButtonFrame(Padding padding) : Frame(padding) {
-        rxPushed = std::make_shared<Slot<std::pair<bool, SignalToken>>>();
-        rxPushed->setCallback([&](uint32_t sn, std::pair<bool, SignalToken> pushed) {
-            if (txPushed && sn != mSignalSerialNumber && mButtonType == NormalButton) {
-                txPushed.transmit(sn, pushed);
-            }
-        });
-
-        rxState = std::make_shared<Slot<std::pair<bool, SignalToken>>>();
-        rxState->setCallback([&](uint32_t sn, std::pair<bool, SignalToken> state) {
-            if (sn != mSignalSerialNumber && mInvert != state.first) {
-                setInvert(state.first);
-                updateStateSetting(state.first ? ButtonSetState::ButtonOn : ButtonSetState::ButtonOff);
-                txState.transmit(sn, state);
-            }
-        });
+    ButtonFrame::ButtonFrame(ButtonType buttonType) noexcept : Frame() {
+        if (buttonType != ButtonType::Label) {
+            mButtonSemantics = std::make_unique<ButtonSemantics>(*this);
+            mButtonSemantics->setButtonType(buttonType);
+        }
+        mPadding = Padding{Theme::getTheme().ButtonPadding};
     }
 
-    void ButtonFrame::initializeComposite() {
-        Frame::initializeComposite();
-        mAcceptsFocus = true;
-        auto sRose = rose();
 
-        if (sRose->hasSettings()) {
-            mSettingsUpdateRx = std::make_shared<Slot<std::string>>();
-            mSettingsUpdateRx->setCallback([&](uint32_t, const std::string &name) {
-                if (!name.empty()) {
-                    if (name == mStateId.value())
-                        setInvert(rose()->settings()->getValue(mStateId.value(), 0));
+    TextButton::TextButton(ButtonType buttonType) noexcept : ButtonFrame(buttonType), Text() {
+        mPointSize = Theme::getTheme().ButtonPointSize;
+        mFontName = Theme::getTheme().BoldFont;
+
+        mLayoutManager = std::make_unique<TextButtonLayoutManager>(*this);
+
+        if (mButtonSemantics) {
+            mButtonSemantics->setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState) {
+                buttonDisplayStateChange(buttonDisplayState);
+                getApplication().redrawBackground();
+            });
+
+            mButtonSemantics->setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange) {
+                switch (buttonStateChange) {
+                    case ButtonStateChange::Pushed:
+                        std::cout << "Button state: Pushed\n";
+                        break;
+                    case ButtonStateChange::Off:
+                        std::cout << "Button state: Off\n";
+                        break;
+                    case ButtonStateChange::On:
+                        std::cout << "Button state: On\n";
+                        break;
                 }
             });
         }
-
-        if (!mStateId.empty() && sRose->hasSettings()) {
-            sRose->settings()->dataChangeTx.connect(mSettingsUpdateRx);
-        }
-
-        mClassName = "ButtonFrame";
     }
 
-    bool ButtonFrame::mouseButtonEvent(const Position &mousePos, int button, bool down, int modifiers) {
-        if (button == SDL_BUTTON_LEFT) {
-            if (down) {
-                mSelectProgress = true;
-
-                switch (mButtonType) {
-                    case NormalButton:
-                    case MenuCascade:
-                    case CancelButton:
-                    case OkButton:
-                        setInvert(down);
-                        break;
-                    case ToggleButton:
-                        setInvert(!mInvert);
-                        break;
-                    case RadioButton:
-                    case TabButton:
-                        break;
-                }
-                return true;
-            } else {
-                if (mSelectProgress) {
-                    switch (mButtonType) {
-                        case NormalButton:
-                        case MenuCascade:
-                        case CancelButton:
-                        case OkButton:
-                            txPushed.transmit(mSignalSerialNumber.serialNumber(), std::pair<bool,SignalToken>{true,mSignalToken});
-                            setInvert(false);
-                            break;
-                        case ToggleButton:
-                            mButtonSelectState = mInvert ? ButtonSetState::ButtonOn : ButtonSetState::ButtonOff;
-                            txState.transmit(mSignalSerialNumber.serialNumber(),
-                                             std::pair<bool, SignalToken>{mButtonSelectState, mSignalToken});
-                            updateStateSetting(mButtonSelectState);
-                            break;
-                        case RadioButton:
-                            break;
-                        case TabButton:
-                            if (mButtonSelectState == ButtonOff) {
-                                txPushed.transmit(mSignalSerialNumber.serialNumber(), std::pair<bool,SignalToken>{true,mSignalToken});
-                                mButtonSelectState = ButtonSetState::ButtonOn;
-                                txState.transmit(mSignalSerialNumber.serialNumber(), std::pair<bool,SignalToken>{mButtonSelectState,mSignalToken});
-                                setInvert(!mButtonSelectState);
-                            }
-                            break;
-                    }
-                }
-                mSelectProgress = false;
-                return true;
-            }
-        }
-        return false;
+    TextButton::TextButton(const std::string &text, ButtonType buttonType) : TextButton(buttonType) {
+        mText = text;
     }
 
-    bool ButtonFrame::clickTransactionCancel(const Position &mousePos, int button, bool down, int modifiers) {
-        if (mSelectProgress) {
-            switch (mButtonType) {
-                case NormalButton:
-                case MenuCascade:
-                case CancelButton:
-                case OkButton:
-                    setInvert(false);
-                    break;
-                case ToggleButton:
-                    setInvert(!mInvert);
-                    break;
-                case RadioButton:
-                case TabButton:
-                    break;
-            }
-            mSelectProgress = false;
-        }
-        return true;
-    }
-
-    void ButtonFrame::updateStateSetting(ButtonSetState state) {
-        if ((mButtonType == ButtonType::ToggleButton || mButtonType == ButtonType::RadioButton) &&
-            !mStateId.empty() && rose()->hasSettings()) {
-            rose()->settings()->setValue(mStateId.value(), state == ButtonSetState::ButtonOn);
-        }
-    }
-
-    Button::Button(const string &labelString, ButtonType type, int fontSize) : ButtonFrame(0) {
-        mLabelText = labelString;
-        mButtonType = type;
-        mLabelFontSize = fontSize;
-    }
-
-    Button::Button(const Id &id, ButtonType type, int fontSize) : ButtonFrame(0) {
+    TextButton::TextButton(const Id &id, ButtonType buttonType) : TextButton(buttonType) {
         mId = id;
-        mButtonType = type;
-        mLabelFontSize = fontSize;
+        Settings &settings{Settings::getSettings()};
+        mText = settings.getValue(id.idString, std::string{id.idString});
     }
 
-    Button::Button(RoseImageId imageId, ButtonType type) : ButtonFrame(0) {
-        mImageId = imageId;
-        mButtonType = type;
+    Rectangle TextButton::layout(gm::Context &context, const Rectangle &screenRect) {
+        return Frame::layout(context, screenRect);
     }
 
-    void Button::initializeComposite() {
-        ButtonFrame::initializeComposite();
-        setPadding(rose()->theme().mButtonPadding);
+    void TextButton::draw(gm::Context &context, const Position &containerPosition) {
+        Frame::draw(context, containerPosition);
 
-        if (!mId.empty() && rose()->hasSettings()) {
-            mLabelText = rose()->settings()->getValue(mId.value(), mId.value());
+        if (!mTexture) {
+            createTextureBlended(context);
         }
 
-        auto label = getWidget<ButtonFrame>() << wdg<Label>(mLabelText, RoseImageId{mImageId});
+        auto drawPosition = drawPadding(containerPosition) + mPos + mFramePadding.position() + Position{mFrameWidth};
 
-        auto theme = rose()->theme();
-        if (mLabelFontSize == 0)
-            mLabelFontSize = theme.mFontPointSize;
-
-        label->setFontSize(mLabelFontSize);
-
-        if (unset(mBorder))
-            mBorder = BorderStyle::Bevel;
-
-        mClassName = "Button";
-    }
-
-    void Button::setSize(Size size) {
-        if (auto label = getSingleChild<Label>(); label) {
-            mSize = size;
-            auto labelSize = size;
-            auto borderSize = mLayoutHints.totalBorderSize();
-            labelSize.width() -= borderSize.width();
-            labelSize.height() -= borderSize.height();
-            label->setSize(labelSize);
+        if (mTexture) {
+            Rectangle dst{drawPosition, mTextSize};
+            context.renderCopy(mTexture, dst);
         }
     }
 
-    RadioBehavior::RadioBehavior() {
-        buttonStateRx = std::make_shared<Slot<ButtonFrame::SignalType>>();
-        buttonStateRx->setCallback([&](uint32_t, ButtonFrame::SignalType signal) {
-            auto selected = signal.second - SignalTokenValues::FirstUserSignalToken;
+    Rectangle TextButton::layoutContent(gm::Context &context, const Rectangle &screenRect) {
+        createTextureBlended(context);
+        return Rectangle{Position::Zero, mTextSize};
+    }
 
-            std::for_each(mButtons.begin(), mButtons.end(), [&selected](ButtonListType &button) {
-                button.second->setSelectState(ButtonSetState::ButtonOn);
+    TextButtonLayoutManager::TextButtonLayoutManager(TextButton &textButton) : LayoutManager(), mTextButton(textButton) {
+        mMaxContent = 0;
+    }
+
+    Rectangle
+    TextButtonLayoutManager::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr,
+                                           LayoutManager::Itr) {
+        return mTextButton.layoutContent(context, screenRect);
+    }
+
+    ImageButton::ImageButton(ButtonType buttonType) noexcept : ButtonFrame(buttonType), Image() {
+        mRequestedSize = Theme::getTheme().ImageLabelSize;
+
+        mLayoutManager = std::make_unique<ImageButtonLayoutManager>(*this);
+
+        if (mButtonSemantics) {
+            mButtonSemantics->setButtonDisplayCallback([&](ButtonDisplayState buttonDisplayState) {
+                buttonDisplayStateChange(buttonDisplayState);
+                getApplication().redrawBackground();
             });
 
-            if (signal.first) {
-                if (selected != mSelected || mState == State::None) {
-                    mButtons.at(selected).second->setSelectState(ButtonSetState::ButtonOff);
-                    mState = State::Set;
-                    mSelected = selected;
-                    stateTx.transmit(mSignalSerialNumber.serialNumber(), std::make_tuple(mState, mSelected,
-                                                                                         mButtons.at(selected).first));
+            mButtonSemantics->setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange) {
+                switch (buttonStateChange) {
+                    case ButtonStateChange::Pushed:
+                        std::cout << "Button state: Pushed\n";
+                        break;
+                    case ButtonStateChange::Off:
+                        std::cout << "Button state: Off\n";
+                        break;
+                    case ButtonStateChange::On:
+                        std::cout << "Button state: On\n";
+                        break;
                 }
-            } else {
-                clearState();
-                mState = State::None;
-                mSelected = 0;
-                stateTx.transmit(mSignalSerialNumber.serialNumber(), std::make_tuple(mState, mSelected,
-                                                                                     mButtons.front().first));
-            }
-        });
-    }
-
-    void RadioBehavior::emplace_back(std::shared_ptr<ButtonFrame> &button) {
-        ButtonListType buttonListItem = std::make_pair(button->getSignalToken(), button);
-        button->setSignalToken(SignalTokenValues::FirstUserSignalToken + mButtons.size());
-        button->mButtonType = ButtonType::ToggleButton;
-        button->txState.connect(buttonStateRx);
-        mButtons.emplace_back(buttonListItem);
-    }
-
-    void RadioBehavior::clear() {
-        mButtons.clear();
-        clearState();
-    }
-
-    void RadioBehavior::clearState() {
-        mState = mNoneIsValid ? State::None : State::SetClear;
-        mSelected = 0;
-        stateTx.transmit(mSignalSerialNumber.serialNumber(),
-                         std::make_tuple(mState, mSelected,
-                                         mButtons.empty() ? SignalTokenValues::RadioUndetermined : mButtons.front().first));
-        for (auto &button : mButtons) {
-            button.second->setSelectState(ButtonOn);
+            });
         }
     }
 
-    void RadioBehavior::setState(RadioBehavior::State state, int selected) {
-        if (selected >= 0 && selected < mButtons.size()) {
-            mState = state;
-            mSelected = selected;
-            stateTx.transmit(mSignalSerialNumber.serialNumber(),
-                             std::make_tuple(mState, mSelected, mButtons.front().first));
-            for (auto &button : mButtons) {
-                button.second->setSelectState(ButtonOn);
-            }
-            mButtons.at(selected).second->as<ButtonFrame>()->setSelectState(ButtonOff);
-        } else {
-            clearState();
+    ImageButton::ImageButton(ImageId imageId, ButtonType buttonType) noexcept: ImageButton(buttonType) {
+        mImageId = imageId;
+    }
+
+    Rectangle ImageButton::layout(gm::Context &context, const Rectangle &screenRect) {
+        return Frame::layout(context, screenRect);
+    }
+
+    void ImageButton::draw(gm::Context &context, const Position &containerPosition) {
+        Frame::draw(context, containerPosition);
+
+        auto drawPosition = drawPadding(containerPosition) + mPos + mFramePadding.position() + Position{mFrameWidth};
+
+        if (mImageId != ImageId::NoImage) {
+            ImageStore& imageStore{ImageStore::getStore()};
+            Rectangle dst{drawPosition, imageStore.size(mImageId)};
+            imageStore.renderCopy(context, mImageId, dst);
         }
+    }
+
+    Rectangle ImageButton::layoutContent(gm::Context &context, const Rectangle &screenRect) {
+        mSize = ImageStore::getStore().size(mImageId);
+        if (mPreferredSize)
+            mSize = mPreferredSize;
+        mPos = mPreferredPos;
+
+        if (mSize < mRequestedSize) {
+            auto space = mRequestedSize - mSize;
+            mPadding.l = space.w / 2;
+            mPadding.r = space.w - mPadding.l;
+            mPadding.t = space.h / 2;
+            mPadding.b = space.h - mPadding.t;
+        }
+
+        return Rectangle{mPos, mSize};
+    }
+
+    ImageButtonLayoutManager::ImageButtonLayoutManager(ImageButton &imageButton) : mImageButton(imageButton) {
+        mMaxContent = 0;
+    }
+
+    Rectangle
+    ImageButtonLayoutManager::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                            LayoutManager::Itr last) {
+        return mImageButton.layoutContent(context, screenRect);
     }
 }

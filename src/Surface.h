@@ -7,16 +7,25 @@
 
 #pragma once
 
+#include <exception>
+#include <filesystem>
 #include <memory>
 #include <SDL.h>
 #include "Color.h"
-#include "ScreenMetrics.h"
+#include "Texture.h"
+#include "Types.h"
 
-namespace rose::sdl {
+namespace rose::gm {
 
-    class Renderer;
+    class Context;
 
-    class Texture;
+    class SurfaceRuntimeError : public std::runtime_error {
+    public:
+        ~SurfaceRuntimeError() override = default;
+
+        explicit SurfaceRuntimeError(const std::string &what) : std::runtime_error(what) {}
+        explicit SurfaceRuntimeError(const char *what) : std::runtime_error(what) {}
+    };
 
     /**
 * @brief A functor to destroy an SDL_Surface
@@ -54,7 +63,7 @@ namespace rose::sdl {
          * @brief Create a surface from a file.
          * @param path The path to the file to load.
          */
-        explicit Surface(std::filesystem::path &path);
+        explicit Surface(const std::filesystem::path &path);
 
         /**
          * @brief Constructor. Create a surface using SDL_CreateRGBSurfaceWithFormat()
@@ -66,7 +75,7 @@ namespace rose::sdl {
         Surface(int width, int height, int depth = 32, SDL_PixelFormatEnum format = SDL_PIXELFORMAT_RGBA8888);
 
         explicit Surface(Size size, int depth = 32, SDL_PixelFormatEnum format = SDL_PIXELFORMAT_RGBA8888)
-                : Surface(size.width(), size.height(), depth, format) {}
+                : Surface(size.w, size.h, depth, format) {}
 
         Surface(int width, int height, int depth, uint32_t rmask, uint32_t gmask, uint32_t bmask, uint32_t amask);
 
@@ -126,14 +135,14 @@ namespace rose::sdl {
          * @param texture The Texture object.
          * @return True if the SDL_Texture was created.
          */
-        bool textureFromSurface(Renderer &renderer, Texture &texture);
+        bool textureFromSurface(Context &context, Texture &texture);
 
         /**
          * @brief Create an SDL_Texture from the surface.
-         * @param renderer The Renderer used.
+         * @param context The Renderer used.
          * @return The generatoed Texture.
          */
-        Texture toTexture(Renderer &renderer);
+        Texture toTexture(Context &context);
 
         /**
          * @brief Set the Surfacle SDL_BlendMode.

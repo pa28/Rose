@@ -25,11 +25,11 @@ struct gen_seq<0, Is...> : seq<Is...> {
 };
 
 /**
- * @namespace math
+ * @namespace cx_math
  * @brief Math constructs.
  * @details This namespace provides constexpr trig functions.
  */
-namespace math {
+namespace cx_math {
     template<typename T> constexpr T pi = 3.14159265358979323846264338327L;
     template<typename T> constexpr T two_pi = 6.28318530717958647692528676656L;
     template<typename T> constexpr T half_pi = pi<T> * 0.5;
@@ -117,9 +117,9 @@ namespace math {
 
             constexpr static inline T range_reduce(T x) noexcept {
                 T _x = x;
-                _x += math::pi<T>;
-                _x -= static_cast<std::size_t>(_x / math::two_pi<T>) * math::two_pi<T>;
-                _x -= math::pi<T>;
+                _x += cx_math::pi<T>;
+                _x -= static_cast<std::size_t>(_x / cx_math::two_pi<T>) * cx_math::two_pi<T>;
+                _x -= cx_math::pi<T>;
                 return _x;
             }
 
@@ -140,7 +140,7 @@ namespace math {
 
     template<class T, std::size_t N = detail::_sin<T>::default_N()>
     constexpr inline std::decay_t<T> cos(T x) noexcept {
-        return _sincos<detail::_sin<T>, N>(math::half_pi<T> - x);
+        return _sincos<detail::_sin<T>, N>(cx_math::half_pi<T> - x);
     }
 
 }
@@ -148,9 +148,9 @@ namespace math {
 #if 0
 int main(int argc,char** argv){
     double phs =0;
-    double stp = math::two_pi_v/100.0;
+    double stp = cx_math::two_pi_v/100.0;
     for(int i = 0;i<100;++i){
-        std::cout<<math::sin(phs)<<std::endl;
+        std::cout<<cx_math::sin(phs)<<std::endl;
         phs+=stp;
     }
     return 0;
