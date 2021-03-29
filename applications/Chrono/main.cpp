@@ -254,7 +254,12 @@ struct Chrono : public Application {
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
         registerKeyboardShortcut(SDLK_w, widget);
 
-        SatelliteModel::getModel();
+        Observer observer{45., -75., 0.};
+        DateTime now{true};
+        SatelliteObservation obs{observer};
+        obs.predict(now);
+
+        exit(0);
     }
 };
 

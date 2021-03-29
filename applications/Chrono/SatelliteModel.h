@@ -9,6 +9,7 @@
 
 #include "Utilities.h"
 #include "WebCache.h"
+#include "Plan13.h"
 #include <memory>
 
 namespace rose {
@@ -60,6 +61,8 @@ namespace rose {
         std::string mEphemerisSet{};
 
     public:
+        using iterator = std::map<std::string_view, std::array<std::string_view,3>>::iterator;
+
         Ephemeris() = default;
         ~Ephemeris() = default;
 
@@ -98,6 +101,34 @@ namespace rose {
         SatelliteModel& operator=(const SatelliteModel&) = delete;
 
         SatelliteModel& operator=(SatelliteModel&&) = delete;
+
+        auto begin() {
+            return mEphemeris.begin();
+        }
+
+        auto end() {
+            return mEphemeris.end();
+        }
+
+        [[nodiscard]] auto begin() const {
+            return mEphemeris.cbegin();
+        }
+
+        [[nodiscard]] auto end() const {
+            return mEphemeris.cend();
+        }
+    };
+
+    class SatelliteObservation {
+    protected:
+        Observer mObserver{};
+
+        std::vector<Satellite> mConstellation{};
+
+    public:
+        explicit SatelliteObservation(const Observer &observer);
+
+        void predict(const DateTime &dateTime);
     };
 }
 

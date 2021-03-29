@@ -61,4 +61,23 @@ namespace rose {
 
         mEphemerisCache->fetchAll();
     }
+
+    SatelliteObservation::SatelliteObservation(const Observer& observer) {
+        mObserver = observer;
+        const SatelliteModel& model{SatelliteModel::getModel()};
+
+        for (auto &ephmeris : model) {
+            mConstellation.emplace_back(ephmeris.second);
+        }
+    }
+
+    void SatelliteObservation::predict(const DateTime &dateTime) {
+        auto start = std::chrono::high_resolution_clock::now();
+        std::for_each(mConstellation.begin(), mConstellation.end(), [&dateTime](Satellite& satellite){
+            satellite.predict(dateTime);
+        });
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        std::cout << __PRETTY_FUNCTION__ << ' ' << duration.count() << '\n';
+    }
 }
