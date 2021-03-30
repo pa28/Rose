@@ -1,3 +1,7 @@
+---
+show_downloads: ["yes"]
+---
+
 ### Rose - *Rendering On Small Environments*
 
 Rose is intended, primarily as a Graphic User Interface library for
