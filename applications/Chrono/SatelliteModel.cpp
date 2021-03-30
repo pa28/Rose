@@ -105,6 +105,10 @@ namespace rose {
                            return pass;
                        });
 
+        passData.erase(std::remove_if(passData.begin(), passData.end(), [&](SatellitePassData &pass) -> bool {
+            return pass.satellite.getName() == "Moon";
+        }), passData.end());
+
         bool search = std::any_of(passData.begin(), passData.end(),
                     [&](SatellitePassData &pass) -> bool { return pass.search(now); });
         while (search) {
