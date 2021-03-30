@@ -1,37 +1,18 @@
-## Welcome to GitHub Pages
+### Rose - *Rendering On Small Environments*
 
-You can use the [editor on GitHub](https://github.com/pa28/Rose/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+Rose is intended, primarily as a Graphic User Interface library for
+Raspberry Pi computers with a small touch screen to support application
+that can run directly on the screen frame buffer `/dev/fb0` in an
+*Application* or *Kiosk* mode. Rose uses [SDL2](https://www.libsdl.org/)
+as the underlying graphics engine which makes it possible to run under 
+desktop graphics environments (X11) and multiple OSs and distributions.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/pa28/Rose/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+The project in the reposition builds under [Cmake](https://cmake.org/)
+on Debian Linux derived distributions and produces the following 
+artifacts:
+* The Rose library.
+* Sample programs and applications implements on Rose.
+* Debian packages with:
+    * The library, sample programs and application with supporting
+    resources;
+    * A package for developers.
