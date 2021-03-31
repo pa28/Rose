@@ -103,3 +103,6 @@ https://vicrucann.github.io/tutorials/quick-cmake-doxygen/
 
 #### Merging RGB and A from two textures
 https://forums.libsdl.org/viewtopic.php?p=48648
+
+#### Discrete Furrier Transform for GPU
+https://github.com/jdupuy/dj_fft 
