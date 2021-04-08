@@ -10,9 +10,7 @@
 
 #include "Configuration.h"
 
-#if GRAPHICS_MODEL_SDL2
 #include <SDL.h>
-#endif
 
 #include <memory>
 #include <functional>
@@ -28,7 +26,6 @@ namespace rose {
 }
 
 namespace rose::gm {
-#if GRAPHICS_MODEL_SDL2
 
     /**
      * @brief A functor to destroy an SDL_Window in a std::unique_ptr (rose::sdl::Window).
@@ -45,8 +42,6 @@ namespace rose::gm {
     };
 
     using SdlWindow = std::unique_ptr<SDL_Window, SdlWindowDestroy>;   //!< An SDL_Window unique pointer
-
-#endif
 
     /**
      * @brief Rose object error codes.
@@ -82,7 +77,6 @@ namespace rose::gm {
         friend class RenderTargetGuard;
 
     protected:
-#if GRAPHICS_MODEL_SDL2
         /**
          * @brief A functor to destroy an SDL_Renderer
          */
@@ -101,7 +95,6 @@ namespace rose::gm {
         RendererPtr mRenderer{};    ///< The Renderer.
 
         SDL_Texture *mCurrentRenderTarget{nullptr};
-#endif
 
     public:
 
@@ -455,9 +448,7 @@ namespace rose::gm {
 
     class GraphicsModel {
     protected:
-#if GRAPHICS_MODEL_SDL2
         SdlWindow mSdlWindow{};         ///< The SDL_Window which provides the application "Screen"
-#endif
 
         Context mContext{};             ///< The graphics context used by the application graphics model.
 
