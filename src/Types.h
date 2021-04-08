@@ -30,13 +30,12 @@ namespace rose {
     /**
      *  \brief Flags used when creating a rendering context
      */
-    enum RendererFlags : uint32_t
-    {
+    enum RendererFlags : uint32_t {
         RENDERER_SOFTWARE = static_cast<uint32_t>(SDL_RENDERER_SOFTWARE),         /**< The renderer is a software fallback */
         RENDERER_ACCELERATED = static_cast<uint32_t>(SDL_RENDERER_ACCELERATED),   /**< The renderer uses hardware acceleration */
         RENDERER_PRESENTVSYNC = static_cast<uint32_t>(SDL_RENDERER_PRESENTVSYNC), /**< Present is synchronized with the refresh rate */
         RENDERER_TARGETTEXTURE = static_cast<uint32_t>(SDL_RENDERER_SOFTWARE)     /**< The renderer supports rendering to texture */
-    } SDL_RendererFlags;
+    };
 
     enum class Orientation {
         Horizontal,
