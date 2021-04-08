@@ -19,7 +19,6 @@
 
 namespace rose::gm {
 
-#if GRAPHICS_MODEL_SDL2
     /**
      * @class Fps
      * @brief Throttle the application to limit the number of frames per second the scene is refreshed.
@@ -57,7 +56,6 @@ namespace rose::gm {
             return (m_nextTime <= now) ? 0 : m_nextTime - now;
         }
     };
-#endif //GRAPHICS_MODEL_SDL2
 
     int Context::renderCopy(const Texture &texture, Rectangle dst) {
         SDL_Rect dstRect{dst.x, dst.y, dst.w, dst.h};
@@ -124,9 +122,6 @@ namespace rose::gm {
 
     bool GraphicsModel::initialize(const std::string &title, Size initialSize, Position initialPosition,
                                    uint32_t extraFlags) {
-#if GRAPHICS_MODEL_SDL2
-        std::cout << __PRETTY_FUNCTION__ << '\n';
-
         Settings &settings{Settings::getSettings()};
         SDL_RendererInfo info;
 
@@ -190,7 +185,6 @@ namespace rose::gm {
             ErrorCode = RoseErrorCode::SDL_WINDOW_CREATE;
             return false;
         }
-#endif
         return true;
     }
 
