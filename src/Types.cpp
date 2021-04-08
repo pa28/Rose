@@ -10,19 +10,6 @@
 
 namespace rose {
 
-    template<typename I = int>
-    constexpr I WINDOWPOS_UNDEFINED_DISPLAY(uint display=0) {
-        return static_cast<I>(SDL_WINDOWPOS_UNDEFINED_MASK | display);
-    }
-
-    template<typename I = int>
-    constexpr I WINDOWPOS_CENTERED_DISPLAY(uint display=0) {
-        return static_cast<I>(SDL_WINDOWPOS_CENTERED_MASK | display);
-    }
-
-    static constexpr int WINDOWPOS_UNDEFINED = WINDOWPOS_UNDEFINED_DISPLAY();
-    static constexpr int WINDOWPOS_CENTERED = WINDOWPOS_CENTERED_DISPLAY();
-
     Position Position::Zero{};
     Position Position::Undefined{WINDOWPOS_UNDEFINED, WINDOWPOS_UNDEFINED};
     Size Size::Zero{};

@@ -12,6 +12,7 @@
 #include "Texture.h"
 #include "Utilities.h"
 #include "Settings.h"
+#include "Types.h"
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -173,8 +174,9 @@ namespace rose::gm {
                 }
             }
 
-            mContext = Context{mSdlWindow, -1, SDL_RENDERER_ACCELERATED
-                                               | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC};
+            mContext = Context{mSdlWindow, -1, RendererFlags::RENDERER_ACCELERATED
+                                               | RendererFlags::RENDERER_TARGETTEXTURE
+                                               | RendererFlags::RENDERER_PRESENTVSYNC};
 
             if (mContext) {
                 mContext.setDrawBlendMode(SDL_BLENDMODE_BLEND);

@@ -14,6 +14,30 @@
 
 namespace rose {
 
+    template<typename I = int>
+    constexpr I WINDOWPOS_UNDEFINED_DISPLAY(uint display=0) {
+        return static_cast<I>(SDL_WINDOWPOS_UNDEFINED_MASK | display);
+    }
+
+    template<typename I = int>
+    constexpr I WINDOWPOS_CENTERED_DISPLAY(uint display=0) {
+        return static_cast<I>(SDL_WINDOWPOS_CENTERED_MASK | display);
+    }
+
+    static constexpr int WINDOWPOS_UNDEFINED = WINDOWPOS_UNDEFINED_DISPLAY();
+    static constexpr int WINDOWPOS_CENTERED = WINDOWPOS_CENTERED_DISPLAY();
+
+    /**
+     *  \brief Flags used when creating a rendering context
+     */
+    enum RendererFlags : unsigned int
+    {
+        RENDERER_SOFTWARE = static_cast<uint32_t>(SDL_RENDERER_SOFTWARE),         /**< The renderer is a software fallback */
+        RENDERER_ACCELERATED = static_cast<uint32_t>(SDL_RENDERER_ACCELERATED),   /**< The renderer uses hardware acceleration */
+        RENDERER_PRESENTVSYNC = static_cast<uint32_t>(SDL_RENDERER_PRESENTVSYNC), /**< Present is synchronized with the refresh rate */
+        RENDERER_TARGETTEXTURE = static_cast<uint32_t>(SDL_RENDERER_SOFTWARE)     /**< The renderer supports rendering to texture */
+    } SDL_RendererFlags;
+
     enum class Orientation {
         Horizontal,
         Vertical,
