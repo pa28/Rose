@@ -14,10 +14,20 @@ namespace rose::gm {
 
     Texture::Texture(Context &context, SDL_PixelFormatEnum format, SDL_TextureAccess access, int width, int height) {
         reset(SDL_CreateTexture(context.get(), format, access, width, height));
+        if (!operator bool()) {
+            throw TextureRuntimeError(
+                    StringCompositor("SDL_CreateTexture: (", width, 'x', height, ") -- ",
+                                     SDL_GetError()));
+        }
     }
 
     Texture::Texture(Context &context, Size size) {
         reset(SDL_CreateTexture(context.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.w, size.h));
+        if (!operator bool()) {
+            throw TextureRuntimeError(
+                    StringCompositor("SDL_CreateTexture: (", size.w, 'x', size.h, ") -- ",
+                                     SDL_GetError()));
+        }
     }
 
     int Texture::setAlphaMod(float alpha) {

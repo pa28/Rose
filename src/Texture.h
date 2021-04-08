@@ -14,6 +14,14 @@
 
 namespace rose::gm {
 
+    class TextureRuntimeError : public std::runtime_error {
+    public:
+        ~TextureRuntimeError() override = default;
+
+        explicit TextureRuntimeError(const std::string &what) : std::runtime_error(what) {}
+        explicit TextureRuntimeError(const char *what) : std::runtime_error(what) {}
+    };
+
     /**
      * @brief A functor to destroy an SDL_Texture in a std::unique_ptr (rose::sdl::Texture)
      */
@@ -24,7 +32,8 @@ namespace rose::gm {
          * @param sdlTexture A pointer to the SDL_Texture to destroy.
          */
         void operator()(SDL_Texture *sdlTexture) {
-            SDL_DestroyTexture(sdlTexture);
+            if (sdlTexture != nullptr)
+                SDL_DestroyTexture(sdlTexture);
         }
     };
 

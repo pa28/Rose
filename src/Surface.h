@@ -28,8 +28,8 @@ namespace rose::gm {
     };
 
     /**
-* @brief A functor to destroy an SDL_Surface
-*/
+    * @brief A functor to destroy an SDL_Surface
+    */
     class SurfaceDestroy {
     public:
         /**
@@ -37,7 +37,8 @@ namespace rose::gm {
          * @param sdlSurface A pointer to the SDL_Surface to free.
          */
         void operator()(SDL_Surface *sdlSurface) {
-            SDL_FreeSurface(sdlSurface);
+            if (sdlSurface != nullptr)
+                SDL_FreeSurface(sdlSurface);
         }
     };
 
