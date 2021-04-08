@@ -195,8 +195,8 @@ namespace rose::gm {
     }
 
     /**
- * @brief The Rose version of the SDL event loop.
- */
+     * @brief The Rose version of the SDL event loop.
+     */
     void GraphicsModel::eventLoop(std::shared_ptr<Screen> &screen) {
         SDL_Event e;
         Fps fps;
