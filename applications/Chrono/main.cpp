@@ -248,11 +248,12 @@ struct Chrono : public Application {
         Environment &environment{Environment::getEnvironment()};
         std::shared_ptr<Widget> widget{};
 
-        auto m = screen() << wdg<Window>()
+        screen() << wdg<Window>()
                           << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                           << wdg<MapProjection>() << endw
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
+
         registerKeyboardShortcut(SDLK_w, widget);
 
         Observer observer{45., -75., 0.};
