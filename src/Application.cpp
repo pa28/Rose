@@ -22,8 +22,19 @@ namespace rose {
         std::cout << __PRETTY_FUNCTION__ << ' ';
         Settings &settings{Settings::getSettings()};
         switch (type) {
-            case EventSemantics::Shown:
+            case EventSemantics::Shown: {
                 std::cout << "Shown" << mGraphicsModel.windowBorders();
+                auto windowFlags = SDL_GetWindowFlags(mGraphicsModel.getSdlWindow().get());
+                if (windowFlags & SDL_WINDOW_FULLSCREEN || windowFlags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                    mAppState = EventSemantics::FullScreen;
+                else if (windowFlags & SDL_WINDOW_MAXIMIZED)
+                    mAppState = EventSemantics::Maximized;
+                else if (windowFlags & SDL_WINDOW_MINIMIZED)
+                    mAppState = EventSemantics::Minimized;
+                else
+                    mAppState = EventSemantics::Restored;
+                settings.setValue(set::SetAppState, static_cast<int>(mAppState));
+            }
                 break;
             case EventSemantics::Hidden:
                 std::cout << "Hidden";
@@ -125,7 +136,7 @@ namespace rose {
             std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
             if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut != mKeyboardShortcuts.end()) {
                 if (auto widget = shortcut->second.lock(); widget)
-                    widget->keyboardShortcutEvent(shortcut->first, keyboardEvent.state == SDL_PRESSED,
+                    return widget->keyboardShortcutEvent(shortcut->first, keyboardEvent.state == SDL_PRESSED,
                                                   keyboardEvent.repeat);
                 else
                     mKeyboardShortcuts.erase(shortcut->first);
@@ -268,6 +279,9 @@ namespace rose {
                 break;
             case EventSemantics::Maximized:
                 extraFlags |= SDL_WINDOW_MAXIMIZED;
+                break;
+            case EventSemantics::FullScreen:
+                extraFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
                 break;
             case EventSemantics::Restored:
             default:

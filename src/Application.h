@@ -21,7 +21,7 @@ namespace rose {
     class EventSemantics {
     public:
         enum WindowEventType : int {
-            Shown, Hidden, Exposed, SizeChanged, Minimized, Maximized, Restored, Enter, Leave, Focus, UnFocus,
+            Shown, Hidden, Exposed, SizeChanged, Minimized, Maximized, FullScreen, Restored, Enter, Leave, Focus, UnFocus,
             Close, Moved, Resized,
         };
 

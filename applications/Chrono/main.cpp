@@ -190,6 +190,7 @@ struct Chrono : public Application {
         static Size Size2{2400, 1440};
         static Size Size3{3200, 1920};
 
+        std::cout << __PRETTY_FUNCTION__ << '\n';
         if (keyboardEvent.keysym.mod & (uint) KMOD_CTRL) {
             auto displayIndex = SDL_GetWindowDisplayIndex(getSdlWindow().get());
             if (keyboardEvent.keysym.sym == SDLK_F5 || keyboardEvent.keysym.sym == SDLK_F6 ||
