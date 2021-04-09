@@ -109,30 +109,36 @@ namespace rose {
                   << ' ' << SDL_GetKeyName(keyboardEvent.keysym.sym) << '\n';
 
         string keyName{SDL_GetKeyName(keyboardEvent.keysym.sym)};
-        if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_CTRL, KeyboardCtlKeyMods))
+        if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_CTRL, KeyboardCtlKeyMods)) {
             switch (keyboardEvent.keysym.sym) {
                 case SDLK_F1:
                     SDL_MinimizeWindow(getSdlWindow().get());
+                    mAppState = EventSemantics::Minimized;
                     return true;
                 case SDLK_F2:
                     SDL_SetWindowFullscreen(getSdlWindow().get(), 0);
                     SDL_RestoreWindow(getSdlWindow().get());
+                    mAppState = EventSemantics::Restored;
                     return true;
                 case SDLK_F3:
-                    if (SDL_GetWindowFlags(getSdlWindow().get()) & (uint)SDL_WINDOW_RESIZABLE) {
+                    if (SDL_GetWindowFlags(getSdlWindow().get()) & (uint) SDL_WINDOW_RESIZABLE) {
                         SDL_SetWindowFullscreen(getSdlWindow().get(), 0);
                         SDL_MaximizeWindow(getSdlWindow().get());
+                        mAppState = EventSemantics::Maximized;
                     } else {
                         SDL_SetWindowFullscreen(getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        mAppState = EventSemantics::FullScreen;
                     }
                     return true;
                 case SDLK_F4:
                     SDL_SetWindowFullscreen(getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    mAppState = EventSemantics::FullScreen;
                     return true;
                 default:
                     break;
             }
-        else if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_ALT, KeyboardAltKeyMods)) {
+            Settings::getSettings().setValue(set::SetAppState, static_cast<int>(mAppState));
+        } else if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_ALT, KeyboardAltKeyMods)) {
             std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
             if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut != mKeyboardShortcuts.end()) {
                 if (auto widget = shortcut->second.lock(); widget)

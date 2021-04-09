@@ -4,7 +4,6 @@
 #include "PointerInteractions.h"
 #include "GraphicsModel.h"
 #include "Application.h"
-#include "Font.h"
 #include "ImageStore.h"
 #include "Layout.h"
 #include "Settings.h"
@@ -30,7 +29,6 @@ public:
 
     ChronoLayout() {
         Settings& settings{Settings::getSettings()};
-        auto l = settings.getValue(LayoutScheme, static_cast<int>(mLayout));
         mLayout = static_cast<Layout>(settings.getValue(LayoutScheme, static_cast<int>(mLayout)));
     }
 
@@ -257,7 +255,6 @@ struct Chrono : public Application {
         registerKeyboardShortcut(SDLK_w, widget);
 
         Observer observer{45., -75., 0.};
-        DateTime now{true};
         SatelliteObservation obs{observer};
         obs.passPrediction(6, "ISS");
     }
