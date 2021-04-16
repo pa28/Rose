@@ -189,13 +189,13 @@ namespace rose {
      * @param y The map y pixel location 0 at the top
      * @param mapSize the width (x) and height (y) of the map in pixels
      * @param location the longitude (x) and latitude (y) of the center of the projection
-     * @param siny pre-computed sine of the latitude
-     * @param cosy pre-computed cosine of the latitude
+     * @param sinY pre-computed sine of the latitude
+     * @param cosY pre-computed cosine of the latitude
      * @return [valid, latitude, longitude ], valid if the pixel is on the Earth,
      * latitude -PI..+PI West to East, longitude +PI/2..-PI/2 North to South
      */
     std::tuple<bool, double, double>
-    xyToAzLatLong(int x, int y, const Size &mapSize, const GeoPosition &location, double siny, double cosy) {
+    xyToAzLatLong(int x, int y, const Size &mapSize, const GeoPosition &location, double sinY, double cosY) {
         bool onAntipode = x > mapSize.w / 2;
         auto w2 = (mapSize.h / 2) * (mapSize.h / 2);
         auto dx = onAntipode ? x - (3 * mapSize.w) / 4 : x - mapSize.w / 4;
@@ -206,7 +206,7 @@ namespace rose {
             auto b = sqrt((double) r2 / (double) w2) * M_PI_2;    // Great circle distance.
             auto A = M_PI_2 - atan2((double) dy, (double) dx);       // Azimuth
             double ca, B;
-            solveSphere(A, b, (onAntipode ? -siny : siny), cosy, ca, B);
+            solveSphere(A, b, (onAntipode ? -sinY : sinY), cosY, ca, B);
             auto lat = (float) M_PI_2 - acos(ca);
             auto lon = location.lon + B + (onAntipode ? 6. : 5.) * (double) M_PI;
             lon = fmod(location.lon + B + (onAntipode ? 6. : 5.) * (double) M_PI, 2 * M_PI) - (double) M_PI;
@@ -216,7 +216,7 @@ namespace rose {
     }
 
     /**
-     * Compute the sub-solar geographic coordinates, used in plotting the solar ilumination.
+     * Compute the sub-solar geographic coordinates, used in plotting the solar illumination.
      * @return a tuple with the latitude, longitude in radians
      */
     std::tuple<double, double> subSolar() {
@@ -232,7 +232,6 @@ namespace rose {
         double e = 23.439 - 0.00000036 * D;
         double RA = 180 / M_PI * atan2(cos(M_PI / 180 * e) * sin(M_PI / 180 * L), cos(M_PI / 180 * L));
         auto lat = asin(sin(M_PI / 180 * e) * sin(M_PI / 180 * L));
-        auto lat_d = rad2deg(lat);
         double GMST = fmod(15 * (18.697374558 + 24.06570982441908 * D), 360.0);
         auto lng_d = fmod(RA - GMST + 36000.0 + 180.0, 360.0) - 180.0;
         auto lng = deg2rad(lng_d);
@@ -244,8 +243,8 @@ namespace rose {
 
     bool MapProjection::computeAzimuthalMaps() {
         // Compute Azimuthal maps from the Mercator maps
-        auto siny = sin(mQthRad.lat);
-        auto cosy = cos(mQthRad.lat);
+        auto sinY = sin(mQthRad.lat);
+        auto cosY = cos(mQthRad.lat);
         for (int y = 0; y < mMapImgSize.h; y += 1) {
             for (int x = 0; x < mMapImgSize.w; x += 1) {
                 if (mAbortFuture) {
@@ -253,9 +252,8 @@ namespace rose {
                     return false;
                 }
 
-                auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapImgSize, mQthRad, siny, cosy);
+                auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapImgSize, mQthRad, sinY, cosY);
                 if (valid) {
-                    GeoPosition position{lat, lon, true};
                     auto xx = std::min(mMapImgSize.w - 1,
                                        (int) round((double) mMapImgSize.w * ((lon + M_PI) / (2 * M_PI))));
                     auto yy = std::min(mMapImgSize.h - 1,
@@ -285,8 +283,8 @@ namespace rose {
 
         auto[latS, lonS] = subSolar();
 
-        auto siny = sin(mQthRad.lat);
-        auto cosy = cos(mQthRad.lat);
+        auto sinY = sin(mQthRad.lat);
+        auto cosY = cos(mQthRad.lat);
 
         // Three loops for: Longitude, Latitude, and map form (Mercator, Azimuthal).
         // This lets us use the common calculations without repeating them, easier than
@@ -307,7 +305,7 @@ namespace rose {
                     if (az == 1) {
                         // The Azimuthal coordinates that correspond to a map pixel
                         auto tuple = xyToAzLatLong(x, y, mMapImgSize,
-                                                   mQthRad, siny, cosy);
+                                                   mQthRad, sinY, cosY);
                         valid = std::get<0>(tuple);
                         latE = std::get<1>(tuple);
                         lonE = std::get<2>(tuple);
@@ -320,17 +318,17 @@ namespace rose {
                                (float) ((float) mMapImgSize.h / 2.);
                     }
                     if (valid) {
-                        // Compute the amont of solar illumination and use it to compute the pixel alpha value
+                        // Compute the amount of solar illumination and use it to compute the pixel alpha value
                         // GrayLineCos sets the interior angle between the sub-solar point and the location.
                         // GrayLinePower sets how fast it gets dark.
                         auto cosDeltaSigma = sin(latS) * sin(latE) + cos(latS) * cos(latE) * cos(abs(lonS - lonE));
-                        double fract_day;
+                        double dayFraction;
                         if (cosDeltaSigma < 0) {
                             if (cosDeltaSigma > GrayLineCos[1]) {
-                                fract_day = 1.0 - pow(cosDeltaSigma / GrayLineCos[1], GrayLinePow);
-                                alpha = std::clamp((float) fract_day, 0.0313f, 1.f);
+                                dayFraction = 1.0 - pow(cosDeltaSigma / GrayLineCos[1], GrayLinePow);
+                                alpha = std::clamp((float) dayFraction, 0.0313f, 1.f);
                             } else
-                                alpha = 0.0313;  // Set the minimun alpha to keep some daytime colour on the night side
+                                alpha = 0.0313;  // Set the minimum alpha to keep some daytime colour on the night side
                         }
                     } else
                         alpha = 0;
