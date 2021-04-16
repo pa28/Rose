@@ -110,16 +110,19 @@ namespace rose {
 
         string keyName{SDL_GetKeyName(keyboardEvent.keysym.sym)};
         if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_CTRL, KeyboardCtlKeyMods)) {
+            bool returnValue = false;
             switch (keyboardEvent.keysym.sym) {
                 case SDLK_F1:
                     SDL_MinimizeWindow(getSdlWindow().get());
                     mAppState = EventSemantics::Minimized;
-                    return true;
+                    returnValue = true;
+                    break;
                 case SDLK_F2:
                     SDL_SetWindowFullscreen(getSdlWindow().get(), 0);
                     SDL_RestoreWindow(getSdlWindow().get());
                     mAppState = EventSemantics::Restored;
-                    return true;
+                    returnValue = true;
+                    break;
                 case SDLK_F3:
                     if (SDL_GetWindowFlags(getSdlWindow().get()) & (uint) SDL_WINDOW_RESIZABLE) {
                         SDL_SetWindowFullscreen(getSdlWindow().get(), 0);
@@ -129,15 +132,18 @@ namespace rose {
                         SDL_SetWindowFullscreen(getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
                         mAppState = EventSemantics::FullScreen;
                     }
-                    return true;
+                    returnValue = true;
+                    break;
                 case SDLK_F4:
                     SDL_SetWindowFullscreen(getSdlWindow().get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
                     mAppState = EventSemantics::FullScreen;
-                    return true;
+                    returnValue = true;
+                    break;
                 default:
                     break;
             }
             Settings::getSettings().setValue(set::SetAppState, static_cast<int>(mAppState));
+            return returnValue;
         } else if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_ALT, KeyboardAltKeyMods)) {
             std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
             if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut != mKeyboardShortcuts.end()) {
