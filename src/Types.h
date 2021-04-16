@@ -174,6 +174,10 @@ namespace rose {
             return w < other.w && h < other.h;
         }
 
+        bool operator<=(const Size &other) const noexcept {
+            return w <= other.w && h <= other.h;
+        }
+
         bool operator>=(const Size &other) const noexcept {
             return !(operator<(other));
         }

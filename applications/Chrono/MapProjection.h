@@ -202,11 +202,6 @@ namespace rose {
          */
         bool setForegroundBackground();
 
-        /**
-         * @brief Add the selected maps to the current cache list and invoke a load if required.
-         */
-        void cacheCurrentMaps();
-
     public:
         MapProjection();
 
@@ -226,7 +221,17 @@ namespace rose {
 
         GraphicsModelFrameProtocol::slot_type frameSlot{};
 
+        /**
+         * @brief Called when added to a container.
+         * @details Connects the map slot receiver for notification when maps are loaded, then calls
+         * cacheCurrentMaps().
+         */
         void addedToContainer() override;
+
+        /**
+         * @brief Add the selected maps to the current cache list and invoke a load if required.
+         */
+        void cacheCurrentMaps();
 
     };
 }

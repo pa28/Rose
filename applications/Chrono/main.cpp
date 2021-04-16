@@ -182,6 +182,8 @@ struct Chrono : public Application {
 
     Chrono(int argc, char **argv) : Application(argc, argv) {}
 
+    std::shared_ptr<MapProjection> mapProjection{};
+
     bool keyboardEventCallback(const SDL_KeyboardEvent &keyboardEvent) override {
         static Size Size0{800, 480};
         static Size Size1{1600, 960};
@@ -248,7 +250,7 @@ struct Chrono : public Application {
 
         screen() << wdg<Window>()
                           << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                          << wdg<MapProjection>() << endw
+                          << wdg<MapProjection>() >> mapProjection << endw
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
 

@@ -129,6 +129,18 @@ namespace rose {
 
     Rectangle MapProjection::layout(gm::Context &context, const Rectangle &screenRect) {
         std::cout << __PRETTY_FUNCTION__ << screenRect << '\n';
+        if (MapImageSize(mMapSize) != screenRect.size()) {
+            auto currentMapSize = mMapSize;
+            for (int i = static_cast<int>(MapSize::Small); i < static_cast<int>(MapSize::Last); ++i) {
+                if (MapImageSize(static_cast<MapSize>(i)) <= screenRect.size()) {
+                    mMapSize = static_cast<MapSize>(i);
+                } else {
+                    break;
+                }
+            }
+            if (currentMapSize != mMapSize)
+                cacheCurrentMaps();
+        }
         return screenRect;
     }
 

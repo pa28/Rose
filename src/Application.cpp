@@ -358,7 +358,6 @@ namespace rose {
                 fingerTouchEvent(e.tfinger);
                 break;
             case SDL_MULTIGESTURE:
-//                break;
             case SDL_KEYMAPCHANGED:
                 break;
             default:

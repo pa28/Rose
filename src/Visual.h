@@ -615,12 +615,19 @@ inline std::shared_ptr<WidgetClass> operator >>(std::shared_ptr<WidgetClass> wid
     return widget;
 }
 
-template<class ManagerClass>
-inline std::shared_ptr<ManagerClass> operator >>(std::shared_ptr<ManagerClass> manager, std::shared_ptr<rose::Manager> &store) {
-    static_assert(std::is_base_of_v<rose::Manager,ManagerClass>, "ManagerClass must be derived from rose::Manager." );
-    store = manager;
-    return manager;
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator >>(std::shared_ptr<WidgetClass> widget, std::shared_ptr<WidgetClass> &store) {
+    static_assert(std::is_base_of_v<rose::Widget,WidgetClass>, "WidgetClass must be derived from rose::Widget." );
+    store = widget;
+    return widget;
 }
+
+//template<class ManagerClass>
+//inline std::shared_ptr<ManagerClass> operator >>(std::shared_ptr<ManagerClass> manager, std::shared_ptr<rose::Manager> &store) {
+//    static_assert(std::is_base_of_v<rose::Manager,ManagerClass>, "ManagerClass must be derived from rose::Manager." );
+//    store = manager;
+//    return manager;
+//}
 
 template<class WidgetClass>
 inline std::shared_ptr<rose::Manager> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Parent &) {
