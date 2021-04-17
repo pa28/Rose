@@ -254,7 +254,9 @@ struct Chrono : public Application {
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
 
-        registerKeyboardShortcut(SDLK_w, widget);
+        registerKeyboardShortcut(SDLK_w, widget, 0);
+        registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
+        registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthaProjection);
 
         Observer observer{45., -75., 0.};
         SatelliteObservation obs{observer};

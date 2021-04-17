@@ -146,10 +146,11 @@ namespace rose {
             return returnValue;
         } else if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_ALT, KeyboardAltKeyMods)) {
             std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
-            if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut != mKeyboardShortcuts.end()) {
-                if (auto widget = shortcut->second.lock(); widget)
-                    return widget->keyboardShortcutEvent(shortcut->first, keyboardEvent.state == SDL_PRESSED,
-                                                  keyboardEvent.repeat);
+            if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut !=
+                                                                                   mKeyboardShortcuts.end()) {
+                if (auto widget = shortcut->second.second.lock(); widget)
+                    return widget->keyboardShortcutEvent(shortcut->second.first, keyboardEvent.state == SDL_PRESSED,
+                                                         keyboardEvent.repeat);
                 else
                     mKeyboardShortcuts.erase(shortcut->first);
             }

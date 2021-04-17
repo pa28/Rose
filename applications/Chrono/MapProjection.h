@@ -153,6 +153,12 @@ namespace rose {
      * @brief
      */
     class MapProjection : public Widget {
+    public:
+        enum ShortCutCode : uint32_t {
+            MercatorProjection,
+            AzimuthaProjection,
+        };
+
     protected:
         std::unique_ptr<WebCache> mMapCache{};
         WebCacheProtocol::slot_type mMapSlot{};

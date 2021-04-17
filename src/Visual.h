@@ -542,9 +542,9 @@ namespace rose {
 
         /**
          * @brief Notify the Widget of a keyboard shortcut invocation.
-         * @param keycode The keycode registered to the Widget.
+         * @param shortcutCode The keycode registered to the Widget.
          */
-        bool keyboardShortcutEvent(SDL_Keycode keycode, bool state, uint repeat);
+        bool keyboardShortcutEvent(uint32_t shortcutCode, bool state, uint repeat);
 
         /// Set the keyboard shortcut callback
         void setKeyboardShortcutCallback(KeyboardShortcutCallback keyboardShortcutCallback) {

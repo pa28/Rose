@@ -154,10 +154,10 @@ namespace rose {
         return false;
     }
 
-    bool Widget::keyboardShortcutEvent(SDL_Keycode keycode, bool state, uint repeat) {
+    bool Widget::keyboardShortcutEvent(uint32_t shortcutCode, bool state, uint repeat) {
         std::cout << __PRETTY_FUNCTION__ << (state ? " Pressed." : " Released.") << ' ' << repeat << '\n';
         if (mKeyboardShortcutCallback) {
-            mKeyboardShortcutCallback(keycode, state, repeat);
+            mKeyboardShortcutCallback(shortcutCode, state, repeat);
             return true;
         }
         return false;

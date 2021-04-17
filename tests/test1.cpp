@@ -269,7 +269,7 @@ struct Chrono : public Application {
                           << wdg<TestMap>() << endw
                           << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
                           << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
-        registerKeyboardShortcut(SDLK_w, widget);
+        registerKeyboardShortcut(SDLK_w, widget, 0);
     }
 };
 

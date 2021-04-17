@@ -77,9 +77,9 @@ namespace rose {
     /**
      * @brief Keyboard shortcut callback.
      * @details Called when a registered ALt-Key is pressed
-     * @param keycode The SDL_Keycode representing the key pressed with modifiers removed.
+     * @param shortcutCode The shortcut code defined by the widget bound to the action.
      * @param state True if the key is pressed, false if released.
      */
-    using KeyboardShortcutCallback = std::function<void(SDL_Keycode keycode, bool state, uint repeat)>;
+    using KeyboardShortcutCallback = std::function<void(uint32_t shortcutCode, bool state, uint repeat)>;
 
 }
