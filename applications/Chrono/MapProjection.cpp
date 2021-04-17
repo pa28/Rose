@@ -17,6 +17,20 @@ namespace rose {
         mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
                                                Environment::getEnvironment().cacheHome(),
                                                "Maps", std::chrono::hours{24 * 30});
+
+        mKeyboardShortcutCallback = [&](uint32_t shortcutCode, bool pressed, uint repeat) {
+            std::cout << __PRETTY_FUNCTION__ << ' ';
+            switch (static_cast<ShortCutCode>(shortcutCode)) {
+                case MercatorProjection:
+                    std::cout << "MercatorProjection ";
+                    break;
+                case AzimuthaProjection:
+                    std::cout << "AzimuthalProjection ";
+                    break;
+            }
+
+            std::cout << (pressed ? "Pressed " : "Released ") << "Repeats: " << repeat << '\n';
+        };
     }
 
     void MapProjection::cacheCurrentMaps() {
