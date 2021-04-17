@@ -157,6 +157,8 @@ namespace rose {
         enum ShortCutCode : uint32_t {
             MercatorProjection,
             AzimuthalProjection,
+            TerrainMap,
+            CountryMap,
         };
 
     protected:

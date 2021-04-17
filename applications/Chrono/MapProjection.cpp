@@ -20,6 +20,7 @@ namespace rose {
 
         mKeyboardShortcutCallback = [&](uint32_t shortcutCode, bool pressed, uint repeat) {
             MapProjectionType projectionType = mProjection;
+            MapDepiction mapDepiction = mMapDepiction;
             switch (static_cast<ShortCutCode>(shortcutCode)) {
                 case MercatorProjection:
                     projectionType = MapProjectionType::StationMercator;
@@ -27,11 +28,22 @@ namespace rose {
                 case AzimuthalProjection:
                     projectionType = MapProjectionType::StationAzimuthal;
                     break;
+                case TerrainMap:
+                    mapDepiction = MapDepiction::Terrain;
+                    break;
+                case CountryMap:
+                    mapDepiction = MapDepiction::Countries;
+                    break;
             }
 
             if (projectionType != mProjection) {
                 mProjection = projectionType;
                 getApplication().redrawBackground();
+            }
+
+            if (mapDepiction != mMapDepiction) {
+                mMapDepiction = mapDepiction;
+                cacheCurrentMaps();
             }
         };
     }
