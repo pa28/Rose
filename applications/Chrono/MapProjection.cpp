@@ -110,7 +110,6 @@ namespace rose {
         }
 
         Rectangle widgetRect{containerPosition + mPos, mSize};
-        int splitPixel = 0;
         switch (mProjection) {
             case MapProjectionType::Mercator:
                 context.renderCopy(mMercator[1], widgetRect);
@@ -118,7 +117,7 @@ namespace rose {
                 break;
             case MapProjectionType::StationMercator: {
                 auto lon = mQth.lon;
-                splitPixel = util::roundToInt((double) mMapImgSize.w * ((lon) / 360.));
+                int splitPixel = util::roundToInt((double) mMapImgSize.w * ((lon) / 360.));
                 if (splitPixel < 0)
                     splitPixel += mMapImgSize.w;
 
