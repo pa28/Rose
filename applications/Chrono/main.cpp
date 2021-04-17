@@ -256,7 +256,7 @@ struct Chrono : public Application {
 
         registerKeyboardShortcut(SDLK_w, widget, 0);
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
-        registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthaProjection);
+        registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
 
         Observer observer{45., -75., 0.};
         SatelliteObservation obs{observer};

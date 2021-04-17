@@ -24,7 +24,7 @@ namespace rose {
                 case MercatorProjection:
                     std::cout << "MercatorProjection ";
                     break;
-                case AzimuthaProjection:
+                case AzimuthalProjection:
                     std::cout << "AzimuthalProjection ";
                     break;
             }

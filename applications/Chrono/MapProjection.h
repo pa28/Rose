@@ -156,7 +156,7 @@ namespace rose {
     public:
         enum ShortCutCode : uint32_t {
             MercatorProjection,
-            AzimuthaProjection,
+            AzimuthalProjection,
         };
 
     protected:
