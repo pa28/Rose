@@ -19,17 +19,20 @@ namespace rose {
                                                "Maps", std::chrono::hours{24 * 30});
 
         mKeyboardShortcutCallback = [&](uint32_t shortcutCode, bool pressed, uint repeat) {
-            std::cout << __PRETTY_FUNCTION__ << ' ';
+            MapProjectionType projectionType = mProjection;
             switch (static_cast<ShortCutCode>(shortcutCode)) {
                 case MercatorProjection:
-                    std::cout << "MercatorProjection ";
+                    projectionType = MapProjectionType::StationMercator;
                     break;
                 case AzimuthalProjection:
-                    std::cout << "AzimuthalProjection ";
+                    projectionType = MapProjectionType::StationAzimuthal;
                     break;
             }
 
-            std::cout << (pressed ? "Pressed " : "Released ") << "Repeats: " << repeat << '\n';
+            if (projectionType != mProjection) {
+                mProjection = projectionType;
+                getApplication().redrawBackground();
+            }
         };
     }
 
