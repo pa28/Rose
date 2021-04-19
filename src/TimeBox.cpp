@@ -28,8 +28,6 @@ namespace rose {
     }
 
     void TimeBox::initialize() {
-        mTimerTick->secondSignal.connect(secondSlot);
-
         this->getNode<TimeBox>() << wdg<TextLabel>("01:10") << Padding{0}
                                  << FontName{Theme::getTheme().FixedBoldFont} << endw
                                  << wdg<TextLabel>("00 GMT") << Padding{0}
@@ -37,6 +35,8 @@ namespace rose {
                                  << PointSize{2*Theme::getTheme().LabelPointSize/3};
 
         updateTimeDisplay();
+
+        mTimerTick->secondSignal.connect(secondSlot);
     }
 
     void TimeBox::draw(gm::Context &context, const Position &containerPosition) {
@@ -62,8 +62,6 @@ namespace rose {
         std::stringstream sec{};
         sec.imbue(std::locale());
         put_locale_time(sec, ' ', &tm, mDisplaySeconds ? LongSecondsFmt : ShortSecondsFmt);
-
-        std::cout << hm.str() << ' ' << sec.str() << '\n';
 
         bool redrawBackground = false;
         if (auto first = begin(); first != end()) {
