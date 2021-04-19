@@ -116,8 +116,8 @@ public:
                 if (i == 1) {
                     std::dynamic_pointer_cast<Visual>(*(first + i))->setScreenRectangle(sideRect);
                 } else {
-                    std::dynamic_pointer_cast<TimeBox>(*(first + i))->layout(context, botRect);
-                    std::dynamic_pointer_cast<TimeBox>(*(first + i))->setScreenRectangle(botRect);
+                    std::dynamic_pointer_cast<Column>(*(first + i))->layout(context, botRect);
+                    std::dynamic_pointer_cast<Column>(*(first + i))->setScreenRectangle(botRect);
                 }
             }
         }
@@ -277,7 +277,9 @@ struct Chrono : public Application {
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                  << wdg<MapProjection>() >> mapProjection << endw
                  << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
-                 << wdg<TimeBox>(timerTick, true, true);
+                 << wdg<Column>()
+                     << wdg<TimeBox>(timerTick, true, false) << endw
+                     << wdg<DateBox>(timerTick, true, false);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
         registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
