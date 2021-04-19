@@ -16,10 +16,14 @@ namespace rose {
 
     /**
      * @class EventSemantics
-     * @brief
+     * @brief A class to process event semantics.
      */
     class EventSemantics {
     public:
+        /**
+         * @enum WindowEventType
+         * @brief The type of window event.
+         */
         enum WindowEventType : int {
             Shown, Hidden, Exposed, SizeChanged, Minimized, Maximized, FullScreen, Restored, Enter, Leave, Focus, UnFocus,
             Close, Moved, Resized,
@@ -35,6 +39,7 @@ namespace rose {
         using FingerTouchEventCallback = std::function<bool(Application&, const SDL_TouchFingerEvent&)>;
 
     protected:
+        /// The Application the EventSemantics are processed for.
         Application& mApplication;
         WindowSizeChangeCallback windowSizeChangeCallback;
         WindowPositionChangeCallback windowPositionChangeCallback;
