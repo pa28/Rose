@@ -15,6 +15,25 @@
 
 using namespace rose;
 
+class Column : public Manager {
+protected:
+
+public:
+    Column() : Manager() {
+        setLayoutManager(std::make_unique<LinearLayout>(Orientation::Vertical));
+    }
+
+    ~Column() override = default;
+
+    Column(const Column&) = delete;
+
+    Column(Column &&) = delete;
+
+    Column& operator=(const Column&) = delete;
+
+    Column& operator=(Column &&) = delete;
+};
+
 class ChronoLayout : public LayoutManager {
 public:
 
