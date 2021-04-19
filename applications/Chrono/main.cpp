@@ -258,7 +258,7 @@ struct Chrono : public Application {
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                  << wdg<MapProjection>() >> mapProjection << endw
                  << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
-                 << wdg<TimeBox>(timerTick);
+                 << wdg<TimeBox>(timerTick, true, true);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
         registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);

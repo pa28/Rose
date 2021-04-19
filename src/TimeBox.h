@@ -21,14 +21,40 @@ namespace rose {
      */
     class TimeBox : public Manager {
     protected:
+        static constexpr std::string_view HoursMinutesFmt = "%R";
+        static constexpr std::string_view LongSecondsFmt = "%S %Z";
+        static constexpr std::string_view ShortSecondsFmt = "%Z";
+
         std::shared_ptr<TimerTick> mTimerTick{};      ///< The source of time signals.
         bool mDisplaySeconds{true}; ///< Display seconds in time.
         bool mLocalTime{false};     ///< If time zone is empty display local time if true.
         std::string mTimeZone{};    ///< The time zone if not empty.
 
         TickProtocol::slot_type secondSlot{};   ///< Receive time signals.
+        const std::time_put<char> &locale_time_put;
 
         void initialize();
+
+        /**
+         * A helper function to convert the system time to a localized time
+         * @param strm The stream to output time, that is imbued with the locale
+         * @param fill The fill char
+         * @param tm The std::tm struct with the desired time.
+         * @param fmt A format string (see std::locale_time_put::put()
+         * @return an iterator one past the last char generated.
+         */
+        auto put_locale_time(std::stringstream &strm, char fill, const std::tm *tm, const std::string_view &format) {
+            auto fmt = std::string{format};
+            if (fmt.empty()) {
+                throw std::runtime_error("Format must not be empty");
+            } else {
+                const char *fmtbeg = fmt.c_str();
+                const char *fmtend = fmtbeg + fmt.size();
+                return locale_time_put.put(strm, strm, fill, tm, fmtbeg, fmtend);
+            }
+        }
+
+        void updateTimeDisplay();
 
     public:
         TimeBox() = delete;
