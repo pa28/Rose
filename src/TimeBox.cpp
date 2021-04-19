@@ -9,7 +9,6 @@
 
 #include <utility>
 #include <chrono>
-#include <stdlib.h>
 #include "Button.h"
 #include "Application.h"
 
