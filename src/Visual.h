@@ -28,10 +28,16 @@ namespace rose {
     class Manager;
     class Widget;
 
+    /**
+     * @brief A type to specify an Id value.
+     */
     struct Id {
         std::string_view idString;
     };
 
+    /**
+     * @brief A type to specify a state.
+     */
     struct State {
         std::string_view stateString;
     };
@@ -53,7 +59,7 @@ namespace rose {
             return (value & semanticGesture.value) != 0;
         }
 
-        SemanticGesture operator|(const SemanticGesture& other) {
+        SemanticGesture operator|(const SemanticGesture& other) const {
             SemanticGesture result{};
             result.value = value | other.value;
             return result;
@@ -153,6 +159,11 @@ namespace rose {
             mScreenRect = getScreenRectangle(containerPosition);
         }
 
+        /**
+         * @brief Get the rectangle occupied by the Visual.
+         * @param containerPosition The position of the container holding the Visual.
+         * @return The rectangle.
+         */
         [[nodiscard]] Rectangle getScreenRectangle(const Position &containerPosition) const {
             return Rectangle{containerPosition + mPos, mSize};
         }
@@ -178,6 +189,7 @@ namespace rose {
             mPreferredSize = size;
         }
 
+        /// Get the preferred size.
         [[nodiscard]] Size getSize() const {
             return mPreferredSize;
         }
@@ -187,6 +199,7 @@ namespace rose {
             mPreferredPos = position;
         }
 
+        /// Get the preferred Position.
         [[nodiscard]] Position getPosition() const {
             return mPreferredPos;
         }
@@ -224,7 +237,6 @@ namespace rose {
 
         /// Get supported SemanticGestures.
         [[nodiscard]] SemanticGesture supportedSemanticGestures() const { return mSemanticGesture; }
-
     };
 
     class Application;
@@ -262,10 +274,12 @@ namespace rose {
         /// Layout the screen contents.
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
+        /// Get the Application object associated with the Screen.
         Application& getApplication() {
             return mApplication;
         }
 
+        /// Get the Application associated with a const Screen.
         const Application& getApplication() const {
             return mApplication;
         }
@@ -306,14 +320,17 @@ namespace rose {
         /// Layout the contents of the Window
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
+        /// The the Widget which contains the Position.
         std::shared_ptr<Widget> pointerWidget(Position position);
 
+        /// Get the Screen which supports the Window.
         std::shared_ptr<Screen> getScreen() {
             if (auto screen = std::dynamic_pointer_cast<Screen>(container()))
                 return screen;
             return nullptr;
         }
 
+        /// Get the Screen which support the const Window.
         std::shared_ptr<Screen> getScreen() const {
             if (auto screen = std::dynamic_pointer_cast<Screen>(container()))
                 return screen;
@@ -328,17 +345,20 @@ namespace rose {
     class LayoutManager {
 
     protected:
-        size_t mMaxContent{UnlimitedContent};
+        size_t mMaxContent{UnlimitedContent};   //The maximum number of objects the LayoutManager supports.
 
+        /// Get the layout hints from a Visual.
         static std::vector<LayoutHint>& getLayoutHints(std::shared_ptr<Visual> &visual) {
             return visual->mLayoutHints;
         }
 
+        /// Get the screen rectangle of a Visual.
         static Rectangle getScreenRectangle(std::shared_ptr<Visual> &visual) {
             return Rectangle{visual->mPos, visual->mSize};
         }
 
     public:
+        /// The value for 'unlimited' managed objects.
         static constexpr size_t UnlimitedContent = std::numeric_limits<size_t>::max();
 
         LayoutManager() = default;
@@ -349,6 +369,7 @@ namespace rose {
         virtual Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                         LayoutManager::Itr last) = 0;
 
+        /// Get the maximum content of the LayoutManager.
         [[nodiscard]] size_t maximumContent() const { return mMaxContent; }
     };
 
@@ -358,15 +379,24 @@ namespace rose {
         return std::make_unique<Layout>(args ...);
     }
 
+    /**
+     * @class SimpleLayout.
+     * @brief A Simple layout manager.
+     */
     class SimpleLayout : public LayoutManager {
     public:
         SimpleLayout() = default;
         ~SimpleLayout() override = default;
 
+        /// Layout the content.
         Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                 LayoutManager::Itr last) override;
     };
 
+    /**
+     * @class LayoutManagerError
+     * @brief An exception to indicate runtime error during layout.
+     */
     class LayoutManagerError : public std::runtime_error {
     public:
         LayoutManagerError() = delete;
@@ -375,15 +405,30 @@ namespace rose {
         LayoutManagerError(const LayoutManagerError& other) = default;
     };
 
+    /**
+     * @class Widget
+     * @brief An element of the application user interface.
+     */
     class Widget : public Visual, public Container {
     public:
 
     protected:
+        /// The pointer has entered the Widget.
         EventCallback mEnterEventCallback{};
+
+        /// The pointer has left the Widget.
         EventCallback mLeaveEventCallback{};
+
+        /// The pointer button has been pressed with the pointer inside the Widget.
         ButtonCallback mButtonEventCallback{};
+
+        /// The pointer is in motion, inside the Widget with a button pressed.
         MouseMotionCallback mMouseMotionCallback{};
+
+        /// The mouse scroll wheel has moved with the pointer inside the Widget.
         ScrollCallback mMouseScrollCallback{};
+
+        /// A keyboard button event while the Widget has keyboard focus.
         KeyboardShortcutCallback mKeyboardShortcutCallback{};
 
     public:
@@ -401,6 +446,12 @@ namespace rose {
 
 //        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
 
+        /**
+         * @brief Search for the Widget within which the position lies
+         * @param position The position.
+         * @param containerPosition The position of the container holding the Widget.
+         * @return The Widget if found, otherwise a null pointer.
+         */
         std::shared_ptr<Widget> pointerWidget(Position position, Position containerPosition);
 
         /**
@@ -552,8 +603,13 @@ namespace rose {
         }
     };
 
+    /**
+     * @class Manager
+     * @brief A Widget which manages contained Widgets.
+     */
     class Manager : public Widget {
     protected:
+        /// The layout manager which determines the presentation of contained Widgets.
         std::unique_ptr<LayoutManager> mLayoutManager{};
 
     public:
@@ -561,6 +617,10 @@ namespace rose {
 
         ~Manager() override = default;
 
+        /**
+         * @brief Add a Node to the contents of the Manager.
+         * @param node The Node added.
+         */
         void add(const std::shared_ptr<Node> &node) override {
             if (mLayoutManager) {
                 if (mLayoutManager->maximumContent() == LayoutManager::UnlimitedContent || size() < mLayoutManager->maximumContent()) {
@@ -577,27 +637,68 @@ namespace rose {
             }
         }
 
+        /**
+         * @brief Draw the manager and contents.
+         * @param context The graphics context used to draw the manager and contents.
+         * @param containerPosition The Position of the Container that holds the Manager.
+         */
         void draw(gm::Context &context, const Position &containerPosition) override;
 
+        /**
+         * @brief Layout the Manager and contents.
+         * @param context The context that will be used to draw the Manager and contents.
+         * @param screenRect The screen rectangle available to the Manager.
+         * @return The rectangle occupied by the Manager.
+         */
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
+        /**
+         * @brief Set the layout manager.
+         * @param layoutManager The LayoutManager.
+         */
         void setLayoutManager(std::unique_ptr<LayoutManager> &&layoutManager) {
             mLayoutManager = std::move(layoutManager);
         }
 
+        /**
+         * @brief Get the LayoutManager.
+         * @return A reference to the LayoutManager.
+         */
         std::unique_ptr<LayoutManager>& layoutManager() { return mLayoutManager; }
     };
 
+    /**
+     * @class Parent
+     * @brief A type used to extract the parent from a Widget.
+     */
     struct Parent {};
 
+    /**
+     * @brief A manipulator to extract the parent from a Widget.
+     */
     static Parent endw{};
 
+    /**
+     * @brief Create a Widget.
+     * @tparam WidgetClass The type of the Widget to create.
+     * @tparam Args The parameter pack type.
+     * @param args The creation arguments parameter pack.
+     * @return A std::shared_ptr to the Widget or null.
+     */
     template<class WidgetClass, typename ... Args>
     inline std::shared_ptr<WidgetClass> wdg(Args ... args) {
         return std::make_shared<WidgetClass>(args ...);
     }
 }
 
+/**
+ * @brief Insertion operator to place a Widget in a Container.
+ * @tparam ContainerClass The class of the Container.
+ * @tparam WidgetClass The class of the Widget.
+ * @param container The container.
+ * @param widget The Widget.
+ * @return The Widget.
+ */
 template<class ContainerClass, class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<ContainerClass> container, std::shared_ptr<WidgetClass> widget) {
     static_assert(std::is_base_of_v<rose::Visual, ContainerClass> && std::is_base_of_v<rose::Container, ContainerClass>,
@@ -608,6 +709,14 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<ContainerClass> c
     return widget;
 }
 
+/**
+ * @brief An extraction operator to store a Widget in a std::shared_ptr<Widget>.
+ * @details Acting like a 'Tee' operation the Widget is both saved and passed on to be used in further processing.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The widget.
+ * @param store The variable that will store the std::shared_ptr<Widget>.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator >>(std::shared_ptr<WidgetClass> widget, std::shared_ptr<rose::Widget> &store) {
     static_assert(std::is_base_of_v<rose::Widget,WidgetClass>, "WidgetClass must be derived from rose::Widget." );
@@ -615,6 +724,14 @@ inline std::shared_ptr<WidgetClass> operator >>(std::shared_ptr<WidgetClass> wid
     return widget;
 }
 
+/**
+ * @brief An extraction operator to store a Widget in a specifically typed std::shared_ptr<WidgetClass>.
+ * @details Acting like a 'Tee' operation the Widget is both saved and passed on to be used in further processing.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The widget.
+ * @param store The variable that will store the std::shared_ptr<WidgetClass>.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator >>(std::shared_ptr<WidgetClass> widget, std::shared_ptr<WidgetClass> &store) {
     static_assert(std::is_base_of_v<rose::Widget,WidgetClass>, "WidgetClass must be derived from rose::Widget." );
@@ -629,6 +746,12 @@ inline std::shared_ptr<WidgetClass> operator >>(std::shared_ptr<WidgetClass> wid
 //    return manager;
 //}
 
+/**
+ * @brief An insertion operator that take a Parent value and returns the parent of a Widget.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @return The Manager of the Widget, or an empty pointer if the Widget has no Manager.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<rose::Manager> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Parent &) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
@@ -636,6 +759,13 @@ inline std::shared_ptr<rose::Manager> operator<<(std::shared_ptr<WidgetClass> wi
     return std::dynamic_pointer_cast<rose::Manager>(widget->container());
 }
 
+/**
+ * @brief An insertion operator to set the preferred size of a Widget.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @param size The Size.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Size& size) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
@@ -644,6 +774,13 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     return widget;
 }
 
+/**
+ * @brief An insertion operator to set the preferred Position of a Widget.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @param position The Position.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Position& position) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
@@ -652,6 +789,13 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     return widget;
 }
 
+/**
+ * @brief An insertion operator to set the LayoutManager of a Manager.
+ * @tparam WidgetClass The class of the Manager.
+ * @param widget The Manager.
+ * @param layout The LayoutManger.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, std::unique_ptr<rose::LayoutManager>&& layout) {
     static_assert(std::is_base_of_v<rose::Manager,WidgetClass>, "WidgetClass must be derived from rose::Manager.");
@@ -659,6 +803,13 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     return widget;
 }
 
+/**
+ * @brief An insertion operator to set the Padding of a Widget.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @param padding The Padding.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Padding& padding) {
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
@@ -666,6 +817,13 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     return widget;
 }
 
+/**
+ * @brief An insertion operator to set the Id of a Widget.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @param id The Id.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Id& id) {
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
@@ -673,6 +831,13 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
     return widget;
 }
 
+/**
+ * @brief An insertion operator to set a LyoutHing on a Widget.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @param hint The LayoutHint.
+ * @return The Widget.
+ */
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::LayoutHint& hint) {
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
