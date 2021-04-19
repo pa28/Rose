@@ -246,15 +246,13 @@ struct Chrono : public Application {
 
     void build() {
         Environment &environment{Environment::getEnvironment()};
-        std::shared_ptr<Widget> widget{};
 
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                  << wdg<MapProjection>() >> mapProjection << endw
-                 << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) >> widget << endw
+                 << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                  << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
 
-        registerKeyboardShortcut(SDLK_w, widget, 0);
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
         registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
         registerKeyboardShortcut(SDLK_t, mapProjection, MapProjection::ShortCutCode::TerrainMap);
