@@ -85,6 +85,20 @@ namespace rose {
         void setFontName(const std::string &fontName) {
             mFontName = fontName;
         }
+
+        /**
+         * @brief Set the text displayed.
+         * @param text The new text.
+         * @return True if the text has changed, false otherwise.
+         */
+        bool setText(const std::string &text) {
+            if (mText != text) {
+                mText = text;
+                mTexture.reset();
+                return true;
+            }
+            return false;
+        }
     };
 
 #if 0
