@@ -44,6 +44,10 @@ namespace rose {
     public:
         using signal_function = std::function<void(Args...)>;
 
+        explicit operator bool () {
+            return !callList.empty();
+        }
+
         /**
          * @brief Groom the Slot list.
          */

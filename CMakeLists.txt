@@ -113,6 +113,8 @@ list(APPEND ROSE_SRC
         src/Surface.cpp
         src/Text.cpp
         src/Texture.cpp
+        src/TimeBox.cpp
+        src/TimerTick.cpp
         src/Types.cpp
         src/Utilities.cpp
         src/Visual.cpp
