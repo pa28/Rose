@@ -114,7 +114,6 @@ namespace rose {
                 : TextButton(std::string{text}, ButtonType::Label) {}
 
         explicit TextLabel(const Id& id) noexcept : TextButton(id, ButtonType::Label) {}
-
     };
 
     class TextButtonLayoutManager : public LayoutManager {
