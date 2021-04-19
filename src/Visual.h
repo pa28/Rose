@@ -617,6 +617,14 @@ namespace rose {
 
         ~Manager() override = default;
 
+        Manager(const Manager&) = delete;
+
+        Manager(Manager&&) = delete;
+
+        Manager& operator=(const Manager&) = delete;
+
+        Manager& operator=(Manager&&) = delete;
+
         /**
          * @brief Add a Node to the contents of the Manager.
          * @param node The Node added.
