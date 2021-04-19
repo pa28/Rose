@@ -16,32 +16,49 @@
 
 namespace rose {
 
+    /**
+     * @enum MapProjectionType
+     */
     enum class MapProjectionType {
-        Mercator,
-        StationMercator,
-        StationAzimuthal,
+        Mercator,           ///< Standard Mercator split a the International Date Line.
+        StationMercator,    ///< Mercator split so the Station location is centred.
+        StationAzimuthal,   ///< Azimuthal with the Station location centered on the left hemisphere.
     };
 
+    /**
+     * @enum MapDepiction
+     */
     enum class MapDepiction {
-        Terrain,
-        Countries,
+        Terrain,            ///< The terrain map.
+        Countries,          ///< The countries map.
         Last
     };
 
+    /**
+     * @enum MapIllumination
+     */
     enum class MapIllumination {
-        Day,
-        Night,
+        Day,                ///< The Day map.
+        Night,              ///< The Night map.
         Last
     };
 
+    /**
+     * @enum The map size.
+     */
     enum class MapSize {
-        Small,
-        Medium,
-        Large,
-        ExtraLarge,
+        Small,              ///< Small 660 x 330
+        Medium,             ///< Medium 1320 x 660
+        Large,              ///< Large 1980 x 990
+        ExtraLarge,         ///< ExtraLarger 2640 x 1320
         Last
     };
 
+    /**
+     * @brief Get a map Size from MapSize.
+     * @param mapSize The MapSize value.
+     * @return The size of the map.
+     */
     static constexpr Size MapImageSize(MapSize mapSize) {
         switch (mapSize) {
             case MapSize::Small:
@@ -58,10 +75,24 @@ namespace rose {
         return Size{};
     }
 
+    /**
+     * @brief Create an image ide for a specific map.
+     * @param mapDepiction The MapDepiction.
+     * @param mapSize The MapSize.
+     * @param illumination The MapIllumination.
+     * @return A composed image id.
+     */
     static constexpr uint32_t MapImageId(MapDepiction mapDepiction, MapSize mapSize, MapIllumination illumination) {
         return (static_cast<uint32_t>(mapSize) << 2u) | (static_cast<uint32_t>(mapDepiction) << 1u) | static_cast<uint32_t>(illumination);
     }
 
+    /**
+     * @brief Crate a file name for a specific map.
+     * @param mapDepiction The MapDepiction.
+     * @param mapSize The MapSize.
+     * @param illumination The MapIllumination.
+     * @return The composed file name.
+     */
     static std::string MapFileName(MapDepiction mapDepiction, MapSize mapSize, MapIllumination illumination) {
         std::stringstream sstrm{};
 
@@ -95,16 +126,22 @@ namespace rose {
         return sstrm.str();
     }
 
+    /// Convert radians to degrees.
     template<typename T>
     static constexpr T rad2deg(T r) noexcept {
         return 180. * (r/M_PI);
     }
 
+    /// Convert degrees to radians.
     template<typename T>
     static constexpr T deg2rad(T d) noexcept {
         return M_PI * (d/180.);
     }
 
+    /**
+     * @class GeoPosition
+     * @brief An abstraction of a geographic position.
+     */
     struct GeoPosition {
         double lat{0.}, lon{0.};
         bool radians{false};
@@ -113,6 +150,12 @@ namespace rose {
 
         ~GeoPosition() = default;
 
+        /**
+         * @brief Create a geographic position.
+         * @param latitude The latitude.
+         * @param longitude The longitude.
+         * @param rad When true interpret latitude and longitude as degrees, otherwise as radians.
+         */
         GeoPosition(double latitude, double longitude, bool rad = false) {
             radians = rad;
             if (radians) {
@@ -124,6 +167,10 @@ namespace rose {
             }
         }
 
+        /**
+         * @brief Convert the position from degrees to radians.
+         * @return The position in radians.
+         */
         [[nodiscard]] GeoPosition toRadians() const {
             if (radians)
                 return GeoPosition{*this};
@@ -136,6 +183,10 @@ namespace rose {
             }
         }
 
+        /**
+         * @brief Convert the position from radians to degrees.
+         * @return The position in degrees.
+         */
         [[nodiscard]] GeoPosition toDegrees() const {
             if (radians) {
                 GeoPosition g{};
@@ -162,14 +213,28 @@ namespace rose {
         };
 
     protected:
+        /// The pointer to the map cache.
         std::unique_ptr<WebCache> mMapCache{};
+
+        /// The slot to receive map cache events.
         WebCacheProtocol::slot_type mMapSlot{};
+
+        /// The map projection type.
         MapProjectionType mProjection{MapProjectionType::StationAzimuthal};
+
+        /// The map depiction.
         MapDepiction mMapDepiction{MapDepiction::Terrain};
+
+        /// The map size.
         MapSize mMapSize{MapSize::Small};
+
+        /// True when new surfaces have been created.
         bool mNewSurfaces{};
+
+        /// The selected map size.
         size_t mSelectedSize{0};
 
+        /// The size of the map image.
         Size mMapImgSize{};
 
         std::array<gm::Surface,2> mMapSurface{};
@@ -181,8 +246,12 @@ namespace rose {
         std::array<gm::Texture,2> mMercator{};     ///< The Mercator projection background and foreground maps.
         std::array<gm::Texture,2> mAzimuthal{};    ///< The Azimuthal projection background and foreground maps.
 
-        std::atomic_bool mAbortFuture{};
+        std::atomic_bool mAbortFuture{};           ///< A flag to abort background processing.
+
+        /// The station location in degrees.
         GeoPosition mQth{45.,-75.};
+
+        /// The station location in radians.
         GeoPosition mQthRad{mQth.toRadians()};
 
         /// Twilight specs: civil, nautical, astronomical.
@@ -223,8 +292,10 @@ namespace rose {
 
         MapProjection &operator=(MapProjection &&) = delete;
 
+        /// Draw the MapProjection
         void draw(gm::Context &context, const Position &containerPosition) override;
 
+        /// Layout the MapProjection
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         GraphicsModelFrameProtocol::slot_type frameSlot{};
@@ -240,7 +311,6 @@ namespace rose {
          * @brief Add the selected maps to the current cache list and invoke a load if required.
          */
         void cacheCurrentMaps();
-
     };
 }
 
