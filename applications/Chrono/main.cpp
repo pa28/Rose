@@ -7,6 +7,8 @@
 #include "ImageStore.h"
 #include "Layout.h"
 #include "Settings.h"
+#include "TimeBox.h"
+#include "TimerTick.h"
 #include "Types.h"
 #include "MapProjection.h"
 #include "SatelliteModel.h"
@@ -95,7 +97,8 @@ public:
                 if (i == 1) {
                     std::dynamic_pointer_cast<Visual>(*(first + i))->setScreenRectangle(sideRect);
                 } else {
-                    std::dynamic_pointer_cast<Visual>(*(first + i))->setScreenRectangle(botRect);
+                    std::dynamic_pointer_cast<TimeBox>(*(first + i))->layout(context, botRect);
+                    std::dynamic_pointer_cast<TimeBox>(*(first + i))->setScreenRectangle(botRect);
                 }
             }
         }
@@ -184,6 +187,8 @@ struct Chrono : public Application {
 
     std::shared_ptr<MapProjection> mapProjection{};
 
+    std::shared_ptr<TimerTick> timerTick{};
+
     bool keyboardEventCallback(const SDL_KeyboardEvent &keyboardEvent) override {
         static Size Size0{800, 480};
         static Size Size1{1600, 960};
@@ -245,13 +250,15 @@ struct Chrono : public Application {
     }
 
     void build() {
+        timerTick = std::make_shared<TimerTick>();
+
         Environment &environment{Environment::getEnvironment()};
 
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                  << wdg<MapProjection>() >> mapProjection << endw
                  << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
-                 << wdg<TestWidget>(color::DarkRedHSVA.toRGBA()) << endw;
+                 << wdg<TimeBox>(timerTick);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
         registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
