@@ -32,7 +32,7 @@ namespace rose {
     class LinearLayout : public LayoutManager {
     protected:
         Orientation mOrientation{Orientation::Horizontal};
-        int mInternalSpacing;
+        int mInternalSpacing{0};
 
     public:
         LinearLayout() = default;
