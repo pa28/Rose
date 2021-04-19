@@ -9,6 +9,7 @@
 
 #include <utility>
 #include <chrono>
+#include <stdlib.h>
 #include "Button.h"
 #include "Application.h"
 
@@ -77,5 +78,56 @@ namespace rose {
         }
         if (redrawBackground)
             getApplication().redrawBackground();
+    }
+
+    DateBox::DateBox(std::shared_ptr<TimerTick> timerTick) : mTimerTick(std::move(timerTick)),
+        locale_time_put(std::use_facet<std::time_put<char>>(std::locale())) {
+        minuteSlot = TickProtocol::createSlot();
+        minuteSlot->receiver = [&](int minutes) {
+            if (minutes == 0) {
+                updateDateDisplay();
+            }
+        };
+
+        setLayoutManager(std::make_unique<LinearLayout>(Orientation::Horizontal));
+    }
+
+    void DateBox::initialize() {
+        this->getNode<DateBox>() << wdg<TextLabel>("") << Padding{0}
+                                 << FontName{Theme::getTheme().BoldFont}
+                << PointSize{2*Theme::getTheme().LabelPointSize/3};
+
+
+        updateDateDisplay();
+
+        mTimerTick->minuteSignal.connect(minuteSlot);
+    }
+
+    void DateBox::updateDateDisplay() {
+        auto now = ch::system_clock::now();
+        auto tt = ch::system_clock::to_time_t(now);
+        auto tm = mLocalDate ? *localtime(&tt) : *gmtime(&tt);
+
+        std::stringstream date{};
+        date.imbue(std::locale());
+
+        put_locale_time(date, ' ', &tm, mDisplayYear ? LongDateFormat : ShortDateFormat);
+
+        if (auto first = begin(); first != end()) {
+            if (auto hmLabel = (*first)->getNode<TextLabel>(); hmLabel) {
+                if (hmLabel->setText(date.str()))
+                    getApplication().redrawBackground();
+            }
+        }
+    }
+
+    void DateBox::draw(gm::Context &context, const Position &containerPosition) {
+        Manager::draw(context, containerPosition);
+    }
+
+    Rectangle DateBox::layout(gm::Context &context, const Rectangle &screenRect) {
+        if (Container::empty())
+            initialize();
+        return Manager::layout(context, screenRect);
     }
 }
