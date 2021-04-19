@@ -11,8 +11,19 @@
 #include "Font.h"
 #include "GraphicsModel.h"
 #include <string>
+#include <utility>
 
 namespace rose {
+
+    struct PointSize {
+        int pointSize{};
+        explicit PointSize(int size) : pointSize(size) {}
+    };
+
+    struct FontName {
+        std::string fontName;
+        explicit FontName(std::string  name) : fontName(std::move(name)) {}
+    };
 
     /**
      * @class Text
@@ -64,6 +75,16 @@ namespace rose {
          * @return The Status of the operation.
          */
         Status createTextureBlended(gm::Context &context);
+
+        /// Set the font point size.
+        void setPointSize(int pointSize) {
+            mPointSize = pointSize;
+        }
+
+        /// Set the font name.
+        void setFontName(const std::string &fontName) {
+            mFontName = fontName;
+        }
     };
 
 #if 0
@@ -115,3 +136,30 @@ namespace rose {
 #endif
 }
 
+/**
+ * @brief Insertion operator to set PointSize on a Text.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @param pointSize The PointSize.
+ * @return The Widget.
+ */
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::PointSize pointSize) {
+    static_assert(std::is_base_of_v<rose::Text,WidgetClass>, "WidgetClass must be derived from rose::Text." );
+    widget->setPointSize(pointSize.pointSize);
+    return widget;
+}
+
+/**
+ * @brief Insertion operator to set Font name on a Text.
+ * @tparam WidgetClass The class of the Widget.
+ * @param widget The Widget.
+ * @param pointSize The FontName.
+ * @return The Widget.
+ */
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, rose::FontName fontName) {
+    static_assert(std::is_base_of_v<rose::Text,WidgetClass>, "WidgetClass must be derived from rose::Text." );
+    widget->setFontName(fontName.fontName);
+    return widget;
+}
