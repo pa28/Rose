@@ -53,8 +53,6 @@ namespace rose {
             };
 
         public:
-            PulsePerSecond() = default;
-
             ~PulsePerSecond() override = default;
 
             [[nodiscard]] size_t size() const override {
@@ -78,8 +76,6 @@ namespace rose {
             };
 
         public:
-            HeartBeat() = default;
-
             ~HeartBeat() override = default;
 
             [[nodiscard]] size_t size() const override {
@@ -104,8 +100,6 @@ namespace rose {
 
         Animator() = default;
     public:
-        ~Animator() = default;
-
         static Animator& getAnimator() {
             static Animator instance{};
             return instance;
