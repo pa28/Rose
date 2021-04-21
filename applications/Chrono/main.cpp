@@ -15,6 +15,15 @@
 
 using namespace rose;
 
+class Row : public Manager {
+protected:
+
+public:
+    Row() : Manager() {
+        setLayoutManager(std::make_unique<LinearLayout>(Orientation::Horizontal));
+    }
+};
+
 class Column : public Manager {
 protected:
 
@@ -116,8 +125,8 @@ public:
                 if (i == 1) {
                     std::dynamic_pointer_cast<Visual>(*(first + i))->setScreenRectangle(sideRect);
                 } else {
-                    std::dynamic_pointer_cast<Column>(*(first + i))->layout(context, botRect);
-                    std::dynamic_pointer_cast<Column>(*(first + i))->setScreenRectangle(botRect);
+                    std::dynamic_pointer_cast<Row>(*(first + i))->layout(context, botRect);
+                    std::dynamic_pointer_cast<Row>(*(first + i))->setScreenRectangle(botRect);
                 }
             }
         }
@@ -277,9 +286,10 @@ struct Chrono : public Application {
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                  << wdg<MapProjection>() >> mapProjection << endw
                  << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
-                 << wdg<Column>()
-                     << wdg<TimeBox>(timerTick, true, false) << endw
-                     << wdg<DateBox>(timerTick, true, false);
+                 << wdg<Row>()
+                     << wdg<Column>()
+                         << wdg<TimeBox>(timerTick, true, true) << endw
+                         << wdg<DateBox>(timerTick, true, true);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
         registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
