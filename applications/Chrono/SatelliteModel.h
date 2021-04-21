@@ -65,7 +65,6 @@ namespace rose {
         using iterator = std::map<std::string_view, std::array<std::string_view,3>>::iterator;
 
         Ephemeris() = default;
-        ~Ephemeris() = default;
 
         explicit Ephemeris(const std::filesystem::path& filePath);
 
@@ -92,8 +91,6 @@ namespace rose {
             static SatelliteModel instance{};
             return instance;
         }
-
-        ~SatelliteModel() = default;
 
         SatelliteModel(const SatelliteModel&) = delete;
 
@@ -148,7 +145,6 @@ namespace rose {
         DateTime srchTime{}, riseTime{}, setTime{};
 
         SatellitePassData() = default;
-        ~SatellitePassData() = default;
 
         /**
          * @brief Create a std::string that describes the pass.

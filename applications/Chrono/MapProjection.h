@@ -148,8 +148,6 @@ namespace rose {
 
         GeoPosition() = default;
 
-        ~GeoPosition() = default;
-
         /**
          * @brief Create a geographic position.
          * @param latitude The latitude.

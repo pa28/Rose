@@ -204,7 +204,7 @@ public:
     [[nodiscard]] std::tuple<int, uint, uint, uint, uint, uint>
     gettime() const;
 
-    time_t mktime() const;
+    [[nodiscard]] time_t mktime() const;
 
     bool operator<(const DateTime &rhs) const;
 
@@ -271,23 +271,16 @@ public:
     Observer(const Observer &observer) = default;
 
     Observer &operator=(const Observer &observer) = default;
-
-    ~Observer() = default;
 };
 
 //----------------------------------------------------------------------
 
 /**
- * @class Sun
+ * @struct Sun
  * @brief Sun position in the sky.
  */
-class Sun {
-public:
+struct Sun {
     Vec3 SUN, H;
-
-    Sun() = default;
-
-    ~Sun() = default;
 
     void predict(const DateTime &dt);
 };
@@ -348,8 +341,6 @@ public:
     explicit Satellite(const std::array<std::string_view, 3> &ephemeris);
 
     void setEphemeris(const std::array<std::string_view,3> &ephemeris);
-
-    ~Satellite() = default;
 
     constexpr explicit operator bool() const noexcept { return isValid; }
 
