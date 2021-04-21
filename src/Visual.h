@@ -252,11 +252,6 @@ namespace rose {
         explicit Screen(Application &application);
         ~Screen() override = default;
 
-        Screen(const Screen&) = delete;
-        Screen(Screen &&) = delete;
-        Screen& operator=(const Screen&) = delete;
-        Screen& operator=(Screen &&) = delete;
-
         /**
          * @brief Add a Window to the screen.
          * @param node The Window to add.
@@ -293,7 +288,6 @@ namespace rose {
         bool mModalWindow{};
 
     public:
-        Window() = default;
         ~Window() override = default;
 
         bool isModal() const { return mModalWindow; }
@@ -343,7 +337,6 @@ namespace rose {
      * @brief A pure virtual base class for layout managers.
      */
     class LayoutManager {
-
     protected:
         size_t mMaxContent{UnlimitedContent};   //The maximum number of objects the LayoutManager supports.
 
@@ -361,7 +354,6 @@ namespace rose {
         /// The value for 'unlimited' managed objects.
         static constexpr size_t UnlimitedContent = std::numeric_limits<size_t>::max();
 
-        LayoutManager() = default;
         virtual ~LayoutManager() = default;
         using Itr = Container::iterator;
 
@@ -385,7 +377,6 @@ namespace rose {
      */
     class SimpleLayout : public LayoutManager {
     public:
-        SimpleLayout() = default;
         ~SimpleLayout() override = default;
 
         /// Layout the content.
@@ -410,8 +401,6 @@ namespace rose {
      * @brief An element of the application user interface.
      */
     class Widget : public Visual, public Container {
-    public:
-
     protected:
         /// The pointer has entered the Widget.
         EventCallback mEnterEventCallback{};
@@ -432,8 +421,6 @@ namespace rose {
         KeyboardShortcutCallback mKeyboardShortcutCallback{};
 
     public:
-        Widget() = default;
-
         ~Widget() override = default;
 
         Widget(const Widget &) = delete;
