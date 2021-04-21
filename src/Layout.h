@@ -19,8 +19,6 @@ namespace rose {
     protected:
 
     public:
-        StackLayout() = default;
-
         ~StackLayout() override = default;
 
         /// Layout the contents of the associated manager.
@@ -53,8 +51,6 @@ namespace rose {
     protected:
 
     public:
-        PlacementLayout() = default;
-
         ~PlacementLayout() override = default;
 
         /// Layout the contents of the associated manager.

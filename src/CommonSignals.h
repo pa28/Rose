@@ -19,8 +19,6 @@ namespace rose {
         CommonSignals() = default;
 
     public:
-        ~CommonSignals() = default;
-
         CommonSignals(const CommonSignals&) = delete;
 
         CommonSignals(CommonSignals&&) = delete;

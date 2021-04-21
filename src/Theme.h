@@ -33,7 +33,6 @@ namespace rose {
     protected:
         Theme() = default;
     public:
-        ~Theme() = default;
 
         static Theme &getTheme() {
             static Theme instance{};
@@ -127,7 +126,6 @@ namespace rose {
                 { rgba(ThemeColor::Base), rgba(ThemeColor::Invert)},
                 {BorderStyle::NotchIn, BorderStyle::BevelIn}
         };
-
     };
 }
 

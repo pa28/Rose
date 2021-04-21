@@ -114,7 +114,7 @@ namespace rose {
     public:
         WebCache() = delete;
 
-        virtual ~ WebCache() = default;
+        virtual ~WebCache() = default;
 
         /**
          * @brief Constructor
@@ -296,6 +296,4 @@ namespace rose {
             return !mAsyncList.empty();
         }
     };
-
 }
-

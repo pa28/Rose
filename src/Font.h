@@ -84,8 +84,6 @@ namespace rose {
         }
 
     public:
-        ~FontCache() = default;
-
         static FontCache& getFontCache() {
             static FontCache instance{};
 
@@ -219,6 +217,3 @@ namespace rose {
         return font;
     }
 }
-
-
-

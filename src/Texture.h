@@ -46,7 +46,6 @@ namespace rose::gm {
     class Texture : public std::unique_ptr<SDL_Texture,TextureDestroy> {
     public:
         Texture() = default;
-        ~Texture() = default;
 
         Texture(const Texture&) = delete;
         Texture(Texture &&) = default;

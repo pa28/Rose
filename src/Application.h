@@ -68,8 +68,6 @@ namespace rose {
     public:
         EventSemantics() = delete;
 
-        ~EventSemantics() = default;
-
         explicit EventSemantics(Application& application) : mApplication(application) {}
 
         void onEvent(SDL_Event &e);
@@ -183,8 +181,6 @@ namespace rose {
 
     public:
         Application() = delete;
-
-        ~Application() = default;
 
         Application(int argc, char **argv);
 

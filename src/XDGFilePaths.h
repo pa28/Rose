@@ -60,8 +60,6 @@ namespace rose {
 
     public:
 
-        ~XDGFilePaths() = default;
-
         XDGFilePaths();
 
         /**
@@ -87,7 +85,5 @@ namespace rose {
             preferredPath.append(relativePath);
             return std::make_tuple(false, preferredPath);
         }
-
     };
 }
-

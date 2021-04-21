@@ -324,7 +324,7 @@ namespace rose::gm {
         explicit operator bool() const noexcept { return mStatus == 0; }
 
         /**
-         * @brief Set the drow Color on the renderer without pushing the old color on the stack.
+         * @brief Set the draw Color on the renderer without pushing the old color on the stack.
          * @param color The SDL_Color to set.
          * @return The SDL2 API return status code.
          */
@@ -463,10 +463,6 @@ namespace rose::gm {
         std::vector<Rectangle> mDisplayBounds{};
 
     public:
-        GraphicsModel() = default;
-
-        ~GraphicsModel() = default;
-
         RoseErrorCode ErrorCode{RoseErrorCode::OK};
 
         bool initialize(const std::string &title, Size initialSize, Position initialPosition, uint32_t extraFlags);

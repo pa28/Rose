@@ -212,8 +212,6 @@ namespace rose {
     };
 
     class Frame : public Manager, public FrameElements, public Animation {
-    protected:
-
     public:
         Frame() noexcept : Manager(), FrameElements() {
             mLayoutManager = std::make_unique<FrameLayoutManager>();

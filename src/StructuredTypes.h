@@ -185,5 +185,4 @@ namespace rose {
         }
         return node;
     }
-
 }

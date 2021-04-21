@@ -419,21 +419,25 @@ namespace rose {
     std::array<char, 8> utf8(int c);
 }
 
+/// Stream insertion operator for Size.
 inline std::ostream& operator<<(std::ostream& strm, const rose::Size &size) {
     strm << '(' << size.w << ',' << size.h << ')';
     return strm;
 }
 
+/// Stream insertion operator for Position.
 inline std::ostream& operator<<(std::ostream& strm, const rose::Position &pos) {
     strm << '(' << pos.x << ',' << pos.y << ')';
     return strm;
 }
 
+/// Stream insertion operator for Rectangle.
 inline std::ostream& operator<<(std::ostream& strm, const rose::Rectangle &rec) {
     strm << '(' << rec.x << ',' << rec.y << ',' << rec.w << ',' << rec.h << ')';
     return strm;
 }
 
+/// Stream insertion operator for Padding.
 inline std::ostream& operator<<(std::ostream& strm, const rose::Padding &pad) {
     strm << '[' << pad.t << ',' << pad.l << ',' << pad.b << ',' << pad.r << ']';
     return strm;

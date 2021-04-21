@@ -421,6 +421,8 @@ namespace rose {
         KeyboardShortcutCallback mKeyboardShortcutCallback{};
 
     public:
+        Widget() = default;
+
         ~Widget() override = default;
 
         Widget(const Widget &) = delete;
