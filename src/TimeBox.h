@@ -28,7 +28,6 @@ namespace rose {
         static constexpr std::string_view ShortSecondsFmt = "%Z";
 
         std::unique_ptr<cpp_local_time::LocalTime> mLocalTimeConvert{};
-        std::atomic_bool mUpdateTimeDisplay{false};
 
         std::shared_ptr<TimerTick> mTimerTick{};      ///< The source of time signals.
         bool mDisplaySeconds{true}; ///< Display seconds in time.
@@ -112,8 +111,10 @@ namespace rose {
         static constexpr std::string_view LongDateFormat = "%a %b %d, %Y";
         static constexpr std::string_view ShortDateFormat = "%a %b %d";
 
+        std::unique_ptr<cpp_local_time::LocalTime> mLocalTimeConvert{};
+
         bool mDisplayYear{true};
-        bool mLocalDate{false};
+        bool mLocalTime{false};     ///< If time zone is empty display local time if true.
         std::string mTimeZone{};    ///< The time zone if not empty.
         std::shared_ptr<TimerTick> mTimerTick{};      ///< The source of time signals.
 
@@ -160,7 +161,12 @@ namespace rose {
 
         DateBox(std::shared_ptr<TimerTick> timerTick, bool year, bool localTime = false) : DateBox(std::move(timerTick)) {
             mDisplayYear = year;
-            mLocalDate = localTime;
+            mLocalTime = localTime;
+        }
+
+        DateBox(std::shared_ptr<TimerTick> timerTick, const char *timeZone, bool year = true) : DateBox(std::move(timerTick)) {
+            mDisplayYear = year;
+            mTimeZone = timeZone;
         }
 
         DateBox(std::shared_ptr<TimerTick> timerTick, const std::string &timeZone, bool year = true) : DateBox(std::move(timerTick)) {
@@ -177,6 +183,65 @@ namespace rose {
 
         /**
          * @brief Layout the DateBox and contents.
+         * @param context The context that will be used to draw the Manager and contents.
+         * @param screenRect The screen rectangle available to the Manager.
+         * @return The rectangle occupied by the Manager.
+         */
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
+    };
+
+    class TimeDateBox : public Manager {
+    protected:
+        bool mDisplaySecond{};
+        bool mDisplayYear{};
+        bool mLocalTime{};
+        std::string mTimeZone{};
+        std::shared_ptr<TimerTick> mTick{};
+
+        void initialize();
+
+    public:
+        TimeDateBox() = delete;
+
+        ~TimeDateBox() override = default;
+
+        TimeDateBox(const TimeDateBox&) = delete;
+
+        TimeDateBox(TimeDateBox&&) = delete;
+
+        TimeDateBox& operator=(const TimeDateBox&) = delete;
+
+        TimeDateBox& operator=(TimeDateBox&&) = delete;
+
+        explicit TimeDateBox(std::shared_ptr<TimerTick> tick);
+
+        TimeDateBox(std::shared_ptr<TimerTick> timerTick, bool second, bool year, bool localTime = false) : TimeDateBox(std::move(timerTick)) {
+            mDisplayYear = year;
+            mDisplaySecond = second;
+            mLocalTime = localTime;
+        }
+
+        TimeDateBox(std::shared_ptr<TimerTick> timerTick, const char *timeZone, bool second, bool year = true) : TimeDateBox(std::move(timerTick)) {
+            mDisplayYear = year;
+            mDisplaySecond = second;
+            mTimeZone = timeZone;
+        }
+
+        TimeDateBox(std::shared_ptr<TimerTick> timerTick, const std::string &timeZone, bool second, bool year = true) : TimeDateBox(std::move(timerTick)) {
+            mDisplayYear = year;
+            mDisplaySecond = second;
+            mTimeZone = timeZone;
+        }
+
+        /**
+         * @brief Draw the TimeDateBox and contents.
+         * @param context The graphics context used to draw the manager and contents.
+         * @param containerPosition The Position of the Container that holds the Manager.
+         */
+        void draw(gm::Context &context, const Position &containerPosition) override;
+
+        /**
+         * @brief Layout the TimeDateBox and contents.
          * @param context The context that will be used to draw the Manager and contents.
          * @param screenRect The screen rectangle available to the Manager.
          * @return The rectangle occupied by the Manager.

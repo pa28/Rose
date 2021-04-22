@@ -106,23 +106,30 @@ namespace rose {
     void DateBox::initialize() {
         this->getNode<DateBox>() << wdg<TextLabel>("") << Padding{0}
                                  << FontName{Theme::getTheme().BoldFont}
-                << PointSize{2*Theme::getTheme().LabelPointSize/3};
+                                 << PointSize{2 * Theme::getTheme().LabelPointSize / 3};
 
 
+        if (!mTimeZone.empty()) {
+            mLocalTimeConvert = std::make_unique<cpp_local_time::LocalTime>(mTimeZone);
+        } else {
+            if (mLocalTime)
+                mLocalTimeConvert = std::make_unique<cpp_local_time::LocalTime>();
+            else
+                mLocalTimeConvert = std::make_unique<cpp_local_time::LocalTime>("GMT");
+        }
         updateDateDisplay();
 
         mTimerTick->minuteSignal.connect(minuteSlot);
     }
 
     void DateBox::updateDateDisplay() {
-        auto now = ch::system_clock::now();
-        auto tt = ch::system_clock::to_time_t(now);
-        auto tm = mLocalDate ? *localtime(&tt) : *gmtime(&tt);
+        auto now = std::chrono::system_clock::now();
+        *mLocalTimeConvert = std::chrono::system_clock::to_time_t(now);
+        mLocalTimeConvert->getZoneTime();
 
         std::stringstream date{};
         date.imbue(std::locale());
-
-        put_locale_time(date, ' ', &tm, mDisplayYear ? LongDateFormat : ShortDateFormat);
+        date << mLocalTimeConvert->put(mDisplayYear ? LongDateFormat : ShortDateFormat);
 
         if (auto first = begin(); first != end()) {
             if (auto hmLabel = (*first)->getNode<TextLabel>(); hmLabel) {
@@ -140,5 +147,30 @@ namespace rose {
         if (Container::empty())
             initialize();
         return Manager::layout(context, screenRect);
+    }
+
+    TimeDateBox::TimeDateBox(std::shared_ptr<TimerTick> tick) {
+        mTick = std::move(tick);
+        setLayoutManager(std::make_unique<LinearLayout>(Orientation::Vertical));
+    }
+
+    void TimeDateBox::draw(gm::Context &context, const Position &containerPosition) {
+        Manager::draw(context, containerPosition);
+    }
+
+    Rectangle TimeDateBox::layout(gm::Context &context, const Rectangle &screenRect) {
+        if (Container::empty())
+            initialize();
+        return Manager::layout(context, screenRect);
+    }
+
+    void TimeDateBox::initialize() {
+        if (mTimeZone.empty()) {
+            getNode<TimeDateBox>() << wdg<TimeBox>(mTick, mDisplaySecond, mLocalTime) << endw
+                                   << wdg<DateBox>(mTick, mDisplayYear, mLocalTime);
+        } else {
+            getNode<TimeDateBox>() << wdg<TimeBox>(mTick, mTimeZone, mDisplaySecond) << endw
+                                   << wdg<DateBox>(mTick, mTimeZone, mDisplayYear);
+        }
     }
 }
