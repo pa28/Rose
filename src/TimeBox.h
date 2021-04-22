@@ -8,10 +8,12 @@
 #pragma once
 
 #include <utility>
+#include <atomic>
 
 #include "Layout.h"
 #include "Signals.h"
 #include "TimerTick.h"
+#include "LocalTime.h"
 
 namespace rose {
 
@@ -24,6 +26,9 @@ namespace rose {
         static constexpr std::string_view HoursMinutesFmt = "%R";
         static constexpr std::string_view LongSecondsFmt = "%S %Z";
         static constexpr std::string_view ShortSecondsFmt = "%Z";
+
+        std::unique_ptr<cpp_local_time::LocalTime> mLocalTimeConvert{};
+        std::atomic_bool mUpdateTimeDisplay{false};
 
         std::shared_ptr<TimerTick> mTimerTick{};      ///< The source of time signals.
         bool mDisplaySeconds{true}; ///< Display seconds in time.
@@ -74,6 +79,11 @@ namespace rose {
         TimeBox(std::shared_ptr<TimerTick> timerTick, bool seconds, bool localTime = false) : TimeBox(std::move(timerTick)) {
             mDisplaySeconds = seconds;
             mLocalTime = localTime;
+        }
+
+        TimeBox(std::shared_ptr<TimerTick> timerTick, const char *timeZone, bool seconds = true) : TimeBox(std::move(timerTick)) {
+            mDisplaySeconds = seconds;
+            mTimeZone = timeZone;
         }
 
         TimeBox(std::shared_ptr<TimerTick> timerTick, const std::string &timeZone, bool seconds = true) : TimeBox(std::move(timerTick)) {

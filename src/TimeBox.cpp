@@ -35,12 +35,24 @@ namespace rose {
                                  << FontName{Theme::getTheme().FixedBoldFont}
                                  << PointSize{2*Theme::getTheme().LabelPointSize/3};
 
+        if (!mTimeZone.empty()) {
+            mLocalTimeConvert = std::make_unique<cpp_local_time::LocalTime>(mTimeZone);
+        } else {
+            if (mLocalTime)
+                mLocalTimeConvert = std::make_unique<cpp_local_time::LocalTime>();
+            else
+                mLocalTimeConvert = std::make_unique<cpp_local_time::LocalTime>("GMT");
+        }
         updateTimeDisplay();
 
         mTimerTick->secondSignal.connect(secondSlot);
     }
 
     void TimeBox::draw(gm::Context &context, const Position &containerPosition) {
+        if (mUpdateTimeDisplay) {
+            updateTimeDisplay();
+            mUpdateTimeDisplay = false;
+        }
         Manager::draw(context, containerPosition);
     }
 
@@ -51,20 +63,19 @@ namespace rose {
     }
 
     void TimeBox::updateTimeDisplay() {
-        auto now = ch::system_clock::now();
-        auto tt = ch::system_clock::to_time_t(now);
-        auto tm = mLocalTime ? *localtime(&tt) : *gmtime(&tt);
-
-        cpp_local_time::LocalTime localTime{":Canada/Atlantic"};
+        mLocalTimeConvert->now();
+        mLocalTimeConvert->getZoneTime();
 
         std::stringstream hm{};
         hm.imbue(std::locale());
-
-        put_locale_time(hm, ' ', &tm, HoursMinutesFmt);
+        hm << mLocalTimeConvert->put(HoursMinutesFmt);
 
         std::stringstream sec{};
         sec.imbue(std::locale());
-        put_locale_time(sec, ' ', &tm, mDisplaySeconds ? LongSecondsFmt : ShortSecondsFmt);
+        if (mDisplaySeconds)
+            sec << mLocalTimeConvert->put(LongSecondsFmt);
+        else
+            sec << mLocalTimeConvert->put(ShortSecondsFmt);
 
         bool redrawBackground = false;
         if (auto first = begin(); first != end()) {
