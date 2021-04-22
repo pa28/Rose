@@ -43,6 +43,11 @@ namespace rose {
 
             if (mapDepiction != mMapDepiction) {
                 mMapDepiction = mapDepiction;
+                for (auto &mercator : mMercator)
+                    mercator.reset();
+
+                for (auto &azimuthal : mAzimuthal)
+                    azimuthal.reset();
                 cacheCurrentMaps();
             }
         };
@@ -76,30 +81,31 @@ namespace rose {
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
-
         std::array<uint32_t,2> mapId{MapImageId(mMapDepiction, mMapSize, MapIllumination::Day),
                                      MapImageId(mMapDepiction, mMapSize, MapIllumination::Night)};
 
         std::array<std::optional<std::filesystem::path>,2> mapPath{mMapCache->localItemExists(mapId[0]),
                                                     mMapCache->localItemExists(mapId[1])};
 
-        if (mapPath[0] && mapPath[1]) {
-            for (size_t i = 0; i < mapPath.size(); i++) {
-                gm::Surface bmp{mapPath[i].value()};
-                if (i) {
-                    Size bmpSize{bmp->w, bmp->h};
-                    if (bmpSize != mMapImgSize)
-                        throw std::runtime_error("Image size mismatch.");
-                } else {
-                    mMapImgSize = Size{bmp->w, bmp->h};
+        if (!mMercator[0] || !mAzimuthal[0]) {
+            if (mapPath[0] && mapPath[1]) {
+                for (size_t i = 0; i < mapPath.size(); i++) {
+                    gm::Surface bmp{mapPath[i].value()};
+                    if (i) {
+                        Size bmpSize{bmp->w, bmp->h};
+                        if (bmpSize != mMapImgSize)
+                            throw std::runtime_error("Image size mismatch.");
+                    } else {
+                        mMapImgSize = Size{bmp->w, bmp->h};
+                    }
+                    mMapSurface[i] = gm::Surface{bmp->w, bmp->h};
+                    mMapSurface[i].blitSurface(bmp);
+                    mAzSurface[i] = gm::Surface{bmp->w, bmp->h};
                 }
-                mMapSurface[i] = gm::Surface{bmp->w, bmp->h};
-                mMapSurface[i].blitSurface(bmp);
-                mAzSurface[i] = gm::Surface{bmp->w, bmp->h};
-            }
 
-            computeAzimuthalMaps();
-            mNewSurfaces = setForegroundBackground();
+                computeAzimuthalMaps();
+                mNewSurfaces = setForegroundBackground();
+            }
         }
 
         if (mNewSurfaces) {
