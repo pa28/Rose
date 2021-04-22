@@ -133,12 +133,12 @@ time_t DateTime::mktime() const {
     auto timer = time(nullptr);
     auto timeInfo = gmtime(&timer);
     timeInfo->tm_year = year - 1900;
-    timeInfo->tm_mon = month - 1;
+    timeInfo->tm_mon = (int)month - 1;
     timeInfo->tm_mday = day;
     timeInfo->tm_hour = h;
     timeInfo->tm_min = m;
     timeInfo->tm_sec = s;
-    return ::mktime(timeInfo);
+    return ::mktime(timeInfo);  // ToDo: overlap in memcpy
 }
 
 void

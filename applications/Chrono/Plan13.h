@@ -225,7 +225,7 @@ public:
     void userNow() {
         struct tm *tm;
         auto t = time(nullptr);
-        tm = gmtime(&t);
+        tm = gmtime(&t);  // ToDo: overlap in memcpy
         int yr = tm->tm_year + 1900;
         uint8_t mo = tm->tm_mon + 1;
         uint8_t dy = tm->tm_mday;
