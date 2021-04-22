@@ -49,10 +49,6 @@ namespace rose {
     }
 
     void TimeBox::draw(gm::Context &context, const Position &containerPosition) {
-        if (mUpdateTimeDisplay) {
-            updateTimeDisplay();
-            mUpdateTimeDisplay = false;
-        }
         Manager::draw(context, containerPosition);
     }
 
@@ -63,7 +59,8 @@ namespace rose {
     }
 
     void TimeBox::updateTimeDisplay() {
-        mLocalTimeConvert->now();
+        auto now = std::chrono::system_clock::now();
+        *mLocalTimeConvert = std::chrono::system_clock::to_time_t(now);
         mLocalTimeConvert->getZoneTime();
 
         std::stringstream hm{};
@@ -89,8 +86,9 @@ namespace rose {
                 }
             }
         }
-        if (redrawBackground)
+        if (redrawBackground) {
             getApplication().redrawBackground();
+        }
     }
 
     DateBox::DateBox(std::shared_ptr<TimerTick> timerTick) : mTimerTick(std::move(timerTick)),
