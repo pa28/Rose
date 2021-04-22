@@ -276,7 +276,7 @@ struct Chrono : public Application {
                  << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                  << wdg<Row>()
                      << wdg<Column>()
-                         << wdg<TimeBox>(timerTick, ":Canada/Atlantic", true) << endw
+                         << wdg<TimeBox>(timerTick, true, false) << endw
                          << wdg<DateBox>(timerTick, true, false);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
