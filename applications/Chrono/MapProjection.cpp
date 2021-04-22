@@ -43,17 +43,18 @@ namespace rose {
 
             if (mapDepiction != mMapDepiction) {
                 mMapDepiction = mapDepiction;
-                for (auto &mercator : mMercator)
-                    mercator.reset();
-
-                for (auto &azimuthal : mAzimuthal)
-                    azimuthal.reset();
                 cacheCurrentMaps();
             }
         };
     }
 
     void MapProjection::cacheCurrentMaps() {
+        for (auto &mercator : mMercator)
+            mercator.reset();
+
+        for (auto &azimuthal : mAzimuthal)
+            azimuthal.reset();
+
         std::array<std::tuple<MapDepiction,MapSize,MapIllumination>,2> maps{
                 std::make_tuple(mMapDepiction, mMapSize, MapIllumination::Day),
                 std::make_tuple(mMapDepiction, mMapSize, MapIllumination::Night),
