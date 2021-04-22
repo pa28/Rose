@@ -11,6 +11,7 @@
 #include <chrono>
 #include "Button.h"
 #include "Application.h"
+#include "LocalTime.h"
 
 namespace rose {
     namespace ch = std::chrono;
@@ -53,6 +54,8 @@ namespace rose {
         auto now = ch::system_clock::now();
         auto tt = ch::system_clock::to_time_t(now);
         auto tm = mLocalTime ? *localtime(&tt) : *gmtime(&tt);
+
+        cpp_local_time::LocalTime localTime{":Canada/Atlantic"};
 
         std::stringstream hm{};
         hm.imbue(std::locale());

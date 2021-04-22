@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(Rose VERSION 0.1.48.48)
+project(Rose VERSION 0.1.49.49)
 set(PACKAGE_CONTACT "Richard Buckley <richard.buckley>@ieee.org>")
 include(GNUInstallDirs)
 
@@ -22,6 +22,7 @@ find_package(SDL2_IMAGE REQUIRED)
 find_package(SDL2TTF REQUIRED)
 find_package(CURLPP REQUIRED)
 find_package(Soci REQUIRED COMPONENTS sqlite3)
+find_package(LocalTime REQUIRED)
 
 if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ocuments")
     # build the docs
@@ -92,6 +93,7 @@ include_directories(${SDL2TTF_INCLUDE_DIR})
 include_directories(${SDL2_IMAGE_INCLUDE_DIR})
 include_directories(${CURLPP_INCLUDE_DIR})
 include_directories(${SOCI_INCLUDE_DIRS})
+include_directories(${LOCALTIME_INCLUDE_DIR})
 include_directories(src)
 include_directories(include)
 
@@ -130,7 +132,7 @@ add_compile_definitions(VERSION=${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR
 add_compile_definitions($<CONFIG>)
 
 list(APPEND RoseLibraries rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LIBRARY} ${CURLPP_LIBRARIES} ${SOCI_LIBRARY}
-        ${SOCI_sqlite3_PLUGIN} ${EXTRA_LIBS})
+        ${SOCI_sqlite3_PLUGIN} ${LOCALTIME_LIBRARY} ${EXTRA_LIBS})
 
 if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     add_library(rose SHARED ${ROSE_SRC})
