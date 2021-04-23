@@ -293,8 +293,6 @@ namespace rose {
         return std::make_tuple(lat, lng);
     }
 
-#if 1
-
     bool MapProjection::computeAzimuthalMaps() {
         // Compute Azimuthal maps from the Mercator maps
         auto sinY = sin(mQthRad.lat);
@@ -402,7 +400,4 @@ namespace rose {
         }
         return true;
     }
-
-#endif
-
 }
