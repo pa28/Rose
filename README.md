@@ -1,5 +1,7 @@
 # Rose -- A GUI Library Primarily Targeting Raspberry Pi On Small Displays.
 
+[![docs available](https://img.shields.io/badge/Docs-Available-brightgreen)](https://codedocs.xyz/pa28/Rose/)
+
 I have started this project mainly to bring my
 personal desires to the great features available
 from [HamClock](https://www.clearskyinstitute.com/ham/HamClock/).
