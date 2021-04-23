@@ -19,7 +19,6 @@ namespace rose {
     }
 
     void Application::windowStateChange(EventSemantics::WindowEventType type) {
-        std::cout << __PRETTY_FUNCTION__ << ' ';
         Settings &settings{Settings::getSettings()};
         switch (type) {
             case EventSemantics::Shown: {
@@ -89,8 +88,6 @@ namespace rose {
     }
 
     void Application::windowPositionChange(EventSemantics::WindowEventType type, Position position) {
-        std::cout << __PRETTY_FUNCTION__ << position << " Display: "
-            << SDL_GetWindowDisplayIndex(getSdlWindow().get()) << '\n';
         if (mAppState == EventSemantics::Restored) {
             Settings &settings{Settings::getSettings()};
             auto borders = windowBorders();
@@ -103,10 +100,6 @@ namespace rose {
     bool Application::keyboardEventCallback(const SDL_KeyboardEvent &keyboardEvent) {
         static constexpr std::array<uint,2> KeyboardCtlKeyMods{ KMOD_LCTRL, KMOD_RCTRL };
         static constexpr std::array<uint,2> KeyboardAltKeyMods{ KMOD_LALT, KMOD_RALT };
-
-        std::cout << __PRETTY_FUNCTION__ << " Id: " << keyboardEvent.windowID
-                  << ", state: " << (uint32_t) keyboardEvent.state << ", repeat: " << (uint32_t) keyboardEvent.repeat
-                  << ' ' << SDL_GetKeyName(keyboardEvent.keysym.sym) << '\n';
 
         string keyName{SDL_GetKeyName(keyboardEvent.keysym.sym)};
         if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_CTRL, KeyboardCtlKeyMods)) {
@@ -145,7 +138,6 @@ namespace rose {
             Settings::getSettings().setValue(set::SetAppState, static_cast<int>(mAppState));
             return returnValue;
         } else if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_ALT, KeyboardAltKeyMods)) {
-            std::cout << __PRETTY_FUNCTION__ << " Keyboard shortcuts " << keyboardEvent.keysym.sym << "\n";
             if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut !=
                                                                                    mKeyboardShortcuts.end()) {
                 if (auto widget = shortcut->second.second.lock(); widget)
