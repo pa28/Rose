@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "MapProjection.h"
 #include "GraphicsModel.h"
+#include "Texture.h"
 #include "Settings.h"
 #include "Math.h"
 
@@ -124,7 +125,7 @@ namespace rose {
                         mNewSurfaces = setForegroundBackground();
                         mMapProjectionsInvalid = false;
                     } else
-                        std::cout << __PRETTY_FUNCTION__ << " computeAzimuthaMaps returned false.\n";
+                        std::cout << __PRETTY_FUNCTION__ << " computeAzimuthalMaps returned false.\n";
                 }
             }
         }
@@ -156,23 +157,36 @@ namespace rose {
                 break;
             case MapProjectionType::StationMercator: {
                 auto lon = mQth.lon;
-                int splitPixel = util::roundToInt((double) mMapImgSize.w * ((lon) / 360.));
+                auto actualMapImgSize = mMercator[0].getSize();
+                int splitPixel = util::roundToInt((double) actualMapImgSize.w * ((lon) / 360.));
                 if (splitPixel < 0)
-                    splitPixel += mMapImgSize.w;
+                    splitPixel += actualMapImgSize.w;
 
-                Rectangle src{splitPixel, 0, mMapImgSize.w - splitPixel, mMapImgSize.h};
-                Rectangle dst{widgetRect};
-                dst.w = src.w;
-                dst.h = src.h;
-                context.renderCopy(mMercator[1], src, dst);
-                context.renderCopy(mMercator[0], src, dst);
+                Rectangle src0{splitPixel, 0, actualMapImgSize.w - splitPixel, actualMapImgSize.h};
+                Rectangle dst0{widgetRect};
+                dst0.w = src0.w;
+                dst0.h = src0.h;
 
-                src.x = 0;
-                dst.x += src.w;
-                src.w = splitPixel;
-                dst.w = splitPixel;
-                context.renderCopy(mMercator[1], src, dst);
-                context.renderCopy(mMercator[0], src, dst);
+                auto src1 = src0;
+                auto dst1 = dst0;
+                src1.x = 0;
+                dst1.x += src1.w;
+                src1.w = splitPixel;
+                dst1.w = splitPixel;
+
+                gm::Texture tempText{context, actualMapImgSize};
+                if (tempText){
+                    gm::RenderTargetGuard renderTargetGuard{context, tempText};
+
+                    context.renderCopy(mMercator[1], src0, dst0);
+                    context.renderCopy(mMercator[0], src0, dst0);
+
+                    context.renderCopy(mMercator[1], src1, dst1);
+                    context.renderCopy(mMercator[0], src1, dst1);
+                } else {
+                    std::cout << __PRETTY_FUNCTION__ << " Texture creation failed.\n";
+                }
+                context.renderCopy(tempText, widgetRect);
             }
                 break;
             case MapProjectionType::StationAzimuthal:
