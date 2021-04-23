@@ -16,6 +16,12 @@
 
 namespace rose {
 
+    namespace set {
+        static constexpr std::string_view ChronoMapProjection{"MapProjection"};
+        static constexpr std::string_view ChronoMapDepiction{"MapDepiction"};
+    }
+
+
     /**
      * @enum MapProjectionType
      */
@@ -218,7 +224,7 @@ namespace rose {
         WebCacheProtocol::slot_type mMapSlot{};
 
         /// The map projection type.
-        MapProjectionType mProjection{MapProjectionType::StationAzimuthal};
+        MapProjectionType mProjection{};
 
         /// The map depiction.
         MapDepiction mMapDepiction{MapDepiction::Terrain};

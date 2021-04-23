@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "MapProjection.h"
 #include "GraphicsModel.h"
+#include "Settings.h"
 #include "Math.h"
 
 namespace rose {
@@ -38,11 +39,13 @@ namespace rose {
 
             if (projectionType != mProjection) {
                 mProjection = projectionType;
+                Settings::getSettings().setValue(set::ChronoMapProjection, static_cast<int>(mProjection));
                 getApplication().redrawBackground();
             }
 
             if (mapDepiction != mMapDepiction) {
                 mMapDepiction = mapDepiction;
+                Settings::getSettings().setValue(set::ChronoMapDepiction, static_cast<int>(mMapDepiction));
                 cacheCurrentMaps();
             }
         };
@@ -71,6 +74,14 @@ namespace rose {
 
     void MapProjection::addedToContainer() {
         Node::addedToContainer();
+
+        Settings &settings{Settings::getSettings()};
+        mProjection = static_cast<MapProjectionType>(
+                settings.getValue(set::ChronoMapProjection, static_cast<int>(MapProjectionType::StationMercator)));
+
+        mMapDepiction = static_cast<MapDepiction>(
+                settings.getValue(set::ChronoMapDepiction, static_cast<int>(MapDepiction::Terrain)));
+
         mMapSlot = WebCacheProtocol::createSlot();
         mMapSlot->receiver = [&](uint32_t key, long status) {
             std::cout << __PRETTY_FUNCTION__ << ' ' << key << ' ' << status << '\n';
@@ -163,7 +174,6 @@ namespace rose {
     }
 
     Rectangle MapProjection::layout(gm::Context &context, const Rectangle &screenRect) {
-        std::cout << __PRETTY_FUNCTION__ << screenRect << '\n';
         if (MapImageSize(mMapSize) != screenRect.size()) {
             auto currentMapSize = mMapSize;
             for (int i = static_cast<int>(MapSize::Small); i < static_cast<int>(MapSize::Last); ++i) {
