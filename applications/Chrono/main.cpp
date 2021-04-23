@@ -4,6 +4,7 @@
 #include "PointerInteractions.h"
 #include "GraphicsModel.h"
 #include "Application.h"
+#include "Button.h"
 #include "ImageStore.h"
 #include "Layout.h"
 #include "Settings.h"
@@ -57,8 +58,6 @@ public:
     /// Layout the contents of the associated manager.
     Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                             LayoutManager::Itr last) override {
-
-        std::cout << "\n\n" << __PRETTY_FUNCTION__ << screenRect << '\n';
 
         int width, height;
 
@@ -211,7 +210,6 @@ struct Chrono : public Application {
         static Size Size2{2400, 1440};
         static Size Size3{3200, 1920};
 
-        std::cout << __PRETTY_FUNCTION__ << '\n';
         if (keyboardEvent.keysym.mod & (uint) KMOD_CTRL) {
             auto displayIndex = SDL_GetWindowDisplayIndex(getSdlWindow().get());
             if (keyboardEvent.keysym.sym == SDLK_F5 || keyboardEvent.keysym.sym == SDLK_F6 ||
@@ -272,10 +270,12 @@ struct Chrono : public Application {
 
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                 << wdg<MapProjection>() >> mapProjection << endw
-                 << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
-                 << wdg<Row>()
-                         << wdg<TimeDateBox>(timerTick, ":Canada/Newfoundland", true, true);
+                    << wdg<MapProjection>() >> mapProjection << endw
+                    << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
+                    << wdg<Row>()
+                        << wdg<Column>()
+                            << wdg<TextButton>("VE3YSH") << endw
+                            << wdg<TimeDateBox>(timerTick, ":Canada/Newfoundland", true, true);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
         registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
