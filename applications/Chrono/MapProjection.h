@@ -273,8 +273,10 @@ namespace rose {
          */
         bool computeAzimuthalMaps();
 
+        /// The std::future result of computeAzimuthalMaps()
         std::future<bool> mComputeAzimuthalMapsFuture;
 
+        /// True when base maps have not been loaded or projected for use.
         bool mMapProjectionsInvalid{true};
 
         /**
