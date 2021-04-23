@@ -273,6 +273,10 @@ namespace rose {
          */
         bool computeAzimuthalMaps();
 
+        std::future<bool> mComputeAzimuthalMapsFuture;
+
+        bool mMapProjectionsInvalid{true};
+
         /**
          * @brief Compute the sun illumination pattern.
          * @details This creates a background foreground map pair. The background is the night map, the

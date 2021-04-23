@@ -52,11 +52,7 @@ namespace rose {
     }
 
     void MapProjection::cacheCurrentMaps() {
-        for (auto &mercator : mMercator)
-            mercator.reset();
-
-        for (auto &azimuthal : mAzimuthal)
-            azimuthal.reset();
+        mMapProjectionsInvalid = true;
 
         std::array<std::tuple<MapDepiction,MapSize,MapIllumination>,2> maps{
                 std::make_tuple(mMapDepiction, mMapSize, MapIllumination::Day),
@@ -99,24 +95,37 @@ namespace rose {
         std::array<std::optional<std::filesystem::path>,2> mapPath{mMapCache->localItemExists(mapId[0]),
                                                     mMapCache->localItemExists(mapId[1])};
 
-        if (!mMercator[0] || !mAzimuthal[0]) {
-            if (mapPath[0] && mapPath[1]) {
-                for (size_t i = 0; i < mapPath.size(); i++) {
-                    gm::Surface bmp{mapPath[i].value()};
-                    if (i) {
-                        Size bmpSize{bmp->w, bmp->h};
-                        if (bmpSize != mMapImgSize)
-                            throw std::runtime_error("Image size mismatch.");
-                    } else {
-                        mMapImgSize = Size{bmp->w, bmp->h};
+        if (mMapProjectionsInvalid) {
+            if (!mComputeAzimuthalMapsFuture.valid()) {
+                if (mapPath[0] && mapPath[1]) {
+                    for (size_t i = 0; i < mapPath.size(); i++) {
+                        gm::Surface bmp{mapPath[i].value()};
+                        if (i) {
+                            Size bmpSize{bmp->w, bmp->h};
+                            if (bmpSize != mMapImgSize)
+                                throw std::runtime_error("Image size mismatch.");
+                        } else {
+                            mMapImgSize = Size{bmp->w, bmp->h};
+                        }
+                        mMapSurface[i] = gm::Surface{bmp->w, bmp->h};
+                        mMapSurface[i].blitSurface(bmp);
+                        mAzSurface[i] = gm::Surface{bmp->w, bmp->h};
                     }
-                    mMapSurface[i] = gm::Surface{bmp->w, bmp->h};
-                    mMapSurface[i].blitSurface(bmp);
-                    mAzSurface[i] = gm::Surface{bmp->w, bmp->h};
-                }
 
-                computeAzimuthalMaps();
-                mNewSurfaces = setForegroundBackground();
+                    mComputeAzimuthalMapsFuture = std::async(std::launch::async,
+                                                             &MapProjection::computeAzimuthalMaps, this);
+                }
+            } else {
+                std::chrono::milliseconds span{100};
+                if (auto futureStatus = mComputeAzimuthalMapsFuture.wait_for(span); futureStatus ==
+                                                                                    std::future_status::ready) {
+
+                    if (mComputeAzimuthalMapsFuture.get()) {
+                        mNewSurfaces = setForegroundBackground();
+                        mMapProjectionsInvalid = false;
+                    } else
+                        std::cout << __PRETTY_FUNCTION__ << " computeAzimuthaMaps returned false.\n";
+                }
             }
         }
 
