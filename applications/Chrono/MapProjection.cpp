@@ -18,12 +18,6 @@ namespace rose {
 
     MapProjection::MapProjection(std::shared_ptr<TimerTick> timerTick) {
         mTimerTick = std::move(timerTick);
-        mCelestialTimer = TickProtocol::createSlot();
-        mCelestialTimer->receiver = [&](int minutes){
-            if ((minutes % 5) == 1 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
-                mForegroundBackgroundFuture = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
-            }
-        };
 
         Environment &environment{Environment::getEnvironment()};
         mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
@@ -60,8 +54,6 @@ namespace rose {
                 cacheCurrentMaps();
             }
         };
-
-        mTimerTick->minuteSignal.connect(mCelestialTimer);
     }
 
     void MapProjection::cacheCurrentMaps() {
@@ -97,6 +89,15 @@ namespace rose {
             getApplication().redrawBackground();
         };
         mMapCache->cacheLoaded.connect(mMapSlot);
+
+        mCelestialTimer = TickProtocol::createSlot();
+        mCelestialTimer->receiver = [&](int minutes){
+            if ((minutes % 3) == 0 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
+                mForegroundBackgroundFuture = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
+            }
+        };
+
+        mTimerTick->minuteSignal.connect(mCelestialTimer);
 
         cacheCurrentMaps();
     }
