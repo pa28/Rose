@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <functional>
 #include <utility>
+#include <map>
 #include <vector>
 #include "constexpertrig.h"
 #include "GraphicsModel.h"
@@ -96,7 +97,8 @@ namespace rose {
     class Animation;
     class Animator {
     protected:
-        std::vector<std::pair<std::shared_ptr<Animation>,Position>> mAnimations{};
+        using AnimationList = std::vector<std::pair<std::shared_ptr<Animation>,Position>>;
+        std::map<std::shared_ptr<Window>,AnimationList> mAnimations;
 
         Animator() = default;
     public:
@@ -105,14 +107,18 @@ namespace rose {
             return instance;
         }
 
-        void set(std::shared_ptr<Animation>& animation, const Position& position);
+        void set(const std::shared_ptr<Window>& window, std::shared_ptr<Animation>& animation, const Position& position);
 
-        void remove(std::shared_ptr<Animation>& animation);
+        void remove(const std::shared_ptr<Window>& window, std::shared_ptr<Animation>& animation);
 
-        void animate(gm::Context &context, uint32_t frame);
+        void animate(const std::shared_ptr<Window>& window, gm::Context &context, uint32_t frame);
 
         explicit operator bool() const noexcept {
             return !mAnimations.empty();
+        }
+
+        [[nodiscard]] bool areAnimationsForWindow(const std::shared_ptr<Window>& window) const noexcept {
+            return mAnimations.find(window) != mAnimations.end();
         }
     };
 
@@ -140,12 +146,12 @@ namespace rose {
 
         virtual ~Animation() = default;
 
-        static void setAnimation(std::shared_ptr<Animation> animation, const Position& position) {
-            Animator::getAnimator().set(animation, position);
+        static void setAnimation(const std::shared_ptr<Window>& window, std::shared_ptr<Animation> animation, const Position& position) {
+            Animator::getAnimator().set(window, animation, position);
         }
 
-        static void removeAnimation(std::shared_ptr<Animation> animation) {
-            Animator::getAnimator().remove(animation);
+        static void removeAnimation(const std::shared_ptr<Window>& window, std::shared_ptr<Animation> animation) {
+            Animator::getAnimator().remove(window, animation);
         }
 
         void setActionCurve(std::unique_ptr<ActionCurves::ActionCurve> &&actionCurve) {
