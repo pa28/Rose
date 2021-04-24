@@ -37,7 +37,11 @@ int main(int argc, char **argv) {
                          << wdg<ImageButton>(ImageId::ThreeDots, ButtonType::ToggleButton)
                             << theme.SemiBevelFrame
                             << endw
-                         << wdg<TextButton>(Id{"lblHello"})
+                         << wdg<TextButton>(Id{"lblHello"}, [&](ButtonStateChange buttonStateChange){
+                                 if (buttonStateChange == rose::ButtonStateChange::Pushed) {
+                                     std::cout << "Local Button state: Pushed\n";
+                                 }
+                             })
                             << theme.SemiBevelFrame
                             << endw
                          << wdg<TextLabel>(Id{"lblHello"})

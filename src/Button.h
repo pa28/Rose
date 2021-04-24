@@ -72,7 +72,28 @@ namespace rose {
         explicit TextButton(const std::string_view& text, ButtonType buttonType = ButtonType::PushButton)
             : TextButton(std::string{text}, buttonType) {}
 
-        explicit TextButton(const Id& id, ButtonType buttonType = ButtonType::PushButton);
+        explicit TextButton(const Id &id, ButtonType buttonType = ButtonType::PushButton);
+
+        explicit TextButton(const Id &id, ButtonStateChangeCallback stateChangeCB,
+                            ButtonType buttonType = ButtonType::PushButton)
+            : TextButton(id, buttonType) {
+            mButtonSemantics->setButtonStateChangeCallback(std::move(stateChangeCB));
+        }
+
+        explicit TextButton(const std::string& text, ButtonStateChangeCallback stateChangeCB, ButtonType buttonType = ButtonType::PushButton)
+                : TextButton(text, buttonType) {
+            mButtonSemantics->setButtonStateChangeCallback(std::move(stateChangeCB));
+        }
+
+        explicit TextButton(const char* text, ButtonStateChangeCallback stateChangeCB, ButtonType buttonType = ButtonType::PushButton)
+                : TextButton(std::string{text}, buttonType) {
+            mButtonSemantics->setButtonStateChangeCallback(std::move(stateChangeCB));
+        }
+
+        explicit TextButton(const std::string_view& text, ButtonStateChangeCallback stateChangeCB, ButtonType buttonType = ButtonType::PushButton)
+                : TextButton(std::string{text}, buttonType) {
+            mButtonSemantics->setButtonStateChangeCallback(std::move(stateChangeCB));
+        }
 
         /**
          * @brief Layout the text button.

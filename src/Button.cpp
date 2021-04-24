@@ -7,6 +7,8 @@
 
 #include "Application.h"
 #include "Button.h"
+
+#include <utility>
 #include "Settings.h"
 #include "Theme.h"
 
@@ -33,19 +35,19 @@ namespace rose {
                 getApplication().redrawBackground();
             });
 
-            mButtonSemantics->setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange) {
-                switch (buttonStateChange) {
-                    case ButtonStateChange::Pushed:
-                        std::cout << "Button state: Pushed\n";
-                        break;
-                    case ButtonStateChange::Off:
-                        std::cout << "Button state: Off\n";
-                        break;
-                    case ButtonStateChange::On:
-                        std::cout << "Button state: On\n";
-                        break;
-                }
-            });
+//            mButtonSemantics->setButtonStateChangeCallback([&](ButtonStateChange buttonStateChange) {
+//                switch (buttonStateChange) {
+//                    case ButtonStateChange::Pushed:
+//                        std::cout << "Button state: Pushed\n";
+//                        break;
+//                    case ButtonStateChange::Off:
+//                        std::cout << "Button state: Off\n";
+//                        break;
+//                    case ButtonStateChange::On:
+//                        std::cout << "Button state: On\n";
+//                        break;
+//                }
+//            });
         }
     }
 
@@ -53,7 +55,8 @@ namespace rose {
         mText = text;
     }
 
-    TextButton::TextButton(const Id &id, ButtonType buttonType) : TextButton(buttonType) {
+    TextButton::TextButton(const Id &id, ButtonType buttonType)
+            : TextButton(buttonType) {
         mId = id;
         Settings &settings{Settings::getSettings()};
         mText = settings.getValue(id.idString, std::string{id.idString});
