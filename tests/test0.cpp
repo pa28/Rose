@@ -90,7 +90,7 @@ struct PopupWindow : public Window {
         std::cout << __PRETTY_FUNCTION__ << screenRect << '\n';
         auto rectangle = Window::layout(context, screenRect);
         std::cout << '\t' << rectangle << '\n';
-        return Rectangle{300, 100, 200, 200};
+        return Rectangle{50, 50, 200, 200};
     }
 
     void addedToContainer() override {

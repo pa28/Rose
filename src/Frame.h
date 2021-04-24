@@ -222,13 +222,13 @@ namespace rose {
                     draw(context, position);
                     mLastColorValue = mColorValue;
                 } else {
-                    removeAnimation(getNode<Animation>());
+                    removeAnimation(getWindow(), getNode<Animation>());
                 }
             };
 
             mAnimationEnableStateCallback = [&](AnimationEnable animationEnable){
                 if (animationEnable == AnimationEnable::Disable && mAnimationEnableState == AnimationEnable::Enable) {
-                    removeAnimation(getNode<Animation>());
+                    removeAnimation(getWindow(), getNode<Animation>());
                 }
             };
         }
@@ -243,7 +243,7 @@ namespace rose {
 
         void draw(gm::Context &context, const Position &containerPosition) override {
             if (mActionCurve && mAnimationEnableState == AnimationEnable::Enable)
-                setAnimation(getNode<Animation>(), containerPosition);
+                setAnimation(getWindow(), getNode<Animation>(), containerPosition);
             drawAnimate(context,containerPosition);
         }
 

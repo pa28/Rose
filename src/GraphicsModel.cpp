@@ -218,27 +218,22 @@ namespace rose::gm {
 
 #if 1
         if (mRedrawBackground) {
-            mContext.setDrawColor(color::DarkBaseColor);
-            mContext.renderClear();
             for (auto &content : *screen) {
                 if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
                     window->generateBaseTexture(mContext, Position::Zero);
                 }
             }
-            mContext.renderPresent();
         }
 
         if (Animator::getAnimator() || mRedrawBackground) {
             mContext.renderClear();
-            for (auto &content : *screen) {
+            for (auto & content : *screen) {
                 if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
                     if (window->baseTextureNeeded(Position::Zero))
                         window->generateBaseTexture(mContext, Position::Zero);
                     window->drawBaseTexture(mContext, Position::Zero);
 
-                    if (Animator::getAnimator()) {
-                        Animator::getAnimator().animate(mContext, mFrame);
-                    }
+                    Animator::getAnimator().animate(window, mContext, mFrame);
                 }
             }
             mContext.renderPresent();
