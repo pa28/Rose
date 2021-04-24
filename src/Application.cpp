@@ -40,13 +40,7 @@ namespace rose {
                 layout();
                 break;
             case EventSemantics::Maximized:
-                settings.setValue(set::SetAppState, static_cast<int>(type));
-                mAppState = type;
-                break;
             case EventSemantics::Minimized:
-                settings.setValue(set::SetAppState, static_cast<int>(type));
-                mAppState = type;
-                break;
             case EventSemantics::Restored:
                 settings.setValue(set::SetAppState, static_cast<int>(type));
                 mAppState = type;
