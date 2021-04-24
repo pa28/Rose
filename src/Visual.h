@@ -285,6 +285,7 @@ namespace rose {
      * @brief A Window is a visual abstraction of a number of related user interface objects.
      */
     class Window : public Visual, public Container {
+    protected:
         bool mModalWindow{};
 
     public:
