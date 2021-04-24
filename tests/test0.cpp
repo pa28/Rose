@@ -16,6 +16,31 @@
 
 using namespace rose;
 
+struct PopupWindow : public Window {
+    PopupWindow() {
+        setSize(Size{100,100});
+        setPosition(Position{0, 0});
+    }
+
+    void draw(gm::Context &context, const Position &containerPosition) override {
+        setScreenRectangle(containerPosition);
+        std::cout << __PRETTY_FUNCTION__ << containerPosition << mScreenRect << '\n';
+        context.fillRect(mScreenRect, Theme::getTheme().rgba(rose::ThemeColor::Green));
+    }
+
+    Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
+        auto rectangle = Rectangle{mPreferredPos, mPreferredSize};
+        std::cout << __PRETTY_FUNCTION__ << rectangle << '\n';
+        return rectangle;
+    }
+
+    void addedToContainer() override {
+        std::cout << __PRETTY_FUNCTION__ << '\n';
+    }
+
+    ~PopupWindow() override = default;
+};
+
 int main(int argc, char **argv) {
     Environment &environment{Environment::getEnvironment()};
     Application application{argc, argv};
@@ -40,6 +65,8 @@ int main(int argc, char **argv) {
                          << wdg<TextButton>(Id{"lblHello"}, [&](ButtonStateChange buttonStateChange){
                                  if (buttonStateChange == rose::ButtonStateChange::Pushed) {
                                      std::cout << "Local Button state: Pushed\n";
+                                     application.screen() << wdg<PopupWindow>();
+                                     application.layout();
                                  }
                              })
                             << theme.SemiBevelFrame
