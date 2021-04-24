@@ -216,7 +216,6 @@ namespace rose::gm {
     void GraphicsModel::drawAll(std::shared_ptr<Screen> &screen) {
         CommonSignals::getCommonSignals().frameSignal.transmit(mFrame);
 
-#if 1
         if (mRedrawBackground) {
             for (auto &content : *screen) {
                 if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
@@ -238,35 +237,6 @@ namespace rose::gm {
             }
             mContext.renderPresent();
         }
-
-#else
-    if (!mBackground || (mBackground.getSize() != screenRectangle().size())) {
-        mBackground = Texture{mContext, screenRectangle().size()};
-        mRedrawBackground = true;
-    }
-
-    if (mRedrawBackground) {
-        RenderTargetGuard renderTargetGuard{mContext, mBackground};
-
-        mContext.setDrawColor(color::DarkBaseColor);
-        mContext.renderClear();
-
-        for (auto &content : *screen) {
-            if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                window->draw(mContext, Position::Zero);
-            }
-        }
-    }
-
-    if (Animator::getAnimator() || mRedrawBackground) {
-        mContext.renderClear();
-        mContext.renderCopy(mBackground);
-        if (Animator::getAnimator()) {
-            Animator::getAnimator().animate(mContext, mFrame);
-        }
-        mContext.renderPresent();
-    }
-#endif
 
         mRedrawBackground = false;
         mFrame++;
