@@ -16,8 +16,9 @@ using namespace rose;
 
 struct PopupWindow : public Window {
     PopupWindow() {
-        setSize(Size{100,100});
-        setPosition(Position{0, 0});
+        setSize(Size{200,200});
+        setPosition(Position{300, 100});
+        mModalWindow = true;
     }
 
     void draw(gm::Context &context, const Position &containerPosition) override {
@@ -28,7 +29,7 @@ struct PopupWindow : public Window {
 
     Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
         auto rectangle = Rectangle{mPreferredPos, mPreferredSize};
-        std::cout << __PRETTY_FUNCTION__ << rectangle << '\n';
+        std::cout << __PRETTY_FUNCTION__ << screenRect << rectangle << '\n';
         return rectangle;
     }
 
