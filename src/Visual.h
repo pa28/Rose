@@ -16,6 +16,7 @@
 #include "StructuredTypes.h"
 #include "Types.h"
 #include "Utilities.h"
+#include "Texture.h"
 
 namespace rose {
 
@@ -287,6 +288,7 @@ namespace rose {
     class Window : public Visual, public Container {
     protected:
         bool mModalWindow{};
+        gm::Texture mBaseTexture{};     ///< The base texture which animations draw over.
 
     public:
         ~Window() override = default;
@@ -311,6 +313,24 @@ namespace rose {
 
         /// Draw the contents of the Window
         void draw(gm::Context &context, const Position &containerPosition) override;
+
+        bool baseTextureNeeded(const Position &containerPosition) {
+            setScreenRectangle(containerPosition);
+            return !mBaseTexture || mBaseTexture.getSize() != mScreenRect.size();
+        }
+        /**
+         * @brief Create a Texture for the Window that can be drawn over by animations.
+         * @param context The gm::Context to use.
+         * @param containerPosition The container position.
+         */
+        void generateBaseTexture(gm::Context &context, const Position &containerPosition);
+
+        /**
+         * @brief Draw the base texture for the window.
+         * @param context The gm::Context to use.
+         * @param containerPosition The container position.
+         */
+        void drawBaseTexture(gm::Context &context, const Position &containerPosition);
 
         /// Layout the contents of the Window
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;

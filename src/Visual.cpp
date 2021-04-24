@@ -40,6 +40,30 @@ namespace rose {
         return screenRect;
     }
 
+    void Window::generateBaseTexture(gm::Context &context, const Position &containerPosition) {
+        if (baseTextureNeeded(containerPosition)) {
+            mBaseTexture = gm::Texture{context, mScreenRect.size()};
+        }
+
+        gm::RenderTargetGuard renderTargetGuard(context, mBaseTexture);
+        context.setDrawColor(color::DarkBaseColor);
+        context.renderClear();
+        for (auto &content : (*this)) {
+            if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
+                manager->draw(context, Position::Zero);
+            }
+        }
+    }
+
+    void Window::drawBaseTexture(gm::Context &context, const Position &containerPosition){
+        if (mBaseTexture) {
+            setScreenRectangle(containerPosition);
+            context.renderCopy(mBaseTexture,mScreenRect);
+        } else {
+            draw(context, containerPosition);
+        }
+    }
+
     void Window::draw(gm::Context &context, const Position &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {
