@@ -78,9 +78,6 @@ public:
             height = width / 2;
         }
 
-        std::cout << "    width: " << width << ", height: " << height << ", Ratio: " << (float) width / (float) height
-                  << '\n';
-
         Rectangle mapRectangle, sideRect, botRect;
 
         switch (mLayout) {
@@ -120,7 +117,6 @@ public:
             }
         }
 
-        std::cout << "    " << mapRectangle << sideRect << botRect << '\n';
         return screenRect;
     }
 
@@ -270,7 +266,7 @@ struct Chrono : public Application {
 
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                    << wdg<MapProjection>() >> mapProjection << endw
+                    << wdg<MapProjection>(timerTick) >> mapProjection << endw
                     << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                     << wdg<Row>()
                         << wdg<Column>()

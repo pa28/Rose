@@ -7,6 +7,8 @@
 
 #include "Application.h"
 #include "MapProjection.h"
+
+#include <utility>
 #include "GraphicsModel.h"
 #include "Texture.h"
 #include "Settings.h"
@@ -14,7 +16,15 @@
 
 namespace rose {
 
-    MapProjection::MapProjection() {
+    MapProjection::MapProjection(std::shared_ptr<TimerTick> timerTick) {
+        mTimerTick = std::move(timerTick);
+        mCelestialTimer = TickProtocol::createSlot();
+        mCelestialTimer->receiver = [&](int minutes){
+            if ((minutes % 5) == 1 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
+                mForegroundBackgroundFuture = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
+            }
+        };
+
         Environment &environment{Environment::getEnvironment()};
         mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
                                                Environment::getEnvironment().cacheHome(),
@@ -50,6 +60,8 @@ namespace rose {
                 cacheCurrentMaps();
             }
         };
+
+        mTimerTick->minuteSignal.connect(mCelestialTimer);
     }
 
     void MapProjection::cacheCurrentMaps() {
@@ -122,11 +134,22 @@ namespace rose {
                                                                                     std::future_status::ready) {
 
                     if (mComputeAzimuthalMapsFuture.get()) {
-                        mNewSurfaces = setForegroundBackground();
+                        mForegroundBackgroundFuture = std::async(std::launch::async,
+                                                                 &MapProjection::setForegroundBackground, this);
                         mMapProjectionsInvalid = false;
                     } else
                         std::cout << __PRETTY_FUNCTION__ << " computeAzimuthalMaps returned false.\n";
                 }
+            }
+        }
+
+        if (mForegroundBackgroundFuture.valid()) {
+            std::chrono::milliseconds span{100};
+            if (auto futureStatus = mForegroundBackgroundFuture.wait_for(span); futureStatus ==
+                                                                                std::future_status::ready) {
+
+                if (mNewSurfaces = mForegroundBackgroundFuture.get(); !mNewSurfaces)
+                    std::cout << __PRETTY_FUNCTION__ << " setForegroundBackground returned false.\n";
             }
         }
 
@@ -337,6 +360,8 @@ namespace rose {
     }
 
     bool MapProjection::setForegroundBackground() {
+        auto start = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
         for (size_t i = 0; i < mMercatorTemp.size(); ++i) {
             mMercatorTemp[i] = gm::Surface{mMapImgSize};
             mAzimuthalTemp[i] = gm::Surface{mMapImgSize};
@@ -348,6 +373,7 @@ namespace rose {
         }
 
         auto[latS, lonS] = subSolar();
+        std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
 
         auto sinY = sin(mQthRad.lat);
         auto cosY = cos(mQthRad.lat);
@@ -412,6 +438,10 @@ namespace rose {
                 }
             }
         }
+        auto stop = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+        std::cout << __PRETTY_FUNCTION__ << " Duration: " << stop - start << '\n';
+        getApplication().redrawBackground();
         return true;
     }
 }

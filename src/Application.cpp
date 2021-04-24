@@ -22,7 +22,6 @@ namespace rose {
         Settings &settings{Settings::getSettings()};
         switch (type) {
             case EventSemantics::Shown: {
-                std::cout << "Shown" << mGraphicsModel.windowBorders();
                 auto windowFlags = SDL_GetWindowFlags(mGraphicsModel.getSdlWindow().get());
                 if (windowFlags & SDL_WINDOW_FULLSCREEN || windowFlags & SDL_WINDOW_FULLSCREEN_DESKTOP)
                     mAppState = EventSemantics::FullScreen;
@@ -36,24 +35,19 @@ namespace rose {
             }
                 break;
             case EventSemantics::Hidden:
-                std::cout << "Hidden";
                 break;
             case EventSemantics::Exposed:
                 layout();
-                std::cout << "Exposed";
                 break;
             case EventSemantics::Maximized:
-                std::cout << "Maximized";
                 settings.setValue(set::SetAppState, static_cast<int>(type));
                 mAppState = type;
                 break;
             case EventSemantics::Minimized:
-                std::cout << "Minimized";
                 settings.setValue(set::SetAppState, static_cast<int>(type));
                 mAppState = type;
                 break;
             case EventSemantics::Restored:
-                std::cout << "Restored";
                 settings.setValue(set::SetAppState, static_cast<int>(type));
                 mAppState = type;
                 break;
@@ -62,22 +56,14 @@ namespace rose {
             case EventSemantics::Focus:
             case EventSemantics::UnFocus:
             case EventSemantics::Close:
-                break;
             case EventSemantics::Moved:
-                std::cout << "Moved";
-                break;
             case EventSemantics::Resized:
-                std::cout << "Resized";
-                break;
             case EventSemantics::SizeChanged:
-                std::cout << "SizeChanged";
                 layout();
                 break;
             default:
-                std::cout << "Unknown";
                 break;
         }
-        std::cout << '\n';
     }
 
     void Application::windowSizeChange(EventSemantics::WindowEventType type, Size size) {

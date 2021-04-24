@@ -12,6 +12,7 @@
 #include "WebCache.h"
 #include "GraphicsModel.h"
 #include "Texture.h"
+#include "TimerTick.h"
 #include "Surface.h"
 
 namespace rose {
@@ -217,6 +218,12 @@ namespace rose {
         };
 
     protected:
+        /// Source of timing information.
+        std::shared_ptr<TimerTick> mTimerTick{};
+
+        /// Slot to receive celestial update time signals on.
+        TickProtocol::slot_type mCelestialTimer{};
+
         /// The pointer to the map cache.
         std::unique_ptr<WebCache> mMapCache{};
 
@@ -279,6 +286,9 @@ namespace rose {
         /// True when base maps have not been loaded or projected for use.
         bool mMapProjectionsInvalid{true};
 
+        /// The std::future result of setForegroundBackground()
+        std::future<bool> mForegroundBackgroundFuture;
+
         /**
          * @brief Compute the sun illumination pattern.
          * @details This creates a background foreground map pair. The background is the night map, the
@@ -290,7 +300,9 @@ namespace rose {
         bool setForegroundBackground();
 
     public:
-        MapProjection();
+        MapProjection() = delete;
+
+        explicit MapProjection(std::shared_ptr<TimerTick> timerTick);
 
         ~MapProjection() override = default;
 
