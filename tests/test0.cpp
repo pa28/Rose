@@ -7,10 +7,8 @@
 #include "Button.h"
 #include "Font.h"
 #include "Frame.h"
-#include "Image.h"
 #include "ImageStore.h"
 #include "Layout.h"
-#include "Text.h"
 #include "Theme.h"
 #include "Types.h"
 
