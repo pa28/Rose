@@ -149,6 +149,9 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
 
     add_executable(Test2 tests/test2.cpp)
     target_link_libraries(Test2 ${RoseLibraries})
+
+    add_executable(IdPaths UintTests/IdPaths.cpp)
+    target_link_libraries(IdPaths ${RoseLibraries})
 endif()
 
 add_executable(Rose main.cpp)

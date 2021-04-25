@@ -35,16 +35,20 @@ namespace rose {
 
     class Container;
 
+    using IdPathElement = std::pair<std::string,std::string>;
+
     /// A path of objects by Id.
-    template<typename S>
-    struct IdPath : public std::vector<S> {
+    struct IdPath : public std::vector<IdPathElement> {
         bool absolutePath{};
         static constexpr char PathSep = '/';
+        static constexpr char PathWild = '*';
+        static constexpr char PathWildOne = '?';
+        static constexpr char ElementSep = ':';
         static constexpr std::string_view PathParent = "..";
 
-        explicit IdPath(bool absolute = false) : std::vector<S>(), absolutePath(absolute) {}
+        explicit IdPath(bool absolute = false) : std::vector<IdPathElement>(), absolutePath(absolute) {}
 
-        explicit IdPath(const S element, bool absolute = false) : IdPath(absolute) {
+        explicit IdPath(const IdPathElement& element, bool absolute = false) : IdPath(absolute) {
             emplace_back(element);
         }
 
@@ -54,24 +58,36 @@ namespace rose {
             for (auto &element : *this) {
                 if (absolutePath || notFirst) {
                     strm << PathSep;
-                    notFirst = true;
                 }
-                strm << element;
+                strm << element.first;
+                if (!element.second.empty())
+                    strm << ElementSep << element.second;
+                notFirst = true;
             }
             return strm.str();
         }
     };
 
     template<typename I>
-    inline IdPath<std::string> parsePathIdString(I inputString) {
-        std::stringstream strm{inputString};
-        IdPath<std::string> idPath{};
+    inline IdPath parsePathIdString(I inputString) {
+        std::stringstream strm;
+        if constexpr (std::is_same_v<std::string_view,I>) {
+            strm.str(std::string{inputString});
+        } else {
+            strm.str(inputString);
+        }
+        IdPath idPath{};
         std::string tmp;
-        while (std::getline(strm, tmp, IdPath<std::string>::PathSep)) {
+        while (std::getline(strm, tmp, IdPath::PathSep)) {
             if (idPath.empty() && tmp.empty())
                 idPath.absolutePath = true;
-            else if (!tmp.empty())
-                idPath.emplace_back(tmp);
+            else if (!tmp.empty()) {
+                std::string e1{}, e2{};
+                std::stringstream tstrm{tmp};
+                std::getline(tstrm, e1, IdPath::ElementSep);
+                std::getline(tstrm, e2, IdPath::ElementSep);
+                idPath.emplace_back(e1,e2);
+            }
         }
         return idPath;
     }
@@ -126,14 +142,11 @@ namespace rose {
 
         /// Get Id
         std::string_view getId() const {
-            if (mId)
-                return mId.idString;
-            return nodeId();
+            return mId.idString;
         }
 
         /// Get the Id Path.
-        template<typename S = std::string_view>
-        IdPath<S> getIdPath() const;
+        IdPath getIdPath() const;
 
         /**
          * @brief Called when a Node is added to a Container.
@@ -271,13 +284,10 @@ namespace rose {
         return node;
     }
 
-    template<typename S>
-    inline IdPath<S> Node::getIdPath() const {
-        static_assert(std::is_base_of_v<std::string,S> || std::is_base_of_v<std::string_view,S>,
-                "Only std::string or std::string_view supported for getIdPath().");
+    inline IdPath Node::getIdPath() const {
         auto node = container();
-        auto idPath = node ? node->getIdPath<S>() : IdPath<S>{true};
-        idPath.emplace_back(getId());
+        auto idPath = node ? node->getIdPath() : IdPath{true};
+        idPath.emplace_back(nodeId(),getId());
         return idPath;
     }
 }
@@ -296,7 +306,6 @@ inline std::shared_ptr<NodeClass> operator<<(std::shared_ptr<NodeClass> widget, 
     return widget;
 }
 
-template<typename S>
-inline std::ostream& operator<<(std::ostream& ostrm, const rose::IdPath<S>& idPath) {
+inline std::ostream& operator<<(std::ostream& ostrm, const rose::IdPath& idPath) {
     return ostrm << idPath.str();
 }
