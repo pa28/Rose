@@ -66,15 +66,15 @@ namespace rose {
 
         for (auto &map : maps) {
             auto [depiction,size,illumination] = map;
-            auto id = MapImageId(depiction,size,illumination);
+            auto mapDepictionId = MapImageId(depiction,size,illumination);
             auto name = MapFileName(depiction,size,illumination);
-            mMapCache->setCacheItem(id, name);
-            mMapCache->fetchItem(id);
+            mMapCache->setCacheItem(mapDepictionId, name);
+            mMapCache->fetchItem(mapDepictionId);
         }
     }
 
     void MapProjection::addedToContainer() {
-        std::cout << __PRETTY_FUNCTION__ << ' ' << getIdPath() << '\n';
+        std::cout << __PRETTY_FUNCTION__ << ' ' << getIdPath<>() << '\n';
         Node::addedToContainer();
 
         Settings &settings{Settings::getSettings()};

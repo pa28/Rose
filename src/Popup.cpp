@@ -15,7 +15,7 @@
 namespace rose {
 
     void PopupWindow::addedToContainer() {
-        std::cout << __PRETTY_FUNCTION__ << getIdPath() << '\n';
+        std::cout << __PRETTY_FUNCTION__ << getIdPath<std::string_view>() << '\n';
         getNode<PopupWindow>()
                 << wdg<Frame>() << Theme::getTheme().BevelFrame << CornerStyle::Square
                     << wdg<Column>() << Padding(2)

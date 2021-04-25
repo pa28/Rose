@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 namespace rose {
 
@@ -26,23 +27,65 @@ namespace rose {
     class NodeRangeError : std::out_of_range {
     public:
         explicit NodeRangeError(const char *what) : std::out_of_range(what) {}
+
         explicit NodeRangeError(const std::string &what) : std::out_of_range(what) {}
+
         NodeRangeError(const NodeRangeError &other) noexcept = default;
     };
 
     class Container;
+
+    /// A path of objects by Id.
+    template<typename S>
+    struct IdPath : public std::vector<S> {
+        bool absolutePath{};
+        static constexpr char PathSep = '/';
+        static constexpr std::string_view PathParent = "..";
+
+        explicit IdPath(bool absolute = false) : std::vector<S>(), absolutePath(absolute) {}
+
+        explicit IdPath(const S element, bool absolute = false) : IdPath(absolute) {
+            emplace_back(element);
+        }
+
+        [[nodiscard]] std::string str() const {
+            bool notFirst = false;
+            std::stringstream strm{};
+            for (auto &element : *this) {
+                if (absolutePath || notFirst) {
+                    strm << PathSep;
+                    notFirst = true;
+                }
+                strm << element;
+            }
+            return strm.str();
+        }
+    };
+
+    template<typename I>
+    inline IdPath<std::string> parsePathIdString(I inputString) {
+        std::stringstream strm{inputString};
+        IdPath<std::string> idPath{};
+        std::string tmp;
+        while (std::getline(strm, tmp, IdPath<std::string>::PathSep)) {
+            if (idPath.empty() && tmp.empty())
+                idPath.absolutePath = true;
+            else if (!tmp.empty())
+                idPath.emplace_back(tmp);
+        }
+        return idPath;
+    }
 
     /**
      * @brief A type to specify an Id value.
      */
     struct Id {
         std::string_view idString;
+
         constexpr explicit operator bool() const noexcept {
             return !idString.empty();
         }
     };
-
-    using IdPath = std::vector<std::string_view>;
 
     /**
      * @class Node
@@ -89,7 +132,8 @@ namespace rose {
         }
 
         /// Get the Id Path.
-        IdPath getIdPath() const;
+        template<typename S = std::string_view>
+        IdPath<S> getIdPath() const;
 
         /**
          * @brief Called when a Node is added to a Container.
@@ -226,6 +270,16 @@ namespace rose {
         }
         return node;
     }
+
+    template<typename S>
+    inline IdPath<S> Node::getIdPath() const {
+        static_assert(std::is_base_of_v<std::string,S> || std::is_base_of_v<std::string_view,S>,
+                "Only std::string or std::string_view supported for getIdPath().");
+        auto node = container();
+        auto idPath = node ? node->getIdPath<S>() : IdPath<S>{true};
+        idPath.emplace_back(getId());
+        return idPath;
+    }
 }
 
 /**
@@ -242,14 +296,7 @@ inline std::shared_ptr<NodeClass> operator<<(std::shared_ptr<NodeClass> widget, 
     return widget;
 }
 
-inline std::ostream& operator<<(std::ostream& ostrm, const rose::IdPath& idPath) {
-    bool first = true;
-    for (auto &element : idPath) {
-        if (first)
-            first = false;
-        else
-            ostrm << '.';
-        ostrm << element;
-    }
-    return ostrm;
+template<typename S>
+inline std::ostream& operator<<(std::ostream& ostrm, const rose::IdPath<S>& idPath) {
+    return ostrm << idPath.str();
 }
