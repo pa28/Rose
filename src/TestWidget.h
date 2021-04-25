@@ -62,6 +62,11 @@ namespace rose {
             mColor = c;
         }
 
+        static constexpr std::string_view id = "TestWidget";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         /// Draw the visual.
         void draw(gm::Context &context, const Position &containerPosition) override {
             Rectangle dst{containerPosition + mPos, mSize};

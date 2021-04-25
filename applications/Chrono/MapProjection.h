@@ -314,6 +314,11 @@ namespace rose {
 
         MapProjection &operator=(MapProjection &&) = delete;
 
+        static constexpr std::string_view id = "MapProjection";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         /// Draw the MapProjection
         void draw(gm::Context &context, const Position &containerPosition) override;
 

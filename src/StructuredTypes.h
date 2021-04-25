@@ -12,6 +12,7 @@
 #include <exception>
 #include <memory>
 #include <vector>
+#include <iostream>
 
 namespace rose {
 
@@ -32,6 +33,18 @@ namespace rose {
     class Container;
 
     /**
+     * @brief A type to specify an Id value.
+     */
+    struct Id {
+        std::string_view idString;
+        constexpr explicit operator bool() const noexcept {
+            return !idString.empty();
+        }
+    };
+
+    using IdPath = std::vector<std::string_view>;
+
+    /**
      * @class Node
      * @brief A class to define a polymorphic member in an N-Array tree.
      */
@@ -44,6 +57,9 @@ namespace rose {
         /// The Container that holds the Node.
         std::weak_ptr<Container> mContainer{};
 
+        ///< The object Id string.
+        Id mId{};
+
     public:
         Node() = default;
 
@@ -54,6 +70,26 @@ namespace rose {
         explicit Node(const std::shared_ptr<Container> &container);
 
         virtual ~Node() = default;
+
+        static constexpr std::string_view id = "Node";
+        virtual std::string_view nodeId() const noexcept {
+            return id;
+        }
+
+        /// Set Id
+        void setId(const Id& nodeId) noexcept {
+            mId = nodeId;
+        }
+
+        /// Get Id
+        std::string_view getId() const {
+            if (mId)
+                return mId.idString;
+            return nodeId();
+        }
+
+        /// Get the Id Path.
+        IdPath getIdPath() const;
 
         /**
          * @brief Called when a Node is added to a Container.
@@ -165,6 +201,11 @@ namespace rose {
     public:
         ~Container() override = default;
 
+        static constexpr std::string_view id = "Container";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         virtual void add(const std::shared_ptr<Node> &node) {
             if (auto container = getNode<Container>(); container) {
                 container->push_back(node);
@@ -185,4 +226,30 @@ namespace rose {
         }
         return node;
     }
+}
+
+/**
+ * @brief An insertion operator to set the Id of a Widget.
+ * @tparam NodeClass The class of the Widget.
+ * @param widget The Widget.
+ * @param id The Id.
+ * @return The Widget.
+ */
+template<class NodeClass>
+inline std::shared_ptr<NodeClass> operator<<(std::shared_ptr<NodeClass> widget, const rose::Id& id) {
+    static_assert(std::is_base_of_v<rose::Node, NodeClass>, "WidgetClass must be derived from rose::Node.");
+    widget->setId(id);
+    return widget;
+}
+
+inline std::ostream& operator<<(std::ostream& ostrm, const rose::IdPath& idPath) {
+    bool first = true;
+    for (auto &element : idPath) {
+        if (first)
+            first = false;
+        else
+            ostrm << '.';
+        ostrm << element;
+    }
+    return ostrm;
 }

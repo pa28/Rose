@@ -10,11 +10,12 @@
 #include "TestWidget.h"
 #include "Manager.h"
 #include "Application.h"
+#include "Visual.h"
 
 namespace rose {
 
     void PopupWindow::addedToContainer() {
-        std::cout << __PRETTY_FUNCTION__ << '\n';
+        std::cout << __PRETTY_FUNCTION__ << getIdPath() << '\n';
         getNode<PopupWindow>()
                 << wdg<Frame>() << Theme::getTheme().BevelFrame << CornerStyle::Square
                     << wdg<Column>() << Padding(2)

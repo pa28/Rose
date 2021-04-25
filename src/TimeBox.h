@@ -90,6 +90,11 @@ namespace rose {
             mTimeZone = timeZone;
         }
 
+        static constexpr std::string_view id = "TimeBox";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         /**
          * @brief Draw the TimeBox and contents.
          * @param context The graphics context used to draw the manager and contents.
@@ -174,6 +179,11 @@ namespace rose {
             mTimeZone = timeZone;
         }
 
+        static constexpr std::string_view id = "DateBox";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         /**
          * @brief Draw the DateBox and contents.
          * @param context The graphics context used to draw the manager and contents.
@@ -231,6 +241,11 @@ namespace rose {
             mDisplayYear = year;
             mDisplaySecond = second;
             mTimeZone = timeZone;
+        }
+
+        static constexpr std::string_view id = "TimeDateBox";
+        std::string_view nodeId() const noexcept override {
+            return id;
         }
 
         /**

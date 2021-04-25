@@ -243,6 +243,11 @@ namespace rose {
             mPadding = Padding{padding};
         }
 
+        static constexpr std::string_view id = "Frame";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         void drawAnimate(gm::Context &context, const Position &containerPosition);
 
         void draw(gm::Context &context, const Position &containerPosition) override {

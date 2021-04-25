@@ -29,6 +29,11 @@ namespace rose {
             mModalWindow = true;
         }
 
+        static constexpr std::string_view id = "PopupWindow";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
             auto rect = screenRect;
             for (auto &content : (*this)) {

@@ -19,6 +19,11 @@ namespace rose {
         Row() : Manager() {
             setLayoutManager(std::make_unique<LinearLayout>(Orientation::Horizontal));
         }
+
+        static constexpr std::string_view id = "Row";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
     };
 
     class Column : public Manager {
@@ -28,7 +33,10 @@ namespace rose {
         Column() : Manager() {
             setLayoutManager(std::make_unique<LinearLayout>(Orientation::Vertical));
         }
+
+        static constexpr std::string_view id = "Column";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
     };
-
 }
-

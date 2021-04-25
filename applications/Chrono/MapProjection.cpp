@@ -74,6 +74,7 @@ namespace rose {
     }
 
     void MapProjection::addedToContainer() {
+        std::cout << __PRETTY_FUNCTION__ << ' ' << getIdPath() << '\n';
         Node::addedToContainer();
 
         Settings &settings{Settings::getSettings()};

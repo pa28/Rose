@@ -30,13 +30,6 @@ namespace rose {
     class Widget;
 
     /**
-     * @brief A type to specify an Id value.
-     */
-    struct Id {
-        std::string_view idString;
-    };
-
-    /**
      * @brief A type to specify a state.
      */
     struct State {
@@ -145,7 +138,6 @@ namespace rose {
         Size mPreferredSize{};      ///< The preferred size.
         Rectangle mScreenRect{};    ///< The screen Rectangle computed at drawing time.
         Padding mPadding{};         ///< Immediately around the Visual, used for separation and alignment.
-        Id mId{};                   ///< The object Id string.
         State mState{};             ///< The object state Id string.
         bool mVisible{true};        ///< If true the object is visible.
 
@@ -226,11 +218,6 @@ namespace rose {
             mVisible = visible;
         }
 
-        /// Set Id
-        void setId(const Id& id) noexcept {
-            mId = id;
-        }
-
         /// Add a LayoutHint
         void addLayoutHint(const LayoutHint &hint) {
             mLayoutHints.push_back(hint);
@@ -252,6 +239,11 @@ namespace rose {
     public:
         explicit Screen(Application &application);
         ~Screen() override = default;
+
+        static constexpr std::string_view id = "Screen";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
 
         /**
          * @brief Add a Window to the screen.
@@ -292,6 +284,11 @@ namespace rose {
 
     public:
         ~Window() override = default;
+
+        static constexpr std::string_view id = "Window";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
 
         bool isModal() const { return mModalWindow; }
 
@@ -453,6 +450,11 @@ namespace rose {
         Widget &operator=(const Widget &) = delete;
 
         Widget &operator=(Widget &&) = delete;
+
+        static constexpr std::string_view id = "Widget";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
 
 //        std::shared_ptr<Widget> focusWidget(SemanticGesture gesture, Position position, Position containerPosition);
 
@@ -634,6 +636,11 @@ namespace rose {
         Manager& operator=(const Manager&) = delete;
 
         Manager& operator=(Manager&&) = delete;
+
+        static constexpr std::string_view id = "Manager";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
 
         /**
          * @brief Add a Node to the contents of the Manager.
@@ -832,20 +839,6 @@ template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Padding& padding) {
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
     widget->setPadding(padding);
-    return widget;
-}
-
-/**
- * @brief An insertion operator to set the Id of a Widget.
- * @tparam WidgetClass The class of the Widget.
- * @param widget The Widget.
- * @param id The Id.
- * @return The Widget.
- */
-template<class WidgetClass>
-inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Id& id) {
-    static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
-    widget->setId(id);
     return widget;
 }
 

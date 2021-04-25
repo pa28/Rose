@@ -39,6 +39,11 @@ namespace rose {
 
         explicit ButtonFrame(ButtonType buttonType) noexcept;
 
+        static constexpr std::string_view id = "ButtonFrame";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
     };
 
     /**
@@ -95,6 +100,11 @@ namespace rose {
             mButtonSemantics->setButtonStateChangeCallback(std::move(stateChangeCB));
         }
 
+        static constexpr std::string_view id = "TextButton";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         /**
          * @brief Layout the text button.
          * @param context The graphics Context to use.
@@ -135,6 +145,11 @@ namespace rose {
                 : TextButton(std::string{text}, ButtonType::Label) {}
 
         explicit TextLabel(const Id& id) noexcept : TextButton(id, ButtonType::Label) {}
+
+        static constexpr std::string_view id = "TextLabel";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
     };
 
     class TextButtonLayoutManager : public LayoutManager {
@@ -177,6 +192,11 @@ namespace rose {
 
         explicit ImageButton(ImageId imageId, ButtonType buttonType = ButtonType::PushButton) noexcept;
 
+        static constexpr std::string_view id = "ImageButton";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
         /**
          * @brief Layout the image button.
          * @param context The graphics Context to use.
@@ -210,6 +230,11 @@ namespace rose {
         explicit ImageLabel() noexcept : ImageButton(ButtonType::Label) {}
 
         explicit ImageLabel(ImageId imageId) noexcept : ImageButton(imageId, ButtonType::Label) {}
+
+        static constexpr std::string_view id = "ImageLabel";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
 
     };
 
