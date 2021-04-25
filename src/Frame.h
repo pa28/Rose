@@ -233,6 +233,10 @@ namespace rose {
             };
         }
 
+        Frame(bool invert) noexcept : Frame() {
+            mInvert = invert;
+        }
+
         ~Frame() override = default;
 
         explicit Frame(int padding) noexcept : Frame() {
