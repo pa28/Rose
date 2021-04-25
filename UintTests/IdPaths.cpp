@@ -9,12 +9,16 @@
 
 static std::vector<std::string_view> SampleAbsolutePaths{
         "/Screen/Window/Manager/MapProjection",
-        "/Screen/PopupWindow/Frame/Column/Row/TextButton"
+        "/Screen/PopupWindow/Frame/Column/Row/TextButton",
+        "/Screen/PopupWindow/Frame/Column/Row/TextButton:Close",
+        "/Screen/PopupWindow/Frame/Column/Row/:Close"
 };
 
 static std::vector<std::string_view> SampleRelativePaths{
         "*/TextButton",
-        "?/TextButton"
+        "?/TextButton",
+        "*/TextButton:Close",
+        "?/:Close"
 };
 
 struct Test {
