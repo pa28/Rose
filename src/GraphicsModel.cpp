@@ -7,12 +7,12 @@
 
 #include <iostream>
 #include "Animation.h"
-#include "Font.h"
 #include "GraphicsModel.h"
 #include "Texture.h"
 #include "Utilities.h"
 #include "Settings.h"
 #include "Types.h"
+#include "Popup.h"
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -217,6 +217,13 @@ namespace rose::gm {
         CommonSignals::getCommonSignals().frameSignal.transmit(mFrame);
 
         if (mRedrawBackground) {
+            screen->erase(std::remove_if(screen->begin(), screen->end(), [&](auto ref)->bool {
+                if (auto popup = std::dynamic_pointer_cast<PopupWindow>(ref); popup) {
+                    return popup->removePopup();
+                }
+                return false;
+            }),screen->end());
+
             for (auto &content : *screen) {
                 if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
                     window->generateBaseTexture(mContext, Position::Zero);
