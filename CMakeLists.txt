@@ -109,10 +109,13 @@ list(APPEND ROSE_SRC
         src/Image.cpp
         src/ImageStore.cpp
         src/Layout.cpp
+        src/Manager.cpp
         src/PointerInteractions.cpp
+        src/Popup.cpp
         src/Settings.cpp
         src/StructuredTypes.cpp
         src/Surface.cpp
+        src/TestWidget.cpp
         src/Text.cpp
         src/Texture.cpp
         src/TimeBox.cpp

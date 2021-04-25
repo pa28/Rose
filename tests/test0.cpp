@@ -9,98 +9,12 @@
 #include "Frame.h"
 #include "ImageStore.h"
 #include "Layout.h"
+#include "Popup.h"
 #include "Theme.h"
+#include "TestWidget.h"
 #include "Types.h"
 
 using namespace rose;
-
-class TestWidget : public Widget {
-protected:
-    color::RGBA mColor;
-    ButtonSemantics mButtonSemantics;
-
-public:
-    TestWidget() : mButtonSemantics(static_cast<Widget&>(*this)) {
-        mButtonSemantics.setButtonDisplayCallback([](ButtonDisplayState buttonDisplayState){
-            switch (buttonDisplayState) {
-                case rose::ButtonDisplayState::Active:
-                    std::cout << __PRETTY_FUNCTION__ << " Active\n";
-                    break;
-                case rose::ButtonDisplayState::Inactive:
-                    std::cout << __PRETTY_FUNCTION__ << " Inactive\n";
-                    break;
-                case rose::ButtonDisplayState::PressedInactive:
-                    std::cout << __PRETTY_FUNCTION__ << " Pressed Inactive\n";
-                    break;
-                case rose::ButtonDisplayState::PressedActive:
-                    std::cout << __PRETTY_FUNCTION__ << " Pressed Active\n";
-                    break;
-            }
-        });
-    }
-
-    ~TestWidget() override = default;
-
-    TestWidget(const TestWidget &) = delete;
-
-    TestWidget(TestWidget &&) = delete;
-
-    TestWidget &operator=(const TestWidget &) = delete;
-
-    TestWidget &operator=(TestWidget &&) = delete;
-
-    explicit TestWidget(color::RGBA c) : TestWidget() {
-        mSemanticGesture = SemanticGesture::Key | SemanticGesture::Click | SemanticGesture::Scroll | SemanticGesture::Drag;
-        mColor = c;
-    }
-
-    TestWidget(Size size, color::RGBA c) : TestWidget() {
-        mSemanticGesture = SemanticGesture::Key | SemanticGesture::Click | SemanticGesture::Scroll | SemanticGesture::Drag;
-        mPreferredSize = size;
-        mColor = c;
-    }
-
-    /// Draw the visual.
-    void draw(gm::Context &context, const Position &containerPosition) override {
-        Rectangle dst{containerPosition + mPos, mSize};
-        context.fillRect(dst, mColor);
-    }
-
-    /// Layout the visual.
-    Rectangle layout(rose::gm::Context &context, const Rectangle &screenRect) override {
-        setScreenRectangle(screenRect);
-        return Rectangle{mPreferredPos, mPreferredSize};
-    }
-};
-
-struct PopupWindow : public Window {
-    PopupWindow() {
-        setSize(Size{200,200});
-        setPosition(Position{300, 100});
-        mModalWindow = true;
-    }
-
-    void draw(gm::Context &context, const Position &containerPosition) override {
-        setScreenRectangle(containerPosition);
-        std::cout << __PRETTY_FUNCTION__ << containerPosition << mScreenRect << '\n';
-        context.fillRect(mScreenRect, Theme::getTheme().rgba(rose::ThemeColor::Green));
-    }
-
-    Rectangle layout(gm::Context &context, const Rectangle &screenRect) override {
-        std::cout << __PRETTY_FUNCTION__ << screenRect << '\n';
-        auto rectangle = Window::layout(context, screenRect);
-        std::cout << '\t' << rectangle << '\n';
-        return Rectangle{50, 50, 200, 200};
-    }
-
-    void addedToContainer() override {
-        std::cout << __PRETTY_FUNCTION__ << '\n';
-        getNode<PopupWindow>() << wdg<Manager>()
-                << wdg<TestWidget>(Size{200,200}, color::DarkYellowHSVA.toRGBA());
-    }
-
-    ~PopupWindow() override = default;
-};
 
 int main(int argc, char **argv) {
     Environment &environment{Environment::getEnvironment()};
@@ -126,7 +40,7 @@ int main(int argc, char **argv) {
                          << wdg<TextButton>(Id{"lblHello"}, [&](ButtonStateChange buttonStateChange){
                                  if (buttonStateChange == rose::ButtonStateChange::Pushed) {
                                      std::cout << "Local Button state: Pushed\n";
-                                     application.screen() << wdg<PopupWindow>();
+                                     application.screen() << wdg<PopupWindow>() << Position{100,100};
                                      application.layout();
                                  }
                              })

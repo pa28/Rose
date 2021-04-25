@@ -7,6 +7,7 @@
 #include "Button.h"
 #include "ImageStore.h"
 #include "Layout.h"
+#include "Manager.h"
 #include "Settings.h"
 #include "TimeBox.h"
 #include "TimerTick.h"
@@ -15,24 +16,6 @@
 #include "SatelliteModel.h"
 
 using namespace rose;
-
-class Row : public Manager {
-protected:
-
-public:
-    Row() : Manager() {
-        setLayoutManager(std::make_unique<LinearLayout>(Orientation::Horizontal));
-    }
-};
-
-class Column : public Manager {
-protected:
-
-public:
-    Column() : Manager() {
-        setLayoutManager(std::make_unique<LinearLayout>(Orientation::Vertical));
-    }
-};
 
 class ChronoLayout : public LayoutManager {
 public:
