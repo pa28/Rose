@@ -108,6 +108,7 @@ list(APPEND ROSE_SRC
         src/GraphicsModel.cpp
         src/Image.cpp
         src/ImageStore.cpp
+        src/Keyboard.cpp
         src/Layout.cpp
         src/Manager.cpp
         src/PointerInteractions.cpp
