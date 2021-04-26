@@ -9,6 +9,7 @@
 #include "Frame.h"
 #include "ImageStore.h"
 #include "Layout.h"
+#include "Manager.h"
 #include "Popup.h"
 #include "Theme.h"
 #include "TestWidget.h"

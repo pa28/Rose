@@ -12,6 +12,7 @@
 #include "Button.h"
 #include "Application.h"
 #include "LocalTime.h"
+#include "Manager.h"
 
 namespace rose {
     namespace ch = std::chrono;

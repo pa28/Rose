@@ -12,6 +12,50 @@
 
 namespace rose {
 
+    class LinearLayout : public LayoutManager {
+    protected:
+        Orientation mOrientation{Orientation::Horizontal};
+        int mInternalSpacing{0};
+
+    public:
+        LinearLayout() = default;
+
+        ~LinearLayout() override = default;
+
+        explicit LinearLayout(Orientation orientation, int internalSpace = 0) : LinearLayout() {
+            mOrientation = orientation;
+            mInternalSpacing = internalSpace;
+        }
+
+        /// Layout the contents of the associated manager.
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                LayoutManager::Itr last) override;
+    };
+
+    class GridLayout : public LayoutManager {
+    protected:
+        Orientation mOrientation{Orientation::Horizontal};
+        Size mInternalSpacing{0};
+        int mStride{0};
+
+    public:
+        GridLayout() = default;
+
+        ~GridLayout() override = default;
+
+        explicit GridLayout(Orientation orientation, int horizontalSpace = 0, int verticalSpace = 0, int stride = 0)
+                : GridLayout() {
+            mOrientation = orientation;
+            mInternalSpacing.w = horizontalSpace;
+            mInternalSpacing.h = verticalSpace;
+            mStride = stride;
+        }
+
+        /// Layout the contents of the associated manageer.
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                LayoutManager::Itr last) override;
+    };
+
     class Row : public Manager {
     protected:
 
@@ -35,8 +79,28 @@ namespace rose {
         }
 
         static constexpr std::string_view id = "Column";
+
         std::string_view nodeId() const noexcept override {
             return id;
+        }
+    };
+
+    class Grid : public Manager {
+    protected:
+
+    public:
+        Grid() : Manager() {
+            setLayoutManager(std::make_unique<GridLayout>(Orientation::Horizontal, 2, 2, 13));
+        }
+
+        static constexpr std::string_view id = "Grid";
+
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
+        void draw(gm::Context &context, const Position &containerPosition) override {
+            Manager::draw(context, containerPosition);
         }
     };
 }

@@ -233,7 +233,7 @@ namespace rose {
             };
         }
 
-        Frame(bool invert) noexcept : Frame() {
+        explicit Frame(bool invert) noexcept : Frame() {
             mInvert = invert;
         }
 

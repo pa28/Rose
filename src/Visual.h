@@ -61,8 +61,19 @@ namespace rose {
     };
 
     class LayoutHint {
+        friend class Visual;
+
     public:
-        enum Attachment : int {
+        static constexpr size_t AttachmentHint = 0;
+        static constexpr size_t GridHint = 1;
+
+        enum class GridLayoutHint : int {
+            EndStride,
+            AxisSize,
+            AxisOffset,
+        };
+
+        enum class Attachment : int {
             None,           ///< No attachment.
             TopLeft,        ///< Attach to the top left corner of the container.
             TopRight,       ///< Attach to the top right corner of the container.
@@ -82,42 +93,26 @@ namespace rose {
             RightWith,      ///< Set right even with right of indexed object.
         };
 
-        static constexpr size_t RefIndexNone = std::numeric_limits<size_t>::max();
+        static constexpr int RefIndexNone = std::numeric_limits<int>::max();
 
     protected:
-        Attachment mAttachment{None};
-        size_t mRefIndex{RefIndexNone};
-        Id mRefId{};
+        size_t mHintClass;
+        int mValueType;
+        int mValue;
 
     public:
-        LayoutHint() = default;
+        LayoutHint() = delete;
 
-        virtual ~LayoutHint() = default;
-
-        explicit LayoutHint(Attachment attachment) {
-            mAttachment = attachment;
+        LayoutHint(Attachment attachment, int index) {
+            mHintClass = AttachmentHint;
+            mValueType = static_cast<int>(attachment);
+            mValue = index;
         }
 
-        LayoutHint(Attachment attachment, size_t refIndex) {
-            mAttachment = attachment;
-            mRefIndex = refIndex;
-        }
-
-        LayoutHint(Attachment attachment, Id refId) {
-            mAttachment = attachment;
-            mRefId = refId;
-        }
-
-        [[nodiscard]] Attachment attachment() const {
-            return mAttachment;
-        }
-
-        [[nodiscard]] size_t refIndex() const {
-            return mRefIndex;
-        }
-
-        bool operator<(const LayoutHint& other) const noexcept {
-            return static_cast<int>(mAttachment) < static_cast<int>(other.mAttachment);
+        LayoutHint(GridLayoutHint hint, int value) {
+            mHintClass = GridHint;
+            mValueType = static_cast<int>(hint);
+            mValue = value;
         }
     };
 
@@ -128,7 +123,11 @@ namespace rose {
      * may or may not be honoured.
      */
     class Visual {
+    public:
         friend class LayoutManager;
+
+        using ValueMap = std::map<int, int>;        ///< The std::map type for each hint class
+        std::map<size_t, ValueMap> mHintsMap{};     ///< The std::map of hint class to ValueMap
 
     protected:
         SemanticGesture mSemanticGesture{};
@@ -140,8 +139,6 @@ namespace rose {
         Padding mPadding{};         ///< Immediately around the Visual, used for separation and alignment.
         State mState{};             ///< The object state Id string.
         bool mVisible{true};        ///< If true the object is visible.
-
-        std::vector<LayoutHint> mLayoutHints{};     ///< A list of LayoutHints for the LayoutManager.
 
     public:
         /**
@@ -219,8 +216,46 @@ namespace rose {
         }
 
         /// Add a LayoutHint
-        void addLayoutHint(const LayoutHint &hint) {
-            mLayoutHints.push_back(hint);
+        void setLayoutHint(const LayoutHint &hint) {
+            mHintsMap[hint.mHintClass][hint.mValueType] = hint.mValue;
+        }
+
+        /**
+         * @brief Get an AttachmentHint value given a LayoutHint::Attachment.
+         * @param attachment A value from LayoutHint::Attachment.
+         * @return A std::optional with the value if found.
+         */
+        std::optional<int> getAttachmentHint(LayoutHint::Attachment attachment) {
+            if (auto map = mHintsMap.find(LayoutHint::AttachmentHint); map != mHintsMap.end()) {
+                if (auto att = (*map).second.find(static_cast<int>(attachment)); att != (*map).second.end()) {
+                    return (*att).second;
+                }
+            }
+            return std::nullopt;
+        }
+
+        /**
+         * @brief Get a GridLayoutHint value given a LayoutHint::GridLayoutHint.
+         * @param attachment A value from LayoutHint::GridLayoutHint.
+         * @return A std::optional with the value if found.
+         */
+        std::optional<int> getGridHint(LayoutHint::GridLayoutHint gridLayoutHint) {
+            if (auto map = mHintsMap.find(LayoutHint::GridHint); map != mHintsMap.end()) {
+                if (auto gridHint = (*map).second.find(static_cast<int>(gridLayoutHint)); gridHint != (*map).second.end()) {
+                    return (*gridHint).second;
+                }
+            }
+            return std::nullopt;
+        }
+
+        template<size_t HintClass>
+        [[nodiscard]] std::optional<const ValueMap> getHintMap() const {
+            static_assert(HintClass == LayoutHint::AttachmentHint || HintClass == LayoutHint::GridHint,
+                    "Supported maps are: LayoutHint::AttachmentHint, LayoutHint::GridHint.");
+            if (auto map = mHintsMap.find(HintClass); map != mHintsMap.end()) {
+                return std::make_optional<const ValueMap>((*map).second);
+            }
+            return std::nullopt;
         }
 
         /// Get supported SemanticGestures.
@@ -357,11 +392,6 @@ namespace rose {
     class LayoutManager {
     protected:
         size_t mMaxContent{UnlimitedContent};   //The maximum number of objects the LayoutManager supports.
-
-        /// Get the layout hints from a Visual.
-        static std::vector<LayoutHint>& getLayoutHints(std::shared_ptr<Visual> &visual) {
-            return visual->mLayoutHints;
-        }
 
         /// Get the screen rectangle of a Visual.
         static Rectangle getScreenRectangle(std::shared_ptr<Visual> &visual) {
