@@ -18,7 +18,7 @@ namespace rose {
      * @brief
      */
     class Keyboard : public Grid {
-    protected:
+    public:
         static constexpr char CR{'\r'};
         static constexpr char BS{'\b'};
         static constexpr char CapLock{'\001'};
@@ -29,6 +29,8 @@ namespace rose {
         static constexpr char Dots3{'\006'};
         static constexpr char LeftArw{'\007'};
         static constexpr char RightArw{'\013'};
+        static constexpr char CapUnlock{'\014'};
+    protected:
         static constexpr std::array<char,4> Enter {CR, CR, CR, CR};
         static constexpr std::array<char,4> Backspace {BS, BS, BS, BS};
         static constexpr std::array<char,4> CapsLock {CapLock, CapLock, CapLock, CapLock};
@@ -108,6 +110,24 @@ namespace rose {
         explicit LetterKey(std::array<char,4> faceData) : TextButton(), mFaceData(faceData) {
             setText(std::string{mFaceData[0]});
         }
+    };
+
+    class ImageKey : public ImageButton {
+    protected:
+        std::array<char, 4> mFaceData;
+        uint mKeyState{0};
+
+    public:
+        ImageKey() = delete;
+
+        ~ImageKey() override = default;
+
+        explicit ImageKey(std::array<char,4> faceData) : ImageButton(), mFaceData(faceData) {
+        }
+
+        void addedToContainer() override;
+
+        void setKeyImage();
     };
 }
 

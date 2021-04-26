@@ -69,17 +69,22 @@ namespace rose {
 
                 Rectangle contentRect{pos, maxSize};
 
-                if (hintMap) {
-                    if (auto axisSize = getHintValue(hintMap.value(), LayoutHint::GridLayoutHint::AxisSize); axisSize)
-                        contentRect.sizePri(mOrientation) = axisSize.value() * contentRect.sizePri(mOrientation) / 100;
-                    if (auto axisOffset = getHintValue(hintMap.value(), LayoutHint::GridLayoutHint::AxisOffset); axisOffset)
-                        contentRect.posPri(mOrientation) += axisOffset.value() * contentRect.sizePri(mOrientation) / 100;
-                }
+                auto advance = contentRect.sizePri(mOrientation) + mInternalSpacing.primary(mOrientation);
 
-                pos.primary(mOrientation) += contentRect.sizePri(mOrientation);
+                if (hintMap) {
+                    if (auto axisSize = getHintValue(hintMap.value(), LayoutHint::GridLayoutHint::AxisSize); axisSize) {
+                        advance = axisSize.value() * advance / 100;
+                        contentRect.sizePri(mOrientation) = advance - mInternalSpacing.primary(mOrientation);
+                    }
+                    if (auto axisOffset = getHintValue(hintMap.value(), LayoutHint::GridLayoutHint::AxisOffset); axisOffset) {
+                        contentRect.posPri(mOrientation) += axisOffset.value() * contentRect.sizePri(mOrientation) / 100;
+                        advance += axisOffset.value() * contentRect.sizePri(mOrientation) / 100;
+                    }
+                }
+                pos.primary(mOrientation) += advance;
+
                 layoutRect.sizePri(mOrientation) = std::max(layoutRect.sizePri(mOrientation),
                                                             pos.primary(mOrientation));
-                pos.primary(mOrientation) += mInternalSpacing.primary(mOrientation);
 
                 visual->setScreenRectangle(contentRect);
 

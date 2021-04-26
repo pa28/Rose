@@ -28,6 +28,7 @@ namespace rose {
         Check,
         Alert,
         Lock,
+        LockOpen,
         UpBold,
         UpOpenBig,
         Left,
@@ -207,6 +208,22 @@ namespace rose {
         int renderCopy(gm::Context& context, ImageId imageId, Rectangle src, Rectangle dst) {
             if (auto image = mImageMap.find(imageId); image != mImageMap.end())
                 return context.renderCopy(image->second, src, dst);
+            return 0;
+        }
+
+        /**
+         * @brief Render the Texture associated with an Image Id with with optional rotation and flipping.
+         * @param context The Context to use.
+         * @param imageId The Id of the image in the ImageStore.
+         * @param src The source Rectangle.
+         * @param dst The destination Rectangle.
+         * @param angle The rotation Angle.
+         * @param flip Flipping parameters
+         * @return The return status code from the SDL API.
+         */
+        int renderCopyEx(gm::Context& context, ImageId imageId, Rectangle src, Rectangle dst, double angle, gm::RenderFlip flip) {
+            if (auto image = mImageMap.find(imageId); image != mImageMap.end())
+                return context.renderCopyEx(image->second, src, dst, angle, flip);
             return 0;
         }
     };

@@ -882,6 +882,6 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
 template<class WidgetClass>
 inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::LayoutHint& hint) {
     static_assert(std::is_base_of_v<rose::Visual, WidgetClass>, "WidgetClass must be derived from rose::Visual.");
-    widget->addLayoutHint(hint);
+    widget->setLayoutHint(hint);
     return widget;
 }

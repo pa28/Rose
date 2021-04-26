@@ -105,10 +105,6 @@ namespace rose {
             return id;
         }
 
-        void addedToContainer() override {
-            std::cout << __PRETTY_FUNCTION__ << ' ' << getIdPath() << '\n';
-        }
-
         /**
          * @brief Layout the text button.
          * @param context The graphics Context to use.
@@ -181,6 +177,8 @@ namespace rose {
 
         Size mRequestedSize{};
 
+        gm::RenderFlip mRenderFlip{SDL_FLIP_NONE};
+
     public:
         ~ImageButton() override = default;
 
@@ -217,6 +215,15 @@ namespace rose {
          */
         void draw(gm::Context &context, const Position &containerPosition) override;
 
+        /**
+         * @brief Set the image used by the ImageButton.
+         * @param imageId
+         */
+        void setImage(ImageId imageId);
+
+        void setRenderFlip(gm::RenderFlip renderFlip) {
+            mRenderFlip = renderFlip;
+        }
     };
 
     class ImageLabel : public ImageButton {

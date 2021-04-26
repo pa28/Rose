@@ -138,8 +138,12 @@ namespace rose {
 
         if (mImageId != ImageId::NoImage) {
             ImageStore& imageStore{ImageStore::getStore()};
+            Rectangle src{Position::Zero, imageStore.size(mImageId)};
             Rectangle dst{drawPosition, imageStore.size(mImageId)};
-            imageStore.renderCopy(context, mImageId, dst);
+            if (mRenderFlip.mFlip == SDL_FLIP_NONE)
+                imageStore.renderCopy(context, mImageId, dst);
+            else
+                imageStore.renderCopyEx(context, mImageId, src, dst, 0., mRenderFlip);
         }
     }
 
@@ -158,6 +162,11 @@ namespace rose {
         }
 
         return Rectangle{mPos, mSize};
+    }
+
+    void ImageButton::setImage(ImageId imageId) {
+        mImageId = imageId;
+        getApplication().redrawBackground();
     }
 
     ImageButtonLayoutManager::ImageButtonLayoutManager(ImageButton &imageButton) : mImageButton(imageButton) {
