@@ -21,6 +21,23 @@ static std::vector<std::string_view> SampleRelativePaths{
         "?/:Close"
 };
 
+static std::vector<std::string_view> SampleMatchTargets{
+        "/Screen/PopupWindow/Frame/Column/Row/TextButton",
+        "/Screen/PopupWindow/Frame/Column/Row/TextButton:Close",
+        "/Screen/Window/Manager/Row/Column/TextButton",
+        "/Screen/Window/Manager/Row/Column/TextButton:Callsign"
+};
+
+static std::vector<std::string_view> SampleSearchPaths{
+        "*/PopupWindow/*/TextButton",
+        "*/PopupWindow/*/Close",
+        "*/Callsign"
+};
+
+static std::vector<int> SearchResults {
+    0, 1, 3
+};
+
 struct Test {
     size_t testCount{0};
     size_t passCount{0};
@@ -41,7 +58,7 @@ struct Parsing : Test {
     }
 
     void performTest() override {
-        for (auto &path : SampleAbsolutePaths) {
+        for (auto &path : testData) {
             auto idPath = rose::parsePathIdString(path);
             auto pathStr = idPath.str();
             if (path == pathStr) {
@@ -58,9 +75,52 @@ struct Parsing : Test {
     }
 };
 
+struct Search : Test {
+    const std::vector<std::string_view> &searchTargets;
+    const std::vector<std::string_view> &searchPaths;
+    const std::vector<int> &answers;
+
+    explicit Search(const std::string name, const std::vector<std::string_view> &targets,
+                    const std::vector<std::string_view> &paths,
+                    const std::vector<int> &searchRes) : searchTargets(targets), searchPaths(paths), answers(searchRes) {
+        testName = name;
+    }
+
+    void performTest() override {
+        auto answerIdx = answers.begin();
+        for (auto &path : searchPaths) {
+            int selected = -1;
+            int maxScore = 0;
+            auto idPath = rose::parsePathIdString(path);
+            int n = 0;
+            for (auto &target : searchTargets) {
+                auto tgtPath = rose::parsePathIdString(target);
+                auto [match,score] = idPath.compare(tgtPath);
+                if (match) {
+                    if (selected < 0 || score > maxScore) {
+                        selected = n;
+                        maxScore = score;
+                    }
+                }
+                ++n;
+            }
+            if (selected == (*answerIdx)) {
+                passCount++;
+            } else {
+                std::cerr << std::setw(12) << std::left << testName << "Test: " << testCount << " Failed.\n";
+            }
+            testCount++;
+            ++answerIdx;
+        }
+    }
+};
+
 static std::vector<std::shared_ptr<Test>> TestList{
         std::make_shared<Parsing>("AbsPaths", SampleAbsolutePaths),
-        std::make_shared<Parsing>("RelPaths", SampleRelativePaths)
+        std::make_shared<Parsing>("RelPaths", SampleRelativePaths),
+        std::make_shared<Parsing>("MatchTgt", SampleMatchTargets),
+        std::make_shared<Parsing>("SearchPaths", SampleSearchPaths),
+        std::make_shared<Search>("Matching", SampleMatchTargets, SampleSearchPaths, SearchResults)
 };
 
 int main(int argc, char **argv) {

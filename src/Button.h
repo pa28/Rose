@@ -105,6 +105,10 @@ namespace rose {
             return id;
         }
 
+        void addedToContainer() override {
+            std::cout << __PRETTY_FUNCTION__ << ' ' << getIdPath() << '\n';
+        }
+
         /**
          * @brief Layout the text button.
          * @param context The graphics Context to use.

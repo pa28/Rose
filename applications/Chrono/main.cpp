@@ -253,7 +253,7 @@ struct Chrono : public Application {
                     << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                     << wdg<Row>()
                         << wdg<Column>()
-                            << wdg<TextButton>("VE3YSH") << endw
+                            << wdg<TextButton>(Id{"Callsign"}) << endw
                             << wdg<TimeDateBox>(timerTick, ":Canada/Newfoundland", true, true);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);

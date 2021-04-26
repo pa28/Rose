@@ -14,6 +14,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include "Utilities.h"
 
 namespace rose {
 
@@ -41,9 +42,9 @@ namespace rose {
     struct IdPath : public std::vector<IdPathElement> {
         bool absolutePath{};
         static constexpr char PathSep = '/';
-        static constexpr char PathWild = '*';
-        static constexpr char PathWildOne = '?';
         static constexpr char ElementSep = ':';
+        static constexpr std::string_view PathWild = "*";
+        static constexpr std::string_view PathWildOne = "?";
         static constexpr std::string_view PathParent = "..";
 
         explicit IdPath(bool absolute = false) : std::vector<IdPathElement>(), absolutePath(absolute) {}
@@ -65,6 +66,43 @@ namespace rose {
                 notFirst = true;
             }
             return strm.str();
+        }
+
+        std::tuple<bool, int> compare(const IdPath& target) {
+            bool wildCard = false;
+            int score = 0;
+            auto tgt = target.rbegin();
+            for (auto& srch : ReverseContainerView(*this)) {
+                if (tgt == target.rend())
+                    return std::make_tuple(false, 0);
+                *tgt;
+
+                if (wildCard) {
+                    if (srch.first == PathWild || srch.first == PathWildOne)
+                        continue;
+                    while ((srch.first != (*tgt).second) && (srch.first != (*tgt).first)) {
+                        if (++tgt == target.rend())
+                            return std::make_tuple(false, 0);
+                    }
+                    if (srch.first == (*tgt).second)
+                        ++score;
+                    wildCard = false;
+                } else {
+                    if (srch.first == (*tgt).second) {
+                        ++score;
+                    } else if (srch.first != (*tgt).first) {
+                        if (srch.first != PathWildOne) {
+                            if (srch.first == PathWild) {
+                                wildCard = true;
+                            } else {
+                                return std::make_tuple(false, 0);
+                            }
+                        }
+                    }
+                }
+                ++tgt;
+            }
+            return std::make_tuple(true, score);
         }
     };
 
