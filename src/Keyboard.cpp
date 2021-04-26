@@ -9,4 +9,12 @@
 
 namespace rose {
 
+    void Keyboard::addedToContainer() {
+        Node::addedToContainer();
+        auto grid = getNode<Grid>();
+        for( auto& key : keyDataRow0) {
+            if (key[0] >= '@')
+                grid << wdg<LetterKey>(key);
+        }
+    }
 }

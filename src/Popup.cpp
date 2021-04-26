@@ -11,6 +11,7 @@
 #include "Manager.h"
 #include "Application.h"
 #include "Visual.h"
+#include "Keyboard.h"
 
 namespace rose {
 
@@ -26,7 +27,6 @@ namespace rose {
                                     << CornerStyle::Square
                                     << Padding(2)
                                     >> mContentFrame
-                                << wdg<TestWidget>(Size{200,200}, color::DarkBaseColor) << endw
                                 << endw
                             << endw
                         << wdg<TextButton>("Close", [&](ButtonStateChange buttonStateChange){
@@ -35,5 +35,8 @@ namespace rose {
                                 getScreen()->getApplication().redrawBackground();
                             }
                         }) << Theme::getTheme().SemiBevelFrame;
+
+        mContentFrame << wdg<Keyboard>();
+
     }
 }

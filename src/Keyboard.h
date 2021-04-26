@@ -8,29 +8,16 @@
 #pragma once
 
 #include "Button.h"
+#include "Manager.h"
 #include <array>
 
 namespace rose {
-
-
-    class LetterKey : public TextButton {
-    protected:
-        std::array<char, 4> mFaceData;
-        uint mKeyState{0};
-
-    public:
-        LetterKey() = delete;
-
-        ~LetterKey() override = default;
-
-        explicit LetterKey(std::array<char,4> faceData) : mFaceData(faceData) {}
-    };
 
     /**
      * @class Keyboard
      * @brief
      */
-    class Keyboard {
+    class Keyboard : public Grid {
     protected:
         static constexpr char CR{'\r'};
         static constexpr char BS{'\b'};
@@ -100,6 +87,27 @@ namespace rose {
             KeyState
         }};
 
+    public:
+        Keyboard() : Grid() {}
+
+        ~Keyboard() override = default;
+
+        void addedToContainer() override;
+    };
+
+    class LetterKey : public TextButton {
+    protected:
+        std::array<char, 4> mFaceData;
+        uint mKeyState{0};
+
+    public:
+        LetterKey() = delete;
+
+        ~LetterKey() override = default;
+
+        explicit LetterKey(std::array<char,4> faceData) : TextButton(), mFaceData(faceData) {
+            setText(std::string{mFaceData[0]});
+        }
     };
 }
 
