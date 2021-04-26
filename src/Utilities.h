@@ -45,7 +45,7 @@ namespace rose {
          * @param container The standard container to provide the view of.
          * @param reverse If true reverse the container view, if false do not reverse.
          */
-        explicit ReverseContainerView(ContainerType &container, bool reverse = true) : mContainer(container) {}
+        explicit ReverseContainerView(ContainerType &container) : mContainer(container) {}
 
         /**
          * @brief Get the begin iterator for the reverse view
@@ -61,6 +61,44 @@ namespace rose {
          */
         auto end() {
             return std::rend(mContainer);
+        }
+    };
+
+    /**
+     * @class ContainerView
+     * @brief Provide a view of a standard container type.
+     * @details Intended to be constructed by classes which have member containers.
+     * @tparam ContainerType The type of container
+     */
+    template<class ContainerType>
+    class ContainerView {
+    protected:
+        ContainerType &mContainer;      ///< A reference to the standard container.
+
+    public:
+        ContainerView() = delete;
+
+        /**
+         * @brief Constructor.
+         * @param container The standard container to provide the view of.
+         * @param reverse If true reverse the container view, if false do not reverse.
+         */
+        explicit ContainerView(ContainerType &container) : mContainer(container) {}
+
+        /**
+         * @brief Get the begin iterator for the reverse view
+         * @return the standard container rbegin iterator
+         */
+        auto begin() {
+            return std::begin(mContainer);
+        }
+
+        /**
+         * @brief Get the end iterator for the reverse view
+         * @return the standard container rend iterator
+         */
+        auto end() {
+            return std::end(mContainer);
         }
     };
 
