@@ -163,6 +163,8 @@ namespace rose {
                         mButtonCommandCallback(ButtonStateChange::Off, mButtonCommandId);
                 }
                 break;
+            case ButtonType::Label:
+                break;
         }
     }
 

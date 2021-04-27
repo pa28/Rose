@@ -88,6 +88,11 @@ namespace rose {
             mButtonStateChangeCallback = std::move(buttonStateChangeCallback);
         }
 
+        /**
+         * @param Set the ButtonCommandCallback.
+         * @param commandId The identifier of the command to the Widget receiving the callback.
+         * @param buttonCommandCallback The callback.
+         */
         void setButtonCommandCallback(uint commandId, ButtonCommandCallback buttonCommandCallback) {
             mButtonCommandId = commandId;
             mButtonCommandCallback = std::move(buttonCommandCallback);

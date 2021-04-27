@@ -17,7 +17,7 @@ namespace rose {
 
     inline int fmImageId(ImageId id) { return static_cast<int>(id); }
 
-    static constexpr std::array<IconImage, 35> IconImageList{{
+    static constexpr std::array<IconImage, 37> IconImageList{{
                                                                      {ImageId::Compass, ENTYPO_ICON_COMPASS, color::DarkTextColour},
                                                                      {ImageId::Heart, ENTYPO_ICON_HEART, color::DarkRedHSVA.toRGBA()},
                                                                      {ImageId::HeartEmpty, ENTYPO_ICON_HEART_EMPTY, color::DarkTextColour},
@@ -30,6 +30,8 @@ namespace rose {
                                                                      {ImageId::LockOpen, ENTYPO_ICON_LOCK_OPEN, color::DarkTopColor},
                                                                      {ImageId::UpBold, ENTYPO_ICON_UP_BOLD, color::DarkTextColour},
                                                                      {ImageId::UpOpenBig, ENTYPO_ICON_UP_OPEN_BIG, color::DarkTextColour},
+                                                                     {ImageId::DownBold, ENTYPO_ICON_DOWN_BOLD, color::DarkTextColour},
+                                                                     {ImageId::DownOpenBig, ENTYPO_ICON_DOWN_OPEN_BIG, color::DarkTextColour},
                                                                      {ImageId::Left, ENTYPO_ICON_LEFT, color::DarkTextColour},
                                                                      {ImageId::Right, ENTYPO_ICON_RIGHT, color::DarkTextColour},
                                                                      {ImageId::ToEnd, ENTYPO_ICON_TO_END, color::DarkTextColour},

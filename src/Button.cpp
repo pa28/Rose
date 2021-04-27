@@ -77,6 +77,12 @@ namespace rose {
 
         if (mTexture) {
             Rectangle dst{drawPosition, mTextSize};
+
+            if (mCentreHorizontal)
+                dst.x += (mScreenRect.w - mTexture.getSize().w) / 2 - mPadding.l - mFrameWidth;
+            if (mCentreVertical)
+                dst.y += (mScreenRect.h - mTexture.getSize().h) / 2 - mPadding.t - mFrameWidth;
+
             context.renderCopy(mTexture, dst);
         }
     }
@@ -140,6 +146,12 @@ namespace rose {
             ImageStore& imageStore{ImageStore::getStore()};
             Rectangle src{Position::Zero, imageStore.size(mImageId)};
             Rectangle dst{drawPosition, imageStore.size(mImageId)};
+
+            if (mCentreHorizontal)
+                dst.x += (mScreenRect.w - dst.w) / 2 - mPadding.l - mFrameWidth;
+            if (mCentreVertical)
+                dst.y += (mScreenRect.h - dst.h) / 2 - mPadding.t - mFrameWidth;
+
             if (mRenderFlip.mFlip == SDL_FLIP_NONE)
                 imageStore.renderCopy(context, mImageId, dst);
             else

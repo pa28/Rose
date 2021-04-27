@@ -8,6 +8,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include "Frame.h"
 #include "PointerInteractions.h"
 #include "Text.h"
@@ -21,6 +22,9 @@ namespace rose {
      */
     class ButtonFrame : public Frame {
     protected:
+        bool mCentreHorizontal{false};
+        bool mCentreVertical{false};
+
         std::unique_ptr<ButtonSemantics> mButtonSemantics{};
 
         ButtonDisplayCallback mButtonDisplayCallback{};
@@ -42,6 +46,15 @@ namespace rose {
         static constexpr std::string_view id = "ButtonFrame";
         std::string_view nodeId() const noexcept override {
             return id;
+        }
+
+        /**
+         * @param Set the ButtonCommandCallback.
+         * @param commandId The identifier of the command to the Widget receiving the callback.
+         * @param buttonCommandCallback The callback.
+         */
+        void setButtonCommandCallback(uint commandId, ButtonCommandCallback buttonCommandCallback) {
+            mButtonSemantics->setButtonCommandCallback(commandId, std::move(buttonCommandCallback));
         }
     };
 

@@ -31,6 +31,8 @@ namespace rose {
         LockOpen,
         UpBold,
         UpOpenBig,
+        DownBold,
+        DownOpenBig,
         Left,
         Right,
         ToEnd,
