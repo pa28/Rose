@@ -43,7 +43,6 @@ namespace rose {
         std::string_view nodeId() const noexcept override {
             return id;
         }
-
     };
 
     /**

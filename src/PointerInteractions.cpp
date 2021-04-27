@@ -144,6 +144,8 @@ namespace rose {
                     mState = Inactive;
                     if (mButtonStateChangeCallback)
                         mButtonStateChangeCallback(ButtonStateChange::Pushed);
+                    if (mButtonCommandCallback)
+                        mButtonCommandCallback(ButtonStateChange::Pushed, mButtonCommandId);
                 }
                 break;
             case ButtonType::ToggleButton:
@@ -151,10 +153,14 @@ namespace rose {
                     mState = Active;
                     if (mButtonStateChangeCallback)
                         mButtonStateChangeCallback(ButtonStateChange::On);
+                    if (mButtonCommandCallback)
+                        mButtonCommandCallback(ButtonStateChange::On, mButtonCommandId);
                 } else {
                     mState = Inactive;
                     if (mButtonStateChangeCallback)
                         mButtonStateChangeCallback(ButtonStateChange::Off);
+                    if (mButtonCommandCallback)
+                        mButtonCommandCallback(ButtonStateChange::Off, mButtonCommandId);
                 }
                 break;
         }

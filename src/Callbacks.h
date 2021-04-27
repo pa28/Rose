@@ -75,6 +75,13 @@ namespace rose {
     using ButtonStateChangeCallback = std::function<void(ButtonStateChange buttonStateChange)>;
 
     /**
+     * @brief Button command callback.
+     * @param buttonStateChange Indicates the cange in state of the button.
+     * @param commandId Identifies the button command function to the receiver.
+     */
+    using ButtonCommandCallback = std::function<void(ButtonStateChange buttonStateChange, uint commandId)>;
+
+    /**
      * @brief Keyboard shortcut callback.
      * @details Called when a registered ALt-Key is pressed
      * @param shortcutCode The shortcut code defined by the widget bound to the action.

@@ -47,6 +47,8 @@ namespace rose {
         InteractionState mState{Inactive};                  ///< Hold the internal interaction state.
         ButtonType mButtonType{ButtonType::PushButton};     ///< The button type.
         Widget &mWidget;                                    ///< The Widget that implements the button.
+        uint mButtonCommandId{0};                           ///< The Widget command associated with the button.
+
 
         void setButtonState(bool active);   ///< Called when the Active/Inactive state is resolved.
         void enterLeaveCallback();          ///< Callback when the pointer enters or leaves the Widget.
@@ -54,6 +56,7 @@ namespace rose {
 
         ButtonDisplayCallback mButtonDisplayCallback{};         ///< A callback to the Widget to change the display state.
         ButtonStateChangeCallback mButtonStateChangeCallback{}; ///< A callback to the Widget with the new button state.
+        ButtonCommandCallback mButtonCommandCallback{};         ///< A callback to the Widget with the button state and command id.
 
     public:
         ButtonSemantics() = delete;
@@ -83,6 +86,11 @@ namespace rose {
          */
         void setButtonStateChangeCallback(ButtonStateChangeCallback buttonStateChangeCallback) {
             mButtonStateChangeCallback = std::move(buttonStateChangeCallback);
+        }
+
+        void setButtonCommandCallback(uint commandId, ButtonCommandCallback buttonCommandCallback) {
+            mButtonCommandId = commandId;
+            mButtonCommandCallback = std::move(buttonCommandCallback);
         }
     };
 }
