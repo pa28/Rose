@@ -11,11 +11,10 @@
 #include "Manager.h"
 #include "Application.h"
 #include "Visual.h"
-#include "WidgetBuider.h"
 
 namespace rose {
 
-    void PopupWindow::addedToContainer() {
+    void Dialog::addedToContainer() {
         std::cout << __PRETTY_FUNCTION__ << getIdPath() << '\n';
         auto frame = std::make_shared<Frame>();
         getNode<PopupWindow>()->add(frame);
@@ -36,8 +35,5 @@ namespace rose {
                                 getScreen()->getApplication().redrawBackground();
                             }
                         }) << Theme::getTheme().SemiBevelFrame;
-
-//        mContentFrame << wdg<Keyboard>();
-
     }
 }

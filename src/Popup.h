@@ -24,12 +24,18 @@ namespace rose {
 
     public:
         PopupWindow() {
-            setSize(Size{200,200});
-            setPosition(Position{300, 100});
             mModalWindow = true;
         }
 
         ~PopupWindow() override = default;
+
+        PopupWindow(const PopupWindow&) = delete;
+
+        PopupWindow(PopupWindow&&) = delete;
+
+        PopupWindow& operator=(const PopupWindow&) = delete;
+
+        PopupWindow& operator=(PopupWindow&&) = delete;
 
         static constexpr std::string_view id = "PopupWindow";
         std::string_view nodeId() const noexcept override {
@@ -48,17 +54,50 @@ namespace rose {
             return rect;
         }
 
-        void addedToContainer() override;
-
         constexpr bool removePopup() const noexcept {
             return mRemovePopup;
         }
+    };
+
+    class Dialog : public PopupWindow {
+    protected:
+
+    public:
+        Dialog() = default;
+
+        ~Dialog() override = default;
+
+        Dialog(const PopupWindow&) = delete;
+
+        Dialog(PopupWindow&&) = delete;
+
+        explicit Dialog(const Position& position) : PopupWindow() {
+            setPosition(position);
+        }
+
+        static constexpr std::string_view id = "Dialog";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
+        void addedToContainer() override;
 
         template<class WidgetClass>
         void addWidget(std::shared_ptr<WidgetClass> widget) {
             mContentFrame << widget;
         }
     };
+}
+
+template<class WidgetClass>
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<rose::Dialog> dialog, std::shared_ptr<WidgetClass> widget) {
+    dialog->addWidget(widget);
+    return widget;
+}
+
+inline std::shared_ptr<rose::Dialog> operator<<(std::shared_ptr<rose::Dialog> dialog, const rose::Position& position) {
+    dialog->setPosition(position);
+    return dialog;
 }
 
 /**

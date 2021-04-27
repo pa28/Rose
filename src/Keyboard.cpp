@@ -8,7 +8,6 @@
 #include "Keyboard.h"
 #include "ImageStore.h"
 #include "Application.h"
-#include "WidgetBuider.h"
 
 namespace rose {
 

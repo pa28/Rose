@@ -2,8 +2,6 @@
 // Created by richard on 2021-03-06.
 //
 
-#include "GraphicsModel.h"
-#include "WidgetBuider.h"
 #include "Application.h"
 #include "Button.h"
 #include "Font.h"
@@ -42,8 +40,8 @@ int main(int argc, char **argv) {
                          << wdg<TextButton>(Id{"lblHello"}, [&](ButtonStateChange buttonStateChange){
                                  if (buttonStateChange == rose::ButtonStateChange::Pushed) {
                                      std::cout << "Local Button state: Pushed\n";
-                                     application.screen() << wdg<PopupWindow>()
-                                             << Position{0,0}
+                                     application.screen() << wdg<Dialog>()
+                                             << Position::Zero
                                              << wdg<Keyboard>();
                                      application.layout();
                                  }
