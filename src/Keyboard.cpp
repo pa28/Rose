@@ -40,7 +40,9 @@ namespace rose {
             << LayoutHint{LayoutHint::GridLayoutHint::AxisSize, 150};
 
         for( auto& key : keyDataRow2) {
-            if (key[0] >= ' ')
+            if (key[0] == Keyboard::CapLock || key[0] == Keyboard::CapUnlock)
+                grid << wdg<CapsLockKey>();
+            else if (key[0] >= ' ')
                 grid << wdg<LetterKey>(key);
             else
                 grid << wdg<ImageKey>(key);
@@ -97,6 +99,24 @@ namespace rose {
                 setImage(ImageId::Right);
                 break;
         }
+        getApplication().redrawBackground();
+    }
+
+    void CapsLockKey::addedToContainer() {
+        mButtonSemantics->setButtonStateChangeCallback([&](ButtonStateChange pushed) {
+            if (pushed == ButtonStateChange::Pushed) {
+                mLocked = !mLocked;
+                setKeyImage();
+            }
+        });
+        setKeyImage();
+    }
+
+    void CapsLockKey::setKeyImage() {
+        if (mLocked)
+            setImage(ImageId::Lock);
+        else
+            setImage(ImageId::LockOpen);
         getApplication().redrawBackground();
     }
 }

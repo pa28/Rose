@@ -129,5 +129,19 @@ namespace rose {
 
         void setKeyImage();
     };
+
+    class CapsLockKey : public ImageButton {
+    protected:
+        bool mLocked{false};
+
+    public:
+        CapsLockKey() : ImageButton() {}
+
+        ~CapsLockKey() override = default;
+
+        void addedToContainer() override;
+
+        void setKeyImage();
+    };
 }
 
