@@ -11,14 +11,15 @@
 #include "Manager.h"
 #include "Application.h"
 #include "Visual.h"
-#include "Keyboard.h"
+#include "WidgetBuider.h"
 
 namespace rose {
 
     void PopupWindow::addedToContainer() {
         std::cout << __PRETTY_FUNCTION__ << getIdPath() << '\n';
-        getNode<PopupWindow>()
-                << wdg<Frame>() << Theme::getTheme().BevelFrame << CornerStyle::Square
+        auto frame = std::make_shared<Frame>();
+        getNode<PopupWindow>()->add(frame);
+                 frame << Theme::getTheme().BevelFrame << CornerStyle::Square
                     << wdg<Column>() << Padding(2)
                         << wdg<TextLabel>(Id{"PopupWindow"}) << PointSize(20) << endw
                         << wdg<Frame>() << Padding(0)
@@ -36,7 +37,7 @@ namespace rose {
                             }
                         }) << Theme::getTheme().SemiBevelFrame;
 
-        mContentFrame << wdg<Keyboard>();
+//        mContentFrame << wdg<Keyboard>();
 
     }
 }

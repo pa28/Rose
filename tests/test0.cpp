@@ -3,16 +3,17 @@
 //
 
 #include "GraphicsModel.h"
+#include "WidgetBuider.h"
 #include "Application.h"
 #include "Button.h"
 #include "Font.h"
 #include "Frame.h"
 #include "ImageStore.h"
+#include "Keyboard.h"
 #include "Layout.h"
 #include "Manager.h"
 #include "Popup.h"
 #include "Theme.h"
-#include "TestWidget.h"
 #include "Types.h"
 
 using namespace rose;
@@ -41,7 +42,9 @@ int main(int argc, char **argv) {
                          << wdg<TextButton>(Id{"lblHello"}, [&](ButtonStateChange buttonStateChange){
                                  if (buttonStateChange == rose::ButtonStateChange::Pushed) {
                                      std::cout << "Local Button state: Pushed\n";
-                                     application.screen() << wdg<PopupWindow>() << Position{0,0};
+                                     application.screen() << wdg<PopupWindow>()
+                                             << Position{0,0}
+                                             << wdg<Keyboard>();
                                      application.layout();
                                  }
                              })

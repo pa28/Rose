@@ -29,6 +29,8 @@ namespace rose {
             mModalWindow = true;
         }
 
+        ~PopupWindow() override = default;
+
         static constexpr std::string_view id = "PopupWindow";
         std::string_view nodeId() const noexcept override {
             return id;
@@ -52,7 +54,10 @@ namespace rose {
             return mRemovePopup;
         }
 
-        ~PopupWindow() override = default;
+        template<class WidgetClass>
+        void addWidget(std::shared_ptr<WidgetClass> widget) {
+            mContentFrame << widget;
+        }
     };
 }
 
