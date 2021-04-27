@@ -74,9 +74,6 @@ namespace rose {
                 } else
                     mShiftActive = !mShiftActive;
                 break;
-            case SDLK_BACKSPACE:
-            case SDLK_RETURN:
-                break;
             case SDLK_LALT:
             case SDLK_RALT:
                 switch (mAltState) {
@@ -92,17 +89,50 @@ namespace rose {
                 }
                 break;
             case SDLK_LEFT:
-            case SDLK_RIGHT:
+            case SDLK_RIGHT: {
+                SDL_Event event;
+                event.type = SDL_KEYDOWN;
+                event.key.timestamp = SDL_GetTicks();
+                event.key.windowID = 0;
+                event.key.state = SDL_PRESSED;
+                event.key.repeat = 0;
+                event.key.keysym.sym = command;
+                event.key.keysym.mod = SDL_GetModState();
+                event.key.keysym.scancode = SDL_GetScancodeFromKey(event.key.keysym.sym);
+                SDL_ClearError();
+                if (auto status = SDL_PushEvent(&event); !status)
+                    std::cout << __PRETTY_FUNCTION__ << ' ' << status << SDL_GetError() << '\n';
+                event.type = SDL_KEYUP;
+                event.key.state = SDL_RELEASED;
+                SDL_ClearError();
+                if (auto status = SDL_PushEvent(&event); !status)
+                    std::cout << __PRETTY_FUNCTION__ << ' ' << status << SDL_GetError() << '\n';
+            }
                 break;
-            default:
-                std::cout << __PRETTY_FUNCTION__ << " CLock: " << (mCapsLock ? " ON  " : " OFF ")
-                << ", Shift: " << (mShiftActive ? " ON  " : " OFF ")
-                << SDL_GetKeyName(command) << '\n';
+            case SDLK_BACKSPACE:
+            case SDLK_RETURN:
+            default: {
+                SDL_Event event;
+                event.type = SDL_TEXTINPUT;
+                event.text.timestamp = SDL_GetTicks();
+                event.text.windowID = 0;
+                switch (mKeyState) {
+                    case 0:
+                        event.text.text[0] = static_cast<char>(::tolower(static_cast<char>(command & 0xFFu)));
+                        break;
+                    case 1:
+                        event.text.text[0] = static_cast<char>(::toupper(static_cast<char>(command & 0xFFu)));
+                        break;
+                    default:
+                        event.text.text[0] = static_cast<char>(command & 0xFFu);
+                }
+                event.text.text[1] = '\0';
+                SDL_ClearError();
+                if (auto status = SDL_PushEvent(&event); !status)
+                    std::cout << __PRETTY_FUNCTION__ << ' ' << status << SDL_GetError() << '\n';
                 mShiftActive = false;
+            }
         }
-
-        std::cout << __PRETTY_FUNCTION__ << " CLock: " << (mCapsLock ? " ON  " : " OFF ")
-                  << ", Shift: " << (mShiftActive ? " ON  " : " OFF ") << '\n';
 
         uint newKeystate = 0;
         if (mAltState) {

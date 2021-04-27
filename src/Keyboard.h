@@ -28,15 +28,16 @@ namespace rose {
 
     /**
      * @class Keyboard
-     * @brief
+     * @brief A touch keyboard.
      */
     class Keyboard : public Grid {
     protected:
-        bool mCapsLock{false};
-        bool mShiftActive{false};
-        uint mKeyState{0};
-        uint mAltState{0};
+        bool mCapsLock{false};      ///< The CapsLock state
+        bool mShiftActive{false};   ///< The temporary Shift state
+        uint mKeyState{0};          ///< The key state, sets which element is used for a specific key.
+        uint mAltState{0};          ///< The alt keyboard state, access to numbers and special characters.
 
+        /// Top row of the keyboard.
         static constexpr std::array<KeySpec, 11> keyDataRow0
                 {{
                          {false, {SDLK_q, SDLK_q, SDLK_1, SDLK_1}},
@@ -52,6 +53,7 @@ namespace rose {
                          {true, {SDLK_BACKSPACE, SDLK_BACKSPACE, SDLK_BACKSPACE, SDLK_BACKSPACE}}
                  }};
 
+        /// Second row of keys
         static constexpr std::array<KeySpec, 10> keyDataRow1
                 {{
                          {false, {SDLK_a, SDLK_a, SDLK_AT, SDLK_AT}},
@@ -66,6 +68,7 @@ namespace rose {
                          {true, {SDLK_RETURN, SDLK_RETURN, SDLK_RETURN, SDLK_RETURN}}
                  }};
 
+        /// Third row of keys
         static constexpr std::array<KeySpec, 11> keyDataRow2
                 {{
                          {true, {SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK, SDLK_CAPSLOCK}},
@@ -80,6 +83,8 @@ namespace rose {
                          {false, {SDLK_PERIOD, SDLK_SLASH, SDLK_SEMICOLON, SDLK_SEMICOLON}},
                          {true, {SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT, SDLK_RSHIFT}}
                  }};
+
+        /// Bottom row of keys
         static constexpr std::array<KeySpec, 6> keyDataRow3
                 {{
                          {true, {SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT, SDLK_LSHIFT}},
@@ -97,23 +102,30 @@ namespace rose {
 
         void addedToContainer() override;
 
+        /// Callback to process key presses.
         void keyCommandCallback(ButtonStateChange stateChange, uint command);
     };
 
+    /**
+     * @class LetterKey
+     * @brief A key which produces a character of input.
+     */
     class LetterKey : public TextButton {
     protected:
-        std::array<uint, 4> mCommand;
-        uint mKeyState{0};
+        std::array<uint, 4> mCommand;   /// The characters supported by the key in various modes.
+        uint mKeyState{0};              /// The key state of the key, follows the key state of the keyboard.
 
-        void setTextFromCommand();
-
-        std::function<void()> mKeyCallback;
+        void setTextFromCommand();      /// Set the display base on the key state.
 
     public:
         LetterKey() = delete;
 
         ~LetterKey() override = default;
 
+        /**
+         * @brief Construct a letter key
+         * @param cmd Specifies the keys supported.
+         */
         explicit LetterKey(std::array<uint, 4> cmd) : TextButton(), mCommand(cmd) {
             mCentreVertical = true;
             mCentreHorizontal = true;
@@ -121,24 +133,33 @@ namespace rose {
 
         void addedToContainer() override;
 
+        /// Set the key state
         void setKeyState(uint keyState) {
             mKeyState = keyState;
             setTextFromCommand();
         }
     };
 
+    /**
+     * @bclass ImageKey
+     * @brief A key that supports image glyphs. Used for control keys.
+     */
     class ImageKey : public ImageButton {
     protected:
-        std::array<uint, 4> mCommand;
-        uint mKeyState{0};
+        std::array<uint, 4> mCommand;   ///< The glyphs and controlls supported.
+        uint mKeyState{0};              ///< The key state.
 
-        void setImageFromCommand();
+        void setImageFromCommand();     ///< Set the image glyph based on the key state.
 
     public:
         ImageKey() = delete;
 
         ~ImageKey() override = default;
 
+        /**
+         * @brief Construct an Image key.
+         * @param cmd The glyphs and controls supported.
+         */
         explicit ImageKey(std::array<uint, 4> cmd) : ImageButton(), mCommand(cmd) {
             mCentreVertical = true;
             mCentreHorizontal = true;
@@ -146,21 +167,30 @@ namespace rose {
 
         void addedToContainer() override;
 
+        /// Set the key state.
         void setKeyState(uint keyState) {
             mKeyState = keyState;
             setImageFromCommand();
         }
     };
 
+    /**
+     * @class CapsLockKey
+     * @brief A specialized ImageKey for Caps Lock
+     */
     class CapsLockKey : public ImageKey {
     protected:
-        bool mLockState{false};
+        bool mLockState{false};         ///< The caps lock state.
 
-        void setImageFromLockState();
+        void setImageFromLockState();   ///< Set the image glyph on the key.
 
     public:
         CapsLockKey() = delete;
 
+        /**
+         * @brief Construct a caps lock key.
+         * @param cmd Only used to pass on to the ImageKey.
+         */
         explicit CapsLockKey(std::array<uint, 4> cmd) : ImageKey(cmd) {
         }
 

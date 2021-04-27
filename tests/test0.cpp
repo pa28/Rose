@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
                          << wdg<TextButton>(Id{"lblHello"}, [&](ButtonStateChange buttonStateChange){
                                  if (buttonStateChange == rose::ButtonStateChange::Pushed) {
                                      std::cout << "Local Button state: Pushed\n";
-                                     application.screen() << wdg<PopupWindow>() << Position{100,100};
+                                     application.screen() << wdg<PopupWindow>() << Position{0,0};
                                      application.layout();
                                  }
                              })

@@ -316,7 +316,7 @@ namespace rose {
                 keyboardEvent(e.key);
                 break;
             case SDL_TEXTINPUT:
-                std::cout << "TextInputEvent\n";
+                std::cout << "TextInputEvent" << ' ' << e.text.text << '\n';
                 break;
             case SDL_TEXTEDITING:
                 std::cout << "TextEditingEvent\n";
