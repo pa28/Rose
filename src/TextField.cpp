@@ -23,20 +23,25 @@ namespace rose {
             mFontName.fontName = theme.TextFont;
     }
 
-    TextField::TextField(int maxLength, const std::string &text, const std::string &suffix, const std::string &prefix,
+    TextField::TextField(int maxLength, const std::string &text, const std::string &prefix, const std::string &suffix,
                          Padding padding, PointSize pointSize, const std::string &fontName)
             : TextField(maxLength, padding, pointSize, fontName) {
-        mSuffixLabel = std::make_shared<TextLabel>(suffix) << mPointSize << mFontName;
-        mPrefixLabel = std::make_shared<TextLabel>(prefix) << mPointSize << mFontName;
+        if (!suffix.empty())
+            mSuffixLabel = std::make_shared<TextLabel>(suffix) << mPointSize << mFontName;
+        if (!prefix.empty())
+            mPrefixLabel = std::make_shared<TextLabel>(prefix) << mPointSize << mFontName;
         mTextLabel = std::make_shared<TextLabel>(text) << mPointSize << mFontName;
+        mTextLabel->setTextMaxSize(maxLength);
     }
 
     TextField::TextField(Id id, int maxLength, const std::string &prefix, const std::string &suffix, Padding padding,
                          PointSize pointSize, const std::string &fontName)
             : TextField(maxLength, padding, pointSize, fontName) {
         mId = id;
-        mSuffixLabel = std::make_shared<TextLabel>(suffix) << mPointSize << mFontName;
-        mPrefixLabel = std::make_shared<TextLabel>(prefix) << mPointSize << mFontName;
+        if (!suffix.empty())
+            mSuffixLabel = std::make_shared<TextLabel>(suffix) << mPointSize << mFontName;
+        if (!prefix.empty())
+            mPrefixLabel = std::make_shared<TextLabel>(prefix) << mPointSize << mFontName;
     }
 
     void TextField::addedToContainer() {
@@ -54,9 +59,13 @@ namespace rose {
             mTextLabel = std::make_shared<TextLabel>(mText) << mPointSize << mFontName;
         }
 
-        getNode<TextField>()
-                << mPrefixLabel << endw
-                << mTextLabel << endw
-                << mSuffixLabel;
+        auto textField = getNode<TextField>();
+        if (mPrefixLabel)
+            textField << mPrefixLabel;
+
+        textField << mTextLabel;
+
+        if (mSuffixLabel)
+            textField << mSuffixLabel;
     }
 }

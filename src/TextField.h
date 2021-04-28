@@ -25,7 +25,6 @@ namespace rose {
         std::string mPrefix{};
         std::string mSuffix{};
         std::string mCheckRegex{};
-        std::unique_ptr<std::regex> mValidationPattern{};   ///< Regular expression to validate content.
 
         std::shared_ptr<TextLabel> mPrefixLabel{};
         std::shared_ptr<TextLabel> mSuffixLabel{};
@@ -63,8 +62,8 @@ namespace rose {
          * @param fontSize The font size in pixels, defaults to Theme value,
          * @param fontName The font name, defaults to Theme value.
          */
-        TextField(int maxLength, const std::string &text, const std::string &suffix = "",
-                  const std::string &prefix = "", Padding padding = Padding(), PointSize pointSize = PointSize(),
+        TextField(int maxLength, const std::string &text, const std::string &prefix = "",
+                  const std::string &suffix = "", Padding padding = Padding(), PointSize pointSize = PointSize(),
                   const std::string &fontName = "");
 
         /**
@@ -81,8 +80,8 @@ namespace rose {
         void addedToContainer() override;
 
         void setRegex(const std::string& regex) {
-            mCheckRegex = regex;
-            mValidationPattern = std::make_unique<std::regex>(regex);
+            if (mTextLabel)
+                mTextLabel->setTextValidationPattern(regex);
         }
     };
 

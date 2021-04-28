@@ -13,6 +13,7 @@
 #include "Popup.h"
 #include "Theme.h"
 #include "Types.h"
+#include "TextField.h"
 
 using namespace rose;
 
@@ -42,7 +43,11 @@ int main(int argc, char **argv) {
                                      std::cout << "Local Button state: Pushed\n";
                                      application.screen() << wdg<Dialog>()
                                              << Position::Zero
-                                             << wdg<Keyboard>();
+                                             << wdg<Column>()
+                                                 << wdg<TextField>(10, "VE3YSH", "Callsign:" ) << endw
+//                                                 << wdg<Row>()
+                                                     << wdg<TextField>( 8, "45.59\xc2\xb0", "Latitude", "\xc2\xb0") << endw
+                                                     << wdg<TextField>(9, "-76.59\xc2\xb0", "Longitude", "\xc2\xb0");
                                      application.layout();
                                  }
                              })
