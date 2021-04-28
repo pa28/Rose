@@ -12,6 +12,7 @@
 #include "GraphicsModel.h"
 #include <string>
 #include <utility>
+#include <regex>
 
 namespace rose {
 
@@ -62,6 +63,12 @@ namespace rose {
         Size mTextSize{};                   ///< The size of the Texture in pixels.
         Status mStatus{OK};                 ///< The Status of the last operation.
 
+        bool mEditable{false};              ///< The label text is editable.
+        bool mTextValidated{false};         ///< Ture when the content validates by mValidationPatter.
+        int mMaxSize{0};                    ///< The maximum number of characters to be held, 0 indicates variable.
+        char eM{'N'};                       ///< The character used to compute the maximum screen rectangle width.
+        std::unique_ptr<std::regex> mValidationPattern{};   ///< Regular expression to validate content.
+
     public:
         Text();
         virtual ~Text() = default;
@@ -99,11 +106,28 @@ namespace rose {
          */
         bool setText(const std::string &text) {
             if (mText != text) {
-                mText = text;
+                if (mMaxSize)
+                    mText = text.substr(0, static_cast<unsigned long>(mMaxSize));
+                else
+                    mText = text;
                 mTexture.reset();
+                if (mValidationPattern)
+                    mTextValidated = std::regex_match(mText, *mValidationPattern);
+                else
+                    mTextValidated = true;
                 return true;
             }
             return false;
+        }
+
+        void setTextMaxSize(int maxSize, char em = '\0') {
+            mMaxSize = maxSize;
+            if (em)
+                eM = em;
+        }
+
+        void setTextValidationPattern(const std::string& regex) {
+            mValidationPattern = std::make_unique<std::regex>(regex);
         }
     };
 }

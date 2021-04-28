@@ -45,6 +45,11 @@ namespace rose {
             if (surface) {
                 mTextSize.w = surface->w;
                 mTextSize.h = surface->h;
+                if (mMaxSize) {
+                    int em;
+                    TTF_GlyphMetrics(font.get(), eM, nullptr, &em, nullptr, nullptr, nullptr);
+                    mTextSize.w = mMaxSize * em;
+                }
                 mTexture.reset(SDL_CreateTextureFromSurface(context.get(), surface.get()));
                 if (mTexture)
                     return mStatus = OK;
@@ -59,27 +64,4 @@ namespace rose {
         mTextSize = Size::Zero;
         return mStatus;
     }
-
-#if 0
-    TextLabel::TextLabel(const std::string &text, const std::string& fontName, int pointSize) : Widget(), Text() {
-        mText = text;
-    }
-
-    TextLabel::TextLabel(const Id &id, const std::string &fontName, int pointSize) : Widget(), Text() {
-        mId = id;
-        Settings &settings{Settings::getSettings()};
-        mText = settings.getValue(id.idString, std::string{id.idString});
-    }
-
-    void TextLabel::draw(gm::Context &context, const Position &containerPosition) {
-        if (!mTexture) {
-            createTextureBlended(context);
-        }
-
-        if (mTexture) {
-            Rectangle dst{containerPosition + mPos, mTextSize};
-            context.renderCopy(mTexture, dst);
-        }
-    }
-#endif
 }
