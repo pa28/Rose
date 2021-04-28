@@ -136,6 +136,8 @@ namespace rose {
 
     class TextLabel : public TextButton {
     public:
+        TextLabel() noexcept : TextButton(ButtonType::Label) {}
+
         ~TextLabel() override = default;
 
         TextLabel(const TextLabel&) = delete;
@@ -145,8 +147,6 @@ namespace rose {
         TextLabel& operator=(const TextLabel&) = delete;
 
         TextLabel& operator=(TextLabel&&) = delete;
-
-        explicit TextLabel() noexcept : TextButton(ButtonType::Label) {}
 
         explicit TextLabel(const std::string& text) noexcept : TextButton(text, ButtonType::Label) {}
 

@@ -118,6 +118,7 @@ list(APPEND ROSE_SRC
         src/Surface.cpp
         src/TestWidget.cpp
         src/Text.cpp
+        src/TextField.cpp
         src/Texture.cpp
         src/TimeBox.cpp
         src/TimerTick.cpp

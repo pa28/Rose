@@ -17,12 +17,18 @@ namespace rose {
 
     struct PointSize {
         int pointSize{};
+        PointSize() : pointSize(0) {}
         explicit PointSize(int size) : pointSize(size) {}
     };
 
     struct FontName {
         std::string fontName;
+        FontName() : fontName() {}
         explicit FontName(std::string  name) : fontName(std::move(name)) {}
+        FontName& operator=(const FontName& name) {
+            fontName = name.fontName;
+            return *this;
+        }
     };
 
     /**
