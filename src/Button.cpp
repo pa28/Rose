@@ -76,7 +76,7 @@ namespace rose {
         auto drawPosition = drawPadding(containerPosition) + mPos + mFramePadding.position() + Position{mFrameWidth};
 
         if (mTexture) {
-            Rectangle dst{drawPosition, mTextSize};
+            Rectangle dst{drawPosition, mTexture.getSize()};
 
             if (mCentreHorizontal)
                 dst.x += (mScreenRect.w - mTexture.getSize().w) / 2 - mPadding.l - mFrameWidth;
