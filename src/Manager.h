@@ -90,7 +90,13 @@ namespace rose {
 
     public:
         Grid() : Manager() {
-            setLayoutManager(std::make_unique<GridLayout>(Orientation::Horizontal, 2, 2, 13));
+            setLayoutManager(std::make_unique<GridLayout>(Orientation::Horizontal, 2, 2, 0));
+        }
+
+        ~Grid() override = default;
+
+        Grid(int stride) : Manager() {
+            setLayoutManager(std::make_unique<GridLayout>(Orientation::Horizontal, 2, 2, stride));
         }
 
         static constexpr std::string_view id = "Grid";
