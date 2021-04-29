@@ -54,6 +54,7 @@ namespace rose {
 
     protected:
         std::string mText{};                ///< The UTF8 or ASCII text to render.
+        std::string mSuffix{};              ///< The UTF8 or ASCII suffix.
         color::RGBA mTextFgColor;           ///< The foreground color to use.
         color::RGBA mTextBgColor;           ///< The background color to use if rendering Shaded.
         RenderStyle mRenderStyle{Blended};  ///< The style of rendering Solid, Shaded, or Blended.
@@ -118,6 +119,10 @@ namespace rose {
                 return true;
             }
             return false;
+        }
+
+        void setSuffix(const std::string &suffix) {
+            mSuffix = suffix;
         }
 
         void setTextMaxSize(int maxSize, char em = '\0') {

@@ -29,17 +29,18 @@ namespace rose {
         FontCache &fontCache = FontCache::getFontCache();
         if (auto font = fontCache.getFont(mFontName, mPointSize); font) {
             gm::Surface surface{};
+            auto textAndSuffix = mText + mSuffix;
             switch (mRenderStyle) {
                 case Blended:
-                    surface.reset(TTF_RenderUTF8_Blended(font.get(), mText.c_str(), mTextFgColor.toSdlColor()));
+                    surface.reset(TTF_RenderUTF8_Blended(font.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
                     break;
                 case Shaded:
                     surface.reset(
-                            TTF_RenderUTF8_Shaded(font.get(), mText.c_str(), mTextFgColor.toSdlColor(),
+                            TTF_RenderUTF8_Shaded(font.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor(),
                                                   mTextBgColor.toSdlColor()));
                     break;
                 case Solid:
-                    surface.reset(TTF_RenderUTF8_Solid(font.get(), mText.c_str(), mTextFgColor.toSdlColor()));
+                    surface.reset(TTF_RenderUTF8_Solid(font.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
                     break;
             }
             if (surface) {
