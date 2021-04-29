@@ -49,11 +49,11 @@ namespace rose {
         });
 
         setKeyboardFocusCallback([&](bool hasFocus) {
-            keyboardFocusEvent(hasFocus);
+            keyboardFocusReceive(hasFocus);
         });
 
         setKeyboardEvent([&](const SDL_KeyboardEvent& keyEvent) {
-            keyboardEvent(keyEvent);
+            keyboardInput(keyEvent);
         });
     }
 
@@ -95,13 +95,13 @@ namespace rose {
         ++mCaretLocation;
     }
 
-    void TextField::keyboardFocusEvent(bool hasFocus) {
+    void TextField::keyboardFocusReceive(bool hasFocus) {
         setEditingMode(hasFocus, 0);
         mAnimationEnableState = hasFocus ? AnimationEnable::Enable : AnimationEnable::Disable;
         getApplication().redrawBackground();
     }
 
-    void TextField::keyboardEvent(const SDL_KeyboardEvent &keyEvent) {
+    void TextField::keyboardInput(const SDL_KeyboardEvent &keyEvent) {
         std::cout << __PRETTY_FUNCTION__ << ' '
                   << (int) keyEvent.state << ' '
                   << (int) keyEvent.repeat << ' '
