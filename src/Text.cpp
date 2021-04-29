@@ -23,7 +23,7 @@ namespace rose {
     }
 
     Text::Status Text::createTextureBlended(gm::Context &context) {
-        if (mText.empty())
+        if (mText.empty() && mSuffix.empty())
             return TextEmpty;
 
         FontCache &fontCache = FontCache::getFontCache();
@@ -64,5 +64,25 @@ namespace rose {
         mTexture.reset(nullptr);
         mTextSize = Size::Zero;
         return mStatus;
+    }
+
+    void Text::setEditingMode(bool editing, int carret) {
+        mEditingActive = editing;
+        mCaretLocation = std::max(std::min((std::string::size_type)carret, mText.length()),(std::string::size_type)0);
+    }
+
+    bool Text::textUpdated() {
+        if (mMaxSize && mText.size() > mMaxSize) {
+            mText = mText.substr(0, static_cast<unsigned long>(mMaxSize));
+            mCaretLocation = std::max(std::min((std::string::size_type)mCaretLocation, mText.length()),(std::string::size_type)0);
+            return false;
+        }
+
+        mTexture.reset();
+        if (mValidationPattern)
+            mTextValidated = std::regex_match(mText, *mValidationPattern);
+        else
+            mTextValidated = true;
+        return true;
     }
 }

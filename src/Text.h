@@ -63,12 +63,17 @@ namespace rose {
         gm::Texture mTexture{};             ///< The generated Texture.
         Size mTextSize{};                   ///< The size of the Texture in pixels.
         Status mStatus{OK};                 ///< The Status of the last operation.
+        int mCaretLocation{0};              ///< The location of the caret.
+        bool mEditingActive{false};         ///< True when the text is being edited.
 
         bool mEditable{false};              ///< The label text is editable.
         bool mTextValidated{false};         ///< Ture when the content validates by mValidationPatter.
         int mMaxSize{0};                    ///< The maximum number of characters to be held, 0 indicates variable.
         char eM{'N'};                       ///< The character used to compute the maximum screen rectangle width.
         std::unique_ptr<std::regex> mValidationPattern{};   ///< Regular expression to validate content.
+
+        /// Set the editing mode.
+        void setEditingMode(bool editing, int carret);
 
     public:
         Text();
@@ -107,19 +112,23 @@ namespace rose {
          */
         bool setText(const std::string &text) {
             if (mText != text) {
-                if (mMaxSize)
-                    mText = text.substr(0, static_cast<unsigned long>(mMaxSize));
-                else
-                    mText = text;
-                mTexture.reset();
-                if (mValidationPattern)
-                    mTextValidated = std::regex_match(mText, *mValidationPattern);
-                else
-                    mTextValidated = true;
+                mText = text;
+                textUpdated();
+//                if (mMaxSize)
+//                    mText = text.substr(0, static_cast<unsigned long>(mMaxSize));
+//                else
+//                    mText = text;
+//                mTexture.reset();
+//                if (mValidationPattern)
+//                    mTextValidated = std::regex_match(mText, *mValidationPattern);
+//                else
+//                    mTextValidated = true;
                 return true;
             }
             return false;
         }
+
+        bool textUpdated();
 
         void setSuffix(const std::string &suffix) {
             mSuffix = suffix;

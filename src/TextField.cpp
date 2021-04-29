@@ -7,6 +7,7 @@
 
 #include "TextField.h"
 #include "Settings.h"
+#include "Application.h"
 
 namespace rose {
 
@@ -63,19 +64,56 @@ namespace rose {
     }
 
     void TextField::textInputEvent(const std::string &text) {
-        std::cout << __PRETTY_FUNCTION__ << ' ' << text << '\n';
+        if (mCaretLocation > mText.size()) {
+            mText.insert(mText.end(), text[0]);
+            mCaretLocation = mText.size();
+        } else
+            mText.insert(mText.begin() + mCaretLocation, text[0]);
+        if (textUpdated())
+            getApplication().redrawBackground();
+        ++mCaretLocation;
     }
 
     void TextField::keyboardFocusEvent(bool hasFocus) {
-        std::cout << __PRETTY_FUNCTION__ << ' ' << (hasFocus ? "Gained Focus.\n" : "Lost Focus.\n");
+        setEditingMode(hasFocus, 0);
     }
 
     void TextField::keyboardEvent(const SDL_KeyboardEvent &keyEvent) {
         std::cout << __PRETTY_FUNCTION__ << ' '
-                  << (int)keyEvent.state << ' '
-                  << (int)keyEvent.repeat << ' '
-                  << (int)keyEvent.keysym.mod << ' '
+                  << (int) keyEvent.state << ' '
+                  << (int) keyEvent.repeat << ' '
+                  << (int) keyEvent.keysym.mod << ' '
                   << SDL_GetKeyName(keyEvent.keysym.sym)
                   << '\n';
+        if (keyEvent.state) {
+            switch (keyEvent.keysym.sym) {
+                case SDLK_BACKSPACE: {
+                    auto erase = mCaretLocation - 1;
+                    if (erase < 0) {
+                        mCaretLocation = 0;
+                    } else if (erase == 0) {
+                        mText.erase(mText.begin());
+                        mCaretLocation = 0;
+                    } else if (erase >= mText.size()) {
+                        mText.erase(mText.end() - 1);
+                        mCaretLocation = mText.size();
+                    } else {
+                        mText.erase(mText.begin() + erase);
+                        mCaretLocation = erase;
+                    }
+                    if (textUpdated())
+                        getApplication().redrawBackground();
+                }
+                    break;
+                case SDLK_LEFT:
+                    mCaretLocation -= 2;
+                case SDLK_RIGHT:
+                    ++mCaretLocation;
+                    mCaretLocation = std::max(std::min((std::string::size_type) mCaretLocation, mText.length()),
+                                              (std::string::size_type) 0);
+                default:
+                    break;
+            }
+        }
     }
 }
