@@ -89,4 +89,18 @@ namespace rose {
      */
     using KeyboardShortcutCallback = std::function<void(uint32_t shortcutCode, bool state, uint repeat)>;
 
+    /**
+     * @brief Text input callback.
+     * @param text The keyboard input.
+     */
+    using TextInputCallback = std::function<void(const std::string& text)>;
+
+    /**
+     * @brief Keyboard focus callback.
+     * @param hasFocus True if Widget is gaining keyboard focus, false if loosing it.
+     */
+    using KeyboardFocusCallback = std::function<void(bool hasFocus)>;
+
+    using KeyboardEventCallback = std::function<void(const SDL_KeyboardEvent &keyboardEvent)>;
+
 }

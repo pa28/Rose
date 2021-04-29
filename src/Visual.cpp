@@ -187,6 +187,30 @@ namespace rose {
         return false;
     }
 
+    bool Widget::keyTextInputEvent(const std::string& text) {
+        if (mTextInputCallback) {
+            mTextInputCallback(text);
+            return true;
+        }
+        return false;
+    }
+
+    bool Widget::keyboardFocusEvent(bool hasFocus) {
+        if (mKeyboardFocusCallback) {
+            mKeyboardFocusCallback(hasFocus);
+            return true;
+        }
+        return false;
+    }
+
+    bool Widget::keyboardEvent(const SDL_KeyboardEvent &keyboardEvent) {
+        if (mKeyboardEventCallback) {
+            mKeyboardEventCallback(keyboardEvent);
+            return true;
+        }
+        return false;
+    }
+
     void Manager::draw(gm::Context &context, const Position &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {

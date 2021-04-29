@@ -126,6 +126,8 @@ namespace rose {
                 else
                     mKeyboardShortcuts.erase(shortcut->first);
             }
+        } else if (mKeyFocusWidget) {
+            return mKeyFocusWidget->keyboardEvent(keyboardEvent);
         }
         return false;
     }
@@ -178,10 +180,22 @@ namespace rose {
                 if (mPointerWidget != widget) {
                     result |= mPointerWidget->leaveEvent();
                     mPointerWidget = widget;
+                    if (mPointerWidget->supportsKeyboardFocus()) {
+                        if (mKeyFocusWidget)
+                            mKeyFocusWidget->keyboardFocusEvent(false);
+                        mKeyFocusWidget = mPointerWidget;
+                        mKeyFocusWidget->keyboardFocusEvent(true);
+                    }
                     result |= mPointerWidget->enterEvent();
                 }
             } else {
                 mPointerWidget = widget;
+                if (mPointerWidget->supportsKeyboardFocus()) {
+                    if (mKeyFocusWidget)
+                        mKeyFocusWidget->keyboardFocusEvent(false);
+                    mKeyFocusWidget = mPointerWidget;
+                    mKeyFocusWidget->keyboardFocusEvent(true);
+                }
             }
 
             switch (fingerTouchEvent.type) {
@@ -207,6 +221,13 @@ namespace rose {
         return result;
     }
 
+    bool Application::textInputEventCallback(const SDL_TextInputEvent& textInputEvent) {
+        std::cout << __PRETTY_FUNCTION__ << ' ' << textInputEvent.text << '\n';
+        if (mKeyFocusWidget)
+            return mKeyFocusWidget->keyTextInputEvent(std::string{textInputEvent.text});
+        return false;
+    }
+
     bool Application::mouseButtonEventCallback(const SDL_MouseButtonEvent &mouseButtonEvent) {
         mMouseButtonPressed = mouseButtonEvent.state == SDL_PRESSED;
         if (mMouseButtonPressed)
@@ -215,6 +236,12 @@ namespace rose {
             mMouseButtonId &= ~(1u << (mouseButtonEvent.button - 1u));
 
         if (mPointerWidget) {
+            if (mPointerWidget->supportsKeyboardFocus() && !mMouseButtonPressed) {
+                if (mKeyFocusWidget)
+                    mKeyFocusWidget->keyboardFocusEvent(false);
+                mKeyFocusWidget = mPointerWidget;
+                mKeyFocusWidget->keyboardFocusEvent(true);
+            }
             return mPointerWidget->buttonEvent(mMouseButtonPressed, mMouseButtonId, 0, false);
         }
         return false;
@@ -245,6 +272,7 @@ namespace rose {
         mEventSemantics.setMouseButtonEventCallback(&Application::mouseButtonEventCallback);
         mEventSemantics.setMouseWheelEventCallback(&Application::mouseWheelEventCallback);
         mEventSemantics.setFingerTouchEventCallback(&Application::fingerTouchEventCallback);
+        mEventSemantics.setTextInputEventCallback(&Application::textInputEventCallback);
 
         mGraphicsModel.eventCallback = [&](SDL_Event e) {
             mEventSemantics.onEvent(e);
@@ -316,7 +344,7 @@ namespace rose {
                 keyboardEvent(e.key);
                 break;
             case SDL_TEXTINPUT:
-                std::cout << "TextInputEvent" << ' ' << e.text.text << '\n';
+                textInputEvent(e.text);
                 break;
             case SDL_TEXTEDITING:
                 std::cout << "TextEditingEvent\n";
@@ -421,5 +449,10 @@ namespace rose {
     void EventSemantics::fingerTouchEvent(SDL_TouchFingerEvent &e) {
         if (fingerTouchEventCallback)
             fingerTouchEventCallback(mApplication, e);
+    }
+
+    void EventSemantics::textInputEvent(SDL_TextInputEvent &e) {
+        if (textInputEventCallback)
+            textInputEventCallback(mApplication, e);
     }
 }

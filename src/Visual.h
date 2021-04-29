@@ -468,6 +468,15 @@ namespace rose {
         /// A keyboard button event while the Widget has keyboard focus.
         KeyboardShortcutCallback mKeyboardShortcutCallback{};
 
+        /// A text input event while the Widget has keyboard focus.
+        TextInputCallback mTextInputCallback{};
+
+        /// Notification that this Widget has gained or lost keyboard focus.
+        KeyboardFocusCallback mKeyboardFocusCallback{};
+
+        /// Notification that this Widget has received a keyboard event.
+        KeyboardEventCallback mKeyboardEventCallback{};
+
     public:
         Widget() = default;
 
@@ -642,6 +651,42 @@ namespace rose {
         /// Set the keyboard shortcut callback
         void setKeyboardShortcutCallback(KeyboardShortcutCallback keyboardShortcutCallback) {
             mKeyboardShortcutCallback = std::move(keyboardShortcutCallback);
+        }
+
+        /**
+         * @brief Notify the Widget of text input.
+         * @param text The text input
+         * @return True if the event is consumed.
+         */
+        bool keyTextInputEvent(const std::string& text);
+
+        /// Set the text input callback
+        void setTextInputCallback(TextInputCallback textInputCallback) {
+            mTextInputCallback = std::move(textInputCallback);
+        }
+
+        bool supportsKeyboardFocus() const {
+            if (mTextInputCallback || mKeyboardFocusCallback || mKeyboardEventCallback)
+                return true;
+            return false;
+        }
+
+        /**
+         * @brief Notify the Widget when it gains or looses keyboard focus.
+         * @param hasFocus True when the Widget has gained focus.
+         * @return True if the event is consumed.
+         */
+        bool keyboardFocusEvent(bool hasFocus);
+
+        /// Set the keyboard focus callback.
+        void setKeyboardFocusCallback(KeyboardFocusCallback keyboardFocusCallback) {
+            mKeyboardFocusCallback = std::move(keyboardFocusCallback);
+        }
+
+        bool keyboardEvent(const SDL_KeyboardEvent &keyboardEvent);
+
+        void setKeyboardEvent(KeyboardEventCallback keyboardEventCallback) {
+            mKeyboardEventCallback = keyboardEventCallback;
         }
     };
 

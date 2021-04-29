@@ -15,12 +15,24 @@ namespace rose {
         setFontName(fontName);
         setTextMaxSize(maxLength);
 
-        Theme& theme{Theme::getTheme()};
+        Theme &theme{Theme::getTheme()};
         if (pointSize.pointSize == 0)
             mPointSize = theme.TextPointSize;
 
         if (fontName.empty())
             mFontName = theme.TextFont;
+
+        setTextInputCallback([&](const std::string &text) {
+            textInputEvent(text);
+        });
+
+        setKeyboardFocusCallback([&](bool hasFocus) {
+            keyboardFocusEvent(hasFocus);
+        });
+
+        setKeyboardEvent([&](const SDL_KeyboardEvent& keyEvent) {
+            keyboardEvent(keyEvent);
+        });
     }
 
     TextField::TextField(int maxLength, const std::string &text, const std::string &suffix,
@@ -39,7 +51,7 @@ namespace rose {
     }
 
     void TextField::addedToContainer() {
-        Settings& settings{Settings::getSettings()};
+        Settings &settings{Settings::getSettings()};
 
         if (mId) {
             if (auto text = settings.getValue<std::string>(mId.idString); text)
@@ -48,5 +60,22 @@ namespace rose {
 
         if (mMaxSize == 0)
             mMaxSize = mText.length();
+    }
+
+    void TextField::textInputEvent(const std::string &text) {
+        std::cout << __PRETTY_FUNCTION__ << ' ' << text << '\n';
+    }
+
+    void TextField::keyboardFocusEvent(bool hasFocus) {
+        std::cout << __PRETTY_FUNCTION__ << ' ' << (hasFocus ? "Gained Focus.\n" : "Lost Focus.\n");
+    }
+
+    void TextField::keyboardEvent(const SDL_KeyboardEvent &keyEvent) {
+        std::cout << __PRETTY_FUNCTION__ << ' '
+                  << (int)keyEvent.state << ' '
+                  << (int)keyEvent.repeat << ' '
+                  << (int)keyEvent.keysym.mod << ' '
+                  << SDL_GetKeyName(keyEvent.keysym.sym)
+                  << '\n';
     }
 }

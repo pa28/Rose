@@ -37,6 +37,7 @@ namespace rose {
         using MouseButtonEventCallback = std::function<bool(Application&, const SDL_MouseButtonEvent&)>;
         using MouseWheelEventCallback = std::function<bool(Application&, const SDL_MouseWheelEvent&)>;
         using FingerTouchEventCallback = std::function<bool(Application&, const SDL_TouchFingerEvent&)>;
+        using TextInputEventCallback = std::function<bool(Application&, const SDL_TextInputEvent&)>;
 
     protected:
         /// The Application the EventSemantics are processed for.
@@ -49,6 +50,7 @@ namespace rose {
         MouseButtonEventCallback mouseButtonEventCallback;
         MouseWheelEventCallback mouseWheelEventCallback;
         FingerTouchEventCallback fingerTouchEventCallback;
+        TextInputEventCallback textInputEventCallback;
 
         void windowStateChange(WindowEventType type) {
             if (windowStateChangeCallback)
@@ -84,6 +86,8 @@ namespace rose {
 
         void fingerTouchEvent(SDL_TouchFingerEvent &e);
 
+        void textInputEvent(SDL_TextInputEvent &e);
+
         void setWindowStateChangeCallback(WindowStateChangeCallback callback) {
             windowStateChangeCallback = std::move(callback);
         }
@@ -114,6 +118,10 @@ namespace rose {
 
         void setFingerTouchEventCallback(FingerTouchEventCallback callback) {
             fingerTouchEventCallback = std::move(callback);
+        }
+
+        void setTextInputEventCallback(TextInputEventCallback callback) {
+            textInputEventCallback = std::move(callback);
         }
     };
 
@@ -201,6 +209,8 @@ namespace rose {
         virtual bool mouseWheelEventCallback(const SDL_MouseWheelEvent& mouseWheelEvent);
 
         virtual bool fingerTouchEventCallback(const SDL_TouchFingerEvent& fingerTouchEvent);
+
+        virtual bool textInputEventCallback(const SDL_TextInputEvent& textInputEvent);
 
         gm::Context& context() { return mGraphicsModel.context(); }
 

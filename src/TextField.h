@@ -64,6 +64,11 @@ namespace rose {
 
         void addedToContainer() override;
 
+        void keyboardFocusEvent(bool hasFocus);
+
+        void textInputEvent(const std::string& text);
+
+        void keyboardEvent(const SDL_KeyboardEvent &keyEvent);
     };
 
     struct TextFieldRegex {
