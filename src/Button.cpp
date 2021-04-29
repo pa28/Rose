@@ -74,10 +74,20 @@ namespace rose {
         }
 
         auto drawPosition = drawPadding(containerPosition) + mPos + mFramePadding.position() + Position{mFrameWidth};
+        Rectangle dst{drawPosition, mTexture.getSize()};
+
+        if (mEditingActive) {
+            int w, h;
+            auto beforeCaret = mText.substr(0, mCaretLocation);
+            TTF_SizeUTF8(mFont.get(), beforeCaret.c_str(), &w, &h);
+
+            auto caretColor = mCaretColor;
+            caretColor.a() = mCaretAlpha;
+            Rectangle rectangle{dst.x + w, dst.y, 2, h};
+            context.fillRect(rectangle, caretColor);
+        }
 
         if (mTexture) {
-            Rectangle dst{drawPosition, mTexture.getSize()};
-
             if (mCentreHorizontal)
                 dst.x += (mScreenRect.w - mTexture.getSize().w) / 2 - mPadding.l - mFrameWidth;
             if (mCentreVertical)

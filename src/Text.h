@@ -57,8 +57,11 @@ namespace rose {
         std::string mSuffix{};              ///< The UTF8 or ASCII suffix.
         color::RGBA mTextFgColor;           ///< The foreground color to use.
         color::RGBA mTextBgColor;           ///< The background color to use if rendering Shaded.
+        color::RGBA mCaretColor{};          ///< The color of the caret when editing.
+        float mCaretAlpha{0.f};             ///< The alpha value of the caret during animation.
         RenderStyle mRenderStyle{Blended};  ///< The style of rendering Solid, Shaded, or Blended.
         std::string mFontName;              ///< The name of the True Type Font to use.
+        std::shared_ptr<_TTF_Font> mFont{}; ///< The cached font used.
         int mPointSize;                     ///< The point (pixel) size of the font.
         gm::Texture mTexture{};             ///< The generated Texture.
         Size mTextSize{};                   ///< The size of the Texture in pixels.
@@ -114,15 +117,6 @@ namespace rose {
             if (mText != text) {
                 mText = text;
                 textUpdated();
-//                if (mMaxSize)
-//                    mText = text.substr(0, static_cast<unsigned long>(mMaxSize));
-//                else
-//                    mText = text;
-//                mTexture.reset();
-//                if (mValidationPattern)
-//                    mTextValidated = std::regex_match(mText, *mValidationPattern);
-//                else
-//                    mTextValidated = true;
                 return true;
             }
             return false;

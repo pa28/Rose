@@ -8,15 +8,36 @@
 #include "TextField.h"
 #include "Settings.h"
 #include "Application.h"
+#include "Animation.h"
 
 namespace rose {
 
     TextField::TextField(int maxLength, PointSize pointSize, const std::string &fontName) : TextLabel() {
+        mAnimationCallback = [&](gm::Context &context, const Position &position, uint32_t frame) {
+            if (mActionCurve) {
+                auto idx = frame % mActionCurve->size();
+                mCaretAlpha = (*mActionCurve)[idx];
+                draw(context, position);
+            } else {
+                removeAnimation(getWindow(), getNode<Animation>());
+            }
+        };
+
+        mAnimationEnableStateCallback = [&](AnimationEnable animationEnable){
+            if (animationEnable == AnimationEnable::Disable && mAnimationEnableState == AnimationEnable::Enable) {
+                removeAnimation(getWindow(), getNode<Animation>());
+            }
+        };
+
+        Theme &theme{Theme::getTheme()};
+
+        mActionCurve = std::make_unique<ActionCurves::CursorPulse>();
+        mCaretColor = color::DarkTextColour;
+
         setPointSize(pointSize.pointSize);
         setFontName(fontName);
         setTextMaxSize(maxLength);
 
-        Theme &theme{Theme::getTheme()};
         if (pointSize.pointSize == 0)
             mPointSize = theme.TextPointSize;
 
@@ -76,6 +97,8 @@ namespace rose {
 
     void TextField::keyboardFocusEvent(bool hasFocus) {
         setEditingMode(hasFocus, 0);
+        mAnimationEnableState = hasFocus ? AnimationEnable::Enable : AnimationEnable::Disable;
+        getApplication().redrawBackground();
     }
 
     void TextField::keyboardEvent(const SDL_KeyboardEvent &keyEvent) {
@@ -109,8 +132,8 @@ namespace rose {
                     mCaretLocation -= 2;
                 case SDLK_RIGHT:
                     ++mCaretLocation;
-                    mCaretLocation = std::max(std::min((std::string::size_type) mCaretLocation, mText.length()),
-                                              (std::string::size_type) 0);
+                    mCaretLocation = std::max(std::min(mCaretLocation, (int)mText.length()), 0);
+                    break;
                 default:
                     break;
             }

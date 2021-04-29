@@ -42,7 +42,7 @@ namespace rose {
         color::RGBA mRightColor;
         color::RGBA mActiveColor;
         color::RGBA mInactiveColor;
-        float mColorValue{}, mLastColorValue{};
+        float mColorValue{};
         int mFrameWidth{2};
         Padding mFramePadding{};
         CornerStyle mCornerStyle{CornerStyle::Round};
@@ -220,7 +220,6 @@ namespace rose {
                     auto idx = frame % mActionCurve->size();
                     mColorValue = (*mActionCurve)[idx];
                     draw(context, position);
-                    mLastColorValue = mColorValue;
                 } else {
                     removeAnimation(getWindow(), getNode<Animation>());
                 }

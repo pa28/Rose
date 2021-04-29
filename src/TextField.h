@@ -9,6 +9,7 @@
 
 #include "Manager.h"
 #include "Button.h"
+#include "Animation.h"
 #include <regex>
 
 namespace rose {
@@ -61,6 +62,12 @@ namespace rose {
          */
         explicit TextField(Id id, int maxLength, const std::string &suffix = "",
                            PointSize pointSize = PointSize(), const std::string &fontName = "");
+
+        void draw(gm::Context &context, const Position &containerPosition) override {
+            if (mActionCurve && mAnimationEnableState == AnimationEnable::Enable)
+                setAnimation(getWindow(), getNode<Animation>(), containerPosition);
+            TextLabel::draw(context,containerPosition);
+        }
 
         void addedToContainer() override;
 

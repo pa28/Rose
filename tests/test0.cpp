@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
                          << wdg<Frame>(5) << Position{10, 10} << theme.SemiBevelFrame
                          << wdg<Manager>() << Id{"row"} << makeLayout<LinearLayout>(Orientation::Vertical, 5)
                          << wdg<ImageLabel>(ImageId::HeartEmpty)
-                            << curve<ActionCurves::HeartBeat>()
+                            << curve<ActionCurves::CursorPulse>()
                             << FrameColor{FrameColorType::AnimateColor, theme.rgba(rose::ThemeColor::Red)}
                             << FrameColor{FrameColorType::InactiveColor, theme.hsva(rose::ThemeColor::Red).withValue(0.25).toRGBA()}
                             << AnimationEnable::Enable

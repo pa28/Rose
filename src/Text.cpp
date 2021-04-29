@@ -26,21 +26,25 @@ namespace rose {
         if (mText.empty() && mSuffix.empty())
             return TextEmpty;
 
-        FontCache &fontCache = FontCache::getFontCache();
-        if (auto font = fontCache.getFont(mFontName, mPointSize); font) {
+        if (!mFont) {
+            FontCache &fontCache = FontCache::getFontCache();
+            mFont = fontCache.getFont(mFontName, mPointSize);
+        }
+
+        if (mFont) {
             gm::Surface surface{};
             auto textAndSuffix = mText + mSuffix;
             switch (mRenderStyle) {
                 case Blended:
-                    surface.reset(TTF_RenderUTF8_Blended(font.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
+                    surface.reset(TTF_RenderUTF8_Blended(mFont.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
                     break;
                 case Shaded:
                     surface.reset(
-                            TTF_RenderUTF8_Shaded(font.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor(),
+                            TTF_RenderUTF8_Shaded(mFont.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor(),
                                                   mTextBgColor.toSdlColor()));
                     break;
                 case Solid:
-                    surface.reset(TTF_RenderUTF8_Solid(font.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
+                    surface.reset(TTF_RenderUTF8_Solid(mFont.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
                     break;
             }
             if (surface) {
@@ -48,7 +52,7 @@ namespace rose {
                 mTextSize.h = surface->h;
                 if (mMaxSize) {
                     int em;
-                    TTF_GlyphMetrics(font.get(), eM, nullptr, &em, nullptr, nullptr, nullptr);
+                    TTF_GlyphMetrics(mFont.get(), eM, nullptr, &em, nullptr, nullptr, nullptr);
                     mTextSize.w = mMaxSize * em;
                 }
                 mTexture.reset(SDL_CreateTextureFromSurface(context.get(), surface.get()));

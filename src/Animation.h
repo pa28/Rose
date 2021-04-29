@@ -31,6 +31,10 @@ namespace rose {
             return cx_math::sin(cx_math::pi<float> * (float)t / FrameRate);
         }
 
+        constexpr float ac_inv_sin(int t) {
+            return 1.f - cx_math::sin(cx_math::pi<float> * (float)t / FrameRate);
+        }
+
         class ActionCurve {
         public:
             ActionCurve() = default;
@@ -78,6 +82,29 @@ namespace rose {
 
         public:
             ~HeartBeat() override = default;
+
+            [[nodiscard]] size_t size() const override {
+                return data.size();
+            }
+
+            float operator[](size_t idx) const override {
+                return data[idx];
+            }
+        };
+
+        class CursorPulse : public ActionCurve {
+        protected:
+            static constexpr std::array<float, 30> data {
+                    ac_inv_sin(0), ac_inv_sin(6),ac_inv_sin(12),ac_inv_sin(18),
+                    ac_inv_sin(24), 1.f,1.f, 1.f,1.f, 1.f,
+                    1.f,1.f, 1.f,1.f, 1.f, 1.f,
+                    1.f,1.f, 1.f,1.f, 1.f, 1.f,
+                    1.f,1.f, 1.f,1.f, 1.f, 1.f,
+                    1.f,1.f
+            };
+
+        public:
+            ~CursorPulse() override = default;
 
             [[nodiscard]] size_t size() const override {
                 return data.size();
