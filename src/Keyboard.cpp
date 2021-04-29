@@ -11,6 +11,10 @@
 
 namespace rose {
 
+    static std::shared_ptr<LetterKey> makeLetterKey(const std::array<uint,4>& keySpec) {
+        return wdg<LetterKey>(keySpec) << PointSize{40};
+    }
+
     void Keyboard::addedToContainer() {
         Node::addedToContainer();
         auto grid = getNode<Grid>();
@@ -18,7 +22,7 @@ namespace rose {
             if (spec.imageKey)
                 grid << wdg<ImageKey>(spec.command);
             else
-                grid << wdg<LetterKey>(spec.command);
+                grid << makeLetterKey(spec.command);
         }
 
         back()->getNode<Visual>() << LayoutHint{LayoutHint::GridLayoutHint::EndStride, 0};
@@ -28,7 +32,7 @@ namespace rose {
             if (spec.imageKey)
                 grid << wdg<ImageKey>(spec.command);
             else
-                grid << wdg<LetterKey>(spec.command);
+                grid << makeLetterKey(spec.command);
             if (first) {
                 back()->getNode<Visual>() << LayoutHint{LayoutHint::GridLayoutHint::AxisOffset, 50};
                 first = false;
@@ -45,7 +49,7 @@ namespace rose {
             else if (spec.imageKey)
                 grid << wdg<ImageKey>(spec.command);
             else
-                grid << wdg<LetterKey>(spec.command);
+                grid << makeLetterKey(spec.command);
         }
         back()->getNode<Visual>()
                 << LayoutHint{LayoutHint::GridLayoutHint::EndStride, 0};
@@ -54,10 +58,10 @@ namespace rose {
             if (spec.imageKey)
                 grid << wdg<ImageKey>(spec.command);
             else if (spec.command[0] == SDLK_SPACE)
-                grid << wdg<LetterKey>(spec.command)
+                grid << makeLetterKey(spec.command)
                      << LayoutHint{LayoutHint::GridLayoutHint::AxisSize, 600};
             else
-                grid << wdg<LetterKey>(spec.command);
+                grid << makeLetterKey(spec.command);
         }
     }
 
