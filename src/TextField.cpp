@@ -10,38 +10,32 @@
 
 namespace rose {
 
-    TextField::TextField(int maxLength, Padding padding, PointSize pointSize, const std::string &fontName) {
-        mMaxLength = maxLength;
-        mPadding = padding;
-        mPointSize = pointSize;
-        mFontName.fontName = fontName;
+    TextField::TextField(int maxLength, PointSize pointSize, const std::string &fontName) : TextLabel() {
+        setPointSize(pointSize.pointSize);
+        setFontName(fontName);
+        setTextMaxSize(maxLength);
+
         Theme& theme{Theme::getTheme()};
-        if (mPointSize.pointSize == 0)
-            mPointSize.pointSize = theme.TextPointSize;
+        if (pointSize.pointSize == 0)
+            mPointSize = theme.TextPointSize;
 
-        if (mFontName.fontName.empty())
-            mFontName.fontName = theme.TextFont;
+        if (fontName.empty())
+            mFontName = theme.TextFont;
     }
 
-    TextField::TextField(int maxLength, const std::string &text, const std::string &prefix, const std::string &suffix,
-                         Padding padding, PointSize pointSize, const std::string &fontName)
-            : TextField(maxLength, padding, pointSize, fontName) {
-        if (!suffix.empty())
-            mSuffixLabel = std::make_shared<TextLabel>(suffix) << mPointSize << mFontName;
-        if (!prefix.empty())
-            mPrefixLabel = std::make_shared<TextLabel>(prefix) << mPointSize << mFontName;
-        mTextLabel = std::make_shared<TextLabel>(text) << mPointSize << mFontName;
-        mTextLabel->setTextMaxSize(maxLength);
+    TextField::TextField(int maxLength, const std::string &text, const std::string &suffix,
+                         PointSize pointSize,
+                         const std::string &fontName)
+            : TextField(maxLength, pointSize, fontName) {
+        setText(text);
+        setSuffix(suffix);
     }
 
-    TextField::TextField(Id id, int maxLength, const std::string &prefix, const std::string &suffix, Padding padding,
-                         PointSize pointSize, const std::string &fontName)
-            : TextField(maxLength, padding, pointSize, fontName) {
+    TextField::TextField(Id id, int maxLength, const std::string &suffix, PointSize pointSize,
+                         const std::string &fontName)
+            : TextField(maxLength, pointSize, fontName) {
         mId = id;
-        if (!suffix.empty())
-            mSuffixLabel = std::make_shared<TextLabel>(suffix) << mPointSize << mFontName;
-        if (!prefix.empty())
-            mPrefixLabel = std::make_shared<TextLabel>(prefix) << mPointSize << mFontName;
+        setSuffix(suffix);
     }
 
     void TextField::addedToContainer() {
@@ -52,20 +46,7 @@ namespace rose {
                 mText = text.value();
         }
 
-        if (mMaxLength == 0)
-            mMaxLength = mText.length();
-
-        if (!mTextLabel) {
-            mTextLabel = std::make_shared<TextLabel>(mText) << mPointSize << mFontName;
-        }
-
-        auto textField = getNode<TextField>();
-        if (mPrefixLabel)
-            textField << mPrefixLabel;
-
-        textField << mTextLabel;
-
-        if (mSuffixLabel)
-            textField << mSuffixLabel;
+        if (mMaxSize == 0)
+            mMaxSize = mText.length();
     }
 }

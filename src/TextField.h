@@ -17,21 +17,9 @@ namespace rose {
      * @class TextField
      * @brief An Widget to edit a small amount of text.
      */
-    class TextField : public Row {
-        int mMaxLength{0};
-        PointSize mPointSize{0};
-        FontName mFontName{};
-        std::string mText{};
-        std::string mPrefix{};
-        std::string mSuffix{};
-        std::string mCheckRegex{};
-
-        std::shared_ptr<TextLabel> mPrefixLabel{};
-        std::shared_ptr<TextLabel> mSuffixLabel{};
-        std::shared_ptr<TextLabel> mTextLabel{};
-
+    class TextField : public TextLabel {
     public:
-        TextField() noexcept: Row() {}
+        TextField() noexcept: TextLabel() {}
 
         ~TextField() override = default;
 
@@ -50,8 +38,7 @@ namespace rose {
          * @param fontSize The font size in pixels, defaults to Theme value,
          * @param fontName The font name, defaults to Theme value.
          */
-        explicit TextField(int maxLength, Padding padding = Padding(), PointSize pointSize = PointSize(),
-                           const std::string &fontName = "");
+        explicit TextField(int maxLength, PointSize pointSize = PointSize(), const std::string &fontName = "");
 
         /**
          * @brief Constructor
@@ -62,9 +49,8 @@ namespace rose {
          * @param fontSize The font size in pixels, defaults to Theme value,
          * @param fontName The font name, defaults to Theme value.
          */
-        TextField(int maxLength, const std::string &text, const std::string &prefix = "",
-                  const std::string &suffix = "", Padding padding = Padding(), PointSize pointSize = PointSize(),
-                  const std::string &fontName = "");
+        TextField(int maxLength, const std::string &text, const std::string &suffix = "",
+                  PointSize pointSize = PointSize(), const std::string &fontName = "");
 
         /**
          * @brief Constructor
@@ -73,25 +59,15 @@ namespace rose {
          * saving and propagation of values.
          * @param id The Id used to identify the TextFiled and its settings.
          */
-        explicit TextField(Id id, int maxLength, const std::string &prefix = "", const std::string &suffix = "",
-                           Padding padding = Padding(), PointSize pointSize = PointSize(),
-                           const std::string &fontName = "");
+        explicit TextField(Id id, int maxLength, const std::string &suffix = "",
+                           PointSize pointSize = PointSize(), const std::string &fontName = "");
 
         void addedToContainer() override;
 
-        void setRegex(const std::string& regex) {
-            if (mTextLabel)
-                mTextLabel->setTextValidationPattern(regex);
-        }
     };
 
     struct TextFieldRegex {
         std::string regex;
     };
-}
-
-inline std::shared_ptr<rose::TextField> operator<<(std::shared_ptr<rose::TextField> textField, const rose::TextFieldRegex& regex) {
-    textField->setRegex(regex.regex);
-    return textField;
 }
 
