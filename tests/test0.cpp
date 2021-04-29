@@ -26,6 +26,8 @@ int main(int argc, char **argv) {
     ImageStore &imageStore{ImageStore::getStore(application.context())};
     Theme& theme{Theme::getTheme()};
 
+    PointSize prefixPointSize{theme.TextPointSize};
+    FontName prefixFontName{theme.TextFont};
     application.screen() << wdg<Window>()
                          << wdg<Frame>(5) << Position{10, 10} << theme.SemiBevelFrame
                          << wdg<Manager>() << Id{"row"} << makeLayout<LinearLayout>(Orientation::Vertical, 5)
@@ -44,10 +46,15 @@ int main(int argc, char **argv) {
                                      application.screen() << wdg<Dialog>()
                                              << Position::Zero
                                              << wdg<Column>()
-                                                 << wdg<TextField>(10, "VE3YSH", "Callsign:" ) << endw
-//                                                 << wdg<Row>()
-                                                     << wdg<TextField>( 8, "45.59\xc2\xb0", "Latitude", "\xc2\xb0") << endw
-                                                     << wdg<TextField>(9, "-76.59\xc2\xb0", "Longitude", "\xc2\xb0");
+                                                 << wdg<Grid>(2)
+                                                     << wdg<TextLabel>("Callsign:") << prefixPointSize << prefixFontName << endw
+                                                     << wdg<TextField>(10, "MM0MMM-9" ) << endw
+                                                     << wdg<TextLabel>("Latitude:") << prefixPointSize << prefixFontName  << endw
+                                                     << wdg<TextField>(8, "0", "\xc2\xb0") << endw
+                                                     << wdg<TextLabel>("Longitude:") << prefixPointSize << prefixFontName  << endw
+                                                     << wdg<TextField>(9, "0", "\xc2\xb0") << endw
+                                                     << endw
+                                                 << wdg<Keyboard>();
                                      application.layout();
                                  }
                              })

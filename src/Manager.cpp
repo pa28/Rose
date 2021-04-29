@@ -156,7 +156,6 @@ namespace rose {
             }
         }
 
-        std::cout << __PRETTY_FUNCTION__ << layoutRect << '\n';
         return layoutRect;
     }
 }
