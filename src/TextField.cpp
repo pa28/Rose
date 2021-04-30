@@ -32,7 +32,6 @@ namespace rose {
         Theme &theme{Theme::getTheme()};
 
         mActionCurve = std::make_unique<ActionCurves::CursorPulse>();
-        mCaretColor = color::DarkTextColour;
 
         setPointSize(pointSize.pointSize);
         setFontName(fontName);

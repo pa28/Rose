@@ -23,6 +23,9 @@ namespace rose {
         Red,
         Green,
         Yellow,
+        RedText,
+        GreenText,
+        YellowText,
     };
 
     /**
@@ -44,7 +47,7 @@ namespace rose {
          */
         color::HSVA BaseColorHSVA{200.f, .00, .25, 1.0};
 
-        std::array<color::HSVA, 10> _hsva{{
+        std::array<color::HSVA, 13> _hsva{{
                                                  BaseColorHSVA,
                                                  BaseColorHSVA.modValue(0.2),
                                                  BaseColorHSVA.modValue(-0.15),
@@ -54,10 +57,13 @@ namespace rose {
                                                  BaseColorHSVA.contrasting(),
                                                  {0.f, 1.f, 0.55f, 1.f},
                                                  {79.f, 1.f, .4f, 1.f},
-                                                 {50.f, 1.f, 0.55f, 1.f}
+                                                 {50.f, 1.f, 0.55f, 1.f},
+                                                 {0.f, 1.f, 0.75f, 1.f},
+                                                 {79.f, 1.f, 0.75f, 1.f},
+                                                  {50.f, 1.f, 0.75f, 1.f}
                                          }};
 
-        std::array<color::RGBA, 10> _rgba{{
+        std::array<color::RGBA, 13> _rgba{{
                                                  _hsva[0].toRGBA(),
                                                  _hsva[1].toRGBA(),
                                                  _hsva[2].toRGBA(),
@@ -68,6 +74,9 @@ namespace rose {
                                                  _hsva[7].toRGBA(),
                                                  _hsva[8].toRGBA(),
                                                  _hsva[9].toRGBA(),
+                                                 _hsva[10].toRGBA(),
+                                                 _hsva[11].toRGBA(),
+                                                 _hsva[12].toRGBA()
                                          }};
 
         color::RGBA rgba(ThemeColor themeColor) {

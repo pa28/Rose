@@ -16,10 +16,14 @@ namespace rose {
 
     Text::Text() {
         Theme& theme{Theme::getTheme()};
+        auto test = theme.hsva(ThemeColor::Red).withValue(0.75);
         mFontName = theme.BoldFont;
         mPointSize = theme.LabelPointSize;
         mTextFgColor = theme.rgba(ThemeColor::Text);
         mTextBgColor = color::RGBA::TransparentBlack;
+        mCaretColor = theme.rgba(ThemeColor::YellowText);
+        mRegexFail = theme.rgba(ThemeColor::RedText);
+        mDataSaved = theme.rgba(ThemeColor::GreenText);
     }
 
     Text::Status Text::createTextureBlended(gm::Context &context) {
@@ -34,17 +38,23 @@ namespace rose {
         if (mFont) {
             gm::Surface surface{};
             auto textAndSuffix = mText + mSuffix;
+            auto fgColor = mTextFgColor;
+            if (mSaveToSettings)
+                fgColor = mDataSaved;
+            else if (!mTextValidated)
+                fgColor = mRegexFail;
+
             switch (mRenderStyle) {
                 case Blended:
-                    surface.reset(TTF_RenderUTF8_Blended(mFont.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
+                    surface.reset(TTF_RenderUTF8_Blended(mFont.get(), textAndSuffix.c_str(), fgColor.toSdlColor()));
                     break;
                 case Shaded:
                     surface.reset(
-                            TTF_RenderUTF8_Shaded(mFont.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor(),
+                            TTF_RenderUTF8_Shaded(mFont.get(), textAndSuffix.c_str(), fgColor.toSdlColor(),
                                                   mTextBgColor.toSdlColor()));
                     break;
                 case Solid:
-                    surface.reset(TTF_RenderUTF8_Solid(mFont.get(), textAndSuffix.c_str(), mTextFgColor.toSdlColor()));
+                    surface.reset(TTF_RenderUTF8_Solid(mFont.get(), textAndSuffix.c_str(), fgColor.toSdlColor()));
                     break;
             }
             if (surface) {
@@ -82,6 +92,7 @@ namespace rose {
             return false;
         }
 
+        mSaveToSettings = false;
         mTexture.reset();
         if (mValidationPattern)
             mTextValidated = std::regex_match(mText, *mValidationPattern);

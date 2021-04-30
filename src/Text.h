@@ -16,6 +16,9 @@
 
 namespace rose {
 
+    static constexpr std::string_view FloatPattern1 = "[+-]?([0-9]*[.])?[0-9]+";
+    static constexpr std::string_view FloatPattern2 = "[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)";
+
     struct PointSize {
         int pointSize{};
         PointSize() : pointSize(0) {}
@@ -58,6 +61,8 @@ namespace rose {
         color::RGBA mTextFgColor;           ///< The foreground color to use.
         color::RGBA mTextBgColor;           ///< The background color to use if rendering Shaded.
         color::RGBA mCaretColor{};          ///< The color of the caret when editing.
+        color::RGBA mRegexFail{};           ///< The text colour for regex validation failure.
+        color::RGBA mDataSaved{};           ///< The text colour when the data has been saved to settings.
         float mCaretAlpha{0.f};             ///< The alpha value of the caret during animation.
         RenderStyle mRenderStyle{Blended};  ///< The style of rendering Solid, Shaded, or Blended.
         std::string mFontName;              ///< The name of the True Type Font to use.
@@ -70,7 +75,8 @@ namespace rose {
         bool mEditingActive{false};         ///< True when the text is being edited.
 
         bool mEditable{false};              ///< The label text is editable.
-        bool mTextValidated{false};         ///< Ture when the content validates by mValidationPatter.
+        bool mTextValidated{true};          ///< Ture when the content validates by mValidationPatter.
+        bool mSaveToSettings{false};        ///< Set to true when modifications have been saved.
         int mMaxSize{0};                    ///< The maximum number of characters to be held, 0 indicates variable.
         char eM{'N'};                       ///< The character used to compute the maximum screen rectangle width.
         std::unique_ptr<std::regex> mValidationPattern{};   ///< Regular expression to validate content.
