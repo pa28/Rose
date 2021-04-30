@@ -92,6 +92,8 @@ namespace rose {
                         break;
                 }
                 break;
+            case SDLK_BACKSPACE:
+            case SDLK_RETURN:
             case SDLK_LEFT:
             case SDLK_RIGHT: {
                 SDL_Event event;
@@ -113,8 +115,6 @@ namespace rose {
                     std::cout << __PRETTY_FUNCTION__ << ' ' << status << SDL_GetError() << '\n';
             }
                 break;
-            case SDLK_BACKSPACE:
-            case SDLK_RETURN:
             default: {
                 SDL_Event event;
                 event.type = SDL_TEXTINPUT;
