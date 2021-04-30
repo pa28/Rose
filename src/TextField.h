@@ -14,6 +14,12 @@
 
 namespace rose {
 
+    struct RegexPattern {
+        std::string regexPattern{};
+        RegexPattern(const std::string& regex) : regexPattern(regex) {}
+        RegexPattern(const std::string_view& regex) : RegexPattern(std::string{regex}) {}
+    };
+
     /**
      * @class TextField
      * @brief An Widget to edit a small amount of text.
@@ -81,5 +87,10 @@ namespace rose {
     struct TextFieldRegex {
         std::string regex;
     };
+}
+
+inline std::shared_ptr<rose::TextField> operator<<(std::shared_ptr<rose::TextField> textField, const rose::RegexPattern& pattern) {
+    textField->setTextValidationPattern(pattern.regexPattern);
+    return textField;
 }
 
