@@ -100,38 +100,43 @@ namespace rose {
         getApplication().redrawBackground();
     }
 
+    void TextField::eraseChar(int location) {
+        if (location < 0) {
+            mCaretLocation = 0;
+        } else if (location == 0) {
+            mText.erase(mText.begin());
+            mCaretLocation = 0;
+        } else if (location >= mText.size()) {
+            mText.erase(mText.end() - 1);
+            mCaretLocation = mText.size();
+        } else {
+            mText.erase(mText.begin() + location);
+            mCaretLocation = location;
+        }
+    }
+
     void TextField::keyboardInput(const SDL_KeyboardEvent &keyEvent) {
-        std::cout << __PRETTY_FUNCTION__ << ' '
-                  << (int) keyEvent.state << ' '
-                  << (int) keyEvent.repeat << ' '
-                  << (int) keyEvent.keysym.mod << ' '
-                  << SDL_GetKeyName(keyEvent.keysym.sym)
-                  << '\n';
         if (keyEvent.state) {
             switch (keyEvent.keysym.sym) {
-                case SDLK_BACKSPACE: {
-                    auto erase = mCaretLocation - 1;
-                    if (erase < 0) {
-                        mCaretLocation = 0;
-                    } else if (erase == 0) {
-                        mText.erase(mText.begin());
-                        mCaretLocation = 0;
-                    } else if (erase >= mText.size()) {
-                        mText.erase(mText.end() - 1);
-                        mCaretLocation = mText.size();
-                    } else {
-                        mText.erase(mText.begin() + erase);
-                        mCaretLocation = erase;
-                    }
+                case SDLK_BACKSPACE:
+                    eraseChar(mCaretLocation - 1);
                     if (textUpdated())
                         getApplication().redrawBackground();
-                }
                     break;
                 case SDLK_LEFT:
                     mCaretLocation -= 2;
                 case SDLK_RIGHT:
                     ++mCaretLocation;
                     mCaretLocation = std::max(std::min(mCaretLocation, (int)mText.length()), 0);
+                    break;
+                case SDLK_DELETE:
+                    if (keyEvent.keysym.mod & static_cast<uint>(KMOD_CTRL)) {
+                        mText = "";
+                    } else {
+                        eraseChar(mCaretLocation);
+                    }
+                    if (textUpdated())
+                        getApplication().redrawBackground();
                     break;
                 default:
                     break;

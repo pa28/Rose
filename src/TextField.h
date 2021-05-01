@@ -25,6 +25,9 @@ namespace rose {
      * @brief An Widget to edit a small amount of text.
      */
     class TextField : public TextLabel {
+    protected:
+        void eraseChar(int location);
+
     public:
         TextField() noexcept: TextLabel() {}
 
