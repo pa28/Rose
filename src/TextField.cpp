@@ -85,10 +85,10 @@ namespace rose {
 
     void TextField::textInputEvent(const std::string &text) {
         if (mCaretLocation > mText.size()) {
-            mText.insert(mText.end(), text[0]);
+            mText.insert(mText.end(), (toUpperCase ? std::toupper(text[0]) : text[0]));
             mCaretLocation = mText.size();
         } else
-            mText.insert(mText.begin() + mCaretLocation, text[0]);
+            mText.insert(mText.begin() + mCaretLocation, (toUpperCase ? std::toupper(text[0]) : text[0]));
         if (textUpdated())
             getApplication().redrawBackground();
         ++mCaretLocation;

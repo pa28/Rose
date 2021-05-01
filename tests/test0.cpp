@@ -45,18 +45,19 @@ int main(int argc, char **argv) {
                                  if (buttonStateChange == rose::ButtonStateChange::Pushed) {
                                      std::cout << "Local Button state: Pushed\n";
                                      application.screen() << wdg<Dialog>()
-                                             << Position::Zero
-                                             << wdg<Column>() >> column
-                                                 << wdg<Grid>(2)
-                                                     << wdg<TextLabel>("Callsign:") << prefixPointSize << prefixFontName << endw
-                                                     << wdg<TextField>(10, "MM0MMM-9" ) << endw
-                                                     << wdg<TextLabel>("Latitude:") << prefixPointSize << prefixFontName  << endw
-                                                     << wdg<TextField>(8, "0", "\xc2\xb0")
-                                                             << RegexPattern{FloatPattern2} << endw
-                                                     << wdg<TextLabel>("Longitude:") << prefixPointSize << prefixFontName  << endw
-                                                     << wdg<TextField>(9, "0", "\xc2\xb0")
-                                                             << RegexPattern{FloatPattern2} << endw;
-                                     if (!application.keyboardFound())
+                                                          << Position::Zero
+                                                          << wdg<Column>() >> column
+                                                          << wdg<Grid>(2)
+                                                          << wdg<TextLabel>("Callsign:") << prefixPointSize << prefixFontName << endw
+                                                            << wdg<TextField>(10, "MM0MMM-9" )
+                                                            << RegexPattern{CallPattern} << ToUpperCase{true} << endw
+                                                          << wdg<TextLabel>("Latitude:") << prefixPointSize << prefixFontName << endw
+                                                            << wdg<TextField>(8, "0", "\xc2\xb0")
+                                                            << RegexPattern{FloatPattern} << endw
+                                                          << wdg<TextLabel>("Longitude:") << prefixPointSize << prefixFontName << endw
+                                                            << wdg<TextField>(9, "0", "\xc2\xb0")
+                                                            << RegexPattern{FloatPattern} << endw;
+//                                     if (!application.keyboardFound())
                                          column << wdg<Keyboard>();
                                      application.layout();
                                  }

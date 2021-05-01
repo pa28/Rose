@@ -11,13 +11,14 @@
 #include "Button.h"
 #include "Animation.h"
 #include <regex>
+#include <utility>
 
 namespace rose {
 
     struct RegexPattern {
         std::string regexPattern{};
-        RegexPattern(const std::string& regex) : regexPattern(regex) {}
-        RegexPattern(const std::string_view& regex) : RegexPattern(std::string{regex}) {}
+        explicit RegexPattern(std::string  regex) : regexPattern(std::move(regex)) {}
+        explicit RegexPattern(const std::string_view& regex) : RegexPattern(std::string{regex}) {}
     };
 
     /**
@@ -26,6 +27,7 @@ namespace rose {
      */
     class TextField : public TextLabel {
     protected:
+        /// Erase the character as if the caret is at the specified location and Backspace is used.
         void eraseChar(int location);
 
     public:
@@ -85,10 +87,17 @@ namespace rose {
         void textInputEvent(const std::string& text);
 
         void keyboardInput(const SDL_KeyboardEvent &keyEvent);
+
+        bool toUpperCase{false};               ///< If true input is forced to upper case.
     };
 
     struct TextFieldRegex {
         std::string regex;
+    };
+
+    struct ToUpperCase {
+        bool toUpperCase;
+        explicit ToUpperCase(bool upperCase) : toUpperCase(upperCase) {}
     };
 }
 
@@ -97,3 +106,7 @@ inline std::shared_ptr<rose::TextField> operator<<(std::shared_ptr<rose::TextFie
     return textField;
 }
 
+inline std::shared_ptr<rose::TextField> operator<<(std::shared_ptr<rose::TextField> textField, const rose::ToUpperCase &upperCase) {
+    textField->toUpperCase = upperCase.toUpperCase;
+    return textField;
+}
