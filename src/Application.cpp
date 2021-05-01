@@ -85,11 +85,9 @@ namespace rose {
     }
 
     bool Application::keyboardEventCallback(const SDL_KeyboardEvent &keyboardEvent) {
-        static constexpr std::array<uint,2> KeyboardCtlKeyMods{ KMOD_LCTRL, KMOD_RCTRL };
-        static constexpr std::array<uint,2> KeyboardAltKeyMods{ KMOD_LALT, KMOD_RALT };
-
         string keyName{SDL_GetKeyName(keyboardEvent.keysym.sym)};
-        if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_CTRL, KeyboardCtlKeyMods)) {
+        if (keyboardEvent.keysym.mod & (uint) KMOD_CTRL && (keyboardEvent.keysym.sym != SDLK_LCTRL) &&
+            keyboardEvent.keysym.sym != SDLK_RCTRL) {
             bool returnValue = false;
             switch (keyboardEvent.keysym.sym) {
                 case SDLK_F1:
@@ -122,9 +120,13 @@ namespace rose {
                 default:
                     break;
             }
-            Settings::getSettings().setValue(set::SetAppState, static_cast<int>(mAppState));
-            return returnValue;
-        } else if (oneFlagOf(keyboardEvent.keysym.mod & (uint) KMOD_ALT, KeyboardAltKeyMods)) {
+            if (returnValue) {
+                Settings::getSettings().setValue(set::SetAppState, static_cast<int>(mAppState));
+                return returnValue;
+            }
+        }
+
+        if (keyboardEvent.keysym.mod & (uint) KMOD_ALT) {
             if (auto shortcut = mKeyboardShortcuts.find(keyboardEvent.keysym.sym); shortcut !=
                                                                                    mKeyboardShortcuts.end()) {
                 if (auto widget = shortcut->second.second.lock(); widget)
@@ -229,7 +231,6 @@ namespace rose {
     }
 
     bool Application::textInputEventCallback(const SDL_TextInputEvent& textInputEvent) {
-        std::cout << __PRETTY_FUNCTION__ << ' ' << textInputEvent.text << '\n';
         if (mKeyFocusWidget)
             return mKeyFocusWidget->keyTextInputEvent(std::string{textInputEvent.text});
         return false;
