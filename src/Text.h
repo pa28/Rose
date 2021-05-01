@@ -16,8 +16,8 @@
 
 namespace rose {
 
-    static constexpr std::string_view FloatPattern1 = "[+-]?([0-9]*[.])?[0-9]+";
-    static constexpr std::string_view FloatPattern2 = "[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)";
+    static constexpr std::string_view CallPattern = "[A-Z]+[0-9][A-Z]+";
+    static constexpr std::string_view FloatPattern = "([+-]?([0-9]+([.][0-9]*)?|[.][0-9]+))?";
 
     struct PointSize {
         int pointSize{};
