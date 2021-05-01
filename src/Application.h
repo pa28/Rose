@@ -168,6 +168,8 @@ namespace rose {
      */
     class Application {
     protected:
+        static constexpr std::string_view UsbDeviceByPath{"/dev/input/by-path/"};
+        static constexpr std::string_view KeyboardPathRegEx{".*-kbd"};
 
         std::shared_ptr<Screen> mScreen{};
         EventSemantics mEventSemantics;
@@ -186,6 +188,8 @@ namespace rose {
         bool mMouseButtonPressed{false};
         uint mMouseButtonId{0};
         Position mMousePosition{};
+
+        bool mKeyboardFound;
 
     public:
         Application() = delete;
@@ -248,6 +252,10 @@ namespace rose {
 
         void redrawBackground() {
             mGraphicsModel.redrawBackground();
+        }
+
+        bool keyboardFound() const noexcept {
+            return mKeyboardFound;
         }
 
         virtual void run();

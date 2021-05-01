@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
 
     PointSize prefixPointSize{theme.TextPointSize};
     FontName prefixFontName{theme.TextFont};
+    std::shared_ptr<Column> column{};
     application.screen() << wdg<Window>()
                          << wdg<Frame>(5) << Position{10, 10} << theme.SemiBevelFrame
                          << wdg<Manager>() << Id{"row"} << makeLayout<LinearLayout>(Orientation::Vertical, 5)
@@ -45,7 +46,7 @@ int main(int argc, char **argv) {
                                      std::cout << "Local Button state: Pushed\n";
                                      application.screen() << wdg<Dialog>()
                                              << Position::Zero
-                                             << wdg<Column>()
+                                             << wdg<Column>() >> column
                                                  << wdg<Grid>(2)
                                                      << wdg<TextLabel>("Callsign:") << prefixPointSize << prefixFontName << endw
                                                      << wdg<TextField>(10, "MM0MMM-9" ) << endw
@@ -54,9 +55,9 @@ int main(int argc, char **argv) {
                                                              << RegexPattern{FloatPattern2} << endw
                                                      << wdg<TextLabel>("Longitude:") << prefixPointSize << prefixFontName  << endw
                                                      << wdg<TextField>(9, "0", "\xc2\xb0")
-                                                             << RegexPattern{FloatPattern2} << endw
-                                                     << endw
-                                                 << wdg<Keyboard>();
+                                                             << RegexPattern{FloatPattern2} << endw;
+                                     if (!application.keyboardFound())
+                                         column << wdg<Keyboard>();
                                      application.layout();
                                  }
                              })

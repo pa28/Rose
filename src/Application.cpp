@@ -9,6 +9,8 @@
 #include "Settings.h"
 #include "Utilities.h"
 #include "Math.h"
+#include <filesystem>
+#include <regex>
 
 using namespace rose::gm;
 
@@ -16,6 +18,11 @@ namespace rose {
 
     Application::Application(int argc, char **argv) : mEventSemantics(*this), mInputParser(argc, argv) {
         mScreen = std::make_shared<Screen>(*this);
+        std::regex kbPathRegEx{std::string{KeyboardPathRegEx}.c_str()};
+        for(auto& p: std::filesystem::directory_iterator(UsbDeviceByPath)) {
+            if (mKeyboardFound = std::regex_match(p.path().string(), kbPathRegEx); mKeyboardFound)
+                break;
+        }
     }
 
     void Application::windowStateChange(EventSemantics::WindowEventType type) {
