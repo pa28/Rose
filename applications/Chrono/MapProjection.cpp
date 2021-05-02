@@ -180,8 +180,6 @@ namespace rose {
         Rectangle widgetRect{containerPosition + mPos, mSize};
         gm::ClipRectangleGuard clipRectangleGuard(context, widgetRect);
 
-        std::cout << __PRETTY_FUNCTION__ << widgetRect << '\n';
-
         switch (mProjection) {
             case MapProjectionType::Mercator:
                 context.renderCopy(mMercator[1], widgetRect);
