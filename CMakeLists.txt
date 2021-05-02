@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(Rose VERSION 0.1.49.49)
+project(Rose VERSION 0.1.50.50)
 set(PACKAGE_CONTACT "Richard Buckley <richard.buckley>@ieee.org>")
 include(GNUInstallDirs)
 
@@ -156,9 +156,9 @@ if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
     target_link_libraries(IdPaths ${RoseLibraries})
 endif()
 
-add_executable(Rose main.cpp)
-target_link_libraries(Rose ${RoseLibraries})
-add_dependencies(Rose rose)
+#add_executable(Rose main.cpp)
+#target_link_libraries(Rose ${RoseLibraries})
+#add_dependencies(Rose rose)
 
 #add_executable(HamChrono applications/HamChrono/HamChrono.cpp applications/HamChrono/MapProjection.cpp applications/HamChrono/MapProjection.h applications/HamChrono/ConfigDialog.cpp applications/HamChrono/ConfigDialog.h applications/HamChrono/SettingsNames.h applications/HamChrono/Plan13.cpp applications/HamChrono/Plan13.h applications/HamChrono/Ephemeris.cpp applications/HamChrono/Ephemeris.h applications/HamChrono/SatelliteDataDisplay.cpp applications/HamChrono/SatelliteDataDisplay.h src/StructuredTypes.cpp src/StructuredTypes.h)
 #target_link_libraries(HamChrono ${RoseLibraries})
@@ -173,16 +173,16 @@ add_executable(Chrono applications/Chrono/main.cpp
         applications/Chrono/Plan13.h)
 target_link_libraries(Chrono ${RoseLibraries})
 
-add_executable(Life applications/ConwayLife.cpp)
-target_link_libraries(Life ${RoseLibraries})
-add_dependencies(Life rose)
+#add_executable(Life applications/ConwayLife.cpp)
+#target_link_libraries(Life ${RoseLibraries})
+#add_dependencies(Life rose)
 
-add_executable(RoseExec applications/RoseExec.cpp src0/Command.cpp)
-target_link_libraries(RoseExec stdc++fs)
+#add_executable(RoseExec applications/RoseExec.cpp src0/Command.cpp)
+#target_link_libraries(RoseExec stdc++fs)
 
-add_executable(RoseShell applications/RoseShell.cpp)
-target_link_libraries(RoseShell ${RoseLibraries})
-add_dependencies(RoseShell rose)
+#add_executable(RoseShell applications/RoseShell.cpp)
+#target_link_libraries(RoseShell ${RoseLibraries})
+#add_dependencies(RoseShell rose)
 
 if (NOT APPLE)
     set(CMAKE_INSTALL_RPATH $ORIGIN)
@@ -205,7 +205,7 @@ set_target_properties(
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
 
 install(TARGETS
-        rose Rose Life RoseExec RoseShell Chrono
+        rose Chrono
         COMPONENT ROSE_RUNTIME EXCLUDE_FROM_ALL
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -217,7 +217,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
         COMPONENT ROSE_RUNTIME
         )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/HamChrono"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/Chrono"
         DESTINATION "${CMAKE_INSTALL_DATADIR}"
         COMPONENT ROSE_RUNTIME
         )

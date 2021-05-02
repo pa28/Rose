@@ -247,9 +247,11 @@ struct Chrono : public Application {
 
         Environment &environment{Environment::getEnvironment()};
 
+        auto xdgDataDir = environment.getenv_path(XDGFilePaths::XDG_DATA_DIRS, environment.appName(), false);
+
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                    << wdg<MapProjection>(timerTick) >> mapProjection << endw
+                    << wdg<MapProjection>(timerTick, xdgDataDir) >> mapProjection << endw
                     << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                     << wdg<Row>()
                         << wdg<Column>()

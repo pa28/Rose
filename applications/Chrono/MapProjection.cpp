@@ -16,7 +16,8 @@
 
 namespace rose {
 
-    MapProjection::MapProjection(std::shared_ptr<TimerTick> timerTick) {
+    MapProjection::MapProjection(std::shared_ptr<TimerTick> timerTick, std::filesystem::path& xdgDataPath) {
+        mXdgDataPath = xdgDataPath;
         mTimerTick = std::move(timerTick);
 
         Environment &environment{Environment::getEnvironment()};
@@ -101,6 +102,8 @@ namespace rose {
         mTimerTick->minuteSignal.connect(mCelestialTimer);
 
         cacheCurrentMaps();
+
+        loadMapObjectImages(mXdgDataPath, getApplication().context());
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
@@ -175,6 +178,7 @@ namespace rose {
         }
 
         Rectangle widgetRect{containerPosition + mPos, mSize};
+        int splitPixel = 0;
         switch (mProjection) {
             case MapProjectionType::Mercator:
                 context.renderCopy(mMercator[1], widgetRect);
@@ -183,7 +187,7 @@ namespace rose {
             case MapProjectionType::StationMercator: {
                 auto lon = mQth.lon;
                 auto actualMapImgSize = mMercator[0].getSize();
-                int splitPixel = util::roundToInt((double) actualMapImgSize.w * ((lon) / 360.));
+                splitPixel = util::roundToInt((double) actualMapImgSize.w * ((lon) / 360.));
                 if (splitPixel < 0)
                     splitPixel += actualMapImgSize.w;
 
@@ -218,6 +222,19 @@ namespace rose {
                 context.renderCopy(mAzimuthal[1], widgetRect);
                 context.renderCopy(mAzimuthal[0], widgetRect);
                 break;
+        }
+
+        if (mDisplayCelestialObjects) {
+            for(auto& celestial : CelestialOverlayFileName) {
+                switch (celestial.mapOverLayImage) {
+                    case MapOverLayImage::Sun:
+                        drawMapItem(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
+                                    context, widgetRect, mSubSolar, mProjection, splitPixel);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
@@ -376,6 +393,7 @@ namespace rose {
 
         auto[latS, lonS] = subSolar();
         std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
+        mSubSolar = GeoPosition{latS, lonS, true};
 
         auto sinY = sin(mQthRad.lat);
         auto cosY = cos(mQthRad.lat);
@@ -445,5 +463,122 @@ namespace rose {
         std::cout << __PRETTY_FUNCTION__ << " Duration: " << stop - start << '\n';
         getApplication().redrawBackground();
         return true;
+    }
+
+    void MapProjection::loadMapObjectImages(const std::filesystem::path &xdgResourcePath, gm::Context &context) {
+        ImageStore &imageStore{ImageStore::getStore()};
+        for (auto& overlay : CelestialOverlayFileName) {
+            auto path = xdgResourcePath;
+            path.append("images");
+            path.append(overlay.fileName);
+            auto imageId = imageStore.nextImageId();
+            mMapOverlayId[static_cast<std::size_t>(overlay.mapOverLayImage)] = imageId;
+            gm::Surface objectSurface(path);
+            imageStore.setImage(imageId, std::move(objectSurface.toTexture(context)));
+        }
+    }
+
+    void MapProjection::drawMapItem(const ImageId &mapItem, gm::Context& context, Rectangle mapRectangle,
+                                    GeoPosition& geoPosition, MapProjectionType projection, int splitPixel) {
+        if (mapItem == ImageId::NoImage)
+            return;
+
+        auto mapPos = geoToMap(geoPosition, projection, splitPixel);
+
+        ImageStore& imageStore{ImageStore::getStore()};
+        auto iconSize = imageStore.size(mapItem);
+        mapPos.x -= iconSize.w / 2;
+        mapPos.y -= iconSize.h / 2;
+
+        gm::ClipRectangleGuard clipRectangleGuard(context, mapRectangle);
+
+        mapPos = mapPos + mapRectangle.position();
+        Rectangle dst{mapPos, iconSize};
+        int h = 0;
+        if (dst.y < mapRectangle.y) {
+            // Top hang
+            h = mapRectangle.y - dst.y;
+        } else if (dst.y + dst.h > mapRectangle.y + mapRectangle.h) {
+            // Bottom hang
+            h = mapRectangle.y + mapRectangle.h - dst.y;
+        }
+
+        int w = 0;
+        if (dst.x < mapRectangle.x) {
+            w = mapRectangle.x - dst.x;
+        } else if (dst.x + dst.w > mapRectangle.x + mapRectangle.w) {
+            w = mapRectangle.x + mapRectangle.w - dst.x;
+        }
+
+        if (h == 0 && w == 0){
+            imageStore.renderCopy(context, mapItem, dst);
+            return;
+        }
+
+        if (h == 0 && w > 0) {
+            // Left/Right hang - draw left side on right of map
+            dst.x = mapRectangle.x - w;
+            imageStore.renderCopy(context, mapItem, dst);
+            dst.x += mapRectangle.w;
+            imageStore.renderCopy(context, mapItem, dst);
+        } else if (h > 0 && w == 0) {
+            if (projection != MapProjectionType::StationAzimuthal || h < iconSize.h / 2) {
+                imageStore.renderCopy(context, mapItem, dst);
+            }
+            if (projection != MapProjectionType::StationAzimuthal || h >= iconSize.h / 2) {
+                imageStore.renderCopy(context, mapItem, dst);
+            }
+        } else if (h > 0 && w > 0 && projection != MapProjectionType::StationAzimuthal) {
+            dst.x = mapRectangle.x - w;
+            dst.y = mapRectangle.y - h;
+            imageStore.renderCopy(context, mapItem, dst);
+            dst.x += mapRectangle.w;
+            imageStore.renderCopy(context, mapItem, dst);
+            dst.y += mapRectangle.h;
+            imageStore.renderCopy(context, mapItem, dst);
+            dst.x -= mapRectangle.w;
+            imageStore.renderCopy(context, mapItem, dst);
+        }
+    }
+
+    Position MapProjection::geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel) const {
+        Position mapPos{};
+
+        switch (projection) {
+            case MapProjectionType::StationAzimuthal: {
+                double ca, B;
+                solveSphere(geo.lon - mQthRad.lon, M_PI_2 - geo.lat, sin(mQthRad.lat),
+                            cos(mQthRad.lat), ca, B);
+                if (ca > 0) {
+                    auto a = acos(ca);
+                    auto R0 = (double) mMapImgSize.w / 4. - 1.;
+                    auto R = a * (double) mMapImgSize.w / (2. * M_PI);
+                    R = std::min(R, R0);
+                    auto dx = R * sin(B);
+                    auto dy = R * cos(B);
+                    mapPos = Position{mMapImgSize.w / 4 + util::roundToInt(dx), mMapImgSize.h / 2 - util::roundToInt(dy)};
+                } else {
+                    auto a = M_PI - acos(ca);
+                    auto R0 = (double) mMapImgSize.w / 4 - 1;
+                    auto R = a * (double) mMapImgSize.w / (2.f * (float) M_PI);
+                    R = std::min(R, R0);
+                    auto dx = -R * sin(B);
+                    auto dy = R * cos(B);
+                    mapPos = Position{3 * mMapImgSize.w / 4 + util::roundToInt(dx), mMapImgSize.h / 2 - util::roundToInt(dy)};
+                }
+            }
+                break;
+            case MapProjectionType::Mercator:
+                mapPos = Position{util::roundToInt(mMapImgSize.w * (geo.lon + M_PI) / (2. * M_PI)) % mMapImgSize.w,
+                                  util::roundToInt(mMapImgSize.h * (M_PI_2 - geo.lat) / M_PI)};
+                break;
+            case MapProjectionType::StationMercator: {
+                mapPos = Position{util::roundToInt(mMapImgSize.w * (geo.lon + M_PI) / (2. * M_PI)) % mMapImgSize.w,
+                                  util::roundToInt(mMapImgSize.h * (M_PI_2 - geo.lat) / M_PI)};
+                mapPos.x = (mapPos.x + mMapImgSize.w - splitPixel) % mMapImgSize.w;
+                break;
+            }
+        }
+        return mapPos;
     }
 }

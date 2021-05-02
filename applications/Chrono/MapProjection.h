@@ -11,6 +11,7 @@
 #include "Visual.h"
 #include "WebCache.h"
 #include "GraphicsModel.h"
+#include "ImageStore.h"
 #include "Texture.h"
 #include "TimerTick.h"
 #include "Surface.h"
@@ -21,7 +22,6 @@ namespace rose {
         static constexpr std::string_view ChronoMapProjection{"MapProjection"};
         static constexpr std::string_view ChronoMapDepiction{"MapDepiction"};
     }
-
 
     /**
      * @enum MapProjectionType
@@ -218,6 +218,28 @@ namespace rose {
         };
 
     protected:
+        enum class MapOverLayImage : size_t {
+            Sun,
+        };
+
+        struct OverlayImageSpec {
+            MapOverLayImage mapOverLayImage;
+            std::string_view fileName;
+        };
+
+        static constexpr std::array<OverlayImageSpec,1> CelestialOverlayFileName
+        {{
+               { MapOverLayImage::Sun, "35px-Sun.png" },
+        }};
+
+        std::array<ImageId,CelestialOverlayFileName.size()> mMapOverlayId{};
+
+        /// If true celestial objects (Sun, Moon) will be displayed.
+        bool mDisplayCelestialObjects{true};
+
+        /// The geographic sub-solar position.
+        GeoPosition mSubSolar{};
+
         /// Source of timing information.
         std::shared_ptr<TimerTick> mTimerTick{};
 
@@ -266,7 +288,8 @@ namespace rose {
         GeoPosition mQthRad{mQth.toRadians()};
 
         /// Twilight specs: civil, nautical, astronomical.
-        static constexpr std::array<double, 3> GrayLineCos = {-0.105, -0.208,
+        static constexpr std::array<double, 3> GrayLineCos = {-0.105,
+                                                              -0.208,
                                                               -0.309};   ///< Sets the width of the dawn/dusk period.
         static constexpr double GrayLinePow = .80;      ///< Sets the speed of transitions, smaller is sharper. (.75)
 
@@ -299,10 +322,33 @@ namespace rose {
          */
         bool setForegroundBackground();
 
+        /// Load overlay images into the ImageStore.
+        void loadMapObjectImages(const std::filesystem::path &xdgResourcePath, gm::Context &context);
+
+        /**
+         * @brief Convert a GeoPosition in radians to a map Position in pixels.
+         * @param projection True if the desired map is an Azimuthal projection.
+         * @return The map Position.
+         */
+        Position geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel) const;
+
+        /**
+         * @brief Render a single icon on the map.
+         * @param mapItem The MapItem data.
+         * @param renderer The Renderer.
+         * @param projection True if the projection is Azimuthal.
+         * @param splitPixel The split location for Mercator station centric projections.
+         */
+        void drawMapItem(const ImageId &mapItem, gm::Context& context, Rectangle mapRectangle, GeoPosition& geoPosition,
+                         MapProjectionType projection, int splitPixel);
+
+        /// Path to the XDG application data directory.
+        std::filesystem::path mXdgDataPath;
+
     public:
         MapProjection() = delete;
 
-        explicit MapProjection(std::shared_ptr<TimerTick> timerTick);
+        explicit MapProjection(std::shared_ptr<TimerTick> timerTick, std::filesystem::path& xdgDataPath);
 
         ~MapProjection() override = default;
 
