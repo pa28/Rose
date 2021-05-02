@@ -330,10 +330,13 @@ namespace rose {
 
         /**
          * @brief Convert a GeoPosition in radians to a map Position in pixels.
-         * @param projection True if the desired map is an Azimuthal projection.
+         * @param geo The surface geographic position.
+         * @param projection The map projection type.
+         * @param splitPixel The horizontal pixel to split SationMercator maps.
+         * @param mapRect The screen rectanble of the map.
          * @return The map Position.
          */
-        Position geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel) const;
+        Position geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const;
 
         /**
          * @brief Render a single icon on the map.

@@ -180,7 +180,8 @@ namespace rose {
         Rectangle widgetRect{containerPosition + mPos, mSize};
         gm::ClipRectangleGuard clipRectangleGuard(context, widgetRect);
 
-        int splitPixel = 0;
+        std::cout << __PRETTY_FUNCTION__ << widgetRect << '\n';
+
         switch (mProjection) {
             case MapProjectionType::Mercator:
                 context.renderCopy(mMercator[1], widgetRect);
@@ -189,7 +190,7 @@ namespace rose {
             case MapProjectionType::StationMercator: {
                 auto lon = mQth.lon;
                 auto actualMapImgSize = mMercator[0].getSize();
-                splitPixel = util::roundToInt((double) actualMapImgSize.w * ((lon) / 360.));
+                int splitPixel = util::roundToInt((double) actualMapImgSize.w * ((lon) / 360.));
                 if (splitPixel < 0)
                     splitPixel += actualMapImgSize.w;
 
@@ -227,6 +228,9 @@ namespace rose {
         }
 
         if (mDisplayCelestialObjects) {
+            int splitPixel = util::roundToInt((double) widgetRect.w * ((mQth.lon) / 360.));
+            if (splitPixel < 0)
+                splitPixel += widgetRect.w;
             for(auto& celestial : CelestialOverlayFileName) {
                 switch (celestial.mapOverLayImage) {
                     case MapOverLayImage::Sun:
@@ -487,7 +491,7 @@ namespace rose {
         if (mapItem == ImageId::NoImage)
             return;
 
-        auto mapPos = geoToMap(geoPosition, projection, splitPixel);
+        auto mapPos = geoToMap(geoPosition, projection, splitPixel, mapRectangle);
 
         ImageStore& imageStore{ImageStore::getStore()};
         auto iconSize = imageStore.size(mapItem);
@@ -543,7 +547,8 @@ namespace rose {
         }
     }
 
-    Position MapProjection::geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel) const {
+    Position
+    MapProjection::geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const {
         Position mapPos{};
 
         switch (projection) {
@@ -553,31 +558,31 @@ namespace rose {
                             cos(mQthRad.lat), ca, B);
                 if (ca > 0) {
                     auto a = acos(ca);
-                    auto R0 = (double) mMapImgSize.w / 4. - 1.;
-                    auto R = a * (double) mMapImgSize.w / (2. * M_PI);
+                    auto R0 = (double) mapRect.w / 4. - 1.;
+                    auto R = a * (double) mapRect.w / (2. * M_PI);
                     R = std::min(R, R0);
                     auto dx = R * sin(B);
                     auto dy = R * cos(B);
-                    mapPos = Position{mMapImgSize.w / 4 + util::roundToInt(dx), mMapImgSize.h / 2 - util::roundToInt(dy)};
+                    mapPos = Position{mapRect.w / 4 + util::roundToInt(dx), mapRect.h / 2 - util::roundToInt(dy)};
                 } else {
                     auto a = M_PI - acos(ca);
-                    auto R0 = (double) mMapImgSize.w / 4 - 1;
-                    auto R = a * (double) mMapImgSize.w / (2.f * (float) M_PI);
+                    auto R0 = (double) mapRect.w / 4 - 1;
+                    auto R = a * (double) mapRect.w / (2.f * (float) M_PI);
                     R = std::min(R, R0);
                     auto dx = -R * sin(B);
                     auto dy = R * cos(B);
-                    mapPos = Position{3 * mMapImgSize.w / 4 + util::roundToInt(dx), mMapImgSize.h / 2 - util::roundToInt(dy)};
+                    mapPos = Position{3 * mapRect.w / 4 + util::roundToInt(dx), mapRect.h / 2 - util::roundToInt(dy)};
                 }
             }
                 break;
             case MapProjectionType::Mercator:
-                mapPos = Position{util::roundToInt(mMapImgSize.w * (geo.lon + M_PI) / (2. * M_PI)) % mMapImgSize.w,
-                                  util::roundToInt(mMapImgSize.h * (M_PI_2 - geo.lat) / M_PI)};
+                mapPos = Position{util::roundToInt(mapRect.w * (geo.lon + M_PI) / (2. * M_PI)) % mapRect.w,
+                                  util::roundToInt(mapRect.h * (M_PI_2 - geo.lat) / M_PI)};
                 break;
             case MapProjectionType::StationMercator: {
-                mapPos = Position{util::roundToInt(mMapImgSize.w * (geo.lon + M_PI) / (2. * M_PI)) % mMapImgSize.w,
-                                  util::roundToInt(mMapImgSize.h * (M_PI_2 - geo.lat) / M_PI)};
-                mapPos.x = (mapPos.x + mMapImgSize.w - splitPixel) % mMapImgSize.w;
+                mapPos = Position{util::roundToInt(mapRect.w * (geo.lon + M_PI) / (2. * M_PI)) % mapRect.w,
+                                  util::roundToInt(mapRect.h * (M_PI_2 - geo.lat) / M_PI)};
+                mapPos.x = (mapPos.x + mapRect.w - splitPixel) % mapRect.w;
                 break;
             }
         }
