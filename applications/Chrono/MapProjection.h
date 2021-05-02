@@ -231,8 +231,8 @@ namespace rose {
 
         static constexpr std::array<OverlayImageSpec,static_cast<size_t>(MapOverLayImage::Count)> CelestialOverlayFileName
         {{
-            { MapOverLayImage::Sun, "35px-Sun.png" },
-            { MapOverLayImage::Moon, "moon20.png"},
+                 { MapOverLayImage::Moon, "moon20.png"},
+                 { MapOverLayImage::Sun, "35px-Sun.png" },
         }};
 
         std::array<ImageId,CelestialOverlayFileName.size()> mMapOverlayId{};
