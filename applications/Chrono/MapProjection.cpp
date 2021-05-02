@@ -178,6 +178,8 @@ namespace rose {
         }
 
         Rectangle widgetRect{containerPosition + mPos, mSize};
+        gm::ClipRectangleGuard clipRectangleGuard(context, widgetRect);
+
         int splitPixel = 0;
         switch (mProjection) {
             case MapProjectionType::Mercator:
@@ -491,8 +493,6 @@ namespace rose {
         auto iconSize = imageStore.size(mapItem);
         mapPos.x -= iconSize.w / 2;
         mapPos.y -= iconSize.h / 2;
-
-        gm::ClipRectangleGuard clipRectangleGuard(context, mapRectangle);
 
         mapPos = mapPos + mapRectangle.position();
         Rectangle dst{mapPos, iconSize};
