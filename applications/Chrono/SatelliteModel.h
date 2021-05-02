@@ -124,11 +124,31 @@ namespace rose {
         std::vector<Satellite> mConstellation{};
 
     public:
+        SatelliteObservation() = default;
+
         explicit SatelliteObservation(const Observer &observer);
+
+        SatelliteObservation(const Observer &observer, const std::string& object);
 
         void predict(const DateTime &dateTime);
 
         void passPrediction(uint maxCount, const std::string &favorite);
+
+        [[nodiscard]] const Observer& observer() const {
+            return mObserver;
+        }
+
+        [[nodiscard]] auto empty() const noexcept {
+            return mConstellation.empty();
+        }
+
+        [[nodiscard]] auto size() const noexcept {
+            return mConstellation.size();
+        }
+
+        [[nodiscard]] auto front() const noexcept {
+            return mConstellation.front();
+        }
     };
 
     static constexpr long COARSE_DT = 90L;

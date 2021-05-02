@@ -104,6 +104,14 @@ namespace rose {
         cacheCurrentMaps();
 
         loadMapObjectImages(mXdgDataPath, getApplication().context());
+
+        mSatelliteObservation = SatelliteObservation{Observer{mQth.lat, mQth.lon, 0.}};
+        mSatelliteObservation.passPrediction(6, "ISS");
+
+        mCelestialObservations = SatelliteObservation{mSatelliteObservation.observer(), "Moon"};
+        mCelestialObservations.predict(DateTime{true});
+        auto [lat, lon] = mCelestialObservations.front().geo();
+        mSubLunar = GeoPosition{lat, lon, true};
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
@@ -235,9 +243,11 @@ namespace rose {
                         drawMapItem(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
                                     context, widgetRect, mSubSolar, mProjection, splitPixel);
                         break;
-                    default:
+                    case MapOverLayImage::Moon:
                         drawMapItem(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
-                                    context, widgetRect, mSubSolar, mProjection, splitPixel);
+                                    context, widgetRect, mSubLunar, mProjection, splitPixel);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -400,6 +410,12 @@ namespace rose {
         auto[latS, lonS] = subSolar();
         std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
         mSubSolar = GeoPosition{latS, lonS, true};
+
+        if (!mCelestialObservations.empty()) {
+            mCelestialObservations.predict(DateTime{true});
+            auto [lat, lon] = mCelestialObservations.front().geo();
+            mSubLunar = GeoPosition{lat, lon, true};
+        }
 
         auto sinY = sin(mQthRad.lat);
         auto cosY = cos(mQthRad.lat);

@@ -14,6 +14,7 @@
 #include "ImageStore.h"
 #include "Texture.h"
 #include "TimerTick.h"
+#include "SatelliteModel.h"
 #include "Surface.h"
 
 namespace rose {
@@ -243,6 +244,9 @@ namespace rose {
         /// The geographic sub-solar position.
         GeoPosition mSubSolar{};
 
+        /// The geographic sub-lunar position.
+        GeoPosition mSubLunar{};
+
         /// Source of timing information.
         std::shared_ptr<TimerTick> mTimerTick{};
 
@@ -350,6 +354,12 @@ namespace rose {
 
         /// Path to the XDG application data directory.
         std::filesystem::path mXdgDataPath;
+
+        /// The last calculated observations.
+        SatelliteObservation mSatelliteObservation;
+
+        /// The last calculated celestial observations.
+        SatelliteObservation mCelestialObservations;
 
     public:
         MapProjection() = delete;
