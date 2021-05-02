@@ -361,7 +361,10 @@ namespace rose::gm {
          * @brief Set the old clip rectangle back on the renderer when destroyed.
          */
         ~ClipRectangleGuard() {
-            mStatus = SDL_RenderSetClipRect(mContext.get(), &mOldClip);
+            if (mOldClip.w == 0 && mOldClip.y == 0)
+                mStatus = SDL_RenderSetClipRect(mContext.get(), nullptr);
+            else
+                mStatus = SDL_RenderSetClipRect(mContext.get(), &mOldClip);
         }
 
         /**
