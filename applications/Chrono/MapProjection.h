@@ -220,6 +220,8 @@ namespace rose {
     protected:
         enum class MapOverLayImage : size_t {
             Sun,
+            Moon,
+            Count,
         };
 
         struct OverlayImageSpec {
@@ -227,9 +229,10 @@ namespace rose {
             std::string_view fileName;
         };
 
-        static constexpr std::array<OverlayImageSpec,1> CelestialOverlayFileName
+        static constexpr std::array<OverlayImageSpec,static_cast<size_t>(MapOverLayImage::Count)> CelestialOverlayFileName
         {{
-               { MapOverLayImage::Sun, "35px-Sun.png" },
+            { MapOverLayImage::Sun, "35px-Sun.png" },
+            { MapOverLayImage::Moon, "moon20.png"},
         }};
 
         std::array<ImageId,CelestialOverlayFileName.size()> mMapOverlayId{};

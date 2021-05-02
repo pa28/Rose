@@ -232,6 +232,8 @@ namespace rose {
                                     context, widgetRect, mSubSolar, mProjection, splitPixel);
                         break;
                     default:
+                        drawMapItem(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
+                                    context, widgetRect, mSubSolar, mProjection, splitPixel);
                         break;
                 }
             }
