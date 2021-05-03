@@ -126,7 +126,14 @@ namespace rose {
         std::filesystem::path mDataHome;            ///< The user's XDG Data Home path
         std::filesystem::path mConfigHome;          ///< The user's XDG Config Home path
         std::filesystem::path mCacheHome;           ///< The user's XDG Cache Home path
-        std::filesystem::path mSharedImages;        ///< Image resources installed with the application.
+        std::filesystem::path mAppResources;        ///< Resources installed with the application.
+
+        /**
+         * @brief Resources shared by applications using the library.
+         * @details The content of this directory is maintained by the library developer. Any user data
+         * placed or installed in this directory may be over written by updates.
+         */
+        std::filesystem::path mLibResources;
         XDGFilePaths mFilePaths{};                  ///< XDG Spec file paths.
 
         std::string mAppName;                       ///< Application name as provided by the system.
