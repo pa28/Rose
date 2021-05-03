@@ -17,6 +17,13 @@
 #include "SatelliteModel.h"
 #include "Surface.h"
 
+// https://earthobservatory.nasa.gov/features/NightLights/page3.php
+// https://visibleearth.nasa.gov/images/57752/blue-marble-land-surface-shallow-water-and-shaded-topography
+// https://visibleearth.nasa.gov/images/57752/blue-marble-land-surface-shallow-water-and-shaded-topography/57754l
+// https://commons.wikimedia.org/wiki/File:Large_World_Topo_Map_2.png
+// https://commons.wikimedia.org/wiki/File:The_earth_at_night.jpg
+// https://commons.wikimedia.org/wiki/File:The_earth_at_night_(2).jpg
+
 namespace rose {
 
     namespace set {
