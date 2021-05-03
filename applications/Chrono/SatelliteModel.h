@@ -10,10 +10,28 @@
 #include "Utilities.h"
 #include "WebCache.h"
 #include "Plan13.h"
+#include "Math.h"
 #include <memory>
 #include <algorithm>
+#include <chrono>
 
 namespace rose {
+
+    static constexpr std::chrono::milliseconds LunarMonthMilliseconds{2551442976};
+    static constexpr std::time_t LunarNewMoonEpoch{1618194720};
+
+    /**
+     * @brief Calculate the current phase of the moon in days between [0..29].
+     * @return The moon phase.
+     */
+    inline int MoonPhase() {
+        std::chrono::system_clock::time_point newEpoch = std::chrono::system_clock::from_time_t(LunarNewMoonEpoch);
+        std::chrono::system_clock::time_point epoch = std::chrono::system_clock::now();
+        auto moonAge = std::chrono::duration_cast<std::chrono::milliseconds>(epoch - newEpoch);
+        auto phase = std::chrono::duration_cast<std::chrono::hours>(moonAge % LunarMonthMilliseconds);
+        auto c = util::roundToInt(static_cast<float>(phase.count()) / 24.);
+        return c;
+    }
 
     class ClearSkyEphemeris : public WebCache {
     public:
