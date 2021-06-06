@@ -160,6 +160,10 @@ namespace rose {
 
         [[nodiscard]] const std::filesystem::path& cacheHome() const { return mCacheHome; }
 
+        [[nodiscard]] const std::filesystem::path& dataHome() const { return mDataHome; }
+
+        [[nodiscard]] const std::filesystem::path& appResources() const { return mAppResources; }
+
         /**
          * @brief Find the XDG directory for a specified application name.
          * @details If the path location does not exist, and create is set to true, it is created along with all

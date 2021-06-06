@@ -66,7 +66,7 @@ namespace rose {
          * @brief Search for a relative path on one of the XDG standard locations.
          * @details If the relative path is found below one of the specified paths in the named location, the
          * return value is true with the full absolute path to the location. If not found the return value is
-         * false with the full apsolute path to the relative location in the preferred directory.
+         * false with the full absolute path to the relative location in the preferred directory.
          * @tparam S The type of the relative path, implicitly convertible to a std::string.
          * @param name The XDG name
          * @param relativePath A path releative to an XDG location to search for.

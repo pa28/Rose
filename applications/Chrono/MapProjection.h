@@ -111,24 +111,9 @@ namespace rose {
     static std::string MapFileName(MapDepiction mapDepiction, MapSize mapSize, MapIllumination illumination) {
         std::stringstream sstrm{};
 
-        sstrm << "map-";
-        switch (illumination) {
-            case MapIllumination::Day:
-                sstrm << "D-";
-                break;
-            case MapIllumination::Night:
-                sstrm << "N-";
-                break;
-            default:
-                break;
-        }
-
-        auto size = MapImageSize(mapSize);
-        sstrm << size.w << 'x' << size.h << '-';
-
         switch (mapDepiction) {
             case MapDepiction::Terrain:
-                sstrm << "Terrain";
+                sstrm << "World_Topo_";
                 break;
             case MapDepiction::Countries:
                 sstrm << "Countries";
@@ -137,7 +122,21 @@ namespace rose {
                 break;
         }
 
-        sstrm << ".bmp";
+        switch (illumination) {
+            case MapIllumination::Day:
+                sstrm << "D_";
+                break;
+            case MapIllumination::Night:
+                sstrm << "N_";
+                break;
+            default:
+                break;
+        }
+
+        auto size = MapImageSize(mapSize);
+        sstrm << size.w << 'x' << size.h;
+
+        sstrm << ".png";
         return sstrm.str();
     }
 
@@ -261,7 +260,7 @@ namespace rose {
         TickProtocol::slot_type mCelestialTimer{};
 
         /// The pointer to the map cache.
-        std::unique_ptr<WebCache> mMapCache{};
+//        std::unique_ptr<WebCache> mMapCache{};
 
         /// The slot to receive map cache events.
         WebCacheProtocol::slot_type mMapSlot{};

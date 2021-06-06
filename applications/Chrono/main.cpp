@@ -247,7 +247,7 @@ struct Chrono : public Application {
 
         Environment &environment{Environment::getEnvironment()};
 
-        auto xdgDataDir = environment.getenv_path(XDGFilePaths::XDG_DATA_DIRS, environment.appName(), false);
+        auto xdgDataDir = environment.appResources();
 
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()

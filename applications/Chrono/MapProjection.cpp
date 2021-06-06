@@ -21,9 +21,9 @@ namespace rose {
         mTimerTick = std::move(timerTick);
 
         Environment &environment{Environment::getEnvironment()};
-        mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
-                                               Environment::getEnvironment().cacheHome(),
-                                               "Maps", std::chrono::hours{24 * 30});
+//        mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
+//                                               Environment::getEnvironment().cacheHome(),
+//                                               "Maps", std::chrono::hours{24 * 30});
 
         mKeyboardShortcutCallback = [&](uint32_t shortcutCode, bool pressed, uint repeat) {
             MapProjectionType projectionType = mProjection;
@@ -69,8 +69,8 @@ namespace rose {
             auto [depiction,size,illumination] = map;
             auto mapDepictionId = MapImageId(depiction,size,illumination);
             auto name = MapFileName(depiction,size,illumination);
-            mMapCache->setCacheItem(mapDepictionId, name);
-            mMapCache->fetchItem(mapDepictionId);
+//            mMapCache->setCacheItem(mapDepictionId, name);
+//            mMapCache->fetchItem(mapDepictionId);
         }
     }
 
@@ -90,7 +90,7 @@ namespace rose {
             std::cout << __PRETTY_FUNCTION__ << ' ' << key << ' ' << status << '\n';
             getApplication().redrawBackground();
         };
-        mMapCache->cacheLoaded.connect(mMapSlot);
+//        mMapCache->cacheLoaded.connect(mMapSlot);
 
         mCelestialTimer = TickProtocol::createSlot();
         mCelestialTimer->receiver = [&](int minutes){
@@ -115,11 +115,21 @@ namespace rose {
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
-        std::array<uint32_t,2> mapId{MapImageId(mMapDepiction, mMapSize, MapIllumination::Day),
-                                     MapImageId(mMapDepiction, mMapSize, MapIllumination::Night)};
+//        std::array<uint32_t,2> mapId{MapImageId(mMapDepiction, mMapSize, MapIllumination::Day),
+//                                     MapImageId(mMapDepiction, mMapSize, MapIllumination::Night)};
+//
+//        std::array<std::optional<std::filesystem::path>,2> mapPath{mMapCache->localItemExists(mapId[0]),
+//                                                    mMapCache->localItemExists(mapId[1])};
 
-        std::array<std::optional<std::filesystem::path>,2> mapPath{mMapCache->localItemExists(mapId[0]),
-                                                    mMapCache->localItemExists(mapId[1])};
+        std::array<std::string,2> mapFileName;
+        mapFileName[0] = MapFileName(mMapDepiction,mMapSize,MapIllumination::Day);
+        mapFileName[1] = MapFileName(mMapDepiction,mMapSize,MapIllumination::Night);
+
+        auto mapBasePath = Environment::getEnvironment().appResources();
+        mapBasePath.append("maps");
+        std::array<std::optional<std::filesystem::path>,2> mapPath{mapBasePath, mapBasePath};
+        mapPath[0]->append(mapFileName[0]);
+        mapPath[1]->append(mapFileName[1]);
 
         if (mMapProjectionsInvalid) {
             if (!mComputeAzimuthalMapsFuture.valid()) {
