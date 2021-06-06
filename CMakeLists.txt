@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(Rose VERSION 0.1.50.50)
-set(PACKAGE_CONTACT "Richard Buckley <richard.buckley>@ieee.org>")
+set(PACKAGE_CONTACT "Richard Buckley <richard.buckley@ieee.org>")
 include(GNUInstallDirs)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -205,11 +205,17 @@ set_target_properties(
 get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
 
 install(TARGETS
-        rose Chrono
+        rose
         COMPONENT ROSE_RUNTIME EXCLUDE_FROM_ALL
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+
+install(TARGETS
+        Chrono
+        COMPONENT CHRONO_RUNTIME EXCLUDE_FROM_ALL
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
@@ -217,22 +223,32 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
         COMPONENT ROSE_RUNTIME
         )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/Chrono"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/ChronoImages/images"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono"
+        COMPONENT CHRONO_RUNTIME
+        )
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/ChronoMapsSmall/maps"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono"
+        COMPONENT CHRONO_RUNTIME
+        )
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/ChronoMapsLarge/maps"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono"
+        COMPONENT CHRONO_LARGE
+        )
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/Rose/fonts"
         DESTINATION "${CMAKE_INSTALL_DATADIR}"
         COMPONENT ROSE_RUNTIME
         )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}"
-        COMPONENT ROSE_RUNTIME
-        )
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src0/"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
         COMPONENT ROSE_DEVELOPMENT EXCLUDE_FROM_ALL
         FILES_MATCHING PATTERN "*.h")
 
-install(FILES resources/systemd/rose.service
+install(FILES resources/Rose/systemd/rose.service
         DESTINATION /etc/systemd/system
         COMPONENT ROSE_RUNTIME
         )
@@ -254,6 +270,10 @@ set(CPACK_PACKAGE_RELEASE ${PROJECT_VERSION_TWEAK})
 set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_DEBIAN_ROSE_RUNTIME_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_DEBIAN_CHRONO_RUNTIME_PACKAGE_NAME "Chrono")
+set(CPACK_COMPONENT_CHRONO_RUNTIME_DEPENDS ROSE_RUNTIME)
+set(CPACK_DEBIAN_CHRONO_LARGE_PACKAGE_NAME "ChronoLarge")
+set(CPACK_COMPONENT_CHRONO_LARGE_DEPENDS CHRONO_RUNTIME)
 set(CPACK_DEBIAN_ROSE_DEVELOPMENT_PACKAGE_NAME "${PROJECT_NAME}-dev")
 set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
 set(CPACK_RPM_PACKAGE_LICENSE "GPL")
@@ -286,4 +306,16 @@ cpack_add_component(ROSE_DEVELOPMENT
         DESCRIPTION "A lightweight GUI library targeting the Raspberry Pi."
         REQUIRED
         DEPENDS ROSE_RUNTIME
+        )
+cpack_add_component(CHRONO_RUNTIME
+        DISPLAY_NAME "Chrono"
+        DESCRIPTION "A reimagining of Ham Clock using the Rose library."
+        REQUIRED
+        DEPENDS ROSE_RUNTIME
+        )
+cpack_add_component(CHRONO_LARGE
+        DISPLAY_NAME "ChronoLarge"
+        DESCRIPTION "Large maps for Chrono."
+        REQUIRED
+        DEPENDS CHRONO_RUNTIME
         )
