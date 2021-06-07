@@ -164,6 +164,12 @@ namespace rose {
 
         [[nodiscard]] const std::filesystem::path& appResources() const { return mAppResources; }
 
+        template<typename Source>
+        std::filesystem::path appResourcesAppend(Source source) {
+            auto path = mAppResources;
+            return path.append(source);
+        }
+
         /**
          * @brief Find the XDG directory for a specified application name.
          * @details If the path location does not exist, and create is set to true, it is created along with all
