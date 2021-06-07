@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "MapProjection.h"
 
+#include <algorithm>
 #include <utility>
 #include "GraphicsModel.h"
 #include "Texture.h"
@@ -94,7 +95,7 @@ namespace rose {
 
         mCelestialTimer = TickProtocol::createSlot();
         mCelestialTimer->receiver = [&](int minutes){
-            if ((minutes % 3) == 0 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
+            if ((minutes % 2) == 0 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
                 mForegroundBackgroundFuture = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
             }
         };
@@ -110,29 +111,25 @@ namespace rose {
 
         mCelestialObservations = SatelliteObservation{mSatelliteObservation.observer(), "Moon"};
         mCelestialObservations.predict(DateTime{true});
-        auto [lat, lon] = mCelestialObservations.front().geo();
-        mSubLunar = GeoPosition{lat, lon, true};
+        if (mCelestialObservations.empty()) {
+            mDisplayCelestialObjects = false;
+        } else {
+            auto[lat, lon] = mCelestialObservations.front().geo();
+            mSubLunar = GeoPosition{lat, lon, true};
+        }
     }
 
     void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
-//        std::array<uint32_t,2> mapId{MapImageId(mMapDepiction, mMapSize, MapIllumination::Day),
-//                                     MapImageId(mMapDepiction, mMapSize, MapIllumination::Night)};
-//
-//        std::array<std::optional<std::filesystem::path>,2> mapPath{mMapCache->localItemExists(mapId[0]),
-//                                                    mMapCache->localItemExists(mapId[1])};
-
-        std::array<std::string,2> mapFileName;
-        mapFileName[0] = MapFileName(mMapDepiction,mMapSize,MapIllumination::Day);
-        mapFileName[1] = MapFileName(mMapDepiction,mMapSize,MapIllumination::Night);
-
-        auto mapBasePath = Environment::getEnvironment().appResources();
-        mapBasePath.append("maps");
-        std::array<std::optional<std::filesystem::path>,2> mapPath{mapBasePath, mapBasePath};
-        mapPath[0]->append(mapFileName[0]);
-        mapPath[1]->append(mapFileName[1]);
-
         if (mMapProjectionsInvalid) {
             if (!mComputeAzimuthalMapsFuture.valid()) {
+                std::array<std::string,2> mapFileName{MapFileName(mMapDepiction,mMapSize,MapIllumination::Day),
+                                                      MapFileName(mMapDepiction,mMapSize,MapIllumination::Night)};
+
+                std::array<std::optional<std::filesystem::path>,2> mapPath;
+                std::transform(mapFileName.begin(), mapFileName.end(), mapPath.begin(), [](auto &fileName){
+                    return Environment::getEnvironment().appResourcesAppend("maps").append(fileName);
+                });
+
                 if (mapPath[0] && mapPath[1]) {
                     for (size_t i = 0; i < mapPath.size(); i++) {
                         gm::Surface bmp{mapPath[i].value()};
@@ -421,9 +418,14 @@ namespace rose {
         std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
         mSubSolar = GeoPosition{latS, lonS, true};
 
+        if (mCelestialObservations.empty()) {
+            mCelestialObservations = SatelliteObservation{mSatelliteObservation.observer(), "Moon"};
+            mCelestialObservations.predict(DateTime{true});
+        }
+
         if (!mCelestialObservations.empty()) {
             mCelestialObservations.predict(DateTime{true});
-            auto [lat, lon] = mCelestialObservations.front().geo();
+            auto[lat, lon] = mCelestialObservations.front().geo();
             mSubLunar = GeoPosition{lat, lon, true};
         }
 
