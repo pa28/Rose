@@ -63,6 +63,16 @@ namespace rose {
             auto[lat, lon] = mCelestialObservations.front().geo();
             mSubLunar = GeoPosition{lat, lon, true};
         }
+
+        mCelestialUpdateTimer = TickProtocol::createSlot();
+        mCelestialUpdateTimer->receiver = [&](int minutes){
+            if ((minutes % 2) == 0 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
+                setCelestialObservations();
+            }
+        };
+
+        mTimerTick->minuteSignal.connect(mCelestialUpdateTimer);
+        setCelestialObservations();
     }
 
     void CelestialOverlay::loadMapCelestialObjectImages(const std::filesystem::path &xdgResourcePath, gm::Context &context) {

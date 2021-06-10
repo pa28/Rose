@@ -27,8 +27,20 @@ namespace rose {
 
         std::array<ImageId,CelestialOverlayFileName.size()> mMapOverlayId{};
 
+        /// Slot to receive celestial update time signals on.
+        TickProtocol::slot_type mCelestialUpdateTimer{};
+
         /// If true celestial objects (Sun, Moon) will be displayed.
         bool mDisplayCelestialObjects{true};
+
+        /// The last calculated celestial observations.
+        SatelliteObservation mCelestialObservations;
+
+        /// The geographic sub-solar position.
+        GeoPosition mSubSolar{};
+
+        /// The geographic sub-lunar position.
+        GeoPosition mSubLunar{};
 
     public:
         CelestialOverlay() = delete;
@@ -65,6 +77,23 @@ namespace rose {
 
         /// Load overlay images into the ImageStore.
         void loadMapCelestialObjectImages(const std::filesystem::path &xdgResourcePath, gm::Context &context);
+
+        void setCelestialObservations() {
+            auto[latS, lonS] = subSolar();
+            std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
+            mSubSolar = GeoPosition{latS, lonS, true};
+
+            if (mCelestialObservations.empty()) {
+                mCelestialObservations = SatelliteObservation{mSatelliteObservation.observer(), "Moon"};
+                mCelestialObservations.predict(DateTime{true});
+            }
+
+            if (!mCelestialObservations.empty()) {
+                mCelestialObservations.predict(DateTime{true});
+                auto[lat, lon] = mCelestialObservations.front().geo();
+                mSubLunar = GeoPosition{lat, lon, true};
+            }
+        }
     };
 }
 
