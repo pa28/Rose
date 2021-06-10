@@ -93,14 +93,15 @@ namespace rose {
         };
 //        mMapCache->cacheLoaded.connect(mMapSlot);
 
-        mCelestialTimer = TickProtocol::createSlot();
-        mCelestialTimer->receiver = [&](int minutes){
+        mMapIlluminationTimer = TickProtocol::createSlot();
+        mMapIlluminationTimer->receiver = [&](int minutes){
             if ((minutes % 2) == 0 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
                 mForegroundBackgroundFuture = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
             }
         };
 
-        mTimerTick->minuteSignal.connect(mCelestialTimer);
+        mTimerTick->minuteSignal.connect(mMapIlluminationTimer);
+//        mForegroundBackgroundFuture = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
 
         cacheCurrentMaps();
     }

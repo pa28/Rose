@@ -245,8 +245,8 @@ namespace rose {
         /// Source of timing information.
         std::shared_ptr<TimerTick> mTimerTick{};
 
-        /// Slot to receive celestial update time signals on.
-        TickProtocol::slot_type mCelestialTimer{};
+        /// Slot to receive illumination update time signals on.
+        TickProtocol::slot_type mMapIlluminationTimer{};
 
         /// The pointer to the map cache.
 //        std::unique_ptr<WebCache> mMapCache{};
