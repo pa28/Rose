@@ -236,12 +236,6 @@ namespace rose {
             std::string_view fileName;
         };
 
-        /// The geographic sub-solar position.
-        GeoPosition mSubSolar{};
-
-        /// The geographic sub-lunar position.
-        GeoPosition mSubLunar{};
-
         /// Source of timing information.
         std::shared_ptr<TimerTick> mTimerTick{};
 
@@ -350,9 +344,6 @@ namespace rose {
         /// The last calculated observations.
         SatelliteObservation mSatelliteObservation;
 
-        /// The last calculated celestial observations.
-        SatelliteObservation mCelestialObservations;
-
     public:
         MapProjection() = delete;
 
@@ -392,6 +383,12 @@ namespace rose {
          * @brief Add the selected maps to the current cache list and invoke a load if required.
          */
         void cacheCurrentMaps();
+
+        /**
+         * Compute the sub-solar geographic coordinates, used in plotting the solar illumination.
+         * @return a tuple with the latitude, longitude in radians
+         */
+        std::tuple<double, double> subSolar();
     };
 }
 

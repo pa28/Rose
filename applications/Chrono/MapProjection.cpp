@@ -315,30 +315,6 @@ namespace rose {
         return std::make_tuple(false, 0., 0.);
     }
 
-    /**
-     * Compute the sub-solar geographic coordinates, used in plotting the solar illumination.
-     * @return a tuple with the latitude, longitude in radians
-     */
-    std::tuple<double, double> subSolar() {
-        using namespace std::chrono;
-        auto epoch = system_clock::now();
-        time_t tt = system_clock::to_time_t(epoch);
-
-        double JD = (tt / 86400.0) + 2440587.5;
-        double D = JD - 2451545.0;
-        double g = 357.529 + 0.98560028 * D;
-        double q = 280.459 + 0.98564736 * D;
-        double L = q + 1.915 * sin(M_PI / 180 * g) + 0.020 * sin(M_PI / 180 * 2 * g);
-        double e = 23.439 - 0.00000036 * D;
-        double RA = 180 / M_PI * atan2(cos(M_PI / 180 * e) * sin(M_PI / 180 * L), cos(M_PI / 180 * L));
-        auto lat = asin(sin(M_PI / 180 * e) * sin(M_PI / 180 * L));
-        double GMST = fmod(15 * (18.697374558 + 24.06570982441908 * D), 360.0);
-        auto lng_d = fmod(RA - GMST + 36000.0 + 180.0, 360.0) - 180.0;
-        auto lng = deg2rad(lng_d);
-
-        return std::make_tuple(lat, lng);
-    }
-
     bool MapProjection::computeAzimuthalMaps() {
         // Compute Azimuthal maps from the Mercator maps
         auto sinY = sin(mQthRad.lat);
@@ -368,7 +344,33 @@ namespace rose {
         return true;
     }
 
+    std::tuple<double, double> MapProjection::subSolar() {
+        using namespace std::chrono;
+        auto epoch = system_clock::now();
+        time_t tt = system_clock::to_time_t(epoch);
+
+        double JD = (tt / 86400.0) + 2440587.5;
+        double D = JD - 2451545.0;
+        double g = 357.529 + 0.98560028 * D;
+        double q = 280.459 + 0.98564736 * D;
+        double L = q + 1.915 * sin(M_PI / 180 * g) + 0.020 * sin(M_PI / 180 * 2 * g);
+        double e = 23.439 - 0.00000036 * D;
+        double RA = 180 / M_PI * atan2(cos(M_PI / 180 * e) * sin(M_PI / 180 * L), cos(M_PI / 180 * L));
+        auto lat = asin(sin(M_PI / 180 * e) * sin(M_PI / 180 * L));
+        double GMST = fmod(15 * (18.697374558 + 24.06570982441908 * D), 360.0);
+        auto lng_d = fmod(RA - GMST + 36000.0 + 180.0, 360.0) - 180.0;
+        auto lng = deg2rad(lng_d);
+
+        return std::make_tuple(lat, lng);
+    }
+
     bool MapProjection::setForegroundBackground() {
+        // Compute the amount of solar illumination and use it to compute the pixel alpha value
+        // GrayLineCos sets the interior angle between the sub-solar point and the location.
+        // GrayLinePower sets how fast it gets dark.
+        auto[latS, lonS] = subSolar();
+        std::cout << __PRETTY_FUNCTION__ << " Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
+
         auto start = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()).count();
         for (size_t i = 0; i < mMercatorTemp.size(); ++i) {
@@ -379,21 +381,6 @@ namespace rose {
             mAzimuthalTemp[i].setBlendMode(SDL_BLENDMODE_BLEND);
             mMercatorTemp[i].blitSurface(mMapSurface[i]);
             mAzimuthalTemp[i].blitSurface(mAzSurface[i]);
-        }
-
-        auto[latS, lonS] = subSolar();
-        std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
-        mSubSolar = GeoPosition{latS, lonS, true};
-
-        if (mCelestialObservations.empty()) {
-            mCelestialObservations = SatelliteObservation{mSatelliteObservation.observer(), "Moon"};
-            mCelestialObservations.predict(DateTime{true});
-        }
-
-        if (!mCelestialObservations.empty()) {
-            mCelestialObservations.predict(DateTime{true});
-            auto[lat, lon] = mCelestialObservations.front().geo();
-            mSubLunar = GeoPosition{lat, lon, true};
         }
 
         auto sinY = sin(mQthRad.lat);
@@ -431,9 +418,6 @@ namespace rose {
                                (float) ((float) mMapImgSize.h / 2.);
                     }
                     if (valid) {
-                        // Compute the amount of solar illumination and use it to compute the pixel alpha value
-                        // GrayLineCos sets the interior angle between the sub-solar point and the location.
-                        // GrayLinePower sets how fast it gets dark.
                         auto cosDeltaSigma = sin(latS) * sin(latE) + cos(latS) * cos(latE) * cos(abs(lonS - lonE));
                         double dayFraction;
                         if (cosDeltaSigma < 0) {
