@@ -73,8 +73,7 @@ namespace cx_math {
         constexpr static array_type coeffs = _coeffs(gen_seq<N>{});
     };
 
-    template<class base, std::size_t N>
-    constexpr typename trig_coeffs<base, N>::array_type trig_coeffs<base, N>::coeffs;
+
 
     template<class base, std::size_t N, class dcy = std::decay_t<typename base::value_type>>
     constexpr std::enable_if_t<std::is_floating_point<dcy>::value, dcy>
