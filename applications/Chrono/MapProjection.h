@@ -236,17 +236,6 @@ namespace rose {
             std::string_view fileName;
         };
 
-        static constexpr std::array<OverlayImageSpec,static_cast<size_t>(MapOverLayImage::Count)> CelestialOverlayFileName
-        {{
-                 { MapOverLayImage::Sun, "35px-SunBg.png" },
-                 { MapOverLayImage::Moon, "moon22.png"},
-        }};
-
-        std::array<ImageId,CelestialOverlayFileName.size()> mMapOverlayId{};
-
-        /// If true celestial objects (Sun, Moon) will be displayed.
-        bool mDisplayCelestialObjects{true};
-
         /// The geographic sub-solar position.
         GeoPosition mSubSolar{};
 
@@ -334,9 +323,6 @@ namespace rose {
          * locking is not an issue and the normal render cycle can continue as long as the last Texture is valid.
          */
         bool setForegroundBackground();
-
-        /// Load overlay images into the ImageStore.
-        void loadMapObjectImages(const std::filesystem::path &xdgResourcePath, gm::Context &context);
 
         /**
          * @brief Convert a GeoPosition in radians to a map Position in pixels.

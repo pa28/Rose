@@ -12,7 +12,7 @@
 #include "TimeBox.h"
 #include "TimerTick.h"
 #include "Types.h"
-#include "MapProjection.h"
+#include "CelestialOverlay.h"
 #include "SatelliteModel.h"
 
 using namespace rose;
@@ -179,7 +179,7 @@ struct Chrono : public Application {
 
     Chrono(int argc, char **argv) : Application(argc, argv) {}
 
-    std::shared_ptr<MapProjection> mapProjection{};
+    std::shared_ptr<CelestialOverlay> celestialOverlay{};
 
     std::shared_ptr<TimerTick> timerTick{};
 
@@ -247,21 +247,21 @@ struct Chrono : public Application {
 
         Environment &environment{Environment::getEnvironment()};
 
-        auto xdgDataDir = environment.appResources();
+        const auto& xdgDataDir = environment.appResources();
 
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                    << wdg<MapProjection>(timerTick, xdgDataDir) >> mapProjection << endw
+                    << wdg<CelestialOverlay>(timerTick, xdgDataDir) >> celestialOverlay << endw
                     << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                     << wdg<Row>()
                         << wdg<Column>()
                             << wdg<TextButton>(Id{"Callsign"}) << endw
-                            << wdg<TimeDateBox>(timerTick, ":Canada/Newfoundland", true, true);
+                            << wdg<TimeDateBox>(timerTick, ":Canada/Eastern", true, true);
 
-        registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
-        registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
-        registerKeyboardShortcut(SDLK_t, mapProjection, MapProjection::ShortCutCode::TerrainMap);
-        registerKeyboardShortcut(SDLK_c, mapProjection, MapProjection::ShortCutCode::CountryMap);
+        registerKeyboardShortcut(SDLK_m, celestialOverlay, CelestialOverlay::ShortCutCode::MercatorProjection);
+        registerKeyboardShortcut(SDLK_a, celestialOverlay, CelestialOverlay::ShortCutCode::AzimuthalProjection);
+        registerKeyboardShortcut(SDLK_t, celestialOverlay, CelestialOverlay::ShortCutCode::TerrainMap);
+        registerKeyboardShortcut(SDLK_c, celestialOverlay, CelestialOverlay::ShortCutCode::CountryMap);
 
         Observer observer{45., -75., 0.};
         SatelliteObservation obs{observer};
@@ -272,6 +272,8 @@ struct Chrono : public Application {
 int main(int argc, char **argv) {
     Environment &environment{Environment::getEnvironment()};
     Chrono application{argc, argv};
+
+    MoonPhase();
 
     application.initialize(environment.appName(), Size{800, 480});
 
