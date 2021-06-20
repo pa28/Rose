@@ -51,7 +51,7 @@ namespace rose {
             mStride = stride;
         }
 
-        /// Layout the contents of the associated manageer.
+        /// Layout the contents of the associated manager.
         Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                 LayoutManager::Itr last) override;
     };
