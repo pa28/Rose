@@ -109,4 +109,20 @@ namespace rose {
             Manager::draw(context, containerPosition);
         }
     };
+
+    /**
+     * @class Overlay
+     * @brief A layout manager for to create overlays on the Container.
+     * @details Each object managed by the Overlay is mapped into the same size and location as the container.
+     */
+    class Overlay : public LayoutManager {
+    public:
+        Overlay() = default;
+
+        ~Overlay() override = default;
+
+        /// Layout the contents of the associated manager.
+        Rectangle layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                LayoutManager::Itr last) override;
+    };
 }

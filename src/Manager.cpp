@@ -158,4 +158,9 @@ namespace rose {
 
         return layoutRect;
     }
+
+    Rectangle Overlay::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
+                                     LayoutManager::Itr last) {
+        return Rectangle();
+    }
 }
