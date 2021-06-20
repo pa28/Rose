@@ -34,6 +34,18 @@ namespace rose {
         NodeRangeError(const NodeRangeError &other) noexcept = default;
     };
 
+    /**
+     * @class ContainerTypeError
+     * @brief An exception to indicate an unexpected container type at runtime.
+     */
+    class ContainerTypeError : public std::runtime_error {
+    public:
+        ContainerTypeError() = delete;
+        explicit ContainerTypeError(const std::string &what) : std::runtime_error(what) {}
+        explicit ContainerTypeError(const char *what) : std::runtime_error(what) {}
+        ContainerTypeError(const ContainerTypeError& other) = default;
+    };
+
     class Container;
 
     using IdPathElement = std::pair<std::string,std::string>;
@@ -204,6 +216,24 @@ namespace rose {
             if (mContainer.expired())
                 return nullptr;
             return mContainer.lock();
+        }
+
+        template<typename C>
+        std::shared_ptr<C> containerAs() {
+            auto c = container();
+            if (c) {
+                return std::dynamic_pointer_cast<C>(c);
+            }
+            return nullptr;
+        }
+
+        template<typename C>
+        std::shared_ptr<C> containerAs() const {
+            auto c = container();
+            if (c) {
+                return std::dynamic_pointer_cast<C>(c);
+            }
+            return nullptr;
         }
 
         /**
