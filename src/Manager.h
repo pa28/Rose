@@ -95,7 +95,7 @@ namespace rose {
 
         ~Grid() override = default;
 
-        Grid(int stride) : Manager() {
+        explicit Grid(int stride) : Manager() {
             setLayoutManager(std::make_unique<GridLayout>(Orientation::Horizontal, 2, 2, stride));
         }
 
