@@ -161,6 +161,15 @@ namespace rose {
 
     Rectangle Overlay::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                      LayoutManager::Itr last) {
-        return Rectangle();
+        while (first != last) {
+            auto visual = std::dynamic_pointer_cast<Visual>(*first);
+            if (visual->isVisible()) {
+                auto contentRect = visual->layout(context, screenRect);
+                visual->setScreenRectangle(screenRect);
+            }
+            first++;
+        }
+
+        return screenRect;
     }
 }
