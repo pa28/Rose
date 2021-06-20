@@ -211,11 +211,22 @@ namespace rose {
         }
     };
 
+    enum class MapOverLayImage : size_t {
+        Sun,
+        Moon,
+        Count,
+    };
+
+    struct OverlayImageSpec {
+        MapOverLayImage mapOverLayImage;
+        std::string_view fileName;
+    };
+
     /**
      * @class MapProjection
      * @brief
      */
-    class MapProjection : public Widget {
+    class MapProjection : public Manager {
     public:
         enum ShortCutCode : uint32_t {
             MercatorProjection,
@@ -225,17 +236,6 @@ namespace rose {
         };
 
     protected:
-        enum class MapOverLayImage : size_t {
-            Sun,
-            Moon,
-            Count,
-        };
-
-        struct OverlayImageSpec {
-            MapOverLayImage mapOverLayImage;
-            std::string_view fileName;
-        };
-
         /// Source of timing information.
         std::shared_ptr<TimerTick> mTimerTick{};
 
@@ -328,21 +328,8 @@ namespace rose {
          */
         Position geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const;
 
-        /**
-         * @brief Render a single icon on the map.
-         * @param mapItem The MapItem data.
-         * @param renderer The Renderer.
-         * @param projection True if the projection is Azimuthal.
-         * @param splitPixel The split location for Mercator station centric projections.
-         */
-        void drawMapItem(const ImageId &mapItem, gm::Context& context, Rectangle mapRectangle, GeoPosition& geoPosition,
-                         MapProjectionType projection, int splitPixel);
-
         /// Path to the XDG application data directory.
         std::filesystem::path mXdgDataPath;
-
-        /// The last calculated observations.
-        SatelliteObservation mSatelliteObservation;
 
     public:
         MapProjection() = delete;
@@ -388,7 +375,40 @@ namespace rose {
          * Compute the sub-solar geographic coordinates, used in plotting the solar illumination.
          * @return a tuple with the latitude, longitude in radians
          */
-        std::tuple<double, double> subSolar();
+        static std::tuple<double, double> subSolar();
+
+        /*
+         * @brief Accessor for Qth
+         */
+        auto getQth() const {
+            return mQth;
+        }
+
+        /**
+         * @brief Determine if map projections are valid.
+         * @return Return true if valid, false otherwise.
+         */
+        bool mapProjectionsValid() const {
+            return !mMapProjectionsInvalid; // && !mForegroundBackgroundFuture.valid();
+        }
+
+        /**
+         * @brief Accessor for the type of projection.
+         * @return A MapProjectionType.
+         */
+        auto getProjection() const {
+            return mProjection;
+        }
+
+        /**
+         * @brief Render a single icon on the map.
+         * @param mapItem The MapItem data.
+         * @param renderer The Renderer.
+         * @param projection True if the projection is Azimuthal.
+         * @param splitPixel The split location for Mercator station centric projections.
+         */
+        void drawMapItem(const ImageId &mapItem, gm::Context& context, Rectangle mapRectangle, GeoPosition& geoPosition,
+                         MapProjectionType projection, int splitPixel);
     };
 }
 

@@ -16,7 +16,7 @@ namespace rose {
      * @class CelestialOverlay
      * @brief Add observable celestial objects to MapProjection.
      */
-    class CelestialOverlay : public MapProjection {
+    class CelestialOverlay : public Widget {
 
     protected:
         static constexpr std::array<OverlayImageSpec,static_cast<size_t>(MapOverLayImage::Count)> CelestialOverlayFileName
@@ -41,6 +41,15 @@ namespace rose {
 
         /// The geographic sub-lunar position.
         GeoPosition mSubLunar{};
+
+        /// The last calculated observations.
+        SatelliteObservation mSatelliteObservation;
+
+        /// Path to the XDG application data directory.
+        std::filesystem::path mXdgDataPath;
+
+        /// Source of timing information.
+        std::shared_ptr<TimerTick> mTimerTick{};
 
     public:
         CelestialOverlay() = delete;
@@ -79,7 +88,7 @@ namespace rose {
         void loadMapCelestialObjectImages(const std::filesystem::path &xdgResourcePath, gm::Context &context);
 
         void setCelestialObservations() {
-            auto[latS, lonS] = subSolar();
+            auto[latS, lonS] = MapProjection::subSolar();
             std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
             mSubSolar = GeoPosition{latS, lonS, true};
 
@@ -93,6 +102,10 @@ namespace rose {
                 auto[lat, lon] = mCelestialObservations.front().geo();
                 mSubLunar = GeoPosition{lat, lon, true};
             }
+        }
+
+        void throwContainerError() const {
+            throw new ContainerTypeError("Expected MapProjection as container for CelestialOverlay");
         }
     };
 }

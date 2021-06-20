@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <utility>
+#include "Manager.h"
 #include "GraphicsModel.h"
 #include "Texture.h"
 #include "Settings.h"
@@ -20,6 +21,8 @@ namespace rose {
     MapProjection::MapProjection(std::shared_ptr<TimerTick> timerTick, std::filesystem::path& xdgDataPath) {
         mXdgDataPath = xdgDataPath;
         mTimerTick = std::move(timerTick);
+
+        setLayoutManager(std::make_unique<Overlay>());
 
         Environment &environment{Environment::getEnvironment()};
 //        mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
@@ -68,10 +71,7 @@ namespace rose {
 
         for (auto &map : maps) {
             auto [depiction,size,illumination] = map;
-            auto mapDepictionId = MapImageId(depiction,size,illumination);
             auto name = MapFileName(depiction,size,illumination);
-//            mMapCache->setCacheItem(mapDepictionId, name);
-//            mMapCache->fetchItem(mapDepictionId);
         }
     }
 
@@ -91,7 +91,6 @@ namespace rose {
             std::cout << __PRETTY_FUNCTION__ << ' ' << key << ' ' << status << '\n';
             getApplication().redrawBackground();
         };
-//        mMapCache->cacheLoaded.connect(mMapSlot);
 
         mMapIlluminationTimer = TickProtocol::createSlot();
         mMapIlluminationTimer->receiver = [&](int minutes){
@@ -101,7 +100,6 @@ namespace rose {
         };
 
         mTimerTick->minuteSignal.connect(mMapIlluminationTimer);
-//        mForegroundBackgroundFuture = std::async(std::launch::async, &MapProjection::setForegroundBackground, this);
 
         cacheCurrentMaps();
     }
@@ -226,6 +224,11 @@ namespace rose {
                 context.renderCopy(mAzimuthal[0], widgetRect);
                 break;
         }
+
+        for (auto &object : *this) {
+            if (auto widget = object->getNode<Widget>(); widget)
+                widget->draw(context, containerPosition);
+        }
     }
 
     Rectangle MapProjection::layout(gm::Context &context, const Rectangle &screenRect) {
@@ -241,6 +244,9 @@ namespace rose {
             if (currentMapSize != mMapSize)
                 cacheCurrentMaps();
         }
+
+        Manager::layout(context, screenRect);
+
         return screenRect;
     }
 

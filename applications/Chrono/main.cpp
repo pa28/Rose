@@ -179,7 +179,7 @@ struct Chrono : public Application {
 
     Chrono(int argc, char **argv) : Application(argc, argv) {}
 
-    std::shared_ptr<CelestialOverlay> celestialOverlay{};
+    std::shared_ptr<MapProjection> mapProjection{};
 
     std::shared_ptr<TimerTick> timerTick{};
 
@@ -251,17 +251,18 @@ struct Chrono : public Application {
 
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
-                    << wdg<CelestialOverlay>(timerTick, xdgDataDir) >> celestialOverlay << endw
+                 << wdg<MapProjection>(timerTick, xdgDataDir) >> mapProjection
+                    << wdg<CelestialOverlay>(timerTick, xdgDataDir) << endw << endw
                     << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                     << wdg<Row>()
                         << wdg<Column>()
                             << wdg<TextButton>(Id{"Callsign"}) << endw
                             << wdg<TimeDateBox>(timerTick, ":Canada/Eastern", true, true);
 
-        registerKeyboardShortcut(SDLK_m, celestialOverlay, CelestialOverlay::ShortCutCode::MercatorProjection);
-        registerKeyboardShortcut(SDLK_a, celestialOverlay, CelestialOverlay::ShortCutCode::AzimuthalProjection);
-        registerKeyboardShortcut(SDLK_t, celestialOverlay, CelestialOverlay::ShortCutCode::TerrainMap);
-        registerKeyboardShortcut(SDLK_c, celestialOverlay, CelestialOverlay::ShortCutCode::CountryMap);
+        registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
+        registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
+        registerKeyboardShortcut(SDLK_t, mapProjection, MapProjection::ShortCutCode::TerrainMap);
+        registerKeyboardShortcut(SDLK_c, mapProjection, MapProjection::ShortCutCode::CountryMap);
 
         Observer observer{45., -75., 0.};
         SatelliteObservation obs{observer};

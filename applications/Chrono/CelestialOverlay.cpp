@@ -12,64 +12,73 @@
 
 namespace rose {
 
-    CelestialOverlay::CelestialOverlay(std::shared_ptr<TimerTick> timerTick, path &xdgDataPath) : MapProjection(
-            std::move(timerTick), xdgDataPath) {
-
+    CelestialOverlay::CelestialOverlay(std::shared_ptr<TimerTick> timerTick, path &xdgDataPath) : Widget() {
+        mXdgDataPath = xdgDataPath;
+        mTimerTick = std::move(timerTick);
     }
 
     void CelestialOverlay::draw(gm::Context &context, const Position &containerPosition) {
-        MapProjection::draw(context, containerPosition);
-
         Rectangle widgetRect{containerPosition + mPos, mSize};
 
         if (mDisplayCelestialObjects) {
-            int splitPixel = util::roundToInt((double) widgetRect.w * ((mQth.lon) / 360.));
-            if (splitPixel < 0)
-                splitPixel += widgetRect.w;
-            for(auto& celestial : CelestialOverlayFileName) {
-                switch (celestial.mapOverLayImage) {
-                    case MapOverLayImage::Sun:
-                        drawMapItem(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
-                                    context, widgetRect, mSubSolar, mProjection, splitPixel);
-                        break;
-                    case MapOverLayImage::Moon:
-                        drawMapItem(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
-                                    context, widgetRect, mSubLunar, mProjection, splitPixel);
-                        break;
-                    default:
-                        break;
+            if (auto mapProjection = containerAs<MapProjection>(); mapProjection) {
+                int splitPixel = util::roundToInt((double) widgetRect.w * ((mapProjection->getQth().lon) / 360.));
+                if (splitPixel < 0)
+                    splitPixel += widgetRect.w;
+                for (auto &celestial : CelestialOverlayFileName) {
+                    switch (celestial.mapOverLayImage) {
+                        case MapOverLayImage::Sun:
+                            mapProjection->drawMapItem(
+                                    mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
+                                    context, widgetRect, mSubSolar, mapProjection->getProjection(), splitPixel);
+                            break;
+                        case MapOverLayImage::Moon:
+                            mapProjection->drawMapItem(
+                                    mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
+                                    context, widgetRect, mSubLunar, mapProjection->getProjection(), splitPixel);
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            } else {
+                throwContainerError();
             }
         }
     }
 
     Rectangle CelestialOverlay::layout(gm::Context &context, const Rectangle &screenRect) {
-        return MapProjection::layout(context, screenRect);
+        return screenRect;
     }
 
     void CelestialOverlay::addedToContainer() {
-        MapProjection::addedToContainer();
+        if (auto mapProjection = containerAs<MapProjection>(); mapProjection) {
+            loadMapCelestialObjectImages(mXdgDataPath, getApplication().context());
 
-        loadMapCelestialObjectImages(mXdgDataPath, getApplication().context());
+            mSatelliteObservation = SatelliteObservation{
+                    Observer{mapProjection->getQth().lat, mapProjection->getQth().lon, 0.}};
+            mSatelliteObservation.passPrediction(6, "ISS");
 
-        mSatelliteObservation = SatelliteObservation{Observer{mQth.lat, mQth.lon, 0.}};
-        mSatelliteObservation.passPrediction(6, "ISS");
-
-        mCelestialObservations = SatelliteObservation{mSatelliteObservation.observer(), "Moon"};
-        mCelestialObservations.predict(DateTime{true});
-        if (mCelestialObservations.empty()) {
-            mDisplayCelestialObjects = false;
-        } else {
-            auto[lat, lon] = mCelestialObservations.front().geo();
-            mSubLunar = GeoPosition{lat, lon, true};
-        }
-
-        mCelestialUpdateTimer = TickProtocol::createSlot();
-        mCelestialUpdateTimer->receiver = [&](int minutes){
-            if ((minutes % 2) == 0 && !mMapProjectionsInvalid && !mForegroundBackgroundFuture.valid()) {
-                setCelestialObservations();
+            mCelestialObservations = SatelliteObservation{mSatelliteObservation.observer(), "Moon"};
+            mCelestialObservations.predict(DateTime{true});
+            if (mCelestialObservations.empty()) {
+                mDisplayCelestialObjects = false;
+            } else {
+                auto[lat, lon] = mCelestialObservations.front().geo();
+                mSubLunar = GeoPosition{lat, lon, true};
             }
-        };
+
+            mCelestialUpdateTimer = TickProtocol::createSlot();
+            mCelestialUpdateTimer->receiver = [&](int minutes) {
+                if ((minutes % 2) == 0) {
+                    if (auto mapProjection = containerAs<MapProjection>(); mapProjection)
+                        if (mapProjection->mapProjectionsValid())
+                            setCelestialObservations();
+                }
+            };
+        } else {
+            throwContainerError();
+        }
 
         mTimerTick->minuteSignal.connect(mCelestialUpdateTimer);
         setCelestialObservations();
