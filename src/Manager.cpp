@@ -5,6 +5,7 @@
  * @date 2021-04-24
  */
 
+#include <algorithm>
 #include "Manager.h"
 
 namespace rose {
@@ -161,14 +162,12 @@ namespace rose {
 
     Rectangle Overlay::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                      LayoutManager::Itr last) {
-        while (first != last) {
-            auto visual = std::dynamic_pointer_cast<Visual>(*first);
-            if (visual->isVisible()) {
-                auto contentRect = visual->layout(context, screenRect);
+        std::for_each(first, last, [&context, &screenRect](auto &obj){
+            if (auto visual = std::dynamic_pointer_cast<Visual>(obj); visual && visual->isVisible()) {
+                visual->layout(context, screenRect);
                 visual->setScreenRectangle(screenRect);
             }
-            first++;
-        }
+        });
 
         return screenRect;
     }
