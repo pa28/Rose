@@ -204,9 +204,9 @@ namespace rose {
                 src1.w = splitPixel;
                 dst1.w = splitPixel;
 
-                gm::Texture tempText{context, actualMapImgSize};
-                if (tempText){
-                    gm::RenderTargetGuard renderTargetGuard{context, tempText};
+                gm::Texture tempTexture{context, actualMapImgSize};
+                if (tempTexture){
+                    gm::RenderTargetGuard renderTargetGuard{context, tempTexture};
 
                     context.renderCopy(mMercator[1], src0, dst0);
                     context.renderCopy(mMercator[0], src0, dst0);
@@ -216,7 +216,7 @@ namespace rose {
                 } else {
                     std::cout << __PRETTY_FUNCTION__ << " Texture creation failed.\n";
                 }
-                context.renderCopy(tempText, widgetRect);
+                context.renderCopy(tempTexture, widgetRect);
             }
                 break;
             case MapProjectionType::StationAzimuthal:
