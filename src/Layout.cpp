@@ -15,25 +15,25 @@ namespace rose {
         auto itr = first;
         bool oneIsVisible{false};
 
-        while (itr != last) {
-            auto visual = std::dynamic_pointer_cast<Visual>(*itr);
-            if (visual->isVisible()) {
-                if (oneIsVisible)
-                    visual->setVisible(false);
-                oneIsVisible = true;
+        std::for_each(first, last, [&context, &screenRect, &oneIsVisible, &size](auto &obj){
+            if (auto visual = std::dynamic_pointer_cast<Visual>(obj); visual) {
+                if (visual->isVisible()) {
+                    if (oneIsVisible)
+                        visual->setVisible(false);
+                    oneIsVisible = true;
+                }
+                auto rect = visual->layout(context, screenRect);
+                size.w = std::max(size.w, rect.w);
+                size.h = std::max(size.h, rect.h);
             }
-            auto rect = visual->layout(context, screenRect);
-            size.w = std::max(size.w, rect.w);
-            size.h = std::max(size.h, rect.h);
-            itr++;
-        }
+        });
 
         Rectangle layoutRect{Position::Zero, size};
 
-        while (first != last) {
-            auto visual = std::dynamic_pointer_cast<Visual>(*itr);
-            visual->setScreenRectangle(layoutRect);
-        }
+        std::for_each(first, last, [&layoutRect](auto &obj){
+            if (auto visual = std::dynamic_pointer_cast<Visual>(obj); visual)
+                visual->setScreenRectangle(layoutRect);
+        });
 
         return layoutRect;
     }
