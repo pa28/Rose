@@ -4,6 +4,9 @@
  * @version 1.0
  * @date 2021-06-10
  * @brief Add observable celestial objects to MapProjection.
+ * @details The CelestialOverlay is designed to display icons representing the positions of the Sun and Moon
+ * on the Earth overlaid on a MapProjection. The CelestialOverlay can only be added to a MapProjection and
+ * communicates with the MapProjection to match display with the MapOverlay.
  */
 
 #pragma once
@@ -15,6 +18,9 @@ namespace rose {
     /**
      * @class CelestialOverlay
      * @brief Add observable celestial objects to MapProjection.
+     * @details The CelestialOverlay is designed to display icons representing the positions of the Sun and Moon
+     * on the Earth overlaid on a MapProjection. The CelestialOverlay can only be added to a MapProjection and
+     * communicates with the MapProjection to match display with the MapOverlay.
      */
     class CelestialOverlay : public Widget {
 
