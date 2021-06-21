@@ -160,7 +160,7 @@ namespace rose {
          * @brief Test to see if the store exists.
          * @return True if it exits and is a directory.
          */
-        bool storeExits() const {
+        bool storeExists() const {
             if (!status_known(mStoreStatus))
                 mStoreStatus = status(mStoreRoot);
 
