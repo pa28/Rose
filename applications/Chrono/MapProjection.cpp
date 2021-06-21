@@ -25,9 +25,6 @@ namespace rose {
         setLayoutManager(std::make_unique<Overlay>());
 
         Environment &environment{Environment::getEnvironment()};
-//        mMapCache = std::make_unique<WebCache>("https://www.clearskyinstitute.com/ham/HamClock/maps/",
-//                                               Environment::getEnvironment().cacheHome(),
-//                                               "Maps", std::chrono::hours{24 * 30});
 
         mKeyboardShortcutCallback = [&](uint32_t shortcutCode, bool pressed, uint repeat) {
             MapProjectionType projectionType = mProjection;
