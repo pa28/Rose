@@ -16,9 +16,8 @@ namespace rose {
         Position layoutPos{};
         bool isFirst = true;
 
-        while (first != last) {
-            auto visual = std::dynamic_pointer_cast<Visual>(*first);
-            if (visual->isVisible()) {
+        std::for_each(first, last, [&, *this](auto &obj){
+            if (auto visual = std::dynamic_pointer_cast<Visual>(obj); visual && visual->isVisible()) {
                 auto contentRect = visual->layout(context, screenRect);
                 if (isFirst) {
                     isFirst = false;
@@ -32,8 +31,7 @@ namespace rose {
                 layoutRect.sizeSec(mOrientation) = std::max(layoutRect.sizeSec(mOrientation),
                                                             contentRect.sizeSec(mOrientation));
             }
-            first++;
-        }
+        });
 
         return layoutRect;
     }
