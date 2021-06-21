@@ -46,7 +46,6 @@ namespace rose {
     enum class MapDepiction {
         Terrain,            ///< The terrain map.
         Countries,          ///< The countries map.
-        Last
     };
 
     /**
@@ -55,7 +54,6 @@ namespace rose {
     enum class MapIllumination {
         Day,                ///< The Day map.
         Night,              ///< The Night map.
-        Last
     };
 
     /**
@@ -260,9 +258,6 @@ namespace rose {
         /// True when new surfaces have been created.
         bool mNewSurfaces{};
 
-        /// The selected map size.
-        size_t mSelectedSize{0};
-
         /// The size of the map image.
         Size mMapImgSize{};
 
@@ -328,9 +323,6 @@ namespace rose {
          */
         Position geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const;
 
-        /// Path to the XDG application data directory.
-        std::filesystem::path mXdgDataPath;
-
     public:
         MapProjection() = delete;
 
@@ -356,8 +348,6 @@ namespace rose {
 
         /// Layout the MapProjection
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
-
-        GraphicsModelFrameProtocol::slot_type frameSlot{};
 
         /**
          * @brief Called when added to a container.

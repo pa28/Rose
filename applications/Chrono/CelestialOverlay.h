@@ -104,8 +104,8 @@ namespace rose {
             }
         }
 
-        void throwContainerError() const {
-            throw new ContainerTypeError("Expected MapProjection as container for CelestialOverlay");
+        static void throwContainerError() {
+            throw ContainerTypeError("Expected MapProjection as container for CelestialOverlay");
         }
     };
 }

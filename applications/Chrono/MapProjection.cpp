@@ -19,7 +19,6 @@
 namespace rose {
 
     MapProjection::MapProjection(std::shared_ptr<TimerTick> timerTick, std::filesystem::path& xdgDataPath) {
-        mXdgDataPath = xdgDataPath;
         mTimerTick = std::move(timerTick);
 
         setLayoutManager(std::make_unique<Overlay>());
