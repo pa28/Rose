@@ -171,7 +171,11 @@ add_executable(Chrono applications/Chrono/main.cpp
         applications/Chrono/SatelliteModel.cpp
         applications/Chrono/SatelliteModel.h
         applications/Chrono/Plan13.cpp
-        applications/Chrono/Plan13.h applications/Chrono/CelestialOverlay.cpp applications/Chrono/CelestialOverlay.h)
+        applications/Chrono/Plan13.h
+        applications/Chrono/CelestialOverlay.cpp
+        applications/Chrono/CelestialOverlay.h
+        applications/Chrono/GridOverlay.cpp
+        applications/Chrono/GridOverlay.h)
 target_link_libraries(Chrono ${RoseLibraries})
 
 #add_executable(Life applications/ConwayLife.cpp)

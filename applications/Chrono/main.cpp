@@ -260,6 +260,7 @@ struct Chrono : public Application {
                             << wdg<TimeDateBox>(timerTick, ":Canada/Eastern", true, true);
 
         registerKeyboardShortcut(SDLK_m, mapProjection, MapProjection::ShortCutCode::MercatorProjection);
+        registerKeyboardShortcut(SDLK_s, mapProjection, MapProjection::ShortCutCode::StationMercatorProjection);
         registerKeyboardShortcut(SDLK_a, mapProjection, MapProjection::ShortCutCode::AzimuthalProjection);
         registerKeyboardShortcut(SDLK_t, mapProjection, MapProjection::ShortCutCode::TerrainMap);
         registerKeyboardShortcut(SDLK_c, mapProjection, MapProjection::ShortCutCode::CountryMap);

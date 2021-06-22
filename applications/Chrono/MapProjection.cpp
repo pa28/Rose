@@ -31,6 +31,9 @@ namespace rose {
             MapDepiction mapDepiction = mMapDepiction;
             switch (static_cast<ShortCutCode>(shortcutCode)) {
                 case MercatorProjection:
+                    projectionType = MapProjectionType::Mercator;
+                    break;
+                case StationMercatorProjection:
                     projectionType = MapProjectionType::StationMercator;
                     break;
                 case AzimuthalProjection:
