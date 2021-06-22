@@ -75,7 +75,7 @@ namespace rose::gm {
             return SDL_SetTextureBlendMode(get(), blendMode);
         }
 
-        Size getSize() {
+        Size getSize() const {
             Size size{};
             SDL_QueryTexture(get(), nullptr, nullptr, &size.w, &size.h);
             return size;
