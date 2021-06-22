@@ -102,6 +102,7 @@ list(APPEND EXTRA_LIBS GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 sqlite3 pthread
 list(APPEND ROSE_SRC
         src/Application.cpp
         src/Animation.cpp
+        src/AntiAliasedDrawing.cpp
         src/Button.cpp
         src/Color.cpp
         src/Frame.cpp
