@@ -108,3 +108,6 @@ https://forums.libsdl.org/viewtopic.php?p=48648
 
 #### Discrete Furrier Transform for GPU
 https://github.com/jdupuy/dj_fft 
+
+#### Spherical Trigonometry
+http://www.movable-type.co.uk/scripts/latlong.html
