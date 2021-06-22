@@ -16,6 +16,7 @@
 #include "TimerTick.h"
 #include "SatelliteModel.h"
 #include "Surface.h"
+#include "AntiAliasedDrawing.h"
 
 // https://earthobservatory.nasa.gov/features/NightLights/page3.php
 // https://visibleearth.nasa.gov/images/57752/blue-marble-land-surface-shallow-water-and-shaded-topography
@@ -399,6 +400,36 @@ namespace rose {
          */
         void drawMapItem(const ImageId &mapItem, gm::Context& context, Rectangle mapRectangle, GeoPosition& geoPosition,
                          MapProjectionType projection, int splitPixel);
+
+        /**
+         * @brief Computer the StationMercator split pixel given a map drawing size.
+         * @param drawSize The size of the drawing area in use for the map.
+         * @return The split pixel.
+         */
+        int projectionSplitPixel(Size drawSize) const {
+            int splitPixel = util::roundToInt((double) drawSize.w * ((mQth.lon) / 360.));
+            if (splitPixel < 0)
+                splitPixel += drawSize.w;
+            return splitPixel;
+        }
+
+        void drawLongitude(gm::Context &context, AntiAliasedDrawing &drawing, double longitude, Rectangle mapRect) {
+            GeoPosition geoPosition{0., longitude, true};
+            auto p0 = geoToMap(geoPosition, mProjection, projectionSplitPixel(mapRect.size()), mapRect);
+            p0.y = mapRect.y;
+            auto p1 = p0;
+            p1.y += mapRect.h;
+            drawing.renderLine(context, p0, p1);
+        }
+
+        void drawLatitude(gm::Context &context, AntiAliasedDrawing &drawing, double latitude, Rectangle mapRect) {
+            GeoPosition geoPosition{latitude, 0., true};
+            auto p0 = geoToMap(geoPosition, mProjection, projectionSplitPixel(mapRect.size()), mapRect);
+            p0.x = mapRect.x;
+            auto p1 = p0;
+            p1.x += mapRect.w;
+            drawing.renderLine(context, p0, p1);
+        }
     };
 }
 

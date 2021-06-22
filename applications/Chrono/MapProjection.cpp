@@ -15,6 +15,7 @@
 #include "Texture.h"
 #include "Settings.h"
 #include "Math.h"
+#include "AntiAliasedDrawing.h"
 
 namespace rose {
 
@@ -176,17 +177,17 @@ namespace rose {
         Rectangle widgetRect{containerPosition + mPos, mSize};
         gm::ClipRectangleGuard clipRectangleGuard(context, widgetRect);
 
+        auto actualMapImgSize = mMercator[0].getSize();
+        auto splitPixel = projectionSplitPixel(actualMapImgSize);
+
+        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.f, 0.f, 1.f}};
+
         switch (mProjection) {
             case MapProjectionType::Mercator:
                 context.renderCopy(mMercator[1], widgetRect);
                 context.renderCopy(mMercator[0], widgetRect);
                 break;
             case MapProjectionType::StationMercator: {
-                auto lon = mQth.lon;
-                auto actualMapImgSize = mMercator[0].getSize();
-                int splitPixel = util::roundToInt((double) actualMapImgSize.w * ((lon) / 360.));
-                if (splitPixel < 0)
-                    splitPixel += actualMapImgSize.w;
 
                 Rectangle src0{splitPixel, 0, actualMapImgSize.w - splitPixel, actualMapImgSize.h};
                 Rectangle dst0{widgetRect};
@@ -220,6 +221,11 @@ namespace rose {
                 context.renderCopy(mAzimuthal[0], widgetRect);
                 break;
         }
+
+        drawLatitude(context, antiAliasedDrawing, 0., widgetRect);
+        drawLatitude(context, antiAliasedDrawing, deg2rad(23.4365), widgetRect);
+        drawLatitude(context, antiAliasedDrawing, -deg2rad(23.4365), widgetRect);
+        drawLongitude(context, antiAliasedDrawing, 0., widgetRect);
 
         for (auto &object : *this) {
             if (auto widget = object->getNode<Widget>(); widget)
