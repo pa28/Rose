@@ -414,18 +414,32 @@ namespace rose {
             return splitPixel;
         }
 
+        /**
+         * @brief Draw a line of Longitude at longitude.
+         * @param context The graphics Context
+         * @param drawing The anti-aliased drawing context.
+         * @param longitude The Longitude in degrees.
+         * @param mapRect The size of the map in pixels.
+         */
         void drawLongitude(gm::Context &context, AntiAliasedDrawing &drawing, double longitude, Rectangle mapRect) {
-            GeoPosition geoPosition{0., longitude, true};
-            auto p0 = geoToMap(geoPosition, mProjection, projectionSplitPixel(mapRect.size()), mapRect);
+            GeoPosition geoPosition{0., longitude};
+            auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()), mapRect);
             p0.y = mapRect.y;
             auto p1 = p0;
             p1.y += mapRect.h;
             drawing.renderLine(context, p0, p1);
         }
 
+        /**
+         * @brief Draw a line of Latitude at latitude.
+         * @param context The graphics Context
+         * @param drawing The anti-aliased drawing context.
+         * @param latitude The Latitude in degrees.
+         * @param mapRect The size of the map in pixels.
+         */
         void drawLatitude(gm::Context &context, AntiAliasedDrawing &drawing, double latitude, Rectangle mapRect) {
-            GeoPosition geoPosition{latitude, 0., true};
-            auto p0 = geoToMap(geoPosition, mProjection, projectionSplitPixel(mapRect.size()), mapRect);
+            GeoPosition geoPosition{latitude, 0.};
+            auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()), mapRect);
             p0.x = mapRect.x;
             auto p1 = p0;
             p1.x += mapRect.w;

@@ -183,8 +183,6 @@ namespace rose {
         auto actualMapImgSize = mMercator[0].getSize();
         auto splitPixel = projectionSplitPixel(actualMapImgSize);
 
-        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.f, 0.f, 1.f}};
-
         switch (mProjection) {
             case MapProjectionType::Mercator:
                 context.renderCopy(mMercator[1], widgetRect);
@@ -225,9 +223,11 @@ namespace rose {
                 break;
         }
 
+        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.f, 0.f, 1.f}};
+
         drawLatitude(context, antiAliasedDrawing, 0., widgetRect);
-        drawLatitude(context, antiAliasedDrawing, deg2rad(23.4365), widgetRect);
-        drawLatitude(context, antiAliasedDrawing, -deg2rad(23.4365), widgetRect);
+        drawLatitude(context, antiAliasedDrawing, 23.4365, widgetRect);
+        drawLatitude(context, antiAliasedDrawing, -23.4365, widgetRect);
         drawLongitude(context, antiAliasedDrawing, 0., widgetRect);
 
         for (auto &object : *this) {
