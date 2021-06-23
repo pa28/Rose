@@ -452,9 +452,11 @@ namespace rose {
             for (auto g1 = increment(begin, false); !g1.end; g1 = increment(g1, false)) {
                 auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle);
                 if (gapTest(p0, p1)) {
+                    // Draw up to a plotting gap.
                     drawing.renderLine(context, p0, p1);
                 }
                 else {
+                    // Switch to fine increment until the gap is encountered again.
                     for (g1 = increment(g0, true); !g1.end; g1 = increment(g1, true)) {
                         p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle);
                         if (gapTest(p0, p1)) {
