@@ -426,7 +426,8 @@ namespace rose {
                 case MapProjectionType::Mercator:
                 case MapProjectionType::StationMercator: {
                     GeoPosition geoPosition{0., longitude};
-                    auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()), mapRect);
+                    auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()),
+                                       mapRect);
                     p0.y = mapRect.y;
                     auto p1 = p0;
                     p1.y += mapRect.h;
@@ -434,6 +435,17 @@ namespace rose {
                 }
                     break;
                 case MapProjectionType::StationAzimuthal:
+                    int dLat = 3;
+                    GeoPosition g0{-90., longitude}, g1{0., longitude};
+                    auto p0 = geoToMap(g0.toRadians(), mProjection, 0, mapRect);
+                    for (int idx = 1; idx <= 180 / dLat; ++idx) {
+                        g1.lat = -90 + static_cast<double>(dLat * idx);
+                        auto p1 = geoToMap(g1.toRadians(), mProjection, 0, mapRect);
+                        if (auto split = mapRect.w / 2 + mapRect.x;
+                                (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split))
+                            drawing.renderLine(context, p0, p1);
+                        p0 = p1;
+                    }
                     break;
             }
         }
@@ -458,7 +470,19 @@ namespace rose {
                     drawing.renderLine(context, p0, p1);
                 }
                     break;
-                case MapProjectionType::StationAzimuthal:
+                case MapProjectionType::StationAzimuthal: {
+                    int dLon = 3;
+                    GeoPosition g0{latitude, -180.}, g1{latitude, 0.};
+                    auto p0 = geoToMap(g0.toRadians(), mProjection, 0, mapRect);
+                    for (int idx = 1; idx <= 360 / dLon; ++idx) {
+                        g1.lon = -180 + static_cast<double>(dLon * idx);
+                        auto p1 = geoToMap(g1.toRadians(), mProjection, 0, mapRect);
+                        if (auto split = mapRect.w / 2 + mapRect.x;
+                                (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split))
+                            drawing.renderLine(context, p0, p1);
+                        p0 = p1;
+                    }
+                }
                     break;
             }
         }

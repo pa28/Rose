@@ -223,12 +223,13 @@ namespace rose {
                 break;
         }
 
-        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.f, 0.f, 1.f}};
+        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.6f, 0.6f, 0.6f, 1.f}};
 
         drawLatitude(context, antiAliasedDrawing, 0., widgetRect);
         drawLatitude(context, antiAliasedDrawing, 23.4365, widgetRect);
         drawLatitude(context, antiAliasedDrawing, -23.4365, widgetRect);
         drawLongitude(context, antiAliasedDrawing, 0., widgetRect);
+        drawLongitude(context, antiAliasedDrawing, 180., widgetRect);
 
         for (auto &object : *this) {
             if (auto widget = object->getNode<Widget>(); widget)
