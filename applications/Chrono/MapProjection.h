@@ -422,12 +422,20 @@ namespace rose {
          * @param mapRect The size of the map in pixels.
          */
         void drawLongitude(gm::Context &context, AntiAliasedDrawing &drawing, double longitude, Rectangle mapRect) {
-            GeoPosition geoPosition{0., longitude};
-            auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()), mapRect);
-            p0.y = mapRect.y;
-            auto p1 = p0;
-            p1.y += mapRect.h;
-            drawing.renderLine(context, p0, p1);
+            switch (mProjection) {
+                case MapProjectionType::Mercator:
+                case MapProjectionType::StationMercator: {
+                    GeoPosition geoPosition{0., longitude};
+                    auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()), mapRect);
+                    p0.y = mapRect.y;
+                    auto p1 = p0;
+                    p1.y += mapRect.h;
+                    drawing.renderLine(context, p0, p1);
+                }
+                    break;
+                case MapProjectionType::StationAzimuthal:
+                    break;
+            }
         }
 
         /**
@@ -438,12 +446,21 @@ namespace rose {
          * @param mapRect The size of the map in pixels.
          */
         void drawLatitude(gm::Context &context, AntiAliasedDrawing &drawing, double latitude, Rectangle mapRect) {
-            GeoPosition geoPosition{latitude, 0.};
-            auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()), mapRect);
-            p0.x = mapRect.x;
-            auto p1 = p0;
-            p1.x += mapRect.w;
-            drawing.renderLine(context, p0, p1);
+            switch (mProjection) {
+                case MapProjectionType::Mercator:
+                case MapProjectionType::StationMercator: {
+                    GeoPosition geoPosition{latitude, 0.};
+                    auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()),
+                                       mapRect);
+                    p0.x = mapRect.x;
+                    auto p1 = p0;
+                    p1.x += mapRect.w;
+                    drawing.renderLine(context, p0, p1);
+                }
+                    break;
+                case MapProjectionType::StationAzimuthal:
+                    break;
+            }
         }
     };
 }
