@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(Rose VERSION 0.1.51.50)
+project(Rose VERSION 0.1.52.52)
 set(PACKAGE_CONTACT "Richard Buckley <richard.buckley@ieee.org>")
 include(GNUInstallDirs)
 
@@ -229,17 +229,17 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
         )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/ChronoImages/images"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono/resources"
         COMPONENT CHRONO_RUNTIME
         )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/ChronoMapsSmall/maps"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono/resources"
         COMPONENT CHRONO_RUNTIME
         )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/resources/ChronoMapsLarge/maps"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/Chrono/resources"
         COMPONENT CHRONO_LARGE
         )
 
