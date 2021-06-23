@@ -156,8 +156,10 @@ namespace rose {
      * @brief An abstraction of a geographic position.
      */
     struct GeoPosition {
-        double lat{0.}, lon{0.};
-        bool radians{false};
+        double lat{0.},         ///< Latitude value
+        lon{0.};        ///< Longitude value
+        bool radians{false};    ///< Values are in radians when true.
+        bool end{false};        ///< Is equal to end when used as iterator.
 
         GeoPosition() = default;
 
@@ -415,6 +417,61 @@ namespace rose {
         }
 
         /**
+         * @brief Draw a line on the projected map.
+         * @details The Line runs from begin to end inclusive but skips
+         * @param context The graphics Context
+         * @param drawing The anti-aliased drawing context.
+         * @param begin The starting geographic location.
+         * @param mapRectangle The map Rectangle on the screen.
+         * @param increment A function to increment the geographic location either fine or course and mark the end.
+         */
+        void drawMapLine(gm::Context &context, AntiAliasedDrawing &drawing, GeoPosition begin, Rectangle mapRectangle,
+                         const std::function<GeoPosition(GeoPosition &, bool fine)> &increment) {
+            int splitPixel = 0;
+            std::function<bool(const Position &p0, const Position &p1)> gapTest;
+
+            switch (mProjection) {
+                case MapProjectionType::StationAzimuthal:
+                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                        auto split = mapRectangle.w / 2 + mapRectangle.x;
+                        return (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split);
+                    };
+                    break;
+                case MapProjectionType::StationMercator:
+                    splitPixel = projectionSplitPixel(mapRectangle.size());
+                case MapProjectionType::Mercator:
+                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                        return abs(p0.x - p1.x) < mapRectangle.w / 4 &&
+                               abs(p0.y - p1.y) < mapRectangle.h / 4;
+                    };
+                    break;
+            }
+
+            auto p0 = geoToMap(begin.toRadians(), mProjection, splitPixel, mapRectangle);
+            auto g0 = begin;
+            for (auto g1 = increment(begin, false); !g1.end; g1 = increment(g1, false)) {
+                auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle);
+                if (gapTest(p0, p1)) {
+                    drawing.renderLine(context, p0, p1);
+                }
+                else {
+                    for (g1 = increment(g0, true); !g1.end; g1 = increment(g1, true)) {
+                        p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle);
+                        if (gapTest(p0, p1)) {
+                            drawing.renderLine(context, p0, p1);
+                        } else {
+                            break;
+                        }
+                        p0 = p1;
+                        g0 = g1;
+                    }
+                }
+                p0 = p1;
+                g0 = g1;
+            }
+        }
+
+        /**
          * @brief Draw a line of Longitude at longitude.
          * @param context The graphics Context
          * @param drawing The anti-aliased drawing context.
@@ -422,32 +479,17 @@ namespace rose {
          * @param mapRect The size of the map in pixels.
          */
         void drawLongitude(gm::Context &context, AntiAliasedDrawing &drawing, double longitude, Rectangle mapRect) {
-            switch (mProjection) {
-                case MapProjectionType::Mercator:
-                case MapProjectionType::StationMercator: {
-                    GeoPosition geoPosition{0., longitude};
-                    auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()),
-                                       mapRect);
-                    p0.y = mapRect.y;
-                    auto p1 = p0;
-                    p1.y += mapRect.h;
-                    drawing.renderLine(context, p0, p1);
-                }
-                    break;
-                case MapProjectionType::StationAzimuthal:
-                    int dLat = 3;
-                    GeoPosition g0{-90., longitude}, g1{0., longitude};
-                    auto p0 = geoToMap(g0.toRadians(), mProjection, 0, mapRect);
-                    for (int idx = 1; idx <= 180 / dLat; ++idx) {
-                        g1.lat = -90 + static_cast<double>(dLat * idx);
-                        auto p1 = geoToMap(g1.toRadians(), mProjection, 0, mapRect);
-                        if (auto split = mapRect.w / 2 + mapRect.x;
-                                (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split))
-                            drawing.renderLine(context, p0, p1);
-                        p0 = p1;
-                    }
-                    break;
-            }
+            drawMapLine(context, drawing, GeoPosition{-90., longitude}, mapRect,
+                        [](GeoPosition &g0, bool fine) -> GeoPosition {
+                            auto r = g0;
+                            if (fine) {
+                                r.lat += 1.;
+                            } else {
+                                r.lat += 3.;
+                            }
+                            r.end = r.lat > 91.;
+                            return r;
+                        });
         }
 
         /**
@@ -458,33 +500,17 @@ namespace rose {
          * @param mapRect The size of the map in pixels.
          */
         void drawLatitude(gm::Context &context, AntiAliasedDrawing &drawing, double latitude, Rectangle mapRect) {
-            switch (mProjection) {
-                case MapProjectionType::Mercator:
-                case MapProjectionType::StationMercator: {
-                    GeoPosition geoPosition{latitude, 0.};
-                    auto p0 = geoToMap(geoPosition.toRadians(), mProjection, projectionSplitPixel(mapRect.size()),
-                                       mapRect);
-                    p0.x = mapRect.x;
-                    auto p1 = p0;
-                    p1.x += mapRect.w;
-                    drawing.renderLine(context, p0, p1);
-                }
-                    break;
-                case MapProjectionType::StationAzimuthal: {
-                    int dLon = 3;
-                    GeoPosition g0{latitude, -180.}, g1{latitude, 0.};
-                    auto p0 = geoToMap(g0.toRadians(), mProjection, 0, mapRect);
-                    for (int idx = 1; idx <= 360 / dLon; ++idx) {
-                        g1.lon = -180 + static_cast<double>(dLon * idx);
-                        auto p1 = geoToMap(g1.toRadians(), mProjection, 0, mapRect);
-                        if (auto split = mapRect.w / 2 + mapRect.x;
-                                (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split))
-                            drawing.renderLine(context, p0, p1);
-                        p0 = p1;
-                    }
-                }
-                    break;
-            }
+            drawMapLine(context, drawing, GeoPosition{latitude, -180.}, mapRect,
+                        [](GeoPosition &g0, bool fine) -> GeoPosition {
+                            auto r = g0;
+                            if (fine) {
+                                r.lon += 1.;
+                            } else {
+                                r.lon += 3.;
+                            }
+                            r.end = r.lon > 181.;
+                            return r;
+                        });
         }
     };
 }
