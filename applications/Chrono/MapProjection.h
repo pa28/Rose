@@ -161,7 +161,7 @@ namespace rose {
         bool radians{false};    ///< Values are in radians when true.
         bool end{false};        ///< Is equal to end when used as iterator.
 
-        GeoPosition() = default;
+        constexpr GeoPosition() = default;
 
         /**
          * @brief Create a geographic position.
@@ -169,7 +169,7 @@ namespace rose {
          * @param longitude The longitude.
          * @param rad When true interpret latitude and longitude as degrees, otherwise as radians.
          */
-        GeoPosition(double latitude, double longitude, bool rad = false) {
+        constexpr GeoPosition(double latitude, double longitude, bool rad = false) {
             radians = rad;
             if (radians) {
                 lat = std::clamp(latitude, -M_PI_2, M_PI_2);
@@ -184,7 +184,7 @@ namespace rose {
          * @brief Convert the position from degrees to radians.
          * @return The position in radians.
          */
-        [[nodiscard]] GeoPosition toRadians() const {
+        [[nodiscard]] GeoPosition constexpr toRadians() const {
             if (radians)
                 return GeoPosition{*this};
             else {
@@ -200,7 +200,7 @@ namespace rose {
          * @brief Convert the position from radians to degrees.
          * @return The position in degrees.
          */
-        [[nodiscard]] GeoPosition toDegrees() const {
+        [[nodiscard]] GeoPosition constexpr toDegrees() const {
             if (radians) {
                 GeoPosition g{};
                 g.radians = false;
@@ -210,6 +210,33 @@ namespace rose {
             } else
                 return GeoPosition{*this};
         }
+    };
+
+    static constexpr std::array<GeoPosition, 22> InternationalDateLine = {
+            {
+                    {90.,180.},
+                    {75.,180.},
+                    {67.7356, -169.25},
+                    {65.0189, -169.25},
+                    {52.6863, 170.05},
+                    {47.8353, 180.},
+                    {22., 180.},
+                    {-0.9, 180.},
+                    {-0.9, -159.65},
+                    {2.9, -159.65},
+                    {2.9, -161.85},
+                    {5., -161.85},
+                    {5., -155.95},
+                    {-7.8, -150.65},
+                    {-10., -150.65},
+                    {-10., -156.05},
+                    {-7.8, -156.05},
+                    {-7.8, -178.05},
+                    {-15., -172.75},
+                    {-45., -172.75},
+                    {-51.1815, 180.},
+                    {-90., 180.},
+            }
     };
 
     enum class MapOverLayImage : size_t {

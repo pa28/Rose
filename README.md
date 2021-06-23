@@ -111,3 +111,6 @@ https://github.com/jdupuy/dj_fft
 
 #### Spherical Trigonometry
 http://www.movable-type.co.uk/scripts/latlong.html
+
+#### International Date Line
+https://ithoughthecamewithyou.com/post/international-date-line-longitude-latitude-coordinates
