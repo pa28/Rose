@@ -479,15 +479,19 @@ namespace rose {
          * @param mapRect The size of the map in pixels.
          */
         void drawLongitude(gm::Context &context, AntiAliasedDrawing &drawing, double longitude, Rectangle mapRect) {
-            drawMapLine(context, drawing, GeoPosition{-90., longitude}, mapRect,
+            static constexpr double begin = -90.;
+            static constexpr double end = 90.;
+            static constexpr double fineInc = 1.;
+            static constexpr double courseInc = 3.;
+            drawMapLine(context, drawing, GeoPosition{begin, longitude}, mapRect,
                         [](GeoPosition &g0, bool fine) -> GeoPosition {
                             auto r = g0;
                             if (fine) {
-                                r.lat += 1.;
+                                r.lat += fineInc;
                             } else {
-                                r.lat += 3.;
+                                r.lat += courseInc;
                             }
-                            r.end = r.lat > 91.;
+                            r.end = r.lat > end + courseInc;
                             return r;
                         });
         }
@@ -500,15 +504,19 @@ namespace rose {
          * @param mapRect The size of the map in pixels.
          */
         void drawLatitude(gm::Context &context, AntiAliasedDrawing &drawing, double latitude, Rectangle mapRect) {
-            drawMapLine(context, drawing, GeoPosition{latitude, -180.}, mapRect,
+            static constexpr double begin = -180.;
+            static constexpr double end = 180.;
+            static constexpr double fineInc = 1.;
+            static constexpr double courseInc = 3.;
+            drawMapLine(context, drawing, GeoPosition{latitude, begin}, mapRect,
                         [](GeoPosition &g0, bool fine) -> GeoPosition {
                             auto r = g0;
                             if (fine) {
-                                r.lon += 1.;
+                                r.lon += fineInc;
                             } else {
-                                r.lon += 3.;
+                                r.lon += courseInc;
                             }
-                            r.end = r.lon > 181.;
+                            r.end = r.lon > end + courseInc;
                             return r;
                         });
         }
