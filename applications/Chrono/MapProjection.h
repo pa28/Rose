@@ -501,6 +501,31 @@ namespace rose {
         }
 
         /**
+         * @brief Draw a line on the projected map using points in a standard container.
+         * @tparam Iterator The iterator type of the container.
+         * @param context The graphics Context
+         * @param drawing The anti-aliased drawing context.
+         * @param mapRect The size of the map in pixels.
+         * @param first The first point in the container to use.
+         * @param last One past the last point in the container to use.
+         */
+        template<typename Iterator>
+        void drawMapLine(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, Iterator first, Iterator last) {
+            auto idx = first;
+            drawMapLine(context, drawing, *first, mapRect, [&last, &idx](GeoPosition &g0, bool fine) -> GeoPosition {
+                // Todo: Interpolate between points.
+                if (idx == last) {
+                    GeoPosition r{};
+                    r.end = true;
+                    return r;
+                }
+
+                ++idx;
+                return *idx;
+            });
+        }
+
+        /**
          * @brief Draw a line of Longitude at longitude.
          * @param context The graphics Context
          * @param drawing The anti-aliased drawing context.

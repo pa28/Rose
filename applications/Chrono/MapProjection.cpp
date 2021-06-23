@@ -229,7 +229,8 @@ namespace rose {
         drawLatitude(context, antiAliasedDrawing, 23.4365, widgetRect);
         drawLatitude(context, antiAliasedDrawing, -23.4365, widgetRect);
         drawLongitude(context, antiAliasedDrawing, 0., widgetRect);
-        drawLongitude(context, antiAliasedDrawing, 180., widgetRect);
+//        drawLongitude(context, antiAliasedDrawing, 180., widgetRect);
+        drawMapLine(context, antiAliasedDrawing, widgetRect, InternationalDateLine.begin(), InternationalDateLine.end());
 
         for (auto &object : *this) {
             if (auto widget = object->getNode<Widget>(); widget)
