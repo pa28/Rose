@@ -117,3 +117,5 @@ https://ithoughthecamewithyou.com/post/international-date-line-longitude-latitud
 
 #### Moon Phases
 https://metacpan.org/pod/Astro::MoonPhase
+http://www.ben-daglish.net/moon.shtml
+https://www.subsystems.us/uploads/9/8/9/4/98948044/moonphase.pdf
