@@ -163,6 +163,10 @@ namespace rose {
 
         constexpr GeoPosition() = default;
 
+        constexpr explicit GeoPosition(bool endPoint) : GeoPosition() {
+            end = endPoint;
+        }
+
         /**
          * @brief Create a geographic position.
          * @param latitude The latitude.
@@ -210,17 +214,30 @@ namespace rose {
             } else
                 return GeoPosition{*this};
         }
+
+        [[nodiscard]] double distance(const GeoPosition &other) const {
+            auto r = toRadians();
+            auto o = toRadians();
+            return acos(sin(r.lat)*sin(o.lat)+cos(r.lat)*cos(o.lat)*cos(r.lon-o.lon));
+        }
+
+        std::ostream &printOn(std::ostream &strm) const {
+            auto g = toDegrees();
+            return strm << '(' << g.lat << ',' << g.lon << ')';
+        }
     };
 
-    static constexpr std::array<GeoPosition, 22> InternationalDateLine = {
+    static constexpr double EquatorLatitude = 0.;
+    static constexpr double TropicLatitude = 23.4365;
+    static constexpr double PrimeMeridian = 0.;
+    static constexpr std::array<GeoPosition, 21> InternationalDateLine = {
             {
-                    {90.,180.},
-                    {75.,180.},
+                    {90., 180.},
+                    {75., 180.},
                     {67.7356, -169.25},
                     {65.0189, -169.25},
                     {52.6863, 170.05},
                     {47.8353, 180.},
-                    {22., 180.},
                     {-0.9, 180.},
                     {-0.9, -159.65},
                     {2.9, -159.65},
@@ -500,6 +517,12 @@ namespace rose {
             }
         }
 
+        void drawInterpolate(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, GeoPosition &g0,
+                             GeoPosition &g1, double coarseLat, double coarseLon) {
+            auto r0 = g0.toRadians();
+            auto r1 = g1.toRadians();
+        }
+
         /**
          * @brief Draw a line on the projected map using points in a standard container.
          * @tparam Iterator The iterator type of the container.
@@ -511,18 +534,47 @@ namespace rose {
          */
         template<typename Iterator>
         void drawMapLine(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, Iterator first, Iterator last) {
-            auto idx = first;
-            drawMapLine(context, drawing, *first, mapRect, [&last, &idx](GeoPosition &g0, bool fine) -> GeoPosition {
-                // Todo: Interpolate between points.
-                if (idx == last) {
-                    GeoPosition r{};
-                    r.end = true;
-                    return r;
-                }
+            double StepSize = deg2rad(3.);
+            for (auto idx = first; idx != last - 1; ++idx) {
+                auto g1 = (idx + 1)->toRadians();
+                auto g0 = idx->toRadians();
 
-                ++idx;
-                return *idx;
-            });
+                auto dist = acos(sin(g0.lat)*sin(g1.lat)+cos(g0.lat)*cos(g1.lat)*cos(g0.lon-g1.lon));
+                auto steps = std::max(util::roundToInt(dist/StepSize), 1);
+                double f = 0.;
+                double fInc = 1. / static_cast<double>(steps);
+                // ToDo: This function is not a good choice because:
+                // It was designed to work with monotonic lines. What is needed here is an adaptive next
+                // point algorithm possibly using a binary search on plot gaps.
+                drawMapLine(context, drawing, g0, mapRect, [&](GeoPosition &g, bool fine) {
+                    GeoPosition r{};
+                    if (f > 1.) {
+                        r.end = true;
+                        return r;
+                    }
+                    r.radians = true;
+
+                    if (fine)
+                        f += fInc / 10.;
+                    else
+                        f += fInc;
+
+                    if (f >= 1.) {
+                        r = g1;
+                        f = 2;
+                        return r;
+                    }
+
+                    auto A = sin((1. - f) * dist) / sin(dist);
+                    auto B = sin(f * dist) / sin(dist);
+                    auto x = A * cos(g0.lat) * cos(g0.lon) + B * cos(g1.lat) * cos(g1.lon);
+                    auto y = A * cos(g0.lat) * sin(g0.lon) + B * cos(g1.lat) * sin(g1.lon);
+                    auto z = A * sin(g0.lat) +  B * sin(g1.lat);
+                    r.lat = atan2(z, sqrt(x*x + y*y));
+                    r.lon = atan2(y, x);
+                    return r;
+                });
+            }
         }
 
         /**
@@ -536,16 +588,16 @@ namespace rose {
             static constexpr double begin = -90.;
             static constexpr double end = 90.;
             static constexpr double fineInc = 1.;
-            static constexpr double courseInc = 3.;
+            static constexpr double coarseInc = 3.;
             drawMapLine(context, drawing, GeoPosition{begin, longitude}, mapRect,
                         [](GeoPosition &g0, bool fine) -> GeoPosition {
                             auto r = g0;
                             if (fine) {
                                 r.lat += fineInc;
                             } else {
-                                r.lat += courseInc;
+                                r.lat += coarseInc;
                             }
-                            r.end = r.lat > end + courseInc;
+                            r.end = r.lat > end + coarseInc;
                             return r;
                         });
         }
@@ -561,19 +613,23 @@ namespace rose {
             static constexpr double begin = -180.;
             static constexpr double end = 180.;
             static constexpr double fineInc = 1.;
-            static constexpr double courseInc = 3.;
+            static constexpr double coarseInc = 3.;
             drawMapLine(context, drawing, GeoPosition{latitude, begin}, mapRect,
                         [](GeoPosition &g0, bool fine) -> GeoPosition {
                             auto r = g0;
                             if (fine) {
                                 r.lon += fineInc;
                             } else {
-                                r.lon += courseInc;
+                                r.lon += coarseInc;
                             }
-                            r.end = r.lon > end + courseInc;
+                            r.end = r.lon > end + coarseInc;
                             return r;
                         });
         }
     };
+}
+
+inline std::ostream &operator<<(std::ostream &strm, rose::GeoPosition &geoPosition) {
+    return geoPosition.printOn(strm);
 }
 

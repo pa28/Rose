@@ -225,11 +225,10 @@ namespace rose {
 
         AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.6f, 0.6f, 0.6f, 1.f}};
 
-        drawLatitude(context, antiAliasedDrawing, 0., widgetRect);
-        drawLatitude(context, antiAliasedDrawing, 23.4365, widgetRect);
-        drawLatitude(context, antiAliasedDrawing, -23.4365, widgetRect);
-        drawLongitude(context, antiAliasedDrawing, 0., widgetRect);
-//        drawLongitude(context, antiAliasedDrawing, 180., widgetRect);
+        drawLatitude(context, antiAliasedDrawing, EquatorLatitude, widgetRect);
+        drawLatitude(context, antiAliasedDrawing, TropicLatitude, widgetRect);
+        drawLatitude(context, antiAliasedDrawing, -TropicLatitude, widgetRect);
+        drawLongitude(context, antiAliasedDrawing,  PrimeMeridian, widgetRect);
         drawMapLine(context, antiAliasedDrawing, widgetRect, InternationalDateLine.begin(), InternationalDateLine.end());
 
         for (auto &object : *this) {
