@@ -229,6 +229,7 @@ namespace rose {
 
     static constexpr double EquatorLatitude = 0.;
     static constexpr double TropicLatitude = 23.4365;
+    static constexpr double ArcticCircle = 66.5635;
     static constexpr double PrimeMeridian = 0.;
     static constexpr std::array<GeoPosition, 21> InternationalDateLine = {
             {
@@ -518,9 +519,33 @@ namespace rose {
         }
 
         void drawInterpolate(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, GeoPosition &g0,
-                             GeoPosition &g1, double coarseLat, double coarseLon) {
+                             GeoPosition &g1) {
             auto r0 = g0.toRadians();
             auto r1 = g1.toRadians();
+            int splitPixel = 0;
+            std::function<bool(const Position &p0, const Position &p1)> gapTest;
+
+            switch (mProjection) {
+                case MapProjectionType::StationAzimuthal:
+                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                        auto split = mapRect.w / 2 + mapRect.x;
+                        return (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split);
+                    };
+                    break;
+                case MapProjectionType::StationMercator:
+                    splitPixel = projectionSplitPixel(mapRect.size());
+                case MapProjectionType::Mercator:
+                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                        return abs(p0.x - p1.x) < mapRect.w / 4 &&
+                               abs(p0.y - p1.y) < mapRect.h / 4;
+                    };
+                    break;
+            }
+
+            auto p0 = geoToMap(g0.toRadians(), mProjection, splitPixel, mapRect);
+            auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRect);
+            if (gapTest(p0, p1))
+                drawing.renderLine(context, p0, p1);
         }
 
         /**
@@ -534,46 +559,31 @@ namespace rose {
          */
         template<typename Iterator>
         void drawMapLine(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, Iterator first, Iterator last) {
+
             double StepSize = deg2rad(3.);
             for (auto idx = first; idx != last - 1; ++idx) {
                 auto g1 = (idx + 1)->toRadians();
                 auto g0 = idx->toRadians();
 
-                auto dist = acos(sin(g0.lat)*sin(g1.lat)+cos(g0.lat)*cos(g1.lat)*cos(g0.lon-g1.lon));
-                auto steps = std::max(util::roundToInt(dist/StepSize), 1);
+                auto dist = acos(sin(g0.lat) * sin(g1.lat) + cos(g0.lat) * cos(g1.lat) * cos(g0.lon - g1.lon));
+                auto steps = std::max(util::roundToInt(dist / StepSize), 1);
                 double f = 0.;
                 double fInc = 1. / static_cast<double>(steps);
-                // ToDo: This function is not a good choice because:
-                // It was designed to work with monotonic lines. What is needed here is an adaptive next
-                // point algorithm possibly using a binary search on plot gaps.
-                drawMapLine(context, drawing, g0, mapRect, [&](GeoPosition &g, bool fine) {
-                    GeoPosition r{};
-                    if (f > 1.) {
-                        r.end = true;
-                        return r;
-                    }
-                    r.radians = true;
 
-                    if (fine)
-                        f += fInc / 10.;
-                    else
-                        f += fInc;
-
-                    if (f >= 1.) {
-                        r = g1;
-                        f = 2;
-                        return r;
-                    }
+                auto r0 = g0;
+                for (int fIdx = 0; fIdx <= steps; fIdx++) {
+                    f = fInc * fIdx;
 
                     auto A = sin((1. - f) * dist) / sin(dist);
                     auto B = sin(f * dist) / sin(dist);
                     auto x = A * cos(g0.lat) * cos(g0.lon) + B * cos(g1.lat) * cos(g1.lon);
                     auto y = A * cos(g0.lat) * sin(g0.lon) + B * cos(g1.lat) * sin(g1.lon);
                     auto z = A * sin(g0.lat) +  B * sin(g1.lat);
-                    r.lat = atan2(z, sqrt(x*x + y*y));
-                    r.lon = atan2(y, x);
-                    return r;
-                });
+
+                    GeoPosition r1{atan2(z, sqrt(x*x + y*y)), atan2(y, x), true};
+                    drawInterpolate(context, drawing, mapRect, r0, r1);
+                    r0 = r1;
+                }
             }
         }
 

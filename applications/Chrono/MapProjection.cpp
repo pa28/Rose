@@ -223,13 +223,21 @@ namespace rose {
                 break;
         }
 
-        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.6f, 0.6f, 0.6f, 1.f}};
-
+        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.7f, 0.7f, 1.f}};
+//        for (auto lat = 15; lat <= 75; lat += 15) {
+//            drawLatitude(context, antiAliasedDrawing, static_cast<double>(lat), widgetRect);
+//            drawLatitude(context, antiAliasedDrawing, static_cast<double>(-lat), widgetRect);
+//        }
+        antiAliasedDrawing.setColor(context, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
         drawLatitude(context, antiAliasedDrawing, EquatorLatitude, widgetRect);
+        drawLongitude(context, antiAliasedDrawing,  PrimeMeridian, widgetRect);
+        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f});
+        drawMapLine(context, antiAliasedDrawing, widgetRect, InternationalDateLine.begin(), InternationalDateLine.end());
+        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
         drawLatitude(context, antiAliasedDrawing, TropicLatitude, widgetRect);
         drawLatitude(context, antiAliasedDrawing, -TropicLatitude, widgetRect);
-        drawLongitude(context, antiAliasedDrawing,  PrimeMeridian, widgetRect);
-        drawMapLine(context, antiAliasedDrawing, widgetRect, InternationalDateLine.begin(), InternationalDateLine.end());
+        drawLatitude(context, antiAliasedDrawing, ArcticCircle, widgetRect);
+        drawLatitude(context, antiAliasedDrawing, -ArcticCircle, widgetRect);
 
         for (auto &object : *this) {
             if (auto widget = object->getNode<Widget>(); widget)
