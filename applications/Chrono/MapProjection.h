@@ -227,6 +227,37 @@ namespace rose {
             return acos(sin(r.lat) * sin(o.lat) + cos(r.lat) * cos(o.lat) * cos(r.lon - o.lon));
         }
 
+        /**
+         * @brief Find a mid-point on the Great Circle between this GeoPosition and another.
+         * @param other The other GeoPosition.
+         * @param distance The pre-computed distance between the two positions in Radians.
+         * @param fraction The fraction of the distance between the two positions the desired mid-point is from
+         * this GeoPosition
+         * @return The computed GeoPosition.
+         */
+        [[nodiscard]] GeoPosition midpoint(const GeoPosition &other, double distance, double fraction = 0.5) const {
+            auto r = toRadians();
+            auto o = other.toRadians();
+            auto A = sin((1. - fraction) * distance) / sin(distance);
+            auto B = sin(fraction * distance) / sin(distance);
+            auto x = A * cos(r.lat) * cos(r.lon) + B * cos(o.lat) * cos(o.lon);
+            auto y = A * cos(r.lat) * sin(r.lon) + B * cos(o.lat) * sin(o.lon);
+            auto z = A * sin(r.lat) + B * sin(o.lat);
+
+            return GeoPosition{atan2(z, sqrt(x * x + y * y)), atan2(y, x), true};
+        }
+
+        /**
+         * @brief Find a mid-point on the Great Circle between this GeoPosition and another.
+         * @param other The other GeoPosition.
+         * @param fraction The fraction of the distance between the two positions the desired mid-point is from
+         * this GeoPosition
+         * @return The computed GeoPosition.
+         */
+        [[nodiscard]] GeoPosition midpoint(const GeoPosition &other, double fraction = 0.5) const {
+            return midpoint(other, distance(other), fraction);
+        }
+
         std::ostream &printOn(std::ostream &strm) const {
             auto g = toDegrees();
             return strm << '(' << g.lat << ',' << g.lon << ')';
