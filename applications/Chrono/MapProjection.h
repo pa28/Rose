@@ -529,10 +529,11 @@ namespace rose {
                     break;
             }
 
-            auto p0 = geoToMap(begin.toRadians(), mProjection, splitPixel, mapRectangle);
+            auto p0 = geoToMap(begin.toRadians(), mProjection, splitPixel, mapRectangle) + mapRectangle.position();
             auto g0 = begin;
-            for (auto g1 = increment(begin, false); !g1.end; g1 = increment(g1, false)) {
-                auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle);
+            do {
+                auto g1 = increment(g0, false);
+                auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle) + mapRectangle.position();
                 if (gapTest(p0, p1)) {
                     // Draw up to a plotting gap.
                     drawing.renderLine(context, p0, p1);
@@ -540,7 +541,7 @@ namespace rose {
                 else {
                     // Switch to fine increment until the gap is encountered again.
                     for (g1 = increment(g0, true); !g1.end; g1 = increment(g1, true)) {
-                        p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle);
+                        p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle) + mapRectangle.position();
                         if (gapTest(p0, p1)) {
                             drawing.renderLine(context, p0, p1);
                         } else {
@@ -552,7 +553,7 @@ namespace rose {
                 }
                 p0 = p1;
                 g0 = g1;
-            }
+            } while (!g0.end);
         }
 
         void drawInterpolate(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, GeoPosition &g0,
@@ -579,8 +580,8 @@ namespace rose {
                     break;
             }
 
-            auto p0 = geoToMap(g0.toRadians(), mProjection, splitPixel, mapRect);
-            auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRect);
+            auto p0 = geoToMap(g0.toRadians(), mProjection, splitPixel, mapRect) + mapRect.position();
+            auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRect) + mapRect.position();
             if (gapTest(p0, p1))
                 drawing.renderLine(context, p0, p1);
             else {
@@ -634,20 +635,24 @@ namespace rose {
          * @param longitude The Longitude in degrees.
          * @param mapRect The size of the map in pixels.
          */
-        void drawLongitude(gm::Context &context, AntiAliasedDrawing &drawing, double longitude, Rectangle mapRect) {
-            static constexpr double begin = -90.;
-            static constexpr double end = 90.;
+        void drawLongitude(gm::Context &context, AntiAliasedDrawing &drawing, double longitude, double latitudeBound,
+                           Rectangle mapRect) {
             static constexpr double fineInc = 1.;
             static constexpr double coarseInc = 3.;
+            double begin = -abs(latitudeBound);
+            double end = abs(latitudeBound);
             drawMapLine(context, drawing, GeoPosition{begin, longitude}, mapRect,
-                        [](GeoPosition &g0, bool fine) -> GeoPosition {
+                        [&end](GeoPosition &g0, bool fine) -> GeoPosition {
                             auto r = g0;
                             if (fine) {
                                 r.lat += fineInc;
                             } else {
                                 r.lat += coarseInc;
                             }
-                            r.end = r.lat > end + coarseInc;
+                            if (r.lat > end) {
+                                r.end = true;
+                                r.lat = end;
+                            }
                             return r;
                         });
         }
