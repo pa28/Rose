@@ -131,6 +131,17 @@ namespace rose {
             return o == Orientation::Horizontal ? y : x;
         }
 
+        /**
+         * @brief Compute the distance squared from this position to another.
+         * @param other The other position.
+         * @return The distance between the two positions squared.
+         */
+        [[nodiscard]] constexpr int rSqr(const Position &other) const noexcept {
+            auto dX = other.x - x;
+            auto dY = other.y - y;
+            return dX*dX + dY*dY;
+        }
+
         static Position Zero;
         static Position Undefined;
     };
