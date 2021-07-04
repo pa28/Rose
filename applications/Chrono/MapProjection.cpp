@@ -189,9 +189,8 @@ namespace rose {
                 context.renderCopy(mMercator[0], widgetRect);
                 break;
             case MapProjectionType::StationMercator: {
-
                 Rectangle src0{splitPixel, 0, actualMapImgSize.w - splitPixel, actualMapImgSize.h};
-                Rectangle dst0{widgetRect};
+                Rectangle dst0{};
                 dst0.w = src0.w;
                 dst0.h = src0.h;
 
