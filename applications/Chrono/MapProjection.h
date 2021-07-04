@@ -602,7 +602,7 @@ namespace rose {
                 auto g1 = (idx + 1)->toRadians();
                 auto g0 = idx->toRadians();
 
-                auto dist = acos(sin(g0.lat) * sin(g1.lat) + cos(g0.lat) * cos(g1.lat) * cos(g0.lon - g1.lon));
+                auto dist = g0.distance(g1);
                 auto steps = std::max(util::roundToInt(dist / StepSize), 1);
                 double f = 0.;
                 double fInc = 1. / static_cast<double>(steps);
@@ -611,13 +611,7 @@ namespace rose {
                 for (int fIdx = 0; fIdx <= steps; fIdx++) {
                     f = fInc * fIdx;
 
-                    auto A = sin((1. - f) * dist) / sin(dist);
-                    auto B = sin(f * dist) / sin(dist);
-                    auto x = A * cos(g0.lat) * cos(g0.lon) + B * cos(g1.lat) * cos(g1.lon);
-                    auto y = A * cos(g0.lat) * sin(g0.lon) + B * cos(g1.lat) * sin(g1.lon);
-                    auto z = A * sin(g0.lat) +  B * sin(g1.lat);
-
-                    GeoPosition r1{atan2(z, sqrt(x*x + y*y)), atan2(y, x), true};
+                    auto r1 = g0.midpoint(g1, dist, f);
                     drawInterpolate(context, drawing, mapRect, r0, r1);
                     r0 = r1;
                 }
