@@ -216,10 +216,15 @@ namespace rose {
                 return GeoPosition{*this};
         }
 
+        /**
+         * @brief Computer the Great Circle distance between this GeoPosition and another.
+         * @param other The other GeoPosition.
+         * @return The Great Circle distance in Radians.
+         */
         [[nodiscard]] double distance(const GeoPosition &other) const {
             auto r = toRadians();
-            auto o = toRadians();
-            return acos(sin(r.lat)*sin(o.lat)+cos(r.lat)*cos(o.lat)*cos(r.lon-o.lon));
+            auto o = other.toRadians();
+            return acos(sin(r.lat) * sin(o.lat) + cos(r.lat) * cos(o.lat) * cos(r.lon - o.lon));
         }
 
         std::ostream &printOn(std::ostream &strm) const {
