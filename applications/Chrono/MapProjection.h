@@ -24,6 +24,7 @@
 // https://commons.wikimedia.org/wiki/File:Large_World_Topo_Map_2.png
 // https://commons.wikimedia.org/wiki/File:The_earth_at_night.jpg
 // https://commons.wikimedia.org/wiki/File:The_earth_at_night_(2).jpg
+// https://edwilliams.org/avform147.htm
 
 namespace rose {
 
