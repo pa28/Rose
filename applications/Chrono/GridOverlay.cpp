@@ -30,7 +30,7 @@ namespace rose {
                     mTexture = gm::Texture{context, widgetRect.size()};
                     mTexture.setBlendMode(SDL_BLENDMODE_BLEND);
                     gm::RenderTargetGuard renderTargetGuard{context, mTexture};
-                    context.setDrawColor(color::RGBA::TransparentBlack);
+                    gm::DrawColorGuard drawColorGuard{context, color::RGBA::TransparentBlack};
                     context.renderClear();
 
                     AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.7f, 0.7f, 1.f}};
