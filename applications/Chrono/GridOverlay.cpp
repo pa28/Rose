@@ -37,7 +37,7 @@ namespace rose {
                     context.renderClear();
 
                     AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::SimpleRectangle};
-                    antiAliasedDrawing.setWidthColor(context, 3, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
+                    antiAliasedDrawing.setWidthColor(context, 2, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
 
                     if (mDrawLatLon) {
                         for (auto lat = 15; lat <= 75; lat += 15) {
