@@ -84,7 +84,9 @@ namespace rose {
                 throwContainerError();
             }
 
-            context.renderCopy(mTexture, widgetRect);
+            if (context.renderCopy(mTexture, widgetRect) != 0) {
+                std::cerr << __PRETTY_FUNCTION__ << "Invalid mTexture\n";
+            }
         }
     }
 

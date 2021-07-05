@@ -59,6 +59,10 @@ namespace rose::gm {
 
     int Context::renderCopy(const Texture &texture, Rectangle dst) {
         SDL_Rect dstRect{dst.x, dst.y, dst.w, dst.h};
+        if (!texture) {
+            std::cerr << __PRETTY_FUNCTION__ << "Invalid Texture.\n";
+            return -1;
+        }
 
         return SDL_RenderCopy(mRenderer.get(), texture.get(), nullptr, &dstRect);
     }
