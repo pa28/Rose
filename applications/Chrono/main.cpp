@@ -13,6 +13,7 @@
 #include "TimerTick.h"
 #include "Types.h"
 #include "CelestialOverlay.h"
+#include "GridOverlay.h"
 #include "SatelliteModel.h"
 
 using namespace rose;
@@ -252,6 +253,7 @@ struct Chrono : public Application {
         screen() << wdg<Window>()
                  << wdg<Manager>() >> mManager << makeLayout<ChronoLayout>()
                  << wdg<MapProjection>(timerTick, xdgDataDir) >> mapProjection
+                    << wdg<GridOverlay>( timerTick ) << endw
                     << wdg<CelestialOverlay>(timerTick, xdgDataDir) << endw << endw
                     << wdg<TestWidget>(color::DarkYellowHSVA.toRGBA()) << endw
                     << wdg<Row>()

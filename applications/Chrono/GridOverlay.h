@@ -8,14 +8,72 @@
 
 #pragma once
 
+#include "MapProjection.h"
+
 namespace rose {
 
     /**
-     * @class GridOverlay
-     * @brief
+     * @class GridOverlay.
+     * @brief Draw grid lines to annotate the MapProjection.
      */
-    class GridOverlay {
+    class GridOverlay : public Widget {
+    protected:
+        /// True if there are elements to display.
+        bool mGridOverlayObjects{true};
 
+        bool mDrawLatLon{false};
+        bool mDrawPrimeMeridian{true};
+        bool mDrawInternationalDateLine{true};
+        bool mDrawEquator{true};
+        bool mDrawTropics{true};
+
+        /// The map projection type.
+        MapProjectionType mProjection{};
+
+        /// Slot to receive celestial update time signals on.
+        TickProtocol::slot_type mGridUpdateTimer{};
+
+        /// Source of timing information.
+        std::shared_ptr<TimerTick> mTimerTick{};
+
+        gm::Texture mTexture{};
+
+    public:
+        GridOverlay() = delete;
+
+        explicit GridOverlay(std::shared_ptr<TimerTick> timerTick);
+
+        ~GridOverlay() override = default;
+
+        GridOverlay(const GridOverlay &) = delete;
+
+        GridOverlay(GridOverlay &&) = delete;
+
+        GridOverlay &operator=(const GridOverlay &) = delete;
+
+        GridOverlay &operator=(GridOverlay &&) = delete;
+
+        static constexpr std::string_view id = "GridOverlay";
+        std::string_view nodeId() const noexcept override {
+            return id;
+        }
+
+        /// Draw the GridOverlay
+        void draw(gm::Context &context, const Position &containerPosition) override;
+
+        /// Layout the GridOverlay
+        Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
+
+        /**
+         * @brief Called when added to a container.
+         * @details Connects the map slot receiver for notification when maps are loaded, then calls
+         * cacheCurrentMaps().
+         */
+        void addedToContainer() override;
+
+        static void throwContainerError() {
+            throw ContainerTypeError("Expected MapProjection as container for GridOverlay");
+        }
     };
 }
 

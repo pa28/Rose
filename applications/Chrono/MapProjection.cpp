@@ -210,8 +210,6 @@ namespace rose {
 
                     context.renderCopy(mMercator[1], src1, dst1);
                     context.renderCopy(mMercator[0], src1, dst1);
-                    std::cout << __PRETTY_FUNCTION__ << " src rects: " << src0 << src1 << '\n';
-                    std::cout << __PRETTY_FUNCTION__ << " dst rects: " << dst0 << dst1 << '\n';
                 } else {
                     std::cout << __PRETTY_FUNCTION__ << " Texture creation failed.\n";
                 }
@@ -223,31 +221,6 @@ namespace rose {
                 context.renderCopy(mAzimuthal[0], widgetRect);
                 break;
         }
-
-        AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.7f, 0.7f, 1.f}};
-        antiAliasedDrawing.setColor(context, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
-
-        for (auto lat = 15; lat <= 75; lat += 15) {
-            drawLatitude(context, antiAliasedDrawing, static_cast<double>(lat), widgetRect);
-            drawLatitude(context, antiAliasedDrawing, static_cast<double>(-lat), widgetRect);
-        }
-
-        drawLatitude(context, antiAliasedDrawing, EquatorLatitude, widgetRect);
-        drawLongitude(context, antiAliasedDrawing, PrimeMeridian, 90., widgetRect);
-        for (auto lon = 15; lon <= 180; lon += 15) {
-            drawLongitude(context, antiAliasedDrawing, static_cast<double>(lon), 75., widgetRect);
-            drawLongitude(context, antiAliasedDrawing, static_cast<double>(-lon), 75., widgetRect);
-        }
-        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f});
-        drawMapLine(context, antiAliasedDrawing, widgetRect, InternationalDateLine.begin(), InternationalDateLine.end());
-        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
-
-        std::cout << __PRETTY_FUNCTION__ << " widgetRect: " << widgetRect << '\n';
-
-        drawLatitude(context, antiAliasedDrawing, TropicLatitude, widgetRect);
-        drawLatitude(context, antiAliasedDrawing, -TropicLatitude, widgetRect);
-        drawLatitude(context, antiAliasedDrawing, ArcticCircle, widgetRect);
-        drawLatitude(context, antiAliasedDrawing, -ArcticCircle, widgetRect);
 
         for (auto &object : *this) {
             if (auto widget = object->getNode<Widget>(); widget)
