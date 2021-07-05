@@ -95,6 +95,6 @@ namespace rose {
             throwContainerError();
         }
 
-        mTimerTick->minuteSignal.connect(mGridUpdateTimer);
+//        mTimerTick->minuteSignal.connect(mGridUpdateTimer);
     }
 }
