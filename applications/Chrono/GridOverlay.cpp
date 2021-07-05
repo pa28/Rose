@@ -33,8 +33,8 @@ namespace rose {
                     gm::DrawColorGuard drawColorGuard{context, color::RGBA::TransparentBlack};
                     context.renderClear();
 
-                    AntiAliasedDrawing antiAliasedDrawing{context, 1, color::RGBA{0.7f, 0.7f, 0.7f, 1.f}};
-                    antiAliasedDrawing.setColor(context, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
+                    AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::SimpleRectangle};
+                    antiAliasedDrawing.setWidthColor(context, 3, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
 
                     if (mDrawLatLon) {
                         for (auto lat = 15; lat <= 75; lat += 15) {

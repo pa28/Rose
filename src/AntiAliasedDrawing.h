@@ -19,14 +19,23 @@ namespace rose {
      * @brief
      */
     class AntiAliasedDrawing {
+    public:
+        enum DrawingType {
+            SimpleLine,
+            SimpleRectangle,
+            AntiAliased,
+        };
+
     protected:
         static constexpr int Scale = 10;
         static constexpr int NubWidth = 1;
         static constexpr int NubHeight = 3;
         static constexpr int NubColorSize = 1;
 
-        color::RGBA mColor{};
-        int mWidth{};
+        DrawingType mDrawingType{SimpleLine};
+
+        color::RGBA mColor{color::RGBA::OpaqueBlack};
+        int mWidth{1};
         int mScaledWidth{};
         gm::Texture mTexture{};
 
@@ -40,7 +49,7 @@ namespace rose {
          * @param width The width of the line in pixels.
          * @param rgba The line colour RGBA.
          */
-        AntiAliasedDrawing(gm::Context &context, int width, color::RGBA rgba);
+        AntiAliasedDrawing(gm::Context &context, DrawingType drawingType);
 
         /**
          * @brief Set the width and colour of a line to be drawn.
