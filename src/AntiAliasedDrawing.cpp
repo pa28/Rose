@@ -40,7 +40,6 @@ namespace rose {
     }
 
     bool AntiAliasedDrawing::renderLine(gm::Context &context, Position p0, Position p1) {
-        std::cout << __PRETTY_FUNCTION__ << "Start\n";
         switch (mDrawingType) {
             case SimpleLine: {
                 gm::DrawColorGuard drawColorGuard{context, mColor};
@@ -80,7 +79,6 @@ namespace rose {
 
                         context.fillRect(Rectangle{0, 1, length, mWidth}, mColor);
                     } else {
-                        std::cout << __PRETTY_FUNCTION__ << "End\n";
                         return false;
                     }
                 }
@@ -89,7 +87,6 @@ namespace rose {
                 Rectangle dst{p0, textureSize};
                 dst.x -= cos(angleRad);
                 dst.y -= sin(angleRad);
-                std::cout << __PRETTY_FUNCTION__ << "End\n";
                 return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
                                             Position{0, src.h / 2}) == 0;
             }
@@ -102,12 +99,10 @@ namespace rose {
 
                 Rectangle src{0, 0, NubWidth, NubHeight};
                 Rectangle dst{p0.x, p0.y - mWidth * NubHeight, util::roundToInt(length) + 1, mWidth * NubHeight * 2};
-                std::cout << __PRETTY_FUNCTION__ << "End\n";
                 return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
                                             Position{0, dst.h / 2}) == 0;
             }
         }
-        std::cout << __PRETTY_FUNCTION__ << "End\n";
         return false;
     }
 }
