@@ -22,10 +22,10 @@ namespace rose {
         bool mGridOverlayObjects{true};
 
         bool mDrawLatLon{false};
-        bool mDrawPrimeMeridian{true};
-        bool mDrawInternationalDateLine{true};
-        bool mDrawEquator{true};
-        bool mDrawTropics{true};
+        bool mDrawPrimeMeridian{false};
+        bool mDrawInternationalDateLine{false};
+        bool mDrawEquator{false};
+        bool mDrawTropics{false};
 
         /// The map projection type.
         MapProjectionType mProjection{};
