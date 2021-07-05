@@ -55,12 +55,15 @@ namespace rose {
                         }
                     }
 
+                    std::cout << "DrawEquator\n";
                     if (mDrawEquator)
                         mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
 
+                    std::cout << "DrawPrimeMeridian\n";
                     if (mDrawPrimeMeridian)
                         mapProjection->drawLongitude(context, antiAliasedDrawing, PrimeMeridian, 90., textureRect);
 
+                    std::cout << "DrawInternationalDateLine\n";
                     if (mDrawInternationalDateLine) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f});
                         mapProjection->drawMapLine(context, antiAliasedDrawing, textureRect,
@@ -68,6 +71,7 @@ namespace rose {
                                                    InternationalDateLine.end());
                     }
 
+                    std::cout << "DrawTropics\n";
                     if (mDrawTropics) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
                         mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
