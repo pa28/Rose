@@ -367,6 +367,7 @@ namespace rose {
             colorBackgroundMask(context, mInactiveBG, mInactiveColor, mActiveColor, mInvert ? 1.0 : 0.);
         }
 
+        // ToDo: Why is mBorder NULL sometimes? Is that correct?
         if (mBorder)
             context.renderCopy(mBorder, dst);
         context.renderCopy(mInactiveBG, dst);
