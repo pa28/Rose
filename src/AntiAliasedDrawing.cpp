@@ -40,6 +40,7 @@ namespace rose {
     }
 
     bool AntiAliasedDrawing::renderLine(gm::Context &context, Position p0, Position p1) {
+        std::cout << __PRETTY_FUNCTION__ << "Start\n";
         switch (mDrawingType) {
             case SimpleLine: {
                 gm::DrawColorGuard drawColorGuard{context, mColor};
@@ -50,7 +51,6 @@ namespace rose {
                 auto dy = p1.y - p0.y;
                 auto length = util::roundToInt(sqrt((double) (dx * dx) + (double) (dy * dy)));
                 if (length == 0) {
-                    std::cout << __PRETTY_FUNCTION__ << " Line segment zero length.\n";
                     return true;
                 }
                 length += 2;
@@ -79,14 +79,17 @@ namespace rose {
                         context.renderClear();
 
                         context.fillRect(Rectangle{0, 1, length, mWidth}, mColor);
-                    } else
+                    } else {
+                        std::cout << __PRETTY_FUNCTION__ << "Start\n";
                         return false;
+                    }
                 }
 
                 Rectangle src{Position::Zero, textureSize};
                 Rectangle dst{p0, textureSize};
                 dst.x -= cos(angleRad);
                 dst.y -= sin(angleRad);
+                std::cout << __PRETTY_FUNCTION__ << "Start\n";
                 return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
                                             Position{0, src.h / 2}) == 0;
             }
@@ -99,10 +102,12 @@ namespace rose {
 
                 Rectangle src{0, 0, NubWidth, NubHeight};
                 Rectangle dst{p0.x, p0.y - mWidth * NubHeight, util::roundToInt(length) + 1, mWidth * NubHeight * 2};
+                std::cout << __PRETTY_FUNCTION__ << "Start\n";
                 return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
                                             Position{0, dst.h / 2}) == 0;
             }
         }
+        std::cout << __PRETTY_FUNCTION__ << "Start\n";
         return false;
     }
 }
