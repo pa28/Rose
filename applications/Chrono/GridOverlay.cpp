@@ -73,11 +73,17 @@ namespace rose {
 
                     std::cout << "DrawTropics\n";
                     if (mDrawTropics) {
+			std::cout << "Set Color\n";
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
+			std::cout << "Draw 1\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
+			std::cout << "Draw 2\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -TropicLatitude, textureRect);
+			std::cout << "Draw 3\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, ArcticCircle, textureRect);
+			std::cout << "Draw 4\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -ArcticCircle, textureRect);
+			std::cout << "Draw done\n";
                     }
                 }
             } else {
