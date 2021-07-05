@@ -27,36 +27,38 @@ namespace rose {
         Environment &environment{Environment::getEnvironment()};
 
         mKeyboardShortcutCallback = [&](uint32_t shortcutCode, bool pressed, uint repeat) {
-            MapProjectionType projectionType = mProjection;
-            MapDepiction mapDepiction = mMapDepiction;
-            switch (static_cast<ShortCutCode>(shortcutCode)) {
-                case MercatorProjection:
-                    projectionType = MapProjectionType::Mercator;
-                    break;
-                case StationMercatorProjection:
-                    projectionType = MapProjectionType::StationMercator;
-                    break;
-                case AzimuthalProjection:
-                    projectionType = MapProjectionType::StationAzimuthal;
-                    break;
-                case TerrainMap:
-                    mapDepiction = MapDepiction::Terrain;
-                    break;
-                case CountryMap:
-                    mapDepiction = MapDepiction::Countries;
-                    break;
-            }
+            if (!pressed) {
+                MapProjectionType projectionType = mProjection;
+                MapDepiction mapDepiction = mMapDepiction;
+                switch (static_cast<ShortCutCode>(shortcutCode)) {
+                    case MercatorProjection:
+                        projectionType = MapProjectionType::Mercator;
+                        break;
+                    case StationMercatorProjection:
+                        projectionType = MapProjectionType::StationMercator;
+                        break;
+                    case AzimuthalProjection:
+                        projectionType = MapProjectionType::StationAzimuthal;
+                        break;
+                    case TerrainMap:
+                        mapDepiction = MapDepiction::Terrain;
+                        break;
+                    case CountryMap:
+                        mapDepiction = MapDepiction::Countries;
+                        break;
+                }
 
-            if (projectionType != mProjection) {
-                mProjection = projectionType;
-                Settings::getSettings().setValue(set::ChronoMapProjection, static_cast<int>(mProjection));
-                getApplication().redrawBackground();
-            }
+                if (projectionType != mProjection) {
+                    mProjection = projectionType;
+                    Settings::getSettings().setValue(set::ChronoMapProjection, static_cast<int>(mProjection));
+                    getApplication().redrawBackground();
+                }
 
-            if (mapDepiction != mMapDepiction) {
-                mMapDepiction = mapDepiction;
-                Settings::getSettings().setValue(set::ChronoMapDepiction, static_cast<int>(mMapDepiction));
-                cacheCurrentMaps();
+                if (mapDepiction != mMapDepiction) {
+                    mMapDepiction = mapDepiction;
+                    Settings::getSettings().setValue(set::ChronoMapDepiction, static_cast<int>(mMapDepiction));
+                    cacheCurrentMaps();
+                }
             }
         };
     }
