@@ -25,6 +25,9 @@ namespace rose {
                         mTexture.reset();
                 }
 
+                if (mTexture && mTexture.getSize() != widgetRect.size())
+                    mTexture.reset();
+
                 if (!mTexture) {
                     Rectangle textureRect{Position{}, widgetRect.size()};
                     mTexture = gm::Texture{context, widgetRect.size()};
