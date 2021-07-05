@@ -55,15 +55,12 @@ namespace rose {
                         }
                     }
 
-                    std::cout << "DrawEquator\n";
                     if (mDrawEquator)
                         mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
 
-                    std::cout << "DrawPrimeMeridian\n";
                     if (mDrawPrimeMeridian)
                         mapProjection->drawLongitude(context, antiAliasedDrawing, PrimeMeridian, 90., textureRect);
 
-                    std::cout << "DrawInternationalDateLine\n";
                     if (mDrawInternationalDateLine) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f});
                         mapProjection->drawMapLine(context, antiAliasedDrawing, textureRect,
@@ -71,28 +68,19 @@ namespace rose {
                                                    InternationalDateLine.end());
                     }
 
-                    std::cout << "DrawTropics\n";
                     if (mDrawTropics) {
-			std::cout << "Set Color\n";
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
-			std::cout << "Draw 1\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
-			std::cout << "Draw 2\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -TropicLatitude, textureRect);
-			std::cout << "Draw 3\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, ArcticCircle, textureRect);
-			std::cout << "Draw 4\n";
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -ArcticCircle, textureRect);
-			std::cout << "Draw done\n";
                     }
                 }
             } else {
                 throwContainerError();
             }
 
-            if (context.renderCopy(mTexture, widgetRect) != 0) {
-                std::cerr << __PRETTY_FUNCTION__ << "Invalid mTexture\n";
-            }
+            context.renderCopy(mTexture, widgetRect);
         }
     }
 
