@@ -16,10 +16,6 @@ namespace rose {
     }
 
     void AntiAliasedDrawing::setWidthColor(gm::Context &context, int width, color::RGBA rgba, Size& widgetSize) {
-        if (mColor != rgba || mWidth != width || mWidgetSize != widgetSize) {
-            mTexture.reset();
-        }
-
         mColor = rgba;
         mWidth = width;
         mWidgetSize = widgetSize;
