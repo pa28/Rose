@@ -28,7 +28,6 @@ namespace rose {
                 if (mTexture && mTexture.getSize() != widgetRect.size())
                     mTexture.reset();
 
-#if 0
                 if (!mTexture) {
                     Rectangle textureRect{Position{}, widgetRect.size()};
                     mTexture = gm::Texture{context, widgetRect.size()};
@@ -37,6 +36,7 @@ namespace rose {
                     gm::DrawColorGuard drawColorGuard{context, color::RGBA::TransparentBlack};
                     context.renderClear();
 
+#if 0
                     AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::SimpleRectangle};
                     antiAliasedDrawing.setWidthColor(context, 2, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
 
@@ -76,8 +76,8 @@ namespace rose {
                         mapProjection->drawLatitude(context, antiAliasedDrawing, ArcticCircle, textureRect);
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -ArcticCircle, textureRect);
                     }
-                }
 #endif
+                }
             } else {
                 throwContainerError();
             }
