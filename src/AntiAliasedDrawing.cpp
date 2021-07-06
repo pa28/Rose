@@ -55,7 +55,7 @@ namespace rose {
         switch (mDrawingType) {
             case SimpleLine: {
                 gm::DrawColorGuard drawColorGuard{context, mColor};
-                return SDL_RenderDrawLineF(context.get(), p0.x, p0.y, p1.x, p1.y) == 0;
+                return SDL_RenderDrawLine(context.get(), p0.x, p0.y, p1.x, p1.y) == 0;
             }
             case SimpleRectangle: {
                 auto dx = p1.x - p0.x;
