@@ -60,6 +60,7 @@ namespace rose {
                 std::cout << __PRETTY_FUNCTION__ << " Length: " << length << ", Angle: " << angle << '\n';
 
                 Size textureSize{length, mWidth + 2};
+                std::cout << "textureSize: " << textureSize << '\n';
                 if (mTexture) {
                     auto size = mTexture.getSize();
                     if (textureSize.w != size.w || textureSize.h != size.w)
@@ -67,8 +68,9 @@ namespace rose {
                 }
 
                 if (!mTexture) {
+                    std::cout << "New Texture\n";
                     mTexture = gm::Texture{context, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-                                           length, mWidth + 2};
+                                           textureSize.w, textureSize.h};
                     if (mTexture) {
                         mTexture.setBlendMode(SDL_BLENDMODE_BLEND);
                         gm::RenderTargetGuard renderTargetGuard{context, mTexture};
