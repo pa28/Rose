@@ -55,7 +55,6 @@ namespace rose {
                         }
                     }
 
-#if 0
                     if (mDrawEquator)
                         mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
 
@@ -69,7 +68,6 @@ namespace rose {
                                                    InternationalDateLine.begin(),
                                                    InternationalDateLine.end());
                     }
-#endif
 
                     if (mDrawTropics) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});

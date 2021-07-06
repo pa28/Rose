@@ -587,11 +587,13 @@ namespace rose {
             else {
                 // If distance from p0 to p1 is not small enough, pick a mid point m and
                 // drawInterpolate g0 to m and m to g1.
+#if 0
                 if (auto r = g0.distance(g1); r > deg2rad(0.5)) {
                     auto midPoint = g0.midpoint(g1, r, 0.5);
                     drawInterpolate(context, drawing, mapRect, g0, midPoint);
                     drawInterpolate(context, drawing, mapRect, midPoint, g1);
                 }
+#endif
             }
         }
 
