@@ -82,7 +82,8 @@ namespace rose {
                 throwContainerError();
             }
 
-            context.renderCopy(mTexture, widgetRect);
+            if (mTexture)
+                context.renderCopy(mTexture, widgetRect);
         }
     }
 
