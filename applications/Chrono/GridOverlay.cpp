@@ -14,7 +14,6 @@ namespace rose {
     }
 
     void GridOverlay::draw(gm::Context &context, const Position &containerPosition) {
-#if 0
         Rectangle widgetRect{containerPosition + mPos, mSize};
 
         if (mGridOverlayObjects) {
@@ -29,6 +28,7 @@ namespace rose {
                 if (mTexture && mTexture.getSize() != widgetRect.size())
                     mTexture.reset();
 
+#if 0
                 if (!mTexture) {
                     Rectangle textureRect{Position{}, widgetRect.size()};
                     mTexture = gm::Texture{context, widgetRect.size()};
@@ -77,13 +77,13 @@ namespace rose {
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -ArcticCircle, textureRect);
                     }
                 }
+#endif
             } else {
                 throwContainerError();
             }
 
             context.renderCopy(mTexture, widgetRect);
         }
-#endif
     }
 
     Rectangle GridOverlay::layout(gm::Context &context, const Rectangle &screenRect) {
