@@ -36,7 +36,6 @@ namespace rose {
                     gm::DrawColorGuard drawColorGuard{context, color::RGBA::TransparentBlack};
                     context.renderClear();
 
-#if 0
                     AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::SimpleRectangle};
                     antiAliasedDrawing.setWidthColor(context, 2, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
 
@@ -56,6 +55,7 @@ namespace rose {
                         }
                     }
 
+#if 0
                     if (mDrawEquator)
                         mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
 
