@@ -55,7 +55,7 @@ namespace rose {
                         }
                     }
 
-#if 0
+#if 1
                     if (mDrawEquator)
                         mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
 
