@@ -167,8 +167,12 @@ namespace rose::gm {
         ));
 
         if (mSdlWindow) {
+            SDL_version sdlVersion;
+            SDL_VERSION(&sdlVersion);
             std::cout << "    Number of displays: " << SDL_GetNumVideoDisplays() << ", On: "
-                      << SDL_GetWindowDisplayIndex(mSdlWindow.get()) << '\n';
+                      << SDL_GetWindowDisplayIndex(mSdlWindow.get()) << '\n'
+                      << "    Version " << (int) sdlVersion.major << '.' << (int) sdlVersion.minor << '.'
+                      << (int) sdlVersion.patch << '\n';
             for (int i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
                 SDL_Rect displayBounds{0, 0, 0, 0};
 
