@@ -69,6 +69,7 @@ namespace rose {
                                                    InternationalDateLine.end());
                     }
 
+#endif
                     if (mDrawTropics) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
                         mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
@@ -76,7 +77,6 @@ namespace rose {
                         mapProjection->drawLatitude(context, antiAliasedDrawing, ArcticCircle, textureRect);
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -ArcticCircle, textureRect);
                     }
-#endif
                 }
             } else {
                 throwContainerError();
