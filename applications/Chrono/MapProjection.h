@@ -594,7 +594,7 @@ namespace rose {
                     break;
             }
 
-            for (auto r = r0.distance(r1); r > deg2rad(0.7); r = r0.distance(r1)) {
+            for (auto r = r0.distance(r1); r > deg2rad(0.25); r = r0.distance(r1)) {
                 if (plotPoints(r0, r1)) {
                     auto midPoint = r0.midpoint(r1, r, 0.5);
                     if (plotPoints(r0, midPoint)) {

@@ -57,6 +57,8 @@ namespace rose {
                 float angleRad = atan2((float) dy, (float) dx);
                 float angle = util::rad2deg(angleRad);
 
+                std::cout << __PRETTY_FUNCTION__ << " Length: " << length << ", Angle: " << angle << '\n';
+
                 Size textureSize{length, mWidth + 2};
                 if (mTexture) {
                     auto size = mTexture.getSize();
