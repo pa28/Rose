@@ -29,6 +29,7 @@ namespace rose {
                     mTexture.reset();
 
                 if (!mTexture) {
+                    auto widgetSize = widgetRect.size();
                     Rectangle textureRect{Position{}, widgetRect.size()};
                     mTexture = gm::Texture{context, widgetRect.size()};
                     mTexture.setBlendMode(SDL_BLENDMODE_BLEND);
@@ -37,7 +38,7 @@ namespace rose {
                     context.renderClear();
 
                     AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::SimpleRectangle};
-                    antiAliasedDrawing.setWidthColor(context, 2, color::RGBA{0.4f, 1.f, 0.4f, 1.0f});
+                    antiAliasedDrawing.setWidthColor(context, 2, color::RGBA{0.4f, 1.f, 0.4f, 1.0f}, widgetSize);
 
                     if (mDrawLatLon) {
                         for (auto lat = 15; lat <= 75; lat += 15) {
@@ -63,14 +64,14 @@ namespace rose {
 
 
                     if (mDrawInternationalDateLine) {
-                        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f});
+                        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f}, widgetSize);
                         mapProjection->drawMapLine(context, antiAliasedDrawing, textureRect,
                                                    InternationalDateLine.begin(),
                                                    InternationalDateLine.end());
                     }
 
                     if (mDrawTropics) {
-                        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
+                        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f}, widgetSize);
                         mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
                         mapProjection->drawLatitude(context, antiAliasedDrawing, -TropicLatitude, textureRect);
                         mapProjection->drawLatitude(context, antiAliasedDrawing, ArcticCircle, textureRect);

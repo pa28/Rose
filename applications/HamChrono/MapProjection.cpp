@@ -813,7 +813,7 @@ namespace rose {
                 break;
         }
 
-        mDrawingContext->setColor(renderer, color::RGBA{218u,165u,32u, 255u});
+        mDrawingContext->setColor(renderer, color::RGBA{218u, 165u, 32u, 255u}, Size());
         mapPoints.draw([&](const Position &p0, const Position &p1) -> bool {
             return mDrawingContext->renderLine(renderer, p0+mapPos, p1+mapPos);
         });
@@ -896,7 +896,7 @@ namespace rose {
                     break;
             }
 
-            mDrawingContext->setColor(renderer, view.second);
+            mDrawingContext->setColor(renderer, view.second, Size());
             mapPoints.draw([&](const Position &p0, const Position &p1) -> bool {
                 return mDrawingContext->renderLine(renderer, p0 + mapPos, p1 + mapPos);
             });

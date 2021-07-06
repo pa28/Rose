@@ -38,6 +38,7 @@ namespace rose {
         int mWidth{1};
         int mScaledWidth{};
         gm::Texture mTexture{};
+        Size mWidgetSize{};
 
     public:
         AntiAliasedDrawing() = default;
@@ -57,15 +58,15 @@ namespace rose {
          * @param width The width of the line in pixels.
          * @param rgba The line colour RGBA.
          */
-        void setWidthColor(gm::Context &context, int width, color::RGBA rgba);
+        void setWidthColor(gm::Context &context, int width, color::RGBA rgba, Size& widgetSize);
 
         /**
          * @brief Set the colour of the line to be drawn.
          * @param context The graphics context to use.
          * @param rgba The line colour RGBA.
          */
-        void setColor(gm::Context &context, color::RGBA rgba) {
-            setWidthColor(context, mWidth, rgba);
+        void setColor(gm::Context &context, color::RGBA rgba, Size& widgetSize) {
+            setWidthColor(context, mWidth, rgba, widgetSize);
         }
 
         /**

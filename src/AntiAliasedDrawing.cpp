@@ -15,17 +15,32 @@ namespace rose {
         mDrawingType = drawingType;
     }
 
-    void AntiAliasedDrawing::setWidthColor(gm::Context &context, int width, color::RGBA rgba) {
+    void AntiAliasedDrawing::setWidthColor(gm::Context &context, int width, color::RGBA rgba, Size& widgetSize) {
+        if (mColor != rgba || mWidth != width || mWidgetSize != widgetSize) {
+            mTexture.reset();
+        }
+
         mColor = rgba;
         mWidth = width;
+        mWidgetSize = widgetSize;
+
 
         switch (mDrawingType) {
             case SimpleLine:
-            case SimpleRectangle:
-                if (mTexture)
-                    mTexture.reset();
                 break;
-            case AntiAliased:
+            case SimpleRectangle: {
+                mTexture = gm::Texture{context, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+                                       std::max(widgetSize.w, widgetSize.h) + 2, mWidth + 2};
+                gm::RenderTargetGuard renderTargetGuard{context, mTexture};
+                mTexture.setBlendMode(SDL_BLENDMODE_BLEND);
+                auto transparent = rgba;
+                transparent.a() = 0.;
+                context.fillRect(Rectangle{0, 0, mTexture.getSize().w, mTexture.getSize().h}, transparent);
+                context.fillRect(Rectangle{0, 1, mTexture.getSize().w, mTexture.getSize().h - 2},
+                                 mColor);
+            }
+                break;
+            case AntiAliased: {
                 mTexture = gm::Texture{context, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
                                        NubWidth, NubHeight};
                 gm::RenderTargetGuard renderTargetGuard{context, mTexture};
@@ -35,6 +50,7 @@ namespace rose {
                 context.fillRect(Rectangle{0, 0, NubWidth, NubHeight}, transparent);
                 context.fillRect(Rectangle{0, (NubHeight - NubColorSize) / 2, NubWidth, (NubHeight - NubColorSize) / 2},
                                  mColor);
+            }
                 break;
         }
     }
@@ -59,44 +75,17 @@ namespace rose {
 
                 std::cout << __PRETTY_FUNCTION__ << " Length: " << length << ", Angle: " << angle << '\n';
 
-                Size textureSize{length, mWidth + 2};
-                std::cout << "textureSize: " << textureSize << '\n';
                 if (mTexture) {
-                    auto size = mTexture.getSize();
-                    if (textureSize.w != size.w || textureSize.h != size.w)
-                        mTexture.reset();
+                    Rectangle src{Position::Zero, Size{length, mTexture.getSize().h}};
+                    Rectangle dst{p0, src.size()};
+                    dst.x -= util::roundToInt(cos(angleRad));
+                    dst.y -= util::roundToInt(sin(angleRad));
+                    std::cout << "RenderRectangle" << src << dst << ' ' << angle << '\n';
+                    return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
+                                                Position{0, src.h / 2}) == 0;
+                } else {
+                    return false;
                 }
-
-                if (!mTexture) {
-                    std::cout << "New Texture\n";
-                    mTexture = gm::Texture{context, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-                                           textureSize.w, textureSize.h};
-                    if (mTexture) {
-                        std::cout << "New Texture good.\n";
-                        mTexture.setBlendMode(SDL_BLENDMODE_BLEND);
-                        gm::RenderTargetGuard renderTargetGuard{context, mTexture};
-
-                        auto transparent = mColor;
-                        transparent.a() = 0.;
-
-                        std::cout << "DrawColorGuard\n";
-                        gm::DrawColorGuard drawColorGuard{context, transparent};
-                        context.renderClear();
-
-                        std::cout << "FillRect\n";
-                        context.fillRect(Rectangle{0, 1, length, mWidth}, mColor);
-                    } else {
-                        return false;
-                    }
-                }
-
-                Rectangle src{Position::Zero, textureSize};
-                Rectangle dst{p0, textureSize};
-                dst.x -= cos(angleRad);
-                dst.y -= sin(angleRad);
-                std::cout << "RenderRectangle" << src << dst << ' ' << angle << '\n';
-                return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
-                                            Position{0, src.h / 2}) == 0;
             }
             case AntiAliased: {
                 auto dx = p1.x - p0.x;
