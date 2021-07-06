@@ -556,12 +556,26 @@ namespace rose {
             } while (!g0.end);
         }
 
-        void drawInterpolate(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, GeoPosition &g0,
-                             GeoPosition &g1) {
-            auto r0 = g0.toRadians();
-            auto r1 = g1.toRadians();
+        void drawInterpolate(gm::Context &context, AntiAliasedDrawing &drawing, Rectangle mapRect, GeoPosition &geo0,
+                             GeoPosition &geo1) {
+            auto r0 = geo0.toRadians();
+            auto r1 = geo1.toRadians();
             int splitPixel = 0;
             std::function<bool(const Position &p0, const Position &p1)> gapTest;
+
+            /**
+             * Plot a line between to GeoPositions if the line will not cross a gap. Return true if the plot
+             * would cross the gap.
+             */
+            auto plotPoints = [this,splitPixel,&mapRect,&gapTest,&drawing,&context](GeoPosition &g0, GeoPosition &g1) -> bool {
+                auto p0 = geoToMap(g0, mProjection, splitPixel, mapRect) + mapRect.position();
+                auto p1 = geoToMap(g1, mProjection, splitPixel, mapRect) + mapRect.position();
+                if (gapTest(p0, p1)) {
+                    drawing.renderLine(context, p0, p1);
+                    return false;
+                }
+                return true;
+            };
 
             switch (mProjection) {
                 case MapProjectionType::StationAzimuthal:
@@ -580,6 +594,20 @@ namespace rose {
                     break;
             }
 
+            for (auto r = r0.distance(r1); r > deg2rad(0.25); r = r0.distance(r1)) {
+                if (plotPoints(r0, r1)) {
+                    auto midPoint = r0.midpoint(r1, r, 0.5);
+                    if (plotPoints(r0, midPoint)) {
+                        plotPoints(midPoint, r1);
+                        r1 = midPoint;
+                    } else {
+                        r0 = midPoint;
+                    }
+                } else {
+                    break;
+                }
+            }
+#if 0
             auto p0 = geoToMap(g0.toRadians(), mProjection, splitPixel, mapRect) + mapRect.position();
             auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRect) + mapRect.position();
             if (gapTest(p0, p1))
@@ -588,14 +616,13 @@ namespace rose {
                 // If distance from p0 to p1 is not small enough, pick a mid point m and
                 // drawInterpolate g0 to m and m to g1.
                 // ToDo: This recursion is causing the program to crash on R Pi 4. Need a non-recursive solution.
-#if 0
                 if (auto r = g0.distance(g1); r > deg2rad(0.5)) {
                     auto midPoint = g0.midpoint(g1, r, 0.5);
                     drawInterpolate(context, drawing, mapRect, g0, midPoint);
                     drawInterpolate(context, drawing, mapRect, midPoint, g1);
                 }
-#endif
             }
+#endif
         }
 
         /**
