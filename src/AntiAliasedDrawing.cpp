@@ -90,11 +90,11 @@ namespace rose {
                     }
                 }
 
-                std::cout << "RenderRectangle\n";
                 Rectangle src{Position::Zero, textureSize};
                 Rectangle dst{p0, textureSize};
                 dst.x -= cos(angleRad);
                 dst.y -= sin(angleRad);
+                std::cout << "RenderRectangle" << src << dst << ' ' << angle << '\n';
                 return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
                                             Position{0, src.h / 2}) == 0;
             }
