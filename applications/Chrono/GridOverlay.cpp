@@ -14,6 +14,7 @@ namespace rose {
     }
 
     void GridOverlay::draw(gm::Context &context, const Position &containerPosition) {
+#if 0
         Rectangle widgetRect{containerPosition + mPos, mSize};
 
         if (mGridOverlayObjects) {
@@ -82,6 +83,7 @@ namespace rose {
 
             context.renderCopy(mTexture, widgetRect);
         }
+#endif
     }
 
     Rectangle GridOverlay::layout(gm::Context &context, const Rectangle &screenRect) {
