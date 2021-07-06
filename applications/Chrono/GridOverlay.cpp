@@ -62,6 +62,7 @@ namespace rose {
                     if (mDrawPrimeMeridian)
                         mapProjection->drawLongitude(context, antiAliasedDrawing, PrimeMeridian, 90., textureRect);
 
+#endif
                     if (mDrawInternationalDateLine) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f});
                         mapProjection->drawMapLine(context, antiAliasedDrawing, textureRect,
@@ -69,7 +70,6 @@ namespace rose {
                                                    InternationalDateLine.end());
                     }
 
-#endif
                     if (mDrawTropics) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f});
                         mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
