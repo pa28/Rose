@@ -55,13 +55,14 @@ namespace rose {
                         }
                     }
 
+#if 0
                     if (mDrawEquator)
                         mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
 
                     if (mDrawPrimeMeridian)
                         mapProjection->drawLongitude(context, antiAliasedDrawing, PrimeMeridian, 90., textureRect);
 
-#if 0
+
                     if (mDrawInternationalDateLine) {
                         antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f});
                         mapProjection->drawMapLine(context, antiAliasedDrawing, textureRect,
