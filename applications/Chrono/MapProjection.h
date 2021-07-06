@@ -567,7 +567,7 @@ namespace rose {
              * Plot a line between to GeoPositions if the line will not cross a gap. Return true if the plot
              * would cross the gap.
              */
-            auto plotPoints = [this,splitPixel,&mapRect,&gapTest,&drawing,&context](GeoPosition &g0, GeoPosition &g1) -> bool {
+            auto plotPoints = [this,&splitPixel,&mapRect,&gapTest,&drawing,&context](GeoPosition &g0, GeoPosition &g1) -> bool {
                 auto p0 = geoToMap(g0, mProjection, splitPixel, mapRect) + mapRect.position();
                 auto p1 = geoToMap(g1, mProjection, splitPixel, mapRect) + mapRect.position();
                 if (gapTest(p0, p1)) {
