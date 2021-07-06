@@ -73,14 +73,11 @@ namespace rose {
                 float angleRad = atan2((float) dy, (float) dx);
                 float angle = util::rad2deg(angleRad);
 
-                std::cout << __PRETTY_FUNCTION__ << " Length: " << length << ", Angle: " << angle << '\n';
-
                 if (mTexture) {
                     Rectangle src{Position::Zero, Size{length, mTexture.getSize().h}};
                     Rectangle dst{p0, src.size()};
                     dst.x -= util::roundToInt(cos(angleRad));
                     dst.y -= util::roundToInt(sin(angleRad));
-                    std::cout << "RenderRectangle" << src << dst << ' ' << angle << '\n';
                     return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
                                                 Position{0, src.h / 2}) == 0;
                 } else {
