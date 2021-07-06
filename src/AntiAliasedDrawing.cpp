@@ -72,21 +72,25 @@ namespace rose {
                     mTexture = gm::Texture{context, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
                                            textureSize.w, textureSize.h};
                     if (mTexture) {
+                        std::cout << "New Texture good.\n";
                         mTexture.setBlendMode(SDL_BLENDMODE_BLEND);
                         gm::RenderTargetGuard renderTargetGuard{context, mTexture};
 
                         auto transparent = mColor;
                         transparent.a() = 0.;
 
+                        std::cout << "DrawColorGuard\n";
                         gm::DrawColorGuard drawColorGuard{context, transparent};
                         context.renderClear();
 
+                        std::cout << "FillRect\n";
                         context.fillRect(Rectangle{0, 1, length, mWidth}, mColor);
                     } else {
                         return false;
                     }
                 }
 
+                std::cout << "RenderRectangle\n";
                 Rectangle src{Position::Zero, textureSize};
                 Rectangle dst{p0, textureSize};
                 dst.x -= cos(angleRad);
