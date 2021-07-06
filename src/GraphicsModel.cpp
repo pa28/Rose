@@ -193,7 +193,11 @@ namespace rose::gm {
                 return false;
             }
         } else {
-            std::cerr << "Could not create SDL_Window: " << SDL_GetError() << '\n';
+            std::string sdlError{SDL_GetError()};
+            std::cerr << "Could not create SDL_Window: " << sdlError << '\n';
+            if (sdlError == "Could not initialize EGL") {
+                throw std::runtime_error("If X11 is running, check DISPLAY environment variable.");
+            }
             ErrorCode = RoseErrorCode::SDL_WINDOW_CREATE;
             return false;
         }
