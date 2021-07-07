@@ -11,6 +11,7 @@
 #include <tuple>
 #include <utility>
 #include "Color.h"
+#include "Math.h"
 
 namespace rose {
 
@@ -95,17 +96,49 @@ namespace rose {
         T x{0}, y{0};
 
         constexpr Position() noexcept = default;
-        constexpr Position(T X, T Y) noexcept : x(X), y(Y) {}
+
+        template<typename O>
+        constexpr Position(O X, O Y) noexcept {
+            if constexpr (std::is_same_v<T,O>) {
+                x = X;
+                y = Y;
+            } else if constexpr (std::is_integral_v<T> && std::is_floating_point_v<O>) {
+                x = util::roundToInt(X);
+                y = util::roundToInt(Y);
+            } else {
+                x = static_cast<T>(X);
+                y = static_cast<T>(Y);
+            }
+        }
+
         constexpr Position(const Position &p) = default;
-        constexpr Position(Position &&p) = default;
+        constexpr Position(Position &&p)  noexcept = default;
         constexpr Position& operator=(const Position &p) = default;
         constexpr Position& operator=(Position &&p) = default;
 
         constexpr explicit Position(T p) noexcept : x(p), y(p) {}
 
         /// Add two positions together.
-        constexpr Position operator+(const Position &p) const noexcept {
-            return Position{x + p.x, y + p.y};
+        template <typename O>
+        constexpr Position operator+(const Position<O> &p) const noexcept {
+            if constexpr (std::is_same_v<T,O>) {
+                return Position{x + p.x, y + p.y};
+            } else if constexpr (std::is_integral_v<T> && std::is_floating_point_v<O>) {
+                return Position{x + util::roundToInt(p.x), y + util::roundToInt(p.y)};
+            } else {
+                return Position{x + static_cast<T>(p.x), y + static_cast<T>(p.y)};
+            }
+        }
+
+        template<typename O>
+        Position<O> as() {
+            if constexpr (std::is_same_v<T,O>) {
+                return Position<O>{x, y};
+            } else if constexpr (std::is_integral_v<O> && std::is_floating_point_v<T>) {
+                return Position<O>{util::roundToInt(x), util::roundToInt(y)};
+            } else {
+                return Position<O>{static_cast<O>(x), static_cast<O>(y)};
+            }
         }
 
         bool operator!=(const Position &other) const noexcept {
@@ -141,10 +174,6 @@ namespace rose {
             auto dX = other.x - x;
             auto dY = other.y - y;
             return dX*dX + dY*dY;
-        }
-
-        static Position& Zero() {
-            return Position{0};
         }
     };
 
@@ -272,7 +301,7 @@ namespace rose {
 
         /// Get a Position from a Rectangle.
         [[nodiscard]] Position<int> position() const noexcept {
-            return Position{x,y};
+            return Position<int>{x,y};
         }
 
         /// Get a Size from a Rectangle
@@ -282,12 +311,12 @@ namespace rose {
 
         /// Get the Positions of top-left and bottom-right corners defined by the Rectangle
         [[nodiscard]] std::pair<Position<int>,Position<int>> primeCorners() const noexcept {
-            return std::make_pair(Position{x,y}, Position{x+w,y+h});
+            return std::make_pair(Position<int>{x,y}, Position<int>{x+w,y+h});
         }
 
         /// Get the Positions of the top-right and bottom-left corners defined by the Rectangle
         [[nodiscard]] std::pair<Position<int>,Position<int>> crossCorners() const noexcept {
-            return std::make_pair(Position{x+w,y}, Position{x,y+h});
+            return std::make_pair(Position<int>{x+w,y}, Position<int>{x,y+h});
         }
 
         /// Get the Positions of all four corners defined by the Rectangle, top to bottom, left to right.

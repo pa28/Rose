@@ -147,7 +147,7 @@ namespace rose {
         mMousePosition.x = mouseMotionEvent.x;
         mMousePosition.y = mouseMotionEvent.y;
 
-        Position relativePos{mouseMotionEvent.xrel, mouseMotionEvent.yrel};
+        Position<int> relativePos{mouseMotionEvent.xrel, mouseMotionEvent.yrel};
 
         if (auto widget = pointerWidget(mMousePosition); widget) {
             if (mPointerWidget) {
@@ -179,7 +179,7 @@ namespace rose {
 
         mMousePosition.x = util::roundToInt(fingerTouchEvent.x * (float)screenRect.w);
         mMousePosition.y = util::roundToInt(fingerTouchEvent.y * (float)screenRect.h);
-        Position relativePos{util::roundToInt(fingerTouchEvent.dx * (float)screenRect.w),
+        Position<int> relativePos{util::roundToInt(fingerTouchEvent.dx * (float)screenRect.w),
                              util::roundToInt(fingerTouchEvent.dy * (float)screenRect.h)};
 
         std::cout << "    Position: " << mMousePosition << ", dP: " << relativePos << '\n';
@@ -259,7 +259,7 @@ namespace rose {
         if (mouseWheelEvent.which == SDL_TOUCH_MOUSEID)
             return false;
 
-        Position deltaPos{mouseWheelEvent.x, mouseWheelEvent.y};
+        Position<int> deltaPos{mouseWheelEvent.x, mouseWheelEvent.y};
         if (mouseWheelEvent.direction == SDL_MOUSEWHEEL_FLIPPED) {
             deltaPos.x *= -1;
             deltaPos.y *= -1;
@@ -392,7 +392,7 @@ namespace rose {
                 windowStateChange(Exposed);
                 break;
             case SDL_WINDOWEVENT_MOVED:
-                windowPositionChange(Moved, Position{e.data1, e.data2});
+                windowPositionChange(Moved, Position<int>{e.data1, e.data2});
                 break;
             case SDL_WINDOWEVENT_RESIZED:
                 windowSizeChange(Resized, Size{e.data1, e.data2});

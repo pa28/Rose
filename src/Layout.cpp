@@ -54,13 +54,13 @@ namespace rose {
                                 contRect = Position<int>{};
                                 break;
                             case LayoutHint::Attachment::TopRight:
-                                contRect = Position{screenRect.w - contRect.w, 0};
+                                contRect = Position<int>{screenRect.w - contRect.w, 0};
                                 break;
                             case LayoutHint::Attachment::BottomLeft:
-                                contRect = Position{0, screenRect.h - contRect.h};
+                                contRect = Position<int>{0, screenRect.h - contRect.h};
                                 break;
                             case LayoutHint::Attachment::BottomRight:
-                                contRect = Position{screenRect.w - contRect.w, screenRect.h - contRect.h};
+                                contRect = Position<int>{screenRect.w - contRect.w, screenRect.h - contRect.h};
                                 break;
                             default:
                                 std::cerr << __PRETTY_FUNCTION__ << " Attachment not allowed for Primary object.\n";
@@ -91,13 +91,13 @@ namespace rose {
                                     contRect = Position<int>{};
                                     break;
                                 case LayoutHint::Attachment::TopRight:
-                                    contRect = Position{screenRect.w - contRect.w, 0};
+                                    contRect = Position<int>{screenRect.w - contRect.w, 0};
                                     break;
                                 case LayoutHint::Attachment::BottomLeft:
-                                    contRect = Position{0, screenRect.h - contRect.h};
+                                    contRect = Position<int>{0, screenRect.h - contRect.h};
                                     break;
                                 case LayoutHint::Attachment::BottomRight:
-                                    contRect = Position{screenRect.w - contRect.w, screenRect.h - contRect.h};
+                                    contRect = Position<int>{screenRect.w - contRect.w, screenRect.h - contRect.h};
                                     break;
                                 case LayoutHint::Attachment::Top:
                                     contRect.y = 0;

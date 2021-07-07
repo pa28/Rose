@@ -28,6 +28,12 @@
 
 namespace rose {
 
+#if SDL_VERSION_ATLEAST(2, 0, 10)
+    using MapPositionType = float;
+#else
+    using MapPositionType = int;
+#endif
+
     namespace set {
         static constexpr std::string_view ChronoMapProjection{"MapProjection"};
         static constexpr std::string_view ChronoMapDepiction{"MapDepiction"};
@@ -407,7 +413,7 @@ namespace rose {
          * @param mapRect The screen rectangle of the map.
          * @return The map Position<int>.
          */
-        Position<int> geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const;
+        Position<MapPositionType> geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const;
 
     public:
         MapProjection() = delete;
@@ -510,11 +516,11 @@ namespace rose {
         void drawMapLine(gm::Context &context, AntiAliasedDrawing &drawing, GeoPosition begin, Rectangle mapRectangle,
                          const std::function<GeoPosition(GeoPosition &, bool fine)> &increment) {
             int splitPixel = 0;
-            std::function<bool(const Position<int>& p0, const Position<int>& p1)> gapTest;
+            std::function<bool(const Position<MapPositionType>& p0, const Position<MapPositionType>& p1)> gapTest;
 
             switch (mProjection) {
                 case MapProjectionType::StationAzimuthal:
-                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
+                    gapTest = [&](const Position<MapPositionType>& p0, const Position<MapPositionType>& p1) -> bool {
                         auto split = mapRectangle.w / 2 + mapRectangle.x;
                         return (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split);
                     };
@@ -522,9 +528,9 @@ namespace rose {
                 case MapProjectionType::StationMercator:
                     splitPixel = projectionSplitPixel(mapRectangle.size());
                 case MapProjectionType::Mercator:
-                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
-                        return abs(p0.x - p1.x) < mapRectangle.w / 4 &&
-                               abs(p0.y - p1.y) < mapRectangle.h / 4;
+                    gapTest = [&](const Position<MapPositionType>& p0, const Position<MapPositionType>& p1) -> bool {
+                        return abs(p0.x - p1.x) < static_cast<MapPositionType>(mapRectangle.w) / 4 &&
+                               abs(p0.y - p1.y) < static_cast<MapPositionType>(mapRectangle.h) / 4;
                     };
                     break;
             }
@@ -561,7 +567,7 @@ namespace rose {
             auto r0 = geo0.toRadians();
             auto r1 = geo1.toRadians();
             int splitPixel = 0;
-            std::function<bool(const Position<int>& p0, const Position<int>& p1)> gapTest;
+            std::function<bool(const Position<MapPositionType>& p0, const Position<MapPositionType>& p1)> gapTest;
 
             /**
              * Plot a line between to GeoPositions if the line will not cross a gap. Return true if the plot
@@ -579,7 +585,7 @@ namespace rose {
 
             switch (mProjection) {
                 case MapProjectionType::StationAzimuthal:
-                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
+                    gapTest = [&](const Position<MapPositionType>& p0, const Position<MapPositionType>& p1) -> bool {
                         auto split = mapRect.w / 2 + mapRect.x;
                         return (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split);
                     };
@@ -587,7 +593,7 @@ namespace rose {
                 case MapProjectionType::StationMercator:
                     splitPixel = projectionSplitPixel(mapRect.size());
                 case MapProjectionType::Mercator:
-                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
+                    gapTest = [&](const Position<MapPositionType>& p0, const Position<MapPositionType>& p1) -> bool {
                         return abs(p0.x - p1.x) < mapRect.w / 4 &&
                                abs(p0.y - p1.y) < mapRect.h / 4;
                     };

@@ -460,7 +460,7 @@ namespace rose {
         if (mapItem == ImageId::NoImage)
             return;
 
-        auto mapPos = geoToMap(geoPosition, projection, splitPixel, mapRectangle);
+        auto mapPos = geoToMap(geoPosition, projection, splitPixel, mapRectangle).as<int>();
 
         ImageStore& imageStore{ImageStore::getStore()};
         auto iconSize = imageStore.size(mapItem);
@@ -516,9 +516,9 @@ namespace rose {
         }
     }
 
-    Position<int>
+    Position<MapPositionType>
     MapProjection::geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const {
-        Position<int> mapPos{};
+        Position<MapPositionType> mapPos{};
 
         switch (projection) {
             case MapProjectionType::StationAzimuthal: {
@@ -532,7 +532,7 @@ namespace rose {
                     R = std::min(R, R0);
                     auto dx = R * sin(B);
                     auto dy = R * cos(B);
-                    mapPos = Position{mapRect.w / 4 + util::roundToInt(dx), mapRect.h / 2 - util::roundToInt(dy)};
+                    mapPos = Position<MapPositionType>{(double) mapRect.w / 4 + dx, (double) mapRect.h / 2 - dy};
                 } else {
                     auto a = M_PI - acos(ca);
                     auto R0 = (double) mapRect.w / 4 - 1;
@@ -540,18 +540,20 @@ namespace rose {
                     R = std::min(R, R0);
                     auto dx = -R * sin(B);
                     auto dy = R * cos(B);
-                    mapPos = Position{3 * mapRect.w / 4 + util::roundToInt(dx), mapRect.h / 2 - util::roundToInt(dy)};
+                    mapPos = Position<MapPositionType>{3 * (double) mapRect.w / 4 + dx, (double) mapRect.h / 2 - dy};
                 }
             }
                 break;
             case MapProjectionType::Mercator:
-                mapPos = Position{util::roundToInt(mapRect.w * (geo.lon + M_PI) / (2. * M_PI)) % mapRect.w,
-                                  util::roundToInt(mapRect.h * (M_PI_2 - geo.lat) / M_PI)};
+                mapPos = Position<MapPositionType>{
+                        std::remainder((double) mapRect.w * (geo.lon + M_PI) / (2. * M_PI), (double) mapRect.w),
+                        mapRect.h * (M_PI_2 - geo.lat) / M_PI};
                 break;
             case MapProjectionType::StationMercator: {
-                mapPos = Position{util::roundToInt(mapRect.w * (geo.lon + M_PI) / (2. * M_PI)) % mapRect.w,
-                                  util::roundToInt(mapRect.h * (M_PI_2 - geo.lat) / M_PI)};
-                mapPos.x = (mapPos.x + mapRect.w - splitPixel) % mapRect.w;
+                mapPos = Position<MapPositionType>{
+                        std::remainder((double) mapRect.w * (geo.lon + M_PI) / (2. * M_PI), (double) mapRect.w),
+                        (double) mapRect.h * (M_PI_2 - geo.lat) / M_PI};
+                mapPos.x = std::remainder(mapPos.x + (double)(mapRect.w - splitPixel), mapRect.w);
                 break;
             }
         }

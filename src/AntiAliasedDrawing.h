@@ -11,6 +11,8 @@
 #include "Math.h"
 #include "Surface.h"
 #include "Texture.h"
+#include "Math.h"
+#include "GraphicsModel.h"
 
 namespace rose {
 
@@ -22,8 +24,10 @@ namespace rose {
     public:
         enum DrawingType {
             SimpleLine,
+#if 0
             SimpleRectangle,
             AntiAliased,
+#endif
         };
 
     protected:
@@ -76,7 +80,56 @@ namespace rose {
          * @param p1 The end point.
          * @return True if the rendering operation returned success.
          */
-        bool renderLine(gm::Context &context, Position<int> p0, Position<int> p1);
+        template<typename T>
+        bool renderLine(gm::Context &context, Position<T> p0, Position<T> p1) {
+            switch (mDrawingType) {
+                case SimpleLine: {
+                    gm::DrawColorGuard drawColorGuard{context, mColor};
+                    if constexpr (std::is_integral_v<T>)
+                        return SDL_RenderDrawLine(context.get(), p0.x, p0.y, p1.x, p1.y) == 0;
+                    else
+                        return SDL_RenderDrawLineF(context.get(), p0.x, p0.y, p1.x, p1.y) == 0;
+                }
+#if 0
+                case SimpleRectangle: {
+                    auto dx = p1.x - p0.x;
+                    auto dy = p1.y - p0.y;
+                    auto length = util::roundToInt(sqrt((double) (dx * dx) + (double) (dy * dy)));
+                    if (length == 0) {
+                        return true;
+                    }
+                    length += 2;
+
+                    float angleRad = atan2((float) dy, (float) dx);
+                    float angle = util::rad2deg(angleRad);
+
+                    if (mTexture) {
+                        Rectangle src{Position<int>{}, Size{length, mTexture.getSize().h}};
+                        Rectangle dst{p0, src.size()};
+                        dst.x -= util::roundToInt(cos(angleRad));
+                        dst.y -= util::roundToInt(sin(angleRad));
+                        return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
+                                                    Position{0, src.h / 2}) == 0;
+                    } else {
+                        return false;
+                    }
+                }
+                case AntiAliased: {
+                    auto dx = p1.x - p0.x;
+                    auto dy = p1.y - p0.y;
+                    auto length = sqrt((double) (dx * dx) + (double) (dy * dy));
+
+                    float angle = util::rad2deg(atan2((float) dy, (float) dx));
+
+                    Rectangle src{0, 0, NubWidth, NubHeight};
+                    Rectangle dst{p0.x, p0.y - mWidth * NubHeight, util::roundToInt(length) + 1, mWidth * NubHeight * 2};
+                    return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
+                                                Position{0, dst.h / 2}) == 0;
+                }
+#endif
+            }
+            return false;
+        }
     };
 }
 

@@ -67,24 +67,24 @@ public:
         switch (mLayout) {
             case TopLeft:
                 mapRectangle = Rectangle{Position<int>{}, Size{width, height}};
-                sideRect = Rectangle{Position{mapRectangle.w, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                sideRect = Rectangle{Position<int>{mapRectangle.w, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
             case TopRight:
-                mapRectangle = Rectangle{Position{screenRect.w - width, 0}, Size{width, height}};
-                sideRect = Rectangle{Position{0, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                mapRectangle = Rectangle{Position<int>{screenRect.w - width, 0}, Size{width, height}};
+                sideRect = Rectangle{Position<int>{0, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
             case BottomLeft:
-                mapRectangle = Rectangle{Position{0, screenRect.h - height}, Size{width, height}};
-                sideRect = Rectangle{Position{mapRectangle.w, mapRectangle.y},
+                mapRectangle = Rectangle{Position<int>{0, screenRect.h - height}, Size{width, height}};
+                sideRect = Rectangle{Position<int>{mapRectangle.w, mapRectangle.y},
                                      Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
             case BottomRight:
-                mapRectangle = Rectangle{Position{screenRect.w - width, screenRect.h - height}, Size{width, height}};
-                sideRect = Rectangle{Position{0, mapRectangle.y}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                mapRectangle = Rectangle{Position<int>{screenRect.w - width, screenRect.h - height}, Size{width, height}};
+                sideRect = Rectangle{Position<int>{0, mapRectangle.y}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
         }
 
