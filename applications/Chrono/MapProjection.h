@@ -404,10 +404,10 @@ namespace rose {
          * @param geo The surface geographic position.
          * @param projection The map projection type.
          * @param splitPixel The horizontal pixel to split SationMercator maps.
-         * @param mapRect The screen rectanble of the map.
-         * @return The map Position.
+         * @param mapRect The screen rectangle of the map.
+         * @return The map Position<int>.
          */
-        Position geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const;
+        Position<int> geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const;
 
     public:
         MapProjection() = delete;
@@ -430,7 +430,7 @@ namespace rose {
         }
 
         /// Draw the MapProjection
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int>& containerPosition) override;
 
         /// Layout the MapProjection
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
@@ -510,11 +510,11 @@ namespace rose {
         void drawMapLine(gm::Context &context, AntiAliasedDrawing &drawing, GeoPosition begin, Rectangle mapRectangle,
                          const std::function<GeoPosition(GeoPosition &, bool fine)> &increment) {
             int splitPixel = 0;
-            std::function<bool(const Position &p0, const Position &p1)> gapTest;
+            std::function<bool(const Position<int>& p0, const Position<int>& p1)> gapTest;
 
             switch (mProjection) {
                 case MapProjectionType::StationAzimuthal:
-                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
                         auto split = mapRectangle.w / 2 + mapRectangle.x;
                         return (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split);
                     };
@@ -522,7 +522,7 @@ namespace rose {
                 case MapProjectionType::StationMercator:
                     splitPixel = projectionSplitPixel(mapRectangle.size());
                 case MapProjectionType::Mercator:
-                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
                         return abs(p0.x - p1.x) < mapRectangle.w / 4 &&
                                abs(p0.y - p1.y) < mapRectangle.h / 4;
                     };
@@ -561,7 +561,7 @@ namespace rose {
             auto r0 = geo0.toRadians();
             auto r1 = geo1.toRadians();
             int splitPixel = 0;
-            std::function<bool(const Position &p0, const Position &p1)> gapTest;
+            std::function<bool(const Position<int>& p0, const Position<int>& p1)> gapTest;
 
             /**
              * Plot a line between to GeoPositions if the line will not cross a gap. Return true if the plot
@@ -579,7 +579,7 @@ namespace rose {
 
             switch (mProjection) {
                 case MapProjectionType::StationAzimuthal:
-                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
                         auto split = mapRect.w / 2 + mapRect.x;
                         return (p0.x < split && p1.x < split) || (p0.x > split && p1.x > split);
                     };
@@ -587,7 +587,7 @@ namespace rose {
                 case MapProjectionType::StationMercator:
                     splitPixel = projectionSplitPixel(mapRect.size());
                 case MapProjectionType::Mercator:
-                    gapTest = [&](const Position &p0, const Position &p1) -> bool {
+                    gapTest = [&](const Position<int>& p0, const Position<int>& p1) -> bool {
                         return abs(p0.x - p1.x) < mapRect.w / 4 &&
                                abs(p0.y - p1.y) < mapRect.h / 4;
                     };

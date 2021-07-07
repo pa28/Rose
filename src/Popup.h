@@ -71,7 +71,7 @@ namespace rose {
 
         Dialog(PopupWindow&&) = delete;
 
-        explicit Dialog(const Position& position) : PopupWindow() {
+        explicit Dialog(const Position<int> &position) : PopupWindow() {
             setPosition(position);
         }
 
@@ -95,7 +95,8 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<rose::Dialog> dia
     return widget;
 }
 
-inline std::shared_ptr<rose::Dialog> operator<<(std::shared_ptr<rose::Dialog> dialog, const rose::Position& position) {
+inline std::shared_ptr<rose::Dialog>
+operator<<(std::shared_ptr<rose::Dialog> dialog, const rose::Position<int> &position) {
     dialog->setPosition(position);
     return dialog;
 }
@@ -107,7 +108,8 @@ inline std::shared_ptr<rose::Dialog> operator<<(std::shared_ptr<rose::Dialog> di
  * @param position The Position.
  * @return The Widget.
  */
-inline std::shared_ptr<rose::PopupWindow> operator<<(std::shared_ptr<rose::PopupWindow> widget, const rose::Position& position) {
+inline std::shared_ptr<rose::PopupWindow>
+operator<<(std::shared_ptr<rose::PopupWindow> widget, const rose::Position<int> &position) {
     widget->setPosition(position);
     return widget;
 }

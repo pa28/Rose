@@ -13,7 +13,7 @@ namespace rose {
     Rectangle LinearLayout::layoutContent(gm::Context &context, const Rectangle &screenRect, LayoutManager::Itr first,
                                           LayoutManager::Itr last) {
         Rectangle layoutRect{};
-        Position layoutPos{};
+        Position<int> layoutPos{};
         bool isFirst = true;
 
         std::for_each(first, last, [&, *this](auto &obj){
@@ -71,7 +71,7 @@ namespace rose {
             }
         }
 
-        Position pos{};
+        Position<int> pos{};
         Rectangle layoutRect{};
         if (mStride) {
             auto sizeIdx = maxSizeList.begin();

@@ -74,7 +74,7 @@ namespace rose {
         }
     }
 
-    void Application::windowPositionChange(EventSemantics::WindowEventType type, Position position) {
+    void Application::windowPositionChange(EventSemantics::WindowEventType type, Position<int>& position) {
         if (mAppState == EventSemantics::Restored) {
             Settings &settings{Settings::getSettings()};
             auto borders = windowBorders();
@@ -289,7 +289,7 @@ namespace rose {
         Settings &settings{Settings::getSettings()};
 
         auto appSize = settings.getValue(set::SetAppSize, defaultSize);
-        auto appPos = settings.getValue(set::SetAppPosition, Position::Undefined);
+        auto appPos = settings.getValue(set::SetAppPosition, Position<int>{WINDOWPOS_UNDEFINED});
         mAppState = static_cast<EventSemantics::WindowEventType>(settings.getValue(set::SetAppState,
                                                                                    static_cast<uint>(EventSemantics::WindowEventType::Restored)));
 
@@ -327,10 +327,10 @@ namespace rose {
         mGraphicsModel.redrawBackground();
     }
 
-    std::shared_ptr<Widget> Application::pointerWidget(const Position position) {
+    std::shared_ptr<Widget> Application::pointerWidget(const Position<int>& position) {
         for (auto &content : ReverseContainerView(*mScreen)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                auto windowRect = window->getScreenRectangle(Position::Zero);
+                auto windowRect = window->getScreenRectangle(Position<int>{});
                 if (windowRect.contains(position)) {
                     return window->pointerWidget(position);
                 } else if (window->isModal()) {

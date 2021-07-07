@@ -66,7 +66,7 @@ namespace rose {
         return Frame::layout(context, screenRect);
     }
 
-    void TextButton::draw(gm::Context &context, const Position &containerPosition) {
+    void TextButton::draw(gm::Context &context, const Position<int>& containerPosition) {
         Frame::draw(context, containerPosition);
 
         if (!mTexture) {
@@ -99,7 +99,7 @@ namespace rose {
 
     Rectangle TextButton::layoutContent(gm::Context &context, const Rectangle &screenRect) {
         createTextureBlended(context);
-        return Rectangle{Position::Zero, mTextSize};
+        return Rectangle{Position<int>{}, mTextSize};
     }
 
     TextButtonLayoutManager::TextButtonLayoutManager(TextButton &textButton) : LayoutManager(), mTextButton(textButton) {
@@ -147,14 +147,14 @@ namespace rose {
         return Frame::layout(context, screenRect);
     }
 
-    void ImageButton::draw(gm::Context &context, const Position &containerPosition) {
+    void ImageButton::draw(gm::Context &context, const Position<int>& containerPosition) {
         Frame::draw(context, containerPosition);
 
         auto drawPosition = drawPadding(containerPosition) + mPos + mFramePadding.position() + Position{mFrameWidth};
 
         if (mImageId != ImageId::NoImage) {
             ImageStore& imageStore{ImageStore::getStore()};
-            Rectangle src{Position::Zero, imageStore.size(mImageId)};
+            Rectangle src{Position<int>{}, imageStore.size(mImageId)};
             Rectangle dst{drawPosition, imageStore.size(mImageId)};
 
             if (mCentreHorizontal)

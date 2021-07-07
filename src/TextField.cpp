@@ -13,7 +13,7 @@
 namespace rose {
 
     TextField::TextField(int maxLength, PointSize pointSize, const std::string &fontName) : TextLabel() {
-        mAnimationCallback = [&](gm::Context &context, const Position &position, uint32_t frame) {
+        mAnimationCallback = [&](gm::Context &context, const Position<int> &position, uint32_t frame) {
             if (mActionCurve) {
                 auto idx = frame % mActionCurve->size();
                 mCaretAlpha = (*mActionCurve)[idx];

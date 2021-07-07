@@ -314,7 +314,7 @@ namespace rose {
 
             if (roundCorners) {
                 auto trimSize = is.size(ImageId::RoundCornerTrim) / 2;
-                Rectangle trimSrc{Position::Zero, trimSize}, trimDst{Position::Zero, trimSize};
+                Rectangle trimSrc{Position<int>{}, trimSize}, trimDst{Position<int>{}, trimSize};
 
                 is.renderCopy(context, ImageId::RoundCornerTrim, trimSrc, trimDst);
                 trimDst.x = size.w - trimSrc.w;
@@ -336,7 +336,7 @@ namespace rose {
     void FrameElements::colorBackgroundMask(gm::Context &context, gm::Texture &mask, const color::RGBA &base,
                                             const color::RGBA &active, float value) {
         value = std::clamp(value, 0.0f, 1.0f);
-        Rectangle dst{Position::Zero, mask.getSize()};
+        Rectangle dst{Position<int>{}, mask.getSize()};
         gm::RenderTargetGuard renderTargetGuard(context, mask);
         context.setDrawBlendMode(SDL_BLENDMODE_ADD);
         auto interpolated = base.interpolate(active, value);
@@ -417,7 +417,7 @@ namespace rose {
         return layoutRect;
     }
 
-    void Frame::drawAnimate(gm::Context &context, const Position &containerPosition) {
+    void Frame::drawAnimate(gm::Context &context, const Position<int> &containerPosition) {
         drawFrame(context, Rectangle{containerPosition + mPos, mSize});
         Manager::draw(context, containerPosition + mFramePadding.position() + Position{mFrameWidth});
     }

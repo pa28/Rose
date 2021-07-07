@@ -124,7 +124,7 @@ namespace rose {
     class Animation;
     class Animator {
     protected:
-        using AnimationList = std::vector<std::pair<std::shared_ptr<Animation>,Position>>;
+        using AnimationList = std::vector<std::pair<std::shared_ptr<Animation>, Position<int>>>;
         std::map<std::shared_ptr<Window>,AnimationList> mAnimations;
 
         Animator() = default;
@@ -134,7 +134,8 @@ namespace rose {
             return instance;
         }
 
-        void set(const std::shared_ptr<Window>& window, std::shared_ptr<Animation>& animation, const Position& position);
+        void set(const std::shared_ptr<Window> &window, std::shared_ptr<Animation> &animation,
+                 const Position<int> &position);
 
         void remove(const std::shared_ptr<Window>& window, std::shared_ptr<Animation>& animation);
 
@@ -156,7 +157,7 @@ namespace rose {
     class Animation {
         friend class Animator;
     public:
-        using Callback = std::function<void(gm::Context& context, const Position&, uint32_t frame)>;
+        using Callback = std::function<void(gm::Context &context, const Position<int> &, uint32_t frame)>;
         using Enable = std::function<void(AnimationEnable animationEnable)>;
 
         std::unique_ptr<ActionCurves::ActionCurve> mActionCurve{};
@@ -173,7 +174,8 @@ namespace rose {
 
         virtual ~Animation() = default;
 
-        static void setAnimation(const std::shared_ptr<Window>& window, std::shared_ptr<Animation> animation, const Position& position) {
+        static void setAnimation(const std::shared_ptr<Window> &window, std::shared_ptr<Animation> animation,
+                                 const Position<int> &position) {
             Animator::getAnimator().set(window, animation, position);
         }
 

@@ -17,7 +17,7 @@ namespace rose {
         mTimerTick = std::move(timerTick);
     }
 
-    void CelestialOverlay::draw(gm::Context &context, const Position &containerPosition) {
+    void CelestialOverlay::draw(gm::Context &context, const Position<int>& containerPosition) {
         Rectangle widgetRect{containerPosition + mPos, mSize};
 
         if (mDisplayCelestialObjects) {

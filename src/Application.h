@@ -30,7 +30,7 @@ namespace rose {
         };
 
         using WindowStateChangeCallback = std::function<void(Application&, WindowEventType)>;
-        using WindowPositionChangeCallback = std::function<void(Application&, WindowEventType, Position)>;
+        using WindowPositionChangeCallback = std::function<void(Application&, WindowEventType, Position<int>&)>;
         using WindowSizeChangeCallback = std::function<void(Application&, WindowEventType, Size)>;
         using KeyboardEventCallback = std::function<bool(Application&, const SDL_KeyboardEvent&)>;
         using MouseMotionEventCallback = std::function<bool(Application&, const SDL_MouseMotionEvent&)>;
@@ -62,7 +62,7 @@ namespace rose {
                 windowSizeChangeCallback(mApplication, type, size);
         }
 
-        void windowPositionChange(WindowEventType type, Position position) {
+        void windowPositionChange(WindowEventType type, Position<int> position) {
             if (windowPositionChangeCallback)
                 windowPositionChangeCallback(mApplication, type, position);
         }
@@ -187,7 +187,7 @@ namespace rose {
 
         bool mMouseButtonPressed{false};
         uint mMouseButtonId{0};
-        Position mMousePosition{};
+        Position<int> mMousePosition{};
 
         bool mKeyboardFound;
 
@@ -202,7 +202,7 @@ namespace rose {
 
         virtual void windowSizeChange(EventSemantics::WindowEventType type, Size size);
 
-        virtual void windowPositionChange(EventSemantics::WindowEventType type, Position position);
+        virtual void windowPositionChange(EventSemantics::WindowEventType type, Position<int>& position);
 
         virtual bool keyboardEventCallback(const SDL_KeyboardEvent& keyboardEvent);
 
@@ -222,7 +222,7 @@ namespace rose {
 
         void layout();
 
-        std::shared_ptr<Widget> pointerWidget(Position position);
+        std::shared_ptr<Widget> pointerWidget(const Position<int>& position);
 
         [[nodiscard]] Padding windowBorders() const noexcept {
             return mGraphicsModel.windowBorders();
@@ -254,7 +254,7 @@ namespace rose {
             mGraphicsModel.redrawBackground();
         }
 
-        bool keyboardFound() const noexcept {
+        [[nodiscard]] bool keyboardFound() const noexcept {
             return mKeyboardFound;
         }
 

@@ -68,7 +68,7 @@ namespace rose {
         }
 
         /// Draw the visual.
-        void draw(gm::Context &context, const Position &containerPosition) override {
+        void draw(gm::Context &context, const Position<int>& containerPosition) override {
             Rectangle dst{containerPosition + mPos, mSize};
             context.fillRect(dst, mColor);
         }

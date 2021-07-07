@@ -12,7 +12,7 @@ namespace rose {
     Animation::Animation() = default;
 
     void Animator::set(const std::shared_ptr<Window> &window, std::shared_ptr<Animation> &animation,
-                       const Position &position) {
+                       const Position<int> &position) {
         if (auto animationList = mAnimations.find(window); animationList != mAnimations.end()) {
             auto itr = std::find_if(animationList->second.begin(), animationList->second.end(),
                                     [&animation](auto ref) -> bool {

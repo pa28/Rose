@@ -13,7 +13,7 @@ namespace rose {
         mTimerTick = std::move(timerTick);
     }
 
-    void GridOverlay::draw(gm::Context &context, const Position &containerPosition) {
+    void GridOverlay::draw(gm::Context &context, const Position<int>& containerPosition) {
         Rectangle widgetRect{containerPosition + mPos, mSize};
 
         if (mGridOverlayObjects) {
@@ -30,7 +30,7 @@ namespace rose {
 
                 if (!mTexture) {
                     auto widgetSize = widgetRect.size();
-                    Rectangle textureRect{Position{}, widgetRect.size()};
+                    Rectangle textureRect{Position<int>{}, widgetRect.size()};
                     mTexture = gm::Texture{context, widgetRect.size()};
                     mTexture.setBlendMode(SDL_BLENDMODE_BLEND);
                     gm::RenderTargetGuard renderTargetGuard{context, mTexture};

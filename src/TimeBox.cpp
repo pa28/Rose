@@ -49,7 +49,7 @@ namespace rose {
         mTimerTick->secondSignal.connect(secondSlot);
     }
 
-    void TimeBox::draw(gm::Context &context, const Position &containerPosition) {
+    void TimeBox::draw(gm::Context &context, const Position<int>& containerPosition) {
         Manager::draw(context, containerPosition);
     }
 
@@ -140,7 +140,7 @@ namespace rose {
         }
     }
 
-    void DateBox::draw(gm::Context &context, const Position &containerPosition) {
+    void DateBox::draw(gm::Context &context, const Position<int>& containerPosition) {
         Manager::draw(context, containerPosition);
     }
 
@@ -155,7 +155,7 @@ namespace rose {
         setLayoutManager(std::make_unique<LinearLayout>(Orientation::Vertical));
     }
 
-    void TimeDateBox::draw(gm::Context &context, const Position &containerPosition) {
+    void TimeDateBox::draw(gm::Context &context, const Position<int>& containerPosition) {
         Manager::draw(context, containerPosition);
     }
 

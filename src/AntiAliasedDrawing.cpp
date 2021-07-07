@@ -51,7 +51,7 @@ namespace rose {
         }
     }
 
-    bool AntiAliasedDrawing::renderLine(gm::Context &context, Position p0, Position p1) {
+    bool AntiAliasedDrawing::renderLine(gm::Context &context, Position<int> p0, Position<int> p1) {
         switch (mDrawingType) {
             case SimpleLine: {
                 gm::DrawColorGuard drawColorGuard{context, mColor};
@@ -70,7 +70,7 @@ namespace rose {
                 float angle = util::rad2deg(angleRad);
 
                 if (mTexture) {
-                    Rectangle src{Position::Zero, Size{length, mTexture.getSize().h}};
+                    Rectangle src{Position<int>{}, Size{length, mTexture.getSize().h}};
                     Rectangle dst{p0, src.size()};
                     dst.x -= util::roundToInt(cos(angleRad));
                     dst.y -= util::roundToInt(sin(angleRad));

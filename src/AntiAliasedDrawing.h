@@ -76,7 +76,7 @@ namespace rose {
          * @param p1 The end point.
          * @return True if the rendering operation returned success.
          */
-        bool renderLine(gm::Context &context, Position p0, Position p1);
+        bool renderLine(gm::Context &context, Position<int> p0, Position<int> p1);
     };
 }
 

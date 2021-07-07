@@ -105,7 +105,7 @@ namespace rose {
             return id;
         }
 
-        void draw(gm::Context &context, const Position &containerPosition) override {
+        void draw(gm::Context &context, const Position<int> &containerPosition) override {
             Manager::draw(context, containerPosition);
         }
     };

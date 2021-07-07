@@ -100,7 +100,7 @@ namespace rose {
          * @param context The graphics context used to draw the manager and contents.
          * @param containerPosition The Position of the Container that holds the Manager.
          */
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int>& containerPosition) override;
 
         /**
          * @brief Layout the TimeBox and contents.
@@ -189,7 +189,7 @@ namespace rose {
          * @param context The graphics context used to draw the manager and contents.
          * @param containerPosition The Position of the Container that holds the Manager.
          */
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int>& containerPosition) override;
 
         /**
          * @brief Layout the DateBox and contents.
@@ -253,7 +253,7 @@ namespace rose {
          * @param context The graphics context used to draw the manager and contents.
          * @param containerPosition The Position of the Container that holds the Manager.
          */
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int>& containerPosition) override;
 
         /**
          * @brief Layout the TimeDateBox and contents.

@@ -131,9 +131,9 @@ namespace rose {
 
     protected:
         SemanticGesture mSemanticGesture{};
-        Position mPos{};            ///< Position relative to the container, arrived at by layout.
+        Position<int> mPos{};            ///< Position relative to the container, arrived at by layout.
         Size mSize{};               ///< The size on screen, arrived at by layout.
-        Position mPreferredPos{};   ///< The preferred position.
+        Position<int> mPreferredPos{};   ///< The preferred position.
         Size mPreferredSize{};      ///< The preferred size.
         Rectangle mScreenRect{};    ///< The screen Rectangle computed at drawing time.
         Padding mPadding{};         ///< Immediately around the Visual, used for separation and alignment.
@@ -145,7 +145,7 @@ namespace rose {
          * @brief Compute the screen rectangle from the Container screen Position.
          * @param containerPosition The Container screen Position.
          */
-        void setScreenRectangle(const Position &containerPosition) {
+        void setScreenRectangle(const Position<int> &containerPosition) {
             mScreenRect = getScreenRectangle(containerPosition);
         }
 
@@ -154,18 +154,18 @@ namespace rose {
          * @param containerPosition The position of the container holding the Visual.
          * @return The rectangle.
          */
-        [[nodiscard]] Rectangle getScreenRectangle(const Position &containerPosition) const {
+        [[nodiscard]] Rectangle getScreenRectangle(const Position<int> &containerPosition) const {
             return Rectangle{containerPosition + mPos, mSize};
         }
 
         /// Draw the visual.
-        virtual void draw(gm::Context &context, const Position &containerPosition) = 0;
+        virtual void draw(gm::Context &context, const Position<int> &containerPosition) = 0;
 
         /// Layout the visual.
         virtual Rectangle layout(rose::gm::Context &context, const Rectangle &screenRect) = 0;
 
         /// Pad the drawing location.
-        Position drawPadding(const Position &containerPosition) {
+        Position<int> drawPadding(const Position<int> &containerPosition) {
             return containerPosition + mPadding.position();
         }
 
@@ -185,12 +185,12 @@ namespace rose {
         }
 
         /// Set preferred Position.
-        void setPosition(const Position& position) {
+        void setPosition(const Position<int>& position) {
             mPreferredPos = position;
         }
 
         /// Get the preferred Position.
-        [[nodiscard]] Position getPosition() const {
+        [[nodiscard]] Position<int> getPosition() const {
             return mPreferredPos;
         }
 
@@ -292,7 +292,7 @@ namespace rose {
         }
 
         /// Draw the screen contents.
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int> &containerPosition) override;
 
         /// Layout the screen contents.
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
@@ -344,9 +344,9 @@ namespace rose {
         }
 
         /// Draw the contents of the Window
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int> &containerPosition) override;
 
-        bool baseTextureNeeded(const Position &containerPosition) {
+        bool baseTextureNeeded(const Position<int> &containerPosition) {
             setScreenRectangle(containerPosition);
             return !mBaseTexture || mBaseTexture.getSize() != mScreenRect.size();
         }
@@ -355,20 +355,20 @@ namespace rose {
          * @param context The gm::Context to use.
          * @param containerPosition The container position.
          */
-        void generateBaseTexture(gm::Context &context, const Position &containerPosition);
+        void generateBaseTexture(gm::Context &context, const Position<int> &containerPosition);
 
         /**
          * @brief Draw the base texture for the window.
          * @param context The gm::Context to use.
          * @param containerPosition The container position.
          */
-        void drawBaseTexture(gm::Context &context, const Position &containerPosition);
+        void drawBaseTexture(gm::Context &context, const Position<int> &containerPosition);
 
         /// Layout the contents of the Window
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;
 
         /// The the Widget which contains the Position.
-        std::shared_ptr<Widget> pointerWidget(Position position);
+        std::shared_ptr<Widget> pointerWidget(const Position<int>& position);
 
         /// Get the Screen which supports the Window.
         std::shared_ptr<Screen> getScreen() {
@@ -503,20 +503,20 @@ namespace rose {
          * @param containerPosition The position of the container holding the Widget.
          * @return The Widget if found, otherwise a null pointer.
          */
-        std::shared_ptr<Widget> pointerWidget(Position position, Position containerPosition);
+        std::shared_ptr<Widget> pointerWidget(const Position<int>& position, const Position<int>& containerPosition);
 
         /**
          * @brief Recursively compute the Widget Position on the Screen.
          * @return The computed Position.
          */
-        Position computeScreenPosition();
+        Position<int> computeScreenPosition();
 
         /**
          * @brief Determine if a given Screen Position is within the Widget Rectangle.
          * @param position The Screen Position.
          * @return True if the Position is within the Rectangle.
          */
-        bool contains(const Position &position);
+        bool contains(const Position<int> &position);
 
 //        void clearFocus(const SemanticGesture &gesture) {}
 
@@ -622,7 +622,7 @@ namespace rose {
          * @param relativePos The relative motion of the mouse.
          * @return True if the event is consumed.
          */
-        bool mouseMotionEvent(bool pressed, uint button, Position mousePos, Position relativePos, bool passed);
+        bool mouseMotionEvent(bool pressed, uint button, const Position<int>& mousePos, const Position<int>& relativePos, bool passed);
 
         /// Set the mouse motion callback
         void setMouseMotionEventCallback(MouseMotionCallback mouseMotionCallback) {
@@ -635,7 +635,7 @@ namespace rose {
          * @param deltaPos The delta position of the scroll wheel motion.
          * @return True if the event is consumed.
          */
-        bool mouseScrollEvent(Position deltaPos, bool passed);
+        bool mouseScrollEvent(const Position<int>& deltaPos, bool passed);
 
         /// Set the mouse scroll callback
         void setMouseScrollEventCallback(ScrollCallback scrollCallback) {
@@ -742,7 +742,7 @@ namespace rose {
          * @param context The graphics context used to draw the manager and contents.
          * @param containerPosition The Position of the Container that holds the Manager.
          */
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int> &containerPosition) override;
 
         /**
          * @brief Layout the Manager and contents.
@@ -864,7 +864,7 @@ inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widg
  * @return The Widget.
  */
 template<class WidgetClass>
-inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Position& position) {
+inline std::shared_ptr<WidgetClass> operator<<(std::shared_ptr<WidgetClass> widget, const rose::Position<int>& position) {
     static_assert(std::is_base_of_v<rose::Widget, WidgetClass> || std::is_base_of_v<rose::Manager, WidgetClass>,
                   "WidgetClass must be derived from rose::Widget or rose::Manager.");
     widget->setPosition(position);

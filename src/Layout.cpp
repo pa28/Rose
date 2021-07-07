@@ -28,7 +28,7 @@ namespace rose {
             }
         });
 
-        Rectangle layoutRect{Position::Zero, size};
+        Rectangle layoutRect{Position<int>{}, size};
 
         std::for_each(first, last, [&layoutRect](auto &obj){
             if (auto visual = std::dynamic_pointer_cast<Visual>(obj); visual)
@@ -51,7 +51,7 @@ namespace rose {
                                 std::cerr << __PRETTY_FUNCTION__ << " Primary object has LayoutHint::None.\n";
                                 break;
                             case LayoutHint::Attachment::TopLeft:
-                                contRect = Position::Zero;
+                                contRect = Position<int>{};
                                 break;
                             case LayoutHint::Attachment::TopRight:
                                 contRect = Position{screenRect.w - contRect.w, 0};
@@ -88,7 +88,7 @@ namespace rose {
                                     std::cerr << __PRETTY_FUNCTION__ << " Primary object has LayoutHint::None.\n";
                                     break;
                                 case LayoutHint::Attachment::TopLeft:
-                                    contRect = Position::Zero;
+                                    contRect = Position<int>{};
                                     break;
                                 case LayoutHint::Attachment::TopRight:
                                     contRect = Position{screenRect.w - contRect.w, 0};

@@ -10,8 +10,6 @@
 
 namespace rose {
 
-    Position Position::Zero{};
-    Position Position::Undefined{WINDOWPOS_UNDEFINED, WINDOWPOS_UNDEFINED};
     Size Size::Zero{};
     Rectangle Rectangle::Zero{};
 

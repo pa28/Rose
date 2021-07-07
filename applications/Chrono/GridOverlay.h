@@ -59,7 +59,7 @@ namespace rose {
         }
 
         /// Draw the GridOverlay
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int>& containerPosition) override;
 
         /// Layout the GridOverlay
         Rectangle layout(gm::Context &context, const Rectangle &screenRect) override;

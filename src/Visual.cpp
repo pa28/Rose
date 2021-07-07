@@ -22,7 +22,7 @@ namespace rose {
 
     }
 
-    void rose::Screen::draw(gm::Context &context, const Position &containerPosition) {
+    void rose::Screen::draw(gm::Context &context, const Position<int> &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {
             if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
@@ -40,7 +40,7 @@ namespace rose {
         return screenRect;
     }
 
-    void Window::generateBaseTexture(gm::Context &context, const Position &containerPosition) {
+    void Window::generateBaseTexture(gm::Context &context, const Position<int> &containerPosition) {
         if (baseTextureNeeded(containerPosition)) {
             mBaseTexture = gm::Texture{context, mScreenRect.size()};
         }
@@ -50,21 +50,21 @@ namespace rose {
         context.renderClear();
         for (auto &content : (*this)) {
             if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
-                manager->draw(context, Position::Zero);
+                manager->draw(context, Position<int>{});
             }
         }
     }
 
-    void Window::drawBaseTexture(gm::Context &context, const Position &containerPosition){
+    void Window::drawBaseTexture(gm::Context &context, const Position<int> &containerPosition) {
         if (mBaseTexture) {
             setScreenRectangle(containerPosition);
-            context.renderCopy(mBaseTexture,mScreenRect);
+            context.renderCopy(mBaseTexture, mScreenRect);
         } else {
             draw(context, containerPosition);
         }
     }
 
-    void Window::draw(gm::Context &context, const Position &containerPosition) {
+    void Window::draw(gm::Context &context, const Position<int> &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {
             if (auto manager = std::dynamic_pointer_cast<Manager>(content); manager) {
@@ -83,8 +83,8 @@ namespace rose {
         return screenRect;
     }
 
-    std::shared_ptr<Widget> Window::pointerWidget(Position position) {
-        auto windowRectangle = getScreenRectangle(Position::Zero);
+    std::shared_ptr<Widget> Window::pointerWidget(const Position<int> &position) {
+        auto windowRectangle = getScreenRectangle(Position<int>{});
         for (auto &content : *this) {
             if (auto widget = std::dynamic_pointer_cast<Widget>(content); widget) {
                 auto widgetRectangle = widget->getScreenRectangle(windowRectangle.position());
@@ -97,7 +97,8 @@ namespace rose {
         return nullptr;
     }
 
-    std::shared_ptr<Widget> Widget::pointerWidget(Position position, Position containerPosition) {
+    std::shared_ptr<Widget>
+    Widget::pointerWidget(const Position<int> &position, const Position<int> &containerPosition) {
         auto widgetRectangle = getScreenRectangle(containerPosition);
         if (auto manager = getNode<Manager>(); manager) {
             for (auto &content : *manager) {
@@ -113,18 +114,18 @@ namespace rose {
         return getNode<Widget>();
     }
 
-    Position Widget::computeScreenPosition() {
+    Position<int> Widget::computeScreenPosition() {
         std::shared_ptr<Widget> parent = std::dynamic_pointer_cast<Widget>(container());
         if (parent) {
-            auto position =  parent->computeScreenPosition();
+            auto position = parent->computeScreenPosition();
             position = position + mPos;
             return position;
         }
 
-        return Position::Zero;
+        return Position<int>{};
     }
 
-    bool Widget::contains(const Position &position) {
+    bool Widget::contains(const Position<int> &position) {
         Rectangle screenRectangle{computeScreenPosition(), mSize};
         return screenRectangle.contains(position);
     }
@@ -145,7 +146,9 @@ namespace rose {
         return false;
     }
 
-    bool Widget::mouseMotionEvent(bool pressed, uint button, Position mousePos, Position relativePos, bool passed) {
+    bool
+    Widget::mouseMotionEvent(bool pressed, uint button, const Position<int> &mousePos, const Position<int> &relativePos,
+                             bool passed) {
         if (mMouseMotionCallback) {
             if (mMouseMotionCallback(pressed, button, mousePos, relativePos)) {
                 if (passed) {
@@ -162,7 +165,7 @@ namespace rose {
         return false;
     }
 
-    bool Widget::mouseScrollEvent(Position deltaPos, bool passed) {
+    bool Widget::mouseScrollEvent(const Position<int>& deltaPos, bool passed) {
         std::cout << __PRETTY_FUNCTION__ << deltaPos << '\n';
         if (mMouseScrollCallback)
             if (mMouseScrollCallback(deltaPos)) {
@@ -211,7 +214,7 @@ namespace rose {
         return false;
     }
 
-    void Manager::draw(gm::Context &context, const Position &containerPosition) {
+    void Manager::draw(gm::Context &context, const Position<int> &containerPosition) {
         setScreenRectangle(containerPosition);
         for (auto &content : (*this)) {
             if (auto visual = std::dynamic_pointer_cast<Visual>(content); visual) {

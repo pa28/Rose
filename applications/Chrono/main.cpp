@@ -66,7 +66,7 @@ public:
 
         switch (mLayout) {
             case TopLeft:
-                mapRectangle = Rectangle{Position::Zero, Size{width, height}};
+                mapRectangle = Rectangle{Position<int>{}, Size{width, height}};
                 sideRect = Rectangle{Position{mapRectangle.w, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
                 botRect = Rectangle{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
@@ -162,7 +162,7 @@ public:
     }
 
     /// Draw the visual.
-    void draw(gm::Context &context, const Position &containerPosition) override {
+    void draw(gm::Context &context, const Position<int>& containerPosition) override {
         Rectangle dst{containerPosition + mPos, mSize};
         context.fillRect(dst, mColor);
     }

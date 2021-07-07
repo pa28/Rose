@@ -106,7 +106,7 @@ namespace rose {
         cacheCurrentMaps();
     }
 
-    void MapProjection::draw(gm::Context &context, const Position &containerPosition) {
+    void MapProjection::draw(gm::Context &context, const Position<int>& containerPosition) {
         if (mMapProjectionsInvalid) {
             if (!mComputeAzimuthalMapsFuture.valid()) {
                 std::array<std::string,2> mapFileName{MapFileName(mMapDepiction,mMapSize,MapIllumination::Day),
@@ -516,9 +516,9 @@ namespace rose {
         }
     }
 
-    Position
+    Position<int>
     MapProjection::geoToMap(GeoPosition geo, MapProjectionType projection, int splitPixel, Rectangle &mapRect) const {
-        Position mapPos{};
+        Position<int> mapPos{};
 
         switch (projection) {
             case MapProjectionType::StationAzimuthal: {

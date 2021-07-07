@@ -175,7 +175,7 @@ namespace rose::gm {
          * @return Status code returned by SDL_RenderCopyEx()
          */
         int renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
-                         std::optional<Position> point = std::nullopt) const;
+                         std::optional<Position<int>> point = std::nullopt) const;
 
         /**
          * @brief Set the drawing color used for drawing Rectangles, lines and clearing.
@@ -468,7 +468,7 @@ namespace rose::gm {
     public:
         RoseErrorCode ErrorCode{RoseErrorCode::OK};
 
-        bool initialize(const std::string &title, Size initialSize, Position initialPosition, uint32_t extraFlags);
+        bool initialize(const std::string &title, Size initialSize, const Position<int>& initialPosition, uint32_t extraFlags);
 
         void eventLoop(std::shared_ptr<Screen> &screen);
 

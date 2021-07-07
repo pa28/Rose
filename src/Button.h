@@ -131,7 +131,7 @@ namespace rose {
          * @param context The graphics context to use.
          * @param containerPosition The position of the parent Container.
          */
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int> &containerPosition) override;
     };
 
     class TextLabel : public TextButton {
@@ -225,7 +225,7 @@ namespace rose {
          * @param context The graphics context to use.
          * @param containerPosition The position of the parent Container.
          */
-        void draw(gm::Context &context, const Position &containerPosition) override;
+        void draw(gm::Context &context, const Position<int> &containerPosition) override;
 
         /**
          * @brief Set the image used by the ImageButton.

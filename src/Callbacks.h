@@ -40,7 +40,7 @@ namespace rose {
      * @brief Mouse scroll wheel callback
      * @param deltaPos The change in position indicated by scroll wheel motion.
      */
-    using ScrollCallback = std::function<bool(Position deltaPos)>;
+    using ScrollCallback = std::function<bool(Position<int> deltaPos)>;
 
     /**
      * @brief Mouse button callback.
@@ -57,8 +57,8 @@ namespace rose {
      * @param mousePostion The position of the mouse pointer on the Screen.
      * @param relativePostion The mouse position relative the the last reported position.
      */
-    using MouseMotionCallback = std::function<bool(bool pressed, uint state, Position mousePosition,
-            Position relativePosition)>;
+    using MouseMotionCallback = std::function<bool(bool pressed, uint state, Position<int> mousePosition,
+            Position<int> relativePosition)>;
 
     /**
      * @brief Button display state callback.

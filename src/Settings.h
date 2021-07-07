@@ -98,7 +98,7 @@ namespace rose {
                     return T{r.get<int>(0), r.get<int>(1)};
                 }
                 return nullopt;
-            } else if constexpr (is_base_of_v<Position, T>) {
+            } else if constexpr (is_base_of_v<Position<int>, T>) {
                 soci::row r;
                 sql << "SELECT a,b FROM " << int_pair_table << " WHERE name = \"" << name << '"', soci::into(r);
                 if (sql.got_data() && r.get_indicator(0) == soci::i_ok && r.get_indicator(1) == soci::i_ok) {
@@ -173,7 +173,7 @@ namespace rose {
             } else if constexpr (is_base_of_v<Size,T>) {
                 sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
                     << value.w << ',' << value.h << ')';
-            } else if constexpr (is_base_of_v<Position,T>) {
+            } else if constexpr (is_base_of_v<Position<int>,T>) {
                 sql << "INSERT OR REPLACE INTO " << int_pair_table << " (name,a,b) VALUES (\"" << name << "\","
                     << value.x << ',' << value.y << ')';
             } else if constexpr (is_base_of_v<std::array<double,2>,T>) {

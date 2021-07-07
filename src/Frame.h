@@ -215,7 +215,7 @@ namespace rose {
     public:
         Frame() noexcept : Manager(), FrameElements() {
             mLayoutManager = std::make_unique<FrameLayoutManager>();
-            mAnimationCallback = [&](gm::Context &context, const Position &position, uint32_t frame) {
+            mAnimationCallback = [&](gm::Context &context, const Position<int> &position, uint32_t frame) {
                 if (mActionCurve) {
                     auto idx = frame % mActionCurve->size();
                     mColorValue = (*mActionCurve)[idx];
@@ -247,9 +247,9 @@ namespace rose {
             return id;
         }
 
-        void drawAnimate(gm::Context &context, const Position &containerPosition);
+        void drawAnimate(gm::Context &context, const Position<int> &containerPosition);
 
-        void draw(gm::Context &context, const Position &containerPosition) override {
+        void draw(gm::Context &context, const Position<int> &containerPosition) override {
             if (mActionCurve && mAnimationEnableState == AnimationEnable::Enable)
                 setAnimation(getWindow(), getNode<Animation>(), containerPosition);
             drawAnimate(context,containerPosition);

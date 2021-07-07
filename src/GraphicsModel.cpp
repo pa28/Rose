@@ -92,7 +92,7 @@ namespace rose::gm {
     }
 
     int Context::renderCopyEx(Texture &texture, Rectangle src, Rectangle dst, double angle, RenderFlip renderFlip,
-                               std::optional<Position> point) const {
+                               std::optional<Position<int>> point) const {
         SDL_Rect srcRect{src.x, src.y, src.w, src.h};
         SDL_Rect dstRect{dst.x, dst.y, dst.w, dst.h};
         if (point) {
@@ -132,7 +132,7 @@ namespace rose::gm {
         status = SDL_SetRenderTarget(mContext.get(), mContext.mCurrentRenderTarget);
     }
 
-    bool GraphicsModel::initialize(const std::string &title, Size initialSize, Position initialPosition,
+    bool GraphicsModel::initialize(const std::string &title, Size initialSize, const Position<int>& initialPosition,
                                    uint32_t extraFlags) {
         Settings &settings{Settings::getSettings()};
         SDL_RendererInfo info;
@@ -246,7 +246,7 @@ namespace rose::gm {
 
             for (auto &content : *screen) {
                 if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                    window->generateBaseTexture(mContext, Position::Zero);
+                    window->generateBaseTexture(mContext, Position<int>{});
                 }
             }
         }
@@ -255,9 +255,9 @@ namespace rose::gm {
             mContext.renderClear();
             for (auto & content : *screen) {
                 if (auto window = std::dynamic_pointer_cast<Window>(content); window) {
-                    if (window->baseTextureNeeded(Position::Zero))
-                        window->generateBaseTexture(mContext, Position::Zero);
-                    window->drawBaseTexture(mContext, Position::Zero);
+                    if (window->baseTextureNeeded(Position<int>{}))
+                        window->generateBaseTexture(mContext, Position<int>{});
+                    window->drawBaseTexture(mContext, Position<int>{});
 
                     Animator::getAnimator().animate(window, mContext, mFrame);
                 }

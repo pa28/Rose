@@ -90,17 +90,18 @@ namespace rose {
      * @details For screen objects (0, 0) is the top left corner, x increases to the right, y increases toward
      * the bottom.
      */
+    template <typename T>
     struct Position {
-        int x{0}, y{0};
+        T x{0}, y{0};
 
         constexpr Position() noexcept = default;
-        constexpr Position(int X, int Y) noexcept : x(X), y(Y) {}
+        constexpr Position(T X, T Y) noexcept : x(X), y(Y) {}
         constexpr Position(const Position &p) = default;
         constexpr Position(Position &&p) = default;
         constexpr Position& operator=(const Position &p) = default;
         constexpr Position& operator=(Position &&p) = default;
 
-        constexpr explicit Position(int p) noexcept : x(p), y(p) {}
+        constexpr explicit Position(T p) noexcept : x(p), y(p) {}
 
         /// Add two positions together.
         constexpr Position operator+(const Position &p) const noexcept {
@@ -115,19 +116,19 @@ namespace rose {
             return x == other.x && y == other.y;
         }
 
-        int& primary(Orientation o) noexcept {
+        T& primary(Orientation o) noexcept {
             return o == Orientation::Horizontal ? x : y;
         }
 
-        int& secondary(Orientation o) noexcept {
+        T& secondary(Orientation o) noexcept {
             return o == Orientation::Horizontal ? y : x;
         }
 
-        [[nodiscard]] constexpr int primary(Orientation o) const noexcept {
+        [[nodiscard]] constexpr T primary(Orientation o) const noexcept {
             return o == Orientation::Horizontal ? x : y;
         }
 
-        [[nodiscard]] constexpr int secondary(Orientation o) const noexcept {
+        [[nodiscard]] constexpr T secondary(Orientation o) const noexcept {
             return o == Orientation::Horizontal ? y : x;
         }
 
@@ -136,15 +137,18 @@ namespace rose {
          * @param other The other position.
          * @return The distance between the two positions squared.
          */
-        [[nodiscard]] constexpr int rSqr(const Position &other) const noexcept {
+        [[nodiscard]] constexpr T rSqr(const Position &other) const noexcept {
             auto dX = other.x - x;
             auto dY = other.y - y;
             return dX*dX + dY*dY;
         }
 
-        static Position Zero;
-        static Position Undefined;
+        static Position& Zero() {
+            return Position{0};
+        }
     };
+
+    static constexpr Position<int> UndefinedPosition;
 
     /**
      * @struct Size
@@ -233,7 +237,7 @@ namespace rose {
 
         constexpr Rectangle() noexcept = default;
         constexpr Rectangle(int X, int Y, int W, int H) noexcept : x(X), y(Y), w(W), h(H) {}
-        constexpr Rectangle(const Position &p, const Size &s) noexcept : x(p.x), y(p.y), w(s.w), h(s.h) {}
+        constexpr Rectangle(const Position<int> &p, const Size &s) noexcept : x(p.x), y(p.y), w(s.w), h(s.h) {}
         constexpr Rectangle(const Rectangle &p) = default;
         constexpr Rectangle(Rectangle &&p) = default;
         constexpr Rectangle& operator=(const Rectangle &p) = default;
@@ -245,14 +249,14 @@ namespace rose {
             return *this;
         }
 
-        constexpr Rectangle& operator=(const Position &p) {
+        constexpr Rectangle& operator=(const Position<int> &p) {
             x = p.x;
             y = p.y;
             return *this;
         }
 
         /// Add a Position to a Rectangle.
-        constexpr Rectangle operator + (const Position &p) const noexcept {
+        constexpr Rectangle operator + (const Position<int> &p) const noexcept {
             return Rectangle{x+p.x, y+p.y, w, h};
         }
 
@@ -267,7 +271,7 @@ namespace rose {
         }
 
         /// Get a Position from a Rectangle.
-        [[nodiscard]] Position position() const noexcept {
+        [[nodiscard]] Position<int> position() const noexcept {
             return Position{x,y};
         }
 
@@ -277,24 +281,24 @@ namespace rose {
         }
 
         /// Get the Positions of top-left and bottom-right corners defined by the Rectangle
-        [[nodiscard]] std::pair<Position,Position> primeCorners() const noexcept {
+        [[nodiscard]] std::pair<Position<int>,Position<int>> primeCorners() const noexcept {
             return std::make_pair(Position{x,y}, Position{x+w,y+h});
         }
 
         /// Get the Positions of the top-right and bottom-left corners defined by the Rectangle
-        [[nodiscard]] std::pair<Position,Position> crossCorners() const noexcept {
+        [[nodiscard]] std::pair<Position<int>,Position<int>> crossCorners() const noexcept {
             return std::make_pair(Position{x+w,y}, Position{x,y+h});
         }
 
         /// Get the Positions of all four corners defined by the Rectangle, top to bottom, left to right.
-        [[nodiscard]] std::tuple<Position,Position,Position,Position> corners() const noexcept {
+        [[nodiscard]] std::tuple<Position<int>,Position<int>,Position<int>,Position<int>> corners() const noexcept {
             auto [tl,br] = primeCorners();
             auto [bl,tr] = crossCorners();
             return std::make_tuple(tl,tr,bl,br);
         }
 
         /// Determine if a Rectangle contains a Position.
-        [[nodiscard]] constexpr bool contains(Position pos) const noexcept {
+        [[nodiscard]] constexpr bool contains(Position<int> pos) const noexcept {
             return pos.x >= x && pos.x < x + w && pos.y >= y && pos.y < y + h;
         }
 
@@ -390,7 +394,7 @@ namespace rose {
 
         [[nodiscard]] constexpr int horizontal() const noexcept { return l + r; }
 
-        [[nodiscard]] constexpr Position position() const noexcept { return Position{l, t}; }
+        [[nodiscard]] constexpr Position<int> position() const noexcept { return Position<int>{l, t}; }
 
         [[nodiscard]] constexpr Size size() const noexcept { return Size{horizontal(), vertical()}; }
 
@@ -437,7 +441,7 @@ inline std::ostream& operator<<(std::ostream& strm, const rose::Size &size) {
 }
 
 /// Stream insertion operator for Position.
-inline std::ostream& operator<<(std::ostream& strm, const rose::Position &pos) {
+inline std::ostream& operator<<(std::ostream& strm, const rose::Position<int> &pos) {
     strm << '(' << pos.x << ',' << pos.y << ')';
     return strm;
 }
