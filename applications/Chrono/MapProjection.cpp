@@ -546,14 +546,14 @@ namespace rose {
                 break;
             case MapProjectionType::Mercator:
                 mapPos = Position<MapPositionType>{
-                        std::remainder((double) mapRect.w * (geo.lon + M_PI) / (2. * M_PI), (double) mapRect.w),
+                        std::fmod((double) mapRect.w * (geo.lon + M_PI) / (2. * M_PI), (double) mapRect.w),
                         mapRect.h * (M_PI_2 - geo.lat) / M_PI};
                 break;
             case MapProjectionType::StationMercator: {
                 mapPos = Position<MapPositionType>{
-                        std::remainder((double) mapRect.w * (geo.lon + M_PI) / (2. * M_PI), (double) mapRect.w),
+                        std::fmod((double) mapRect.w * (geo.lon + M_PI) / (2. * M_PI), (double) mapRect.w),
                         (double) mapRect.h * (M_PI_2 - geo.lat) / M_PI};
-                mapPos.x = std::remainder(mapPos.x + (double)(mapRect.w - splitPixel), mapRect.w);
+                mapPos.x = std::fmod(mapPos.x + (double)(mapRect.w - splitPixel), mapRect.w);
                 break;
             }
         }
