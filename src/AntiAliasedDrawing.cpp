@@ -84,8 +84,6 @@ namespace rose {
 
         gm::DrawColorGuard drawColorGuard{context, mColor};
 
-        std::cout << __PRETTY_FUNCTION__ << " stuff0: " << stuff0() << ", stuff1: " << stuff1() << '\n';
-
         auto steep = std::abs(p1.y - p0.y) > std::abs(p1.x - p0.x);
 
         auto stuffPixels = [&](Position<int> p0, Position<int> p1) -> void {
