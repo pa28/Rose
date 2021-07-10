@@ -24,9 +24,9 @@ namespace rose {
     public:
         enum DrawingType {
             SimpleLine,
+            AntiAliased,
 #if 0
             SimpleRectangle,
-            AntiAliased,
 #endif
         };
 
@@ -74,6 +74,18 @@ namespace rose {
         }
 
         /**
+         * @brief Implement a modified Xiaolin Wu anti aliasing algorithm.
+         * @details Implements the Xiaolin Wu anti aliased line algorithm but inserts stuffing pixels between the
+         * two controlled brightness pixes. By default (when interiorWidth < 2) only one pixel is stuffed, Otherwise
+         * the number of pixels specified are stuffed.
+         * @param context The Graphics Context used to draw.
+         * @param p0 The starting point for the line.
+         * @param p1 The ending point for the line.
+         * @param interiorWidth Stuffing width of the line.
+         */
+        void drawLine(gm::Context &context, Position<float> p0, Position<float> p1, int interiorWidth = 0);
+
+        /**
          * @brief Draw an anti-aliased line.
          * @param context The graphics context to use.
          * @param p0 The start point.
@@ -90,43 +102,13 @@ namespace rose {
                     else
                         return SDL_RenderDrawLineF(context.get(), p0.x, p0.y, p1.x, p1.y) == 0;
                 }
-#if 0
-                case SimpleRectangle: {
-                    auto dx = p1.x - p0.x;
-                    auto dy = p1.y - p0.y;
-                    auto length = util::roundToInt(sqrt((double) (dx * dx) + (double) (dy * dy)));
-                    if (length == 0) {
-                        return true;
-                    }
-                    length += 2;
-
-                    float angleRad = atan2((float) dy, (float) dx);
-                    float angle = util::rad2deg(angleRad);
-
-                    if (mTexture) {
-                        Rectangle src{Position<int>{}, Size{length, mTexture.getSize().h}};
-                        Rectangle dst{p0, src.size()};
-                        dst.x -= util::roundToInt(cos(angleRad));
-                        dst.y -= util::roundToInt(sin(angleRad));
-                        return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
-                                                    Position{0, src.h / 2}) == 0;
-                    } else {
-                        return false;
-                    }
-                }
                 case AntiAliased: {
-                    auto dx = p1.x - p0.x;
-                    auto dy = p1.y - p0.y;
-                    auto length = sqrt((double) (dx * dx) + (double) (dy * dy));
-
-                    float angle = util::rad2deg(atan2((float) dy, (float) dx));
-
-                    Rectangle src{0, 0, NubWidth, NubHeight};
-                    Rectangle dst{p0.x, p0.y - mWidth * NubHeight, util::roundToInt(length) + 1, mWidth * NubHeight * 2};
-                    return context.renderCopyEx(mTexture, src, dst, angle, gm::RenderFlip{SDL_FLIP_NONE},
-                                                Position{0, dst.h / 2}) == 0;
+                    if constexpr (std::is_integral_v<T>)
+                        drawLine(context, p0.template as<float>(), p1.template as<float>(), mWidth);
+                    else
+                        drawLine(context, p0, p1, mWidth);
+                    return true;
                 }
-#endif
             }
             return false;
         }

@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     FontName prefixFontName{theme.TextFont};
     std::shared_ptr<Column> column{};
     application.screen() << wdg<Window>()
-                         << wdg<Frame>(5) << Position{10, 10} << theme.SemiBevelFrame
+                         << wdg<Frame>(5) << Position<int>{10, 10} << theme.SemiBevelFrame
                          << wdg<Manager>() << Id{"row"} << makeLayout<LinearLayout>(Orientation::Vertical, 5)
                          << wdg<ImageLabel>(ImageId::HeartEmpty)
                             << curve<ActionCurves::CursorPulse>()
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
                                  if (buttonStateChange == rose::ButtonStateChange::Pushed) {
                                      std::cout << "Local Button state: Pushed\n";
                                      application.screen() << wdg<Dialog>()
-                                                          << Position::Zero
+                                                          << Position<int>{}
                                                           << wdg<Column>() >> column
                                                           << wdg<Grid>(2)
                                                           << wdg<TextLabel>("Callsign:") << prefixPointSize << prefixFontName << endw

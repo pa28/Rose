@@ -116,6 +116,15 @@ namespace rose::gm {
         return SDL_RenderFillRect(get(), &r);
     }
 
+    int Context::drawPoint(const Position<int> &p, const color::RGBA &color) {
+        DrawColorGuard drawColorGuard{*this, color};
+        return SDL_RenderDrawPoint(get(), p.x, p.y);
+    }
+
+    int Context::drawLine(const Position<int> &p0, const Position<int> &p1) {
+        return SDL_RenderDrawLine(get(), p0.x, p0.y, p1.x, p1.y);
+    }
+
     RenderTargetGuard::RenderTargetGuard(Context &context, Texture &texture) : mContext(context) {
         mLastTexture = context.mCurrentRenderTarget;
         context.mCurrentRenderTarget = texture.get();

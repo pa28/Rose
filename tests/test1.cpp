@@ -66,25 +66,30 @@ public:
 
         switch (mLayout) {
             case TopLeft:
-                mapRectangle = Rectangle{Position::Zero, Size{width, height}};
-                sideRect = Rectangle{Position{mapRectangle.w, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                mapRectangle = Rectangle{Position<int>{}, Size{width, height}};
+                sideRect = Rectangle{Position<int>{mapRectangle.w, 0},
+                                     Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, mapRectangle.h},
+                                    Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
             case TopRight:
-                mapRectangle = Rectangle{Position{screenRect.w - width, 0}, Size{width, height}};
-                sideRect = Rectangle{Position{0, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, mapRectangle.h}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                mapRectangle = Rectangle{Position<int>{screenRect.w - width, 0}, Size{width, height}};
+                sideRect = Rectangle{Position<int>{0, 0}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, mapRectangle.h},
+                                    Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
             case BottomLeft:
-                mapRectangle = Rectangle{Position{0, screenRect.h - height}, Size{width, height}};
-                sideRect = Rectangle{Position{mapRectangle.w, mapRectangle.y},
+                mapRectangle = Rectangle{Position<int>{0, screenRect.h - height}, Size{width, height}};
+                sideRect = Rectangle{Position<int>{mapRectangle.w, mapRectangle.y},
                                      Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
             case BottomRight:
-                mapRectangle = Rectangle{Position{screenRect.w - width, screenRect.h - height}, Size{width, height}};
-                sideRect = Rectangle{Position{0, mapRectangle.y}, Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
-                botRect = Rectangle{Position{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
+                mapRectangle = Rectangle{Position<int>{screenRect.w - width, screenRect.h - height},
+                                         Size{width, height}};
+                sideRect = Rectangle{Position<int>{0, mapRectangle.y},
+                                     Size{screenRect.w - mapRectangle.w, mapRectangle.h}};
+                botRect = Rectangle{Position<int>{0, 0}, Size{screenRect.w, screenRect.h - mapRectangle.h}};
                 break;
         }
 
@@ -106,7 +111,7 @@ public:
     bool setLayout(Layout layout) {
         if (mLayout != layout) {
             mLayout = layout;
-            Settings& settings{Settings::getSettings()};
+            Settings &settings{Settings::getSettings()};
             settings.setValue(LayoutScheme, static_cast<int>(mLayout));
             return true;
         }
@@ -114,14 +119,100 @@ public:
     }
 };
 
+void drawLine(gm::Context &context, Position<float> p0, Position<float> p1) {
+    auto plot = [&context](const Position<int>& p, float alpha) {
+        return context.drawPoint(p, color::RGBA::OpaqueWhite.withAlpha(alpha));
+    };
+
+    auto ipart = [](float x) {
+        return std::floor(x);
+    };
+
+    auto fpart = [](float x) {
+        return x - std::floor(x);
+    };
+
+    auto rfpart = [&](float x) {
+        return 1.f - fpart(x);
+    };
+
+    auto steep = std::abs(p1.y - p0.y) > std::abs(p1.x - p0.x);
+
+    if (steep) {
+        std::swap(p0.x, p0.y);
+        std::swap(p1.x, p1.y);
+    }
+
+    if (p0.x > p1.x) {
+        std::swap(p0.x, p1.x);
+        std::swap(p0.y, p1.y);
+    }
+
+    Position<float> d{p1.x - p0.x, p1.y - p0.y};
+
+    auto gradient = 1.f;
+    if (d.x != 0.f)
+        gradient = d.y / d.x;
+
+    // handle first endpoint
+    auto xend = std::round(p0.x);
+    auto yend = p0.y + gradient * (xend - p0.x);
+    auto xgap = rfpart(p0.x  + 0.5f);
+    auto xpxl1 = xend;
+    auto ypxl1 = ipart(yend);
+
+    if (steep) {
+        plot(Position<int>{static_cast<int>(ypxl1), static_cast<int>(xpxl1)}, rfpart(yend) * xgap);
+        plot(Position<int>{static_cast<int>(ypxl1+1), static_cast<int>(xpxl1)}, fpart(yend) * xgap);
+    } else {
+        plot(Position<int>{static_cast<int>(xpxl1), static_cast<int>(ypxl1)}, rfpart(yend) * xgap);
+        plot(Position<int>{static_cast<int>(xpxl1), static_cast<int>(ypxl1+1)}, fpart(yend) * xgap);
+    }
+
+    auto intery = yend + gradient;
+
+    // handle second endpoint
+    xend = std::round(p1.x);
+    yend = p1.y + gradient * (xend - p1.x);
+    xgap = fpart(p1.x + 0.5f);
+    auto xpxl2 = xend;
+    auto ypxl2 = ipart(yend);
+
+    if (steep) {
+        plot(Position<int>{static_cast<int>(ypxl2-1), static_cast<int>(xpxl2)}, rfpart(yend) * xgap);
+        plot(Position<int>{static_cast<int>(ypxl2+1), static_cast<int>(xpxl2)}, fpart(yend) * xgap);
+    } else {
+        plot(Position<int>{static_cast<int>(xpxl2), static_cast<int>(ypxl2-1)}, rfpart(yend) * xgap);
+        plot(Position<int>{static_cast<int>(xpxl2), static_cast<int>(ypxl2+1)}, fpart(yend) * xgap);
+    }
+
+    // main loop
+    if (steep) {
+        for (auto x = xpxl1 + 1; x < xpxl2; ++x) {
+            plot(Position<int>{ipart(intery)-1, x}, rfpart(intery));
+            plot(Position<int>{ipart(intery), x}, 1.f);
+            plot(Position<int>{ipart(intery)+1, x}, fpart(intery));
+            intery += gradient;
+        }
+    } else {
+        for (auto x = xpxl1 + 1; x < xpxl2; ++x) {
+            plot(Position<int>{x, ipart(intery)-1}, rfpart(intery));
+            plot(Position<int>{x, ipart(intery)}, 1.f);
+            plot(Position<int>{x, ipart(intery)+1}, fpart(intery));
+            intery += gradient;
+        }
+    }
+}
+
+
 class TestWidget : public Widget {
 protected:
     color::RGBA mColor;
     ButtonSemantics mButtonSemantics;
 
 public:
-    TestWidget() : mButtonSemantics(static_cast<Widget&>(*this)) {
-        mButtonSemantics.setButtonDisplayCallback([](ButtonDisplayState buttonDisplayState){
+    TestWidget() : mButtonSemantics(static_cast<Widget &>(*this)) {
+        mButtonSemantics.setButtonDisplayCallback([](ButtonDisplayState buttonDisplayState) {
             switch (buttonDisplayState) {
                 case rose::ButtonDisplayState::Active:
                     std::cout << __PRETTY_FUNCTION__ << " Active\n";
@@ -161,9 +252,20 @@ public:
     }
 
     /// Draw the visual.
-    void draw(gm::Context &context, const Position &containerPosition) override {
+    void draw(gm::Context &context, const Position<int> &containerPosition) override {
         Rectangle dst{containerPosition + mPos, mSize};
         context.fillRect(dst, mColor);
+
+        Position<float> center0{300.f, 300.f};
+        Position<float> center1{ 600.f, 300.f};
+        float phi = 0.f;
+        while (phi < 2. * M_PI) {
+            Position<float> p{100.f * sin(phi), 100.f * cos(phi)};
+            drawLine(context, center0, p + center0);
+            drawLine(context, center1, p + center1);
+            phi += M_PI / 18.f;
+        }
+        std::cout << __PRETTY_FUNCTION__ << '\n';
     }
 
     /// Layout the visual.

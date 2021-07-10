@@ -132,6 +132,10 @@ namespace rose::color {
             return RGBA{r() * m, g() * m, b() * m, a() * m};
         }
 
+        [[nodiscard]] constexpr RGBA brightness(float m) const noexcept {
+            return RGBA{r() * m, g() * m, b() * m, a() * m};
+        }
+
         /// Add two RGBA values together.
         constexpr RGBA operator+(const RGBA color) const noexcept {
             return RGBA{r() + color.r(), g() + color.g(), b() + color.b(), a() + color.a()};
@@ -149,6 +153,12 @@ namespace rose::color {
             result[3] = inter(operator[](3), to[3], v);
 
             return result;
+        }
+
+        [[nodiscard]] constexpr RGBA withAlpha(float alpha) const noexcept {
+            auto r = *this;
+            r[3] = alpha;
+            return r;
         }
 
         [[nodiscard]] HSVA toHSVA() const;

@@ -200,6 +200,15 @@ namespace rose::gm {
          * @return The status return from the SDL API.
          */
         int fillRect(Rectangle rect, color::RGBA color);
+
+        /**
+         * @brief Render a pixel.
+         * @param p The location of the pixel.
+         * @return The status return from the SDL API.
+         */
+        int drawPoint(const Position<int> &p, const color::RGBA &color);
+
+        int drawLine(const Position<int> &p0, const Position<int> &p1);
     };
 
     /**

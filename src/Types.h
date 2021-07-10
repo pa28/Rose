@@ -131,7 +131,7 @@ namespace rose {
         }
 
         template<typename O>
-        Position<O> as() {
+        Position<O> as() const {
             if constexpr (std::is_same_v<T,O>) {
                 return Position<O>{x, y};
             } else if constexpr (std::is_integral_v<O> && std::is_floating_point_v<T>) {
@@ -147,6 +147,10 @@ namespace rose {
 
         bool operator==(const Position &other) const noexcept {
             return x == other.x && y == other.y;
+        }
+
+        bool operator<=(const Position &other) const noexcept {
+            return x <= other.x && y <= other.y;
         }
 
         T& primary(Orientation o) noexcept {
@@ -470,7 +474,8 @@ inline std::ostream& operator<<(std::ostream& strm, const rose::Size &size) {
 }
 
 /// Stream insertion operator for Position.
-inline std::ostream& operator<<(std::ostream& strm, const rose::Position<int> &pos) {
+template<typename T>
+inline std::ostream& operator<<(std::ostream& strm, const rose::Position<T> &pos) {
     strm << '(' << pos.x << ',' << pos.y << ')';
     return strm;
 }

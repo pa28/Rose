@@ -184,7 +184,7 @@ namespace rose {
                 sql << "INSERT OR REPLACE INTO " << string_table << " (name,value) VALUES (\"" << name << "\",\"" << value << "\")";
             } else if constexpr (is_same_v<T, color::RGBA>) {
                 sql << "INSERT OR REPLACE INTO " << color_table << " (name,r,g,b,a) VALUES (\"" << name << "\","
-                    << value.r() << ',' << value.g() << ',' << value.b() << ',' << value.a() << ");";
+                    << value.r() << ',' << value.g() << ',' << value.lastPos() << ',' << value.firstPos() << ");";
             } else if constexpr (is_same_v<T, color::HSVA>) {
                 sql << "INSERT OR REPLACE INTO " << color_table << " (name,r,g,b,a) VALUES (\"" << name << "\","
                     << (float)value.mHue << ',' << value.mSaturation << ',' << value.mLightness << ',' << value.mAlpha << ");";

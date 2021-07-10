@@ -542,13 +542,13 @@ namespace rose {
                     if (az == 1) {
                         for (auto & azimuthalTemp : mAzimuthalTemp) {
                             auto pixel = sdl::getRGBA(azimuthalTemp->format, azimuthalTemp.pixel(x, y));
-                            pixel.a() = alpha;
+                            pixel.firstPos() = alpha;
                             azimuthalTemp.pixel(x, y) = sdl::mapRGBA(azimuthalTemp->format, pixel);
                         }
                     } else {
                         for (auto & mercatorTemp : mMercatorTemp) {
                             auto pixel = sdl::getRGBA(mercatorTemp->format, mercatorTemp.pixel(x, y));
-                            pixel.a() = alpha;
+                            pixel.firstPos() = alpha;
                             mercatorTemp.pixel(x, y) = sdl::mapRGBA(mercatorTemp->format, pixel);
                         }
                     }
