@@ -37,7 +37,7 @@ namespace rose {
                     gm::DrawColorGuard drawColorGuard{context, color::RGBA::TransparentBlack};
                     context.renderClear();
 
-                    AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::SimpleLine};
+                    AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::AntiAliased};
                     antiAliasedDrawing.setWidthColor(context, 2, color::RGBA{0.4f, 1.f, 0.4f, 1.0f}, widgetSize);
 
                     if (mDrawLatLon) {
