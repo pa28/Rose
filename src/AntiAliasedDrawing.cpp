@@ -17,13 +17,6 @@ namespace rose {
         mColor = rgba;
         mWidth = width;
         mWidgetSize = widgetSize;
-
-        switch (mDrawingType) {
-            case SimpleLine:
-                break;
-            case AntiAliased:
-                break;
-        }
     }
 
     void AntiAliasedDrawing::drawLine(gm::Context &context, Position<float> p0, Position<float> p1, int interiorWidth) {
