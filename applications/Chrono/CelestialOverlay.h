@@ -95,7 +95,6 @@ namespace rose {
 
         void setCelestialObservations() {
             auto[latS, lonS] = MapProjection::subSolar();
-            std::cout << __PRETTY_FUNCTION__ << "Sub-Solar: " << rad2deg(latS) << ", " << rad2deg(lonS) << '\n';
             mSubSolar = GeoPosition{latS, lonS, true};
 
             if (mCelestialObservations.empty()) {
