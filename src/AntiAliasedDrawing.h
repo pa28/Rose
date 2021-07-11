@@ -22,22 +22,20 @@ namespace rose {
      */
     class AntiAliasedDrawing {
     public:
+        /**
+         * @enum DrawingType
+         * @brief The drawing style used by the drawing engine.
+         */
         enum DrawingType {
-            SimpleLine,
-            AntiAliased,
+            SimpleLine,         ///< Simple lines, no anti-aliasing.
+            AntiAliased,        ///< Modified Wu's algorithm anti-aliaseing.
         };
 
     protected:
-        static constexpr int Scale = 10;
-        static constexpr int NubWidth = 1;
-        static constexpr int NubHeight = 3;
-        static constexpr int NubColorSize = 1;
-
         DrawingType mDrawingType{SimpleLine};
 
         color::RGBA mColor{color::RGBA::OpaqueBlack};
         int mWidth{1};
-        int mScaledWidth{};
         gm::Texture mTexture{};
         Size mWidgetSize{};
 
@@ -72,9 +70,8 @@ namespace rose {
 
         /**
          * @brief Implement a modified Xiaolin Wu anti aliasing algorithm.
-         * @details Implements the Xiaolin Wu anti aliased line algorithm but inserts stuffing pixels between the
-         * two controlled brightness pixes. By default (when interiorWidth < 2) only one pixel is stuffed, Otherwise
-         * the number of pixels specified are stuffed.
+         * @details Implements the Xiaolin Wu anti aliased line algorithm but inserts interiorWidth stuffing pixels
+         * between the two controlled brightness pixes. When interiorWidth is 0 the normal Wu algorithm is used.
          * @param context The Graphics Context used to draw.
          * @param p0 The starting point for the line.
          * @param p1 The ending point for the line.

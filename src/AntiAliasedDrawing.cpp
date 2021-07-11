@@ -32,6 +32,8 @@ namespace rose {
         };
 
         auto stuff0 = [&interiorWidth]() {
+            if (interiorWidth < 1)
+                return 0;
             if (interiorWidth < 2)
                 return 1;
             return interiorWidth / 2 + 1;
