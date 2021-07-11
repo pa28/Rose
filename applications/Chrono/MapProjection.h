@@ -539,8 +539,8 @@ namespace rose {
             auto g0 = begin;
             do {
                 auto g1 = increment(g0, false);
-                if (g1.end)
-                    break;
+//                if (g1.end)
+//                    break;
                 auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle) + mapRectangle.position();
                 if (gapTest(p0, p1)) {
                     // Draw up to a plotting gap.
