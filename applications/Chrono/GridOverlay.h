@@ -19,18 +19,18 @@ namespace rose {
     class GridOverlay : public Widget {
     protected:
         enum class GridType {
-            Equator,
-            PrimeMeridian,
-            IntDateLine,
-            Tropics,
-            LatLon,
+            Equator,            ///< The Equator
+            PrimeMeridian,      ///< The Prime Meridian
+            IntDateLine,        ///< The International Date Line.
+            Tropics,            ///< The Tropics of Cancer and Capricorn, Arctic and Antarctic Circles
+            LatLon,             ///< All remaining Latitudes and Longitudes at 15 degree interval.
         };
 
         struct GridData {
-            GridType gridType;
-            bool draw;
-            int lineWidth;
-            color::RGBA color;
+            GridType gridType{GridType::Equator};
+            bool draw{false};
+            int lineWidth{1};
+            color::RGBA color{color::RGBA::OpaqueBlack};
         };
 
         std::array<GridData, 5> mGridData{{
@@ -49,12 +49,6 @@ namespace rose {
         /// True if there are elements to display.
         bool mGridOverlayObjects{true};
 
-        bool mDrawLatLon{false};
-        bool mDrawPrimeMeridian{true};
-        bool mDrawInternationalDateLine{true};
-        bool mDrawEquator{true};
-        bool mDrawTropics{true};
-
         /// The map projection type.
         MapProjectionType mProjection{};
 
@@ -64,6 +58,7 @@ namespace rose {
         /// Source of timing information.
         std::shared_ptr<TimerTick> mTimerTick{};
 
+        /// The Texture used to render all grid lines.
         gm::Texture mTexture{};
 
     public:
