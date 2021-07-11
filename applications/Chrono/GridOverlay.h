@@ -18,6 +18,34 @@ namespace rose {
      */
     class GridOverlay : public Widget {
     protected:
+        enum class GridType {
+            Equator,
+            PrimeMeridian,
+            IntDateLine,
+            Tropics,
+            LatLon,
+        };
+
+        struct GridData {
+            GridType gridType;
+            bool draw;
+            int lineWidth;
+            color::RGBA color;
+        };
+
+        std::array<GridData, 5> mGridData{{
+                                                  {GridType::LatLon, false, 1,
+                                                          color::RGBA{0.5f, 0.5f, 0.5f, 1.0f}},
+                                                  {GridType::Equator, true, 1,
+                                                          color::RGBA{0.4f, 1.f, 0.4f, 1.0f}},
+                                                  {GridType::PrimeMeridian, true, 1,
+                                                          color::RGBA{0.4f, 1.f, 0.4f, 1.0f}},
+                                                  {GridType::Tropics, true, 1,
+                                                          color::RGBA{1.f, 1.f, 0.f, 1.0f}},
+                                                  {GridType::IntDateLine, true, 1,
+                                                          color::RGBA{1.f, 0.f, 0.f, 1.0f}},
+                                          }};
+
         /// True if there are elements to display.
         bool mGridOverlayObjects{true};
 

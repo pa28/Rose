@@ -38,44 +38,49 @@ namespace rose {
                     context.renderClear();
 
                     AntiAliasedDrawing antiAliasedDrawing{context, AntiAliasedDrawing::AntiAliased};
-                    antiAliasedDrawing.setWidthColor(context, 2, color::RGBA{0.4f, 1.f, 0.4f, 1.0f}, widgetSize);
 
-                    if (mDrawLatLon) {
-                        for (auto lat = 15; lat <= 75; lat += 15) {
-                            mapProjection->drawLatitude(context, antiAliasedDrawing, static_cast<double>(lat),
-                                                        textureRect);
-                            mapProjection->drawLatitude(context, antiAliasedDrawing, static_cast<double>(-lat),
-                                                        textureRect);
+                    for (const auto &grid : mGridData) {
+                        if (grid.draw) {
+                            antiAliasedDrawing.setWidthColor(context, grid.lineWidth, grid.color, widgetSize);
+                            switch (grid.gridType) {
+                                case GridType::LatLon:
+                                    for (auto lat = 15; lat <= 75; lat += 15) {
+                                        mapProjection->drawLatitude(context, antiAliasedDrawing,
+                                                                    static_cast<double>(lat),
+                                                                    textureRect);
+                                        mapProjection->drawLatitude(context, antiAliasedDrawing,
+                                                                    static_cast<double>(-lat),
+                                                                    textureRect);
+                                    }
+
+                                    for (auto lon = 15; lon <= 180; lon += 15) {
+                                        mapProjection->drawLongitude(context, antiAliasedDrawing,
+                                                                     static_cast<double>(lon), 75.,
+                                                                     textureRect);
+                                        mapProjection->drawLongitude(context, antiAliasedDrawing,
+                                                                     static_cast<double>(-lon), 75.,
+                                                                     textureRect);
+                                    }
+                                    break;
+                                case GridType::Equator:
+                                    mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
+                                    break;
+                                case GridType::PrimeMeridian:
+                                    mapProjection->drawLongitude(context, antiAliasedDrawing, PrimeMeridian, 90., textureRect);
+                                    break;
+                                case GridType::IntDateLine:
+                                    mapProjection->drawMapLine(context, antiAliasedDrawing, textureRect,
+                                                               InternationalDateLine.begin(),
+                                                               InternationalDateLine.end());
+                                    break;
+                                case GridType::Tropics:
+                                    mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
+                                    mapProjection->drawLatitude(context, antiAliasedDrawing, -TropicLatitude, textureRect);
+                                    mapProjection->drawLatitude(context, antiAliasedDrawing, ArcticCircle, textureRect);
+                                    mapProjection->drawLatitude(context, antiAliasedDrawing, -ArcticCircle, textureRect);
+                                    break;
+                            }
                         }
-
-                        for (auto lon = 15; lon <= 180; lon += 15) {
-                            mapProjection->drawLongitude(context, antiAliasedDrawing, static_cast<double>(lon), 75.,
-                                                         textureRect);
-                            mapProjection->drawLongitude(context, antiAliasedDrawing, static_cast<double>(-lon), 75.,
-                                                         textureRect);
-                        }
-                    }
-
-                    if (mDrawEquator)
-                        mapProjection->drawLatitude(context, antiAliasedDrawing, EquatorLatitude, textureRect);
-
-                    if (mDrawPrimeMeridian)
-                        mapProjection->drawLongitude(context, antiAliasedDrawing, PrimeMeridian, 90., textureRect);
-
-
-                    if (mDrawInternationalDateLine) {
-                        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 0.f, 0.f, 1.0f}, widgetSize);
-                        mapProjection->drawMapLine(context, antiAliasedDrawing, textureRect,
-                                                   InternationalDateLine.begin(),
-                                                   InternationalDateLine.end());
-                    }
-
-                    if (mDrawTropics) {
-                        antiAliasedDrawing.setColor(context, color::RGBA{1.f, 1.f, 0.f, 1.0f}, widgetSize);
-                        mapProjection->drawLatitude(context, antiAliasedDrawing, TropicLatitude, textureRect);
-                        mapProjection->drawLatitude(context, antiAliasedDrawing, -TropicLatitude, textureRect);
-                        mapProjection->drawLatitude(context, antiAliasedDrawing, ArcticCircle, textureRect);
-                        mapProjection->drawLatitude(context, antiAliasedDrawing, -ArcticCircle, textureRect);
                     }
                 }
             } else {
