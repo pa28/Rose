@@ -25,9 +25,6 @@ namespace rose {
         enum DrawingType {
             SimpleLine,
             AntiAliased,
-#if 0
-            SimpleRectangle,
-#endif
         };
 
     protected:
