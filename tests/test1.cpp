@@ -9,6 +9,7 @@
 #include "Layout.h"
 #include "Settings.h"
 #include "Types.h"
+#include "SDL2_gfxPrimitives.h"
 
 using namespace rose;
 
