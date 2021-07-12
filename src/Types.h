@@ -158,30 +158,37 @@ namespace rose {
             }
         }
 
+        /// Inequality operator
         bool operator!=(const Position &other) const noexcept {
             return x != other.x || y != other.y;
         }
 
+        /// Equality operator
         bool operator==(const Position &other) const noexcept {
             return x == other.x && y == other.y;
         }
 
+        /// Less than or Equal to operator
         bool operator<=(const Position &other) const noexcept {
             return x <= other.x && y <= other.y;
         }
 
+        /// Access the primary component for a given Orientation.
         T& primary(Orientation o) noexcept {
             return o == Orientation::Horizontal ? x : y;
         }
 
+        /// Access the secondary component for the given Orientation.
         T& secondary(Orientation o) noexcept {
             return o == Orientation::Horizontal ? y : x;
         }
 
+        /// Return the primary component for a given Orientation.
         [[nodiscard]] constexpr T primary(Orientation o) const noexcept {
             return o == Orientation::Horizontal ? x : y;
         }
 
+        /// Return the secondary component for the given Orientation.
         [[nodiscard]] constexpr T secondary(Orientation o) const noexcept {
             return o == Orientation::Horizontal ? y : x;
         }
