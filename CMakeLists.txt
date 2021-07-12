@@ -99,6 +99,13 @@ include_directories(include)
 
 list(APPEND EXTRA_LIBS GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 sqlite3 pthread dl rt m stdc++fs uuid)
 
+list(APPEND ROSE_SDL_GFX_SRC
+#        src/SDL2_framerate.c
+#        src/SDL2_gfxPrimitives.c
+#        src/SDL2_imageFilter.c
+#        src/SDL2_rotozoom.c
+        )
+
 list(APPEND ROSE_SRC
         src/Application.cpp
         src/Animation.cpp
@@ -141,9 +148,9 @@ list(APPEND RoseLibraries rose ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${SDL2TTF_LI
         ${SOCI_sqlite3_PLUGIN} ${LOCALTIME_LIBRARY} ${EXTRA_LIBS})
 
 if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
-    add_library(rose SHARED ${ROSE_SRC})
+    add_library(rose SHARED ${ROSE_SRC} ${ROSE_SDL_GFX_SRC})
 else()
-    add_library(rose STATIC ${ROSE_SRC})
+    add_library(rose STATIC ${ROSE_SRC} ${ROSE_SDL_GFX_SRC})
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
