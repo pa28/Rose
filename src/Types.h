@@ -203,6 +203,21 @@ namespace rose {
             auto dY = other.y - y;
             return dX*dX + dY*dY;
         }
+
+        /// Swap the x and y components.
+        void swap() noexcept {
+            std::swap(x,y);
+        }
+
+        /// Mirror Position on X axis.
+        [[nodiscard]] constexpr Position<T> mirrorX() const noexcept {
+            return Position<T>{-x, y};
+        }
+
+        /// Mirror Position on Y axis.
+        [[nodiscard]] constexpr Position<T> mirrorY() const noexcept {
+            return Position<T>{x, -y};
+        }
     };
 
     static constexpr Position<int> UndefinedPosition;
