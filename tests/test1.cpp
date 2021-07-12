@@ -168,101 +168,119 @@ public:
         mColor = c;
     }
 
-    /// Draw the visual.
-    void draw(gm::Context &context, const Position<int> &containerPosition) override {
-        Rectangle dst{containerPosition + mPos, mSize};
-        context.fillRect(dst, mColor);
+    static void drawCircle(gm::Context &context, const Position<int>& center, int radius, color::RGBA &baseColor, bool thick = true) {
+        using Segment = unsigned int;
+        static constexpr Segment SegmentMirrorX = 0x1;
+        static constexpr Segment SegmentMirrorY = 0x2;
+        static constexpr Segment SegmentSwap = 0x4;
+        static constexpr Segment SegmentFirst = 0x0;
+        static constexpr Segment SegmentLast = 0x8;
+        static constexpr Segment Segment0 = 0x0;
+        static constexpr Segment Segment3 = SegmentMirrorX;
+        static constexpr Segment Segment1 = SegmentSwap;
+        static constexpr Segment Segment6 = SegmentSwap | SegmentMirrorY;
 
-        std::cout << __PRETTY_FUNCTION__ << '\n';
+        int thickness = thick ? 1 : 0;
+
+        auto drawArcStart = [&context, thickness, &baseColor](const Position<int> &center, Position<int> p0, Segment segment) {
+            Position<int> p1{p0.x - thickness, p0.y};
+            if (segment & SegmentSwap) {
+                p0.swap();
+                if (thickness > 0)
+                    p1.swap();
+            }
+            if (segment & SegmentMirrorX) {
+                p0 = p0.mirrorX();
+                if (thickness > 0)
+                    p1 = p1.mirrorX();
+            }
+            if (segment & SegmentMirrorY) {
+                p0 = p0.mirrorY();
+                if (thickness > 0)
+                    p1 = p1.mirrorY();
+            }
+
+            context.drawPoint(center + p0, baseColor);
+            if (thickness > 0)
+                context.drawPoint(center + p1, baseColor);
+        };
+
+        auto drawArc = [&context, thickness, &baseColor](const Position<int> &center, Position<int> p0, color::RGBA &raColor,
+                                                         const color::RGBA &aColor, Segment segment) {
+            Position<int> p1{p0.x - thickness - 1, p0.y};
+            Position<int> p2{p0.x - 1, p0.y};
+            if (segment & SegmentSwap) {
+                p0.swap();
+                p1.swap();
+                if (thickness > 0)
+                    p2.swap();
+            }
+            if (segment & SegmentMirrorX) {
+                p0 = p0.mirrorX();
+                p1 = p1.mirrorX();
+                if (thickness > 0)
+                    p2 = p2.mirrorX();
+            }
+            if (segment & SegmentMirrorY) {
+                p0 = p0.mirrorY();
+                p1 = p1.mirrorY();
+                if (thickness > 0)
+                    p2 = p2.mirrorY();
+            }
+
+            context.drawPoint(center + p0, raColor);
+            context.drawPoint(center + p1, aColor);
+
+            if (thickness > 0)
+                context.drawPoint(center + p2, baseColor);
+        };
 
         auto DC = [](int r, int y) {
             auto dr = static_cast<double>(r);
             auto dy = static_cast<double>(y);
-            double x = std::sqrt(dr*dr - dy*dy);
+            double x = std::sqrt(dr * dr - dy * dy);
             return std::ceil(x) - x;
         };
 
-        Position<int> c{200, 200};
-        auto baseColor = color::RGBA::OpaqueBlack;
-        int thickness = 0;
-        int radius = 100;
         int y = 0;
         int x = radius;
         float lastAlpha = 0.;
         Position<int> p{x,y};
         gm::DrawColorGuard drawColorGuard(context, baseColor);
         context.setDrawBlendMode(SDL_BLENDMODE_BLEND);
-        context.drawPoint(c + p, baseColor);
-        context.drawPoint(c + p.mirrorX(), baseColor);
-        p.swap();
-        context.drawPoint(c + p, baseColor);
-        context.drawPoint(c + p.mirrorY(), baseColor);
+
+        drawArcStart(center, p, Segment0);
+        drawArcStart(center, p, Segment1);
+        drawArcStart(center, p, Segment6);
+        drawArcStart(center, p, Segment3);
+
         while (x > y) {
             ++y;
             auto alpha = static_cast<float>(DC(radius, y));
             if (alpha < lastAlpha)
                 --x;
-            Position<int> p0{x,y};
-            Position<int> p1{x-thickness-1,y};
+            Position<int> p0{x, y};
 
             auto ralphaColor = baseColor.withAlpha(1.0f - alpha);
             auto alphaColor = baseColor.withAlpha(alpha);
 
-            // Segments 0 and 3 are horizontally opposed.
-            // Draw segment 0 - This is the way to stuff Wu anti-aliasing.
-            context.drawPoint(c + p0, ralphaColor);
-            context.drawPoint(c + p1, alphaColor);
-            if (thickness > 0) {
-                Position<int> t1{p0.x - thickness, p0.y};
-                if (thickness > 1) {
-                    Position<int> t0{p0.x - 1, p0.y};
-                    context.drawLine(c + t0, c + t1);
-                }
-                context.drawPoint(c+t1, baseColor);
-            }
-            // Draw segment 3
-            context.drawPoint(c + p0.mirrorX(), ralphaColor);
-            if (thickness > 1) {
-                for (Position<int> t{-p0.x+1, p0.y}; t.x < -p1.x; ++t.x)
-                    context.drawPoint(c+t, baseColor);
-            }
-            context.drawPoint(c + p1.mirrorX(), alphaColor);
+            ralphaColor = baseColor * (1.0f - alpha);
+            alphaColor = baseColor * alpha;
 
-            // Segments 4 and 7 are horizontally opposed.
-            // Draw Segment 7
-            context.drawPoint(c + p0.mirrorY(), ralphaColor);
-            if (thickness > 1) {
-                for (Position<int> t{p0.x-1, -p0.y}; t.x > p1.x; --t.x)
-                    context.drawPoint(c+t, baseColor);
-            }
-            context.drawPoint(c + p1.mirrorY(), alphaColor);
-            // Draw segment 4
-            context.drawPoint(c - p0, ralphaColor);
-            if (thickness > 1) {
-                for (Position<int> t{-p0.x+1, -p0.y}; t.x < -p1.x; ++t.x)
-                    context.drawPoint(c+t, baseColor);
-            }
-            context.drawPoint(c - p1, alphaColor);
-            p0.swap();
-            p1.swap();
-
-            // Segments 1 and 2 are horizontally opposed.
-            // Draw segment 1
-            context.drawPoint(c + p0, ralphaColor);
-            context.drawPoint(c + p1, alphaColor);
-            // Draw segment 2
-            context.drawPoint(c + p0.mirrorX(), ralphaColor);
-            context.drawPoint(c + p1.mirrorX(), alphaColor);
-
-            // Segments 5 and 6 are horizontally opposed.
-            // Draw segment 6
-            context.drawPoint(c + p0.mirrorY(), ralphaColor);
-            context.drawPoint(c + p1.mirrorY(), alphaColor);
-            // Draw segment 5
-            context.drawPoint(c - p0, ralphaColor);
-            context.drawPoint(c - p1, alphaColor);
+            for (Segment segment = SegmentFirst; segment != SegmentLast; ++segment)
+                drawArc(center, p0, ralphaColor, alphaColor, segment);
             lastAlpha = alpha;
         }
+    }
+
+    /// Draw the visual.
+    void draw(gm::Context &context, const Position<int> &containerPosition) override {
+        Rectangle dst{containerPosition + mPos, mSize};
+        context.fillRect(dst, mColor);
+
+        auto baseColor = color::RGBA::OpaqueBlack;
+        drawCircle(context, Position<int>{200,200}, 100, baseColor);
+        std::cout << __PRETTY_FUNCTION__ << '\n';
     }
 
     /// Layout the visual.
