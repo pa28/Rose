@@ -130,6 +130,23 @@ namespace rose {
             }
         }
 
+        /// Subtract position other from this.
+        template <typename O>
+        constexpr Position operator-(const Position<O> &p) const noexcept {
+            if constexpr (std::is_same_v<T,O>) {
+                return Position{x - p.x, y - p.y};
+            } else if constexpr (std::is_integral_v<T> && std::is_floating_point_v<O>) {
+                return Position{x - util::roundToInt(p.x), y - util::roundToInt(p.y)};
+            } else {
+                return Position{x - static_cast<T>(p.x), y - static_cast<T>(p.y)};
+            }
+        }
+
+        /**
+         * @brief Return this position after converting to type O.
+         * @tparam O The type of the returned values.
+         * @return The converted position.
+         */
         template<typename O>
         Position<O> as() const {
             if constexpr (std::is_same_v<T,O>) {
