@@ -17,20 +17,21 @@
 
 namespace rose {
 
-    static constexpr std::chrono::milliseconds LunarMonthMilliseconds{2551442976};
+//    static constexpr std::chrono::milliseconds LunarMonthMilliseconds{2551442976};
+    static constexpr std::chrono::milliseconds LunarMonthMilliseconds{2551442125};
     static constexpr std::time_t LunarNewMoonEpoch{1618194720};
 
     /**
-     * @brief Calculate the current phase of the moon in days between [0..29].
+     * @brief Calculate the current phase of the moon in days between [0..2*M_PI].
      * @return The moon phase.
      */
-    inline int MoonPhase() {
+    inline double MoonPhase() {
         std::chrono::system_clock::time_point newEpoch = std::chrono::system_clock::from_time_t(LunarNewMoonEpoch);
         std::chrono::system_clock::time_point epoch = std::chrono::system_clock::now();
         auto moonAge = std::chrono::duration_cast<std::chrono::milliseconds>(epoch - newEpoch);
-        auto phase = std::chrono::duration_cast<std::chrono::hours>(moonAge % LunarMonthMilliseconds);
-        auto c = util::roundToInt(static_cast<float>(phase.count()) / 24.);
-        return c;
+        auto phase = static_cast<double>((moonAge % LunarMonthMilliseconds).count()) /
+                     static_cast<double>(LunarMonthMilliseconds.count()) * 2. * M_PI;
+        return phase;
     }
 
     class ClearSkyEphemeris : public WebCache {

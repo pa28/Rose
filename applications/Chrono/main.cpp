@@ -277,7 +277,11 @@ int main(int argc, char **argv) {
     Environment &environment{Environment::getEnvironment()};
     Chrono application{argc, argv};
 
-    MoonPhase();
+    auto moonPhase = MoonPhase();
+
+    std::cout << "Moon phase: " << util::rad2deg(moonPhase)
+              << " sin: " << std::sin(moonPhase)
+              << " cos: " << std::cos(moonPhase) << "\n\n";
 
     application.initialize(environment.appName(), Size{800, 480});
 
