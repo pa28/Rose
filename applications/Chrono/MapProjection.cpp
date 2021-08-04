@@ -316,34 +316,6 @@ namespace rose {
                                                                                    mapSurface.pixel(map.x, map.y)));
     }
 
-#if 0
-    bool MapProjection::computeAzimuthalMaps() {
-        // Compute Azimuthal maps from the Mercator maps
-        auto sinY = sin(mQthRad.lat);
-        auto cosY = cos(mQthRad.lat);
-        for (int y = 0; y < mMapImgSize.h; y += 1) {
-            for (int x = 0; x < mMapImgSize.w; x += 1) {
-                if (mAbortFuture) {
-                    mAbortFuture = false;
-                    return false;
-                }
-
-                auto[valid, lat, lon] = xyToAzLatLong(x, y, mMapImgSize, mQthRad, sinY, cosY);
-                if (valid) {
-                    auto xx = std::min(mMapImgSize.w - 1,
-                                       (int) round((double) mMapImgSize.w * ((lon + M_PI) / (2 * M_PI))));
-                    auto yy = std::min(mMapImgSize.h - 1,
-                                       (int) round((double) mMapImgSize.h * ((M_PI_2 - lat) / M_PI)));
-
-                    azimuthalProjection(mAzSurface[0], mMapSurface[0], Position<int>(x, y), Position<int>(xx, yy));
-                    azimuthalProjection(mAzSurface[1], mMapSurface[1], Position<int>(x, y), Position<int>(xx, yy));
-                }
-            }
-        }
-        return true;
-    }
-#endif
-
     std::tuple<double, double> MapProjection::subSolar() {
         using namespace std::chrono;
         auto epoch = system_clock::now();

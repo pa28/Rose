@@ -678,22 +678,6 @@ namespace rose {
                     break;
                 }
             }
-#if 0
-            auto p0 = geoToMap(g0.toRadians(), mProjection, splitPixel, mapRect) + mapRect.position();
-            auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRect) + mapRect.position();
-            if (gapTest(p0, p1))
-                drawing.renderLine(context, p0, p1);
-            else {
-                // If distance from p0 to p1 is not small enough, pick a mid point m and
-                // drawInterpolate g0 to m and m to g1.
-                // ToDo: This recursion is causing the program to crash on R Pi 4. Need a non-recursive solution.
-                if (auto r = g0.distance(g1); r > deg2rad(0.5)) {
-                    auto midPoint = g0.midpoint(g1, r, 0.5);
-                    drawInterpolate(context, drawing, mapRect, g0, midPoint);
-                    drawInterpolate(context, drawing, mapRect, midPoint, g1);
-                }
-            }
-#endif
         }
 
         /**
