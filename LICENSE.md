@@ -31,3 +31,22 @@ From [WikiMedia](https://openclipart.org/detail/170669/weather-icon-full-moon) o
 or
 
 Static images from [Die.net](https://www.die.net/moon/) shrunken to 25 x 25 pixel.
+
+or
+
+[NASA Scientific Visualization Studio, CGI Moon Kit](https://svs.gsfc.nasa.gov/cgi-bin/details.cgi?aid=4720).
+
+Rendered image derived from the Mercator Projection map using Azimuthal projection and terminator gray line
+shading.
+
+### World Topo Map - Day
+
+[World Topo Maps](https://commons.wikimedia.org/wiki/File:Large_World_Topo_Map_2.png)
+By [MTBlack](https://commons.wikimedia.org/w/index.php?title=User:MTBlack&action=edit&redlink=1).
+
+License: [Creative Commons](https://en.wikipedia.org/wiki/en:Creative_Commons)
+[Attribution Share-Alike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/deed.en)
+
+### World Top Map - Night
+
+[NASA Night Lites 2012 Map](https://earthobservatory.nasa.gov/images/79765/night-lights-2012-map)
