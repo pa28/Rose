@@ -50,3 +50,4 @@ License: [Creative Commons](https://en.wikipedia.org/wiki/en:Creative_Commons)
 ### World Top Map - Night
 
 [NASA Night Lites 2012 Map](https://earthobservatory.nasa.gov/images/79765/night-lights-2012-map)
+[Wikimedia Source](https://commons.wikimedia.org/wiki/File:The_earth_at_night.jpg)
