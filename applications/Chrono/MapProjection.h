@@ -377,6 +377,69 @@ namespace rose {
         static constexpr double GrayLinePow = .80;      ///< Sets the speed of transitions, smaller is sharper. (.75)
 
         /**
+         * @brief Compute Azimuthal map projection for one point.
+         * @param projectedSurface The surface being projected (the result).
+         * @param mapSurface The map surface (the source)
+         * @param projected The point on the projected surface.
+         * @param map The point on the map surface.
+         */
+        static void
+        azimuthalProjection(gm::Surface &projectedSurface, const gm::Surface &mapSurface, Position<int> projected,
+                            Position<int> map);
+
+        /**
+         * Transform a Mercator map pixel into an Azimuthal map latitude and longitude in radians
+         * @param x The map x pixel location 0 on the left
+         * @param y The map y pixel location 0 at the top
+         * @param mapSize the width (x) and height (y) of the map in pixels
+         * @param location the longitude (x) and latitude (y) of the center of the projection
+         * @param sinY pre-computed sine of the latitude
+         * @param cosY pre-computed cosine of the latitude
+         * @return [valid, latitude, longitude ], valid if the pixel is on the Earth,
+         * latitude -PI..+PI West to East, longitude +PI/2..-PI/2 North to South
+         */
+        static std::tuple<bool, double, double>
+        xyToAzLatLong(int x, int y, const Size &mapSize, const GeoPosition &location, double sinY, double cosY);
+
+        /**
+         * @brief Compute Azimuthal projection of a set of the same sized maps.
+         * @tparam N The number of maps in the set.
+         * @param abort A reference to a std::atomic_bool that will cause an abort when true.
+         * @param qthRad The Latitude and Longitude of the projection origin in Radians.
+         * @param mapImageSize The common size of all maps and projections.
+         * @param projected A std::array<gm::Surface,N> holding the projected (output) maps.
+         * @param map A std::array<gm::Surface,N> holding the source (intput) maps.
+         * @return True if successful, false if aborted.
+         */
+        template<size_t N>
+        static bool
+        azimuthalProjectionSet(std::atomic_bool &abort, const GeoPosition &qthRad, const Size &mapImageSize, std::array<gm::Surface,N> &projected, std::array<gm::Surface,N> &map) {
+            // Compute Azimuthal maps from the Mercator maps
+            auto sinY = sin(qthRad.lat);
+            auto cosY = cos(qthRad.lat);
+            for (int y = 0; y < mapImageSize.h; y += 1) {
+                for (int x = 0; x < mapImageSize.w; x += 1) {
+                    if (abort) {
+                        abort = false;
+                        return false;
+                    }
+
+                    auto[valid, lat, lon] = xyToAzLatLong(x, y, mapImageSize, qthRad, sinY, cosY);
+                    if (valid) {
+                        auto xx = std::min(mapImageSize.w - 1,
+                                           (int) round((double) mapImageSize.w * ((lon + M_PI) / (2 * M_PI))));
+                        auto yy = std::min(mapImageSize.h - 1,
+                                           (int) round((double) mapImageSize.h * ((M_PI_2 - lat) / M_PI)));
+
+                        for (auto idx = 0; idx < N; ++idx)
+                            azimuthalProjection(projected[idx], map[idx], Position<int>(x, y), Position<int>(xx, yy));
+                    }
+                }
+            }
+            return true;
+        }
+
+        /**
          * @brief Compute Azimuthal map projections.
          * @details This should be called by creating the std::future mAzimuthalProjection which will be
          * completed when the projection is done, and return true if the projection was successful. This
@@ -384,7 +447,9 @@ namespace rose {
          * The Surface to Texture conversion must happen on the main thread so locking is not an issue and
          * the normal render cycle can continue as long as the last Texture is valid.
          */
-        bool computeAzimuthalMaps();
+        bool computeAzimuthalMaps() {
+            return azimuthalProjectionSet(mAbortFuture, mQthRad, mMapImgSize, mAzSurface, mMapSurface);
+        }
 
         /// The std::future result of computeAzimuthalMaps()
         std::future<bool> mComputeAzimuthalMapsFuture;
@@ -539,8 +604,6 @@ namespace rose {
             auto g0 = begin;
             do {
                 auto g1 = increment(g0, false);
-//                if (g1.end)
-//                    break;
                 auto p1 = geoToMap(g1.toRadians(), mProjection, splitPixel, mapRectangle) + mapRectangle.position();
                 if (gapTest(p0, p1)) {
                     // Draw up to a plotting gap.

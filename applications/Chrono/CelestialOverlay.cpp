@@ -25,14 +25,22 @@ namespace rose {
                 int splitPixel = util::roundToInt((double) widgetRect.w * ((mapProjection->getQth().lon) / 360.));
                 if (splitPixel < 0)
                     splitPixel += widgetRect.w;
+                std::cout << __PRETTY_FUNCTION__ << '\n';
                 for (auto &celestial : CelestialOverlayFileName) {
                     switch (celestial.mapOverLayImage) {
                         case MapOverLayImage::Sun:
+                            std::cout << "MapOverLayImage::Sun  "
+                                      << static_cast<int>(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)])
+                                      << '\n';
                             mapProjection->drawMapItem(
                                     mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
                                     context, widgetRect, mSubSolar, mapProjection->getProjection(), splitPixel);
                             break;
                         case MapOverLayImage::Moon:
+                            std::cout << "MapOverLayImage::Moon "
+                                      << static_cast<int>(mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)])
+                                      << '\n';
+
                             mapProjection->drawMapItem(
                                     mMapOverlayId[static_cast<std::size_t>(celestial.mapOverLayImage)],
                                     context, widgetRect, mSubLunar, mapProjection->getProjection(), splitPixel);
@@ -94,6 +102,8 @@ namespace rose {
             mMapOverlayId[static_cast<std::size_t>(overlay.mapOverLayImage)] = imageId;
             gm::Surface objectSurface(path);
             imageStore.setImage(imageId, std::move(objectSurface.toTexture(context)));
+            std::cout << __PRETTY_FUNCTION__ << " Set Celestial Image: " << static_cast<int>(imageId) << ' '
+                      << path << '\n';
         }
     }
 }

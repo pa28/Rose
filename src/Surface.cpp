@@ -38,12 +38,12 @@ namespace rose::gm {
         }
     }
 
-    uint32_t &Surface::pixel(int x, int y) {
+    uint32_t &Surface::pixel(int x, int y) const {
         auto *pixels = (Uint32 *) get()->pixels;
         return pixels[(y * get()->w) + x];
     }
 
-    color::RGBA Surface::color(int x, int y) {
+    color::RGBA Surface::color(int x, int y) const {
         auto p = pixel(x, y);
         uint8_t r, g, b, a;
         SDL_GetRGBA(p, get()->format, &r, &g, &b, &a);

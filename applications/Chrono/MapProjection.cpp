@@ -288,19 +288,8 @@ namespace rose {
         Bp = B;
     }
 
-    /**
-     * Transform a Mercator map pixel into an Azimuthal map latitude and longitude in radians
-     * @param x The map x pixel location 0 on the left
-     * @param y The map y pixel location 0 at the top
-     * @param mapSize the width (x) and height (y) of the map in pixels
-     * @param location the longitude (x) and latitude (y) of the center of the projection
-     * @param sinY pre-computed sine of the latitude
-     * @param cosY pre-computed cosine of the latitude
-     * @return [valid, latitude, longitude ], valid if the pixel is on the Earth,
-     * latitude -PI..+PI West to East, longitude +PI/2..-PI/2 North to South
-     */
     std::tuple<bool, double, double>
-    xyToAzLatLong(int x, int y, const Size &mapSize, const GeoPosition &location, double sinY, double cosY) {
+    MapProjection::xyToAzLatLong(int x, int y, const Size &mapSize, const GeoPosition &location, double sinY, double cosY) {
         bool onAntipode = x > mapSize.w / 2;
         auto w2 = (mapSize.h / 2) * (mapSize.h / 2);
         auto dx = onAntipode ? x - (3 * mapSize.w) / 4 : x - mapSize.w / 4;
@@ -320,6 +309,14 @@ namespace rose {
         return std::make_tuple(false, 0., 0.);
     }
 
+    void MapProjection::azimuthalProjection(gm::Surface &projectedSurface, const gm::Surface &mapSurface,
+                                            Position<int> projected, Position<int> map) {
+        projectedSurface.pixel(projected.x, projected.y) = gm::mapRGBA(projectedSurface->format,
+                                                                       gm::getRGBA(mapSurface->format,
+                                                                                   mapSurface.pixel(map.x, map.y)));
+    }
+
+#if 0
     bool MapProjection::computeAzimuthalMaps() {
         // Compute Azimuthal maps from the Mercator maps
         auto sinY = sin(mQthRad.lat);
@@ -337,17 +334,15 @@ namespace rose {
                                        (int) round((double) mMapImgSize.w * ((lon + M_PI) / (2 * M_PI))));
                     auto yy = std::min(mMapImgSize.h - 1,
                                        (int) round((double) mMapImgSize.h * ((M_PI_2 - lat) / M_PI)));
-                    mAzSurface[0].pixel(x, y) = gm::mapRGBA(mAzSurface[0]->format,
-                                                            gm::getRGBA(mMapSurface[0]->format,
-                                                                        mMapSurface[0].pixel(xx, yy)));
-                    mAzSurface[1].pixel(x, y) = gm::mapRGBA(mAzSurface[1]->format,
-                                                            gm::getRGBA(mMapSurface[1]->format,
-                                                                        mMapSurface[1].pixel(xx, yy)));
+
+                    azimuthalProjection(mAzSurface[0], mMapSurface[0], Position<int>(x, y), Position<int>(xx, yy));
+                    azimuthalProjection(mAzSurface[1], mMapSurface[1], Position<int>(x, y), Position<int>(xx, yy));
                 }
             }
         }
         return true;
     }
+#endif
 
     std::tuple<double, double> MapProjection::subSolar() {
         using namespace std::chrono;

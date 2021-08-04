@@ -87,7 +87,7 @@ namespace rose::gm {
          * @param y The Y co-ordinate.
          * @return A reference to the pixel.
          */
-        uint32_t &pixel(int x, int y);
+        [[nodiscard]] uint32_t &pixel(int x, int y) const;
 
         /**
          * @brief Get a pixel color of the Surface.
@@ -95,7 +95,7 @@ namespace rose::gm {
          * @param y The y co-ordinate.
          * @return The color as an RGBA.
          */
-        color::RGBA color(int x, int y);
+        [[nodiscard]] color::RGBA color(int x, int y) const;
 
         /**
          * @brief Set a pixel color of the Surface.
